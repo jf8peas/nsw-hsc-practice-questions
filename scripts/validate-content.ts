@@ -10,6 +10,8 @@ import { join } from "node:path";
 
 import { UNITS } from "../content/index";
 import { EXAMS } from "../content/exams";
+import { F } from "../content/formulas";
+import { FORMULA_HTML } from "../content/formulas.generated";
 import type { AnswerSet } from "../lib/types";
 
 const UNITS_DIR = join(process.cwd(), "content", "units");
@@ -90,6 +92,13 @@ async function main() {
       if (!unit.questions.some((q) => q.id === id)) {
         err(`answers.ts has "${id}" but no such question in ${unit.id}`);
       }
+    }
+  }
+
+  // pre-rendered formula HTML must cover every formula
+  for (const def of Object.values(F)) {
+    if (!FORMULA_HTML[def.text]) {
+      err(`formulas.generated.ts is missing "${def.text}" — run \`npm run gen:formulas\``);
     }
   }
 

@@ -4,6 +4,13 @@ import { getQuestion } from "@/content";
 import { gateEnabled, hasAccess } from "@/lib/gate.server";
 import type { GradeRequest } from "@/lib/grading";
 import { gradeAnswer } from "@/lib/grading.server";
+import { checkGradeRateLimit } from "@/lib/ratelimit.server";
+
+function clientIp(req: Request): string {
+  const fwd = req.headers.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0]!.trim();
+  return req.headers.get("x-real-ip")?.trim() || "unknown";
+}
 
 export const runtime = "nodejs";
 
@@ -30,12 +37,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unknown question" }, { status: 404 });
   }
 
-  // Gate only the paid path — short answers. MC is free, always graded.
-  if (found.question.type === "short" && !(await hasAccess())) {
-    return NextResponse.json(
-      { error: "locked", needsCode: true },
-      { status: 401 },
-    );
+  // Gate + rate limit only the paid path — short answers. MC is free.
+  if (found.question.type === "short") {
+    if (!(await hasAccess())) {
+      return NextResponse.json({ error: "locked", needsCode: true }, { status: 401 });
+    }
+    const rl = await checkGradeRateLimit(clientIp(req));
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: "rate_limited", retryAfter: rl.retryAfter },
+        {
+          status: 429,
+          headers: rl.retryAfter ? { "retry-after": String(rl.retryAfter) } : undefined,
+        },
+      );
+    }
   }
 
   const result = await gradeAnswer(questionId, answer);

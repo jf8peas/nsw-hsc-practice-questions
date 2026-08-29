@@ -18,6 +18,8 @@ export interface QuizConfig {
 export interface FormulaRef {
   /** The formula as plain text, e.g. "F = ma". */
   formula: string;
+  /** LaTeX form for KaTeX rendering, e.g. "\\vec{F} = m\\vec{a}". */
+  formulaTex?: string;
   /** What it is, e.g. "Newton's second law". */
   name: string;
 }
@@ -43,8 +45,10 @@ export interface UnitMeta {
 interface BaseQuestion {
   /** Namespaced by unit id, e.g. "y11-formula-test.q3". Never renumber. */
   id: string;
-  /** Optional formula shown above the prompt (plain text for now, LaTeX later). */
+  /** Optional formula shown above the prompt (plain text). */
   formula?: string;
+  /** LaTeX form of `formula` for KaTeX rendering. */
+  formulaTex?: string;
   prompt: string;
   /** Marks this question is worth. MC is normally 1. */
   maxMarks: number;

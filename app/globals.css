@@ -426,6 +426,33 @@ input {
   color: var(--rd-success-500);
 }
 
+/* LLM feedback on a short answer */
+
+.feedback {
+  background: var(--rd-blue-50);
+  border: 1px solid var(--rd-blue-100);
+  border-radius: var(--rd-r-md);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--rd-ink-700);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.feedback-score {
+  font-family: var(--rd-font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--rd-blue-700);
+}
+
+.feedback-miss {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--rd-mute-600);
+  font-size: 13px;
+}
+
 /* Results ------------------------------------------------------- */
 
 .result-card {
@@ -545,6 +572,27 @@ input {
   font-family: var(--rd-font-mono);
   font-size: 14px;
   color: var(--rd-ink-900);
+}
+
+/* KaTeX ------------------------------------------------------------- */
+
+.katex-formula {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.q-formula .katex {
+  font-size: 1em;
+}
+
+.formula-list-formula .katex {
+  font-size: 1.05em;
+}
+
+.breakdown-row .katex {
+  font-size: 1em;
 }
 
 .formula-list-name {

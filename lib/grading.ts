@@ -21,8 +21,13 @@ export interface GradeResult {
   /** Short only: mark-scheme points. */
   rubric?: string[];
   notes?: string;
-  /** Free-text feedback (LLM, step 3). Empty for now. */
+  /** Free-text feedback from the LLM grader, addressed to the student. */
   feedback?: string;
+  /** Rubric points the LLM judged satisfied / missed. */
+  rubricHits?: string[];
+  rubricMisses?: string[];
+  /** The model that graded this answer, if any. */
+  gradedBy?: string;
   /** True when the client must ask the student to self-mark (no LLM result). */
   needsSelfMark: boolean;
 }

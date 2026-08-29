@@ -1,4 +1,8 @@
 import type { UnitMeta } from "@/lib/types";
+import { F, type FormulaDef } from "@/content/formulas";
+
+const list = (defs: FormulaDef[]) =>
+  defs.map((d) => ({ formula: d.text, formulaTex: d.tex, name: d.name }));
 
 export const meta: UnitMeta = {
   id: "y11-formula-test",
@@ -10,45 +14,15 @@ export const meta: UnitMeta = {
     "Every question is built from the Year 11 formulae sheet. Short-answer questions ask you to say what a formula tells you and to name a variable and its SI unit. Multiple-choice questions give you a formula and four scenarios — you pick the one it could answer. Each attempt draws 5 short-answer and 5 multiple-choice questions at random.",
   order: 1,
   quiz: { short: 5, mc: 5, passMark: 70 },
-  formulas: [
+  formulas: list([
     // Motion, forces and gravity
-    { formula: "s = ut + ½at²", name: "Displacement under uniform acceleration" },
-    { formula: "v² = u² + 2as", name: "Velocity and displacement (uniform acceleration)" },
-    { formula: "v = u + at", name: "Velocity and time (uniform acceleration)" },
-    { formula: "F_net = ma", name: "Newton's second law" },
-    { formula: "ΔU = mgΔh", name: "Change in gravitational potential energy (near Earth)" },
-    { formula: "W = Fs cos θ", name: "Work done by a force" },
-    { formula: "K = ½mv²", name: "Kinetic energy" },
-    { formula: "P = ΔE / Δt", name: "Power as the rate of energy transfer" },
-    { formula: "P = Fv cos θ", name: "Power delivered by a force" },
-    { formula: "Σ½mv²(before) = Σ½mv²(after)", name: "Conservation of kinetic energy (elastic collisions)" },
-    { formula: "Σmv(before) = Σmv(after)", name: "Conservation of momentum" },
-    { formula: "Δp = F_net Δt", name: "Impulse and change in momentum" },
-    { formula: "U = −GMm / r", name: "Gravitational potential energy (universal)" },
+    F.suvat_s, F.suvat_v2, F.suvat_v, F.fma, F.gpe, F.work, F.ke, F.powerE,
+    F.powerFv, F.consKE, F.consP, F.impulse, F.ugrav,
     // Waves and thermodynamics
-    { formula: "v = fλ", name: "The wave equation" },
-    { formula: "f = 1 / T", name: "Frequency and period" },
-    { formula: "n = c / v", name: "Refractive index from wave speed" },
-    { formula: "Q = mcΔT", name: "Specific heat capacity" },
-    { formula: "f_beat = |f₂ − f₁|", name: "Beat frequency" },
-    { formula: "f ′ = f (v_wave + v_observer) / (v_wave − v_source)", name: "The Doppler effect" },
-    { formula: "n₁ sin θ₁ = n₂ sin θ₂", name: "Snell's law of refraction" },
-    { formula: "sin θ_c = n₂ / n₁", name: "Critical angle for total internal reflection" },
-    { formula: "I₁r₁² = I₂r₂²", name: "Inverse-square law for intensity" },
-    { formula: "Q / t = kAΔT / d", name: "Rate of heat conduction" },
+    F.wave, F.fT, F.refIndex, F.specHeat, F.beats, F.doppler, F.snell,
+    F.critical, F.invSquare, F.conduction,
     // Electricity and magnetism
-    { formula: "E = V / d", name: "Uniform electric field between parallel plates" },
-    { formula: "V = ΔU / q", name: "Electric potential difference" },
-    { formula: "W = qV", name: "Work to move a charge through a potential difference" },
-    { formula: "W = qEd", name: "Work on a charge in a uniform electric field" },
-    { formula: "B = μ₀I / 2πr", name: "Magnetic field around a straight current-carrying wire" },
-    { formula: "F = qE", name: "Force on a charge in an electric field" },
-    { formula: "F = (1 / 4πε₀)(q₁q₂ / r²)", name: "Coulomb's law" },
-    { formula: "I = q / t", name: "Current as the rate of flow of charge" },
-    { formula: "V = IR", name: "Ohm's law" },
-    { formula: "P = VI", name: "Electrical power" },
-    { formula: "F = qv⊥B = qvB sin θ", name: "Force on a moving charge in a magnetic field" },
-    { formula: "F = lI⊥B = lIB sin θ", name: "Force on a current-carrying conductor in a magnetic field" },
-    { formula: "F / l = (μ₀ / 2π)(I₁I₂ / r)", name: "Force per unit length between parallel conductors" },
-  ],
+    F.eField, F.potDiff, F.wqv, F.wqed, F.bWire, F.fqe, F.coulomb, F.current,
+    F.ohm, F.pvi, F.fqvb, F.flib, F.parallelWires,
+  ]),
 };

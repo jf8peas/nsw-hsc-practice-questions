@@ -128,6 +128,12 @@ export function Quiz({ unit }: { unit: Unit }) {
         setNeedsCode(true);
         return;
       }
+      if (res.status === 429) {
+        const body = await res.json().catch(() => ({}));
+        const wait = typeof body.retryAfter === "number" ? ` Try again in about ${body.retryAfter}s.` : "";
+        setError(`You're submitting answers too fast.${wait}`);
+        return;
+      }
       if (!res.ok) throw new Error(`Grader returned ${res.status}`);
       const data: GradeResult = await res.json();
       setNeedsCode(false);
@@ -223,7 +229,9 @@ export function Quiz({ unit }: { unit: Unit }) {
                 </span>
                 <span className="q">
                   {p.question.formula ? (
-                    <Formula>{p.question.formula}</Formula>
+                    <Formula tex={p.question.formulaTex}>
+                      {p.question.formula}
+                    </Formula>
                   ) : (
                     p.question.prompt
                   )}
@@ -283,7 +291,7 @@ export function Quiz({ unit }: { unit: Unit }) {
           <>
             <div className="q-formula-label">Formula</div>
             <div className="q-formula">
-              <Formula>{q.formula}</Formula>
+              <Formula tex={q.formulaTex}>{q.formula}</Formula>
             </div>
           </>
         )}
@@ -344,22 +352,39 @@ export function Quiz({ unit }: { unit: Unit }) {
                 {busy ? "Marking…" : "Submit answer"}
               </button>
             ) : (
-              <div className="model-answer">
-                <div className="label">Model answer</div>
-                {result.modelAnswer}
-                {result.rubric && result.rubric.length > 0 && (
-                  <ul>
-                    {result.rubric.map((r, idx) => (
-                      <li key={idx}>{r}</li>
-                    ))}
-                  </ul>
-                )}
-                {result.notes && (
-                  <div style={{ marginTop: 8, fontStyle: "italic" }}>
-                    {result.notes}
+              <>
+                {result.feedback && marks[i] !== null && (
+                  <div className="feedback">
+                    <div className="feedback-score">
+                      {marks[i]} / {result.maxMarks} marks
+                    </div>
+                    <p style={{ margin: "6px 0 0" }}>{result.feedback}</p>
+                    {result.rubricMisses && result.rubricMisses.length > 0 && (
+                      <ul className="feedback-miss">
+                        {result.rubricMisses.map((r, idx) => (
+                          <li key={idx}>{r}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 )}
-              </div>
+                <div className="model-answer">
+                  <div className="label">Model answer</div>
+                  {result.modelAnswer}
+                  {result.rubric && result.rubric.length > 0 && (
+                    <ul>
+                      {result.rubric.map((r, idx) => (
+                        <li key={idx}>{r}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {result.notes && (
+                    <div style={{ marginTop: 8, fontStyle: "italic" }}>
+                      {result.notes}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {result !== null && marks[i] === null && (

@@ -3,15 +3,15 @@ import "server-only";
 import { getQuestion } from "@/content";
 import { getAnswer } from "@/content/answers";
 import type { GradeResult } from "@/lib/grading";
+import { gradeShortAnswer } from "@/lib/openrouter.server";
 
 /**
  * Grade one answer. Runs only on the server so the answer key never reaches
  * the browser.
  *
- * Step 1 (now): MC is marked here; short answers reveal the model answer and
- *   rubric and the student self-marks.
- * Step 3 (later): short answers are sent to an LLM via OpenRouter, which fills
- *   in `marksAwarded` + `feedback` and sets `needsSelfMark: false`.
+ * MC is marked here directly. Short answers go to the LLM grader (OpenRouter)
+ * when it is configured; otherwise the client falls back to student
+ * self-marking against the model answer.
  */
 export async function gradeAnswer(
   questionId: string,
@@ -42,15 +42,45 @@ export async function gradeAnswer(
   }
 
   // short answer
-  return {
+  const base = {
     questionId,
-    type: "short",
+    type: "short" as const,
     maxMarks: question.maxMarks,
-    marksAwarded: null,
     modelAnswer: key.modelAnswer,
     rubric: key.rubric,
     notes: key.notes,
-    feedback: "",
-    needsSelfMark: true,
   };
+
+  if (!answer.trim()) {
+    return {
+      ...base,
+      marksAwarded: 0,
+      feedback: "No answer was submitted.",
+      needsSelfMark: false,
+    };
+  }
+
+  const llm = await gradeShortAnswer({
+    formula: question.formula,
+    prompt: question.prompt,
+    modelAnswer: key.modelAnswer ?? "",
+    rubric: key.rubric,
+    maxMarks: question.maxMarks,
+    answer,
+  });
+
+  if (llm) {
+    return {
+      ...base,
+      marksAwarded: llm.marksAwarded,
+      feedback: llm.feedback,
+      rubricHits: llm.rubricHits,
+      rubricMisses: llm.rubricMisses,
+      gradedBy: llm.gradedBy,
+      needsSelfMark: false,
+    };
+  }
+
+  // No LLM (not configured, or the call failed twice) — student self-marks.
+  return { ...base, marksAwarded: null, feedback: "", needsSelfMark: true };
 }

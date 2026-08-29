@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
+import "katex/dist/katex.min.css";
 import "./globals.css";
+// KaTeX CSS ships with the app; the KaTeX JS runs only at build time
+// (scripts/gen-formula-html.ts), never in the browser.
 
 export const metadata: Metadata = {
   title: "Physics Practice",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Formula } from "@/components/Formula";
 import { Shell } from "@/components/Shell";
 import { UnitStatsPanel } from "@/components/UnitStatsPanel";
 import { UNITS, getUnit } from "@/content";
@@ -65,7 +66,9 @@ export default async function UnitPage({
           <ul className="formula-list">
             {unit.formulas.map((f) => (
               <li key={f.formula}>
-                <span className="formula-list-formula">{f.formula}</span>
+                <span className="formula-list-formula">
+                  <Formula tex={f.formulaTex}>{f.formula}</Formula>
+                </span>
                 <span className="formula-list-name">{f.name}</span>
               </li>
             ))}

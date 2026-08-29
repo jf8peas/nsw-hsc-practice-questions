@@ -32,18 +32,30 @@ npm run build
 ### The grade endpoint
 
 `POST /api/grade` with `{ questionId, answer }` (for MC, `answer` is the option
-index as a string). It returns marks for MC immediately. For short answers it
-currently returns the model answer + rubric and the student self-marks; step 3
-below swaps that for an LLM call. The browser never holds the API key or the
-full answer key.
+index as a string).
+
+- **MC** — marked instantly against the answer key, server-side.
+- **Short answer** — sent to the LLM grader (`lib/openrouter.server.ts`) when
+  `OPENROUTER_API_KEY` is set: it returns `marksAwarded` (partial credit),
+  written `feedback`, and `rubricHits` / `rubricMisses`. On any failure (no key,
+  bad key, timeout, unparseable JSON — retried once) it returns `needsSelfMark`
+  and the client falls back to the student self-marking against the model answer.
+
+The browser never holds the API key or the full answer key.
 
 `GET /api/grade` returns `{ gate, unlocked }` so the client can tell up-front
 whether short answers will ask for a class code.
 
-### Access gate
+### Access gate + rate limit
 
-The **short-answer** path (the one that will cost OpenRouter credits) can be put
-behind a shared class code. MC grading is never gated.
+The **short-answer** path (the one that costs OpenRouter credits) sits behind a
+shared class code **and** a per-IP rate limit. MC grading is never gated or
+limited.
+
+Rate limit: `GRADE_RATE_LIMIT` submissions per IP per minute (default 30). Uses
+Upstash Redis when `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set;
+otherwise a per-instance in-memory window (`lib/ratelimit.server.ts`). Over the
+limit → `429` with `retryAfter`.
 
 | `CLASS_CODE` | `SKIP_CLASS_CODE` | Behaviour |
 | --- | --- | --- |
@@ -119,39 +131,44 @@ Add an entry to `EXAMS` in `content/exams.ts` with an ISO `date` and the
 
 Import the repo in Vercel — framework auto-detects as Next.js, no config needed.
 
-**Secrets** (needed from step 3 on) go in Vercel → Project → Settings →
-Environment Variables, for Preview + Production:
+**Env vars** go in Vercel → Project → Settings → Environment Variables, for
+Preview + Production. Everything is optional — the app runs with none set
+(short answers just self-mark, no gate, in-memory rate limit).
 
 | Var | Purpose |
 | --- | --- |
-| `OPENROUTER_API_KEY` | short-answer grading via OpenRouter (step 3) |
-| `GRADING_MODEL` | model slug, e.g. `deepseek/deepseek-chat` (step 3) |
+| `OPENROUTER_API_KEY` | turns on LLM short-answer grading |
+| `GRADING_MODEL` | model slug, default `deepseek/deepseek-chat` |
+| `SITE_URL` | sent to OpenRouter as `HTTP-Referer` |
 | `CLASS_CODE` | shared code students enter to unlock short-answer grading. Unset = no gate |
 | `SKIP_CLASS_CODE` | `true` to bypass `CLASS_CODE` — grading open to anyone |
+| `GRADE_RATE_LIMIT` | short-answer submissions per IP per minute (default 30) |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` | distributed rate limiting; falls back to in-memory |
 
 Locally, copy `.env.example` to `.env.local`. `.env.local` is gitignored — never
 commit a real key. Nothing prefixed `NEXT_PUBLIC_`; keys are read only in
-`app/api/grade/route.ts` / `lib/*.server.ts`.
+`app/api/**` and `lib/*.server.ts`.
 
 ## Roadmap
 
-1. ✅ Full flow — home / unit / quiz / results, MC graded server-side, short
-   answers self-marked, scores in `localStorage`.
+1. ✅ Full flow — home / unit / quiz / results, scores in `localStorage`.
 2. ✅ Answer key is server-only; `/api/grade` live.
 3. ✅ Access gate — `CLASS_CODE` / `SKIP_CLASS_CODE`, `/api/unlock`, cookie.
-4. **LLM short-answer grading.** In `lib/grading.server.ts`, replace the `short`
-   branch with an OpenRouter call: send question + model answer + rubric + marks
-   + student answer, ask for strict JSON `{ marksAwarded, feedback, rubricHits,
-   rubricMisses }`, parse defensively (retry once, then fall back to self-mark).
-5. **Rate limit.** Per-IP limit on the short-answer path (Upstash) as a backstop
-   even with the gate on. Answer length already capped at 2000 chars.
-6. **Polish.** KaTeX formula rendering (store LaTeX in content, render in
-   `components/Formula.tsx`), richer exam countdowns.
+4. ✅ LLM short-answer grading via OpenRouter, with self-mark fallback.
+5. ✅ Per-IP rate limit on the short-answer path (Upstash or in-memory).
+6. ✅ KaTeX formula rendering — LaTeX in `content/formulas.ts`, pre-rendered to
+   HTML at build time (`scripts/gen-formula-html.ts`) so KaTeX stays out of the
+   client bundle.
+
+Possible next: more units; OCR the 3 scanned exam papers; a bigger MC bank;
+re-weight short vs MC marks (currently 3:1).
 
 ## Notes
 
 - `npm audit` flags a high-severity `postcss` advisory pulled in transitively by
   Next 15's build tooling. It's build-time only and not in the request path;
   clearing it means moving to Next 16. Revisit deliberately.
+- `content/formulas.generated.ts` is generated — `npm run gen:formulas` (also
+  runs in `prebuild`). Committed so `next dev` works without a build step.
 - `design/v001/` is the original Claude Design canvas prototype, kept for
   reference. `styles/tokens.css` is copied from it.
