@@ -90,9 +90,34 @@ input {
   border: 1px solid var(--rd-forest-line);
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
-  font-size: 18px;
   cursor: pointer;
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-btn span {
+  font-size: 22px;
+  line-height: 1;
+  display: block;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-brand:hover {
+  color: inherit;
+  opacity: 0.85;
 }
 
 .app-main {
