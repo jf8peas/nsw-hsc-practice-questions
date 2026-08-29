@@ -88,7 +88,10 @@ function buildMessages(p: GradeParams) {
 
 export async function gradeShortAnswer(p: GradeParams): Promise<ShortGrade | null> {
   const key = process.env.OPENROUTER_API_KEY;
-  if (!key) return null;
+  if (!key) {
+    console.warn("[grade] OPENROUTER_API_KEY not set — short answer falls back to self-marking");
+    return null;
+  }
   const model = process.env.GRADING_MODEL || DEFAULT_MODEL;
 
   const body = JSON.stringify({
@@ -139,5 +142,6 @@ export async function gradeShortAnswer(p: GradeParams): Promise<ShortGrade | nul
   }
   if (!out) return null;
 
+  console.info(`[grade] ${model} → ${out.marksAwarded}/${p.maxMarks}`);
   return { ...out, gradedBy: model };
 }
