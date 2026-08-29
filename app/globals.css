@@ -579,6 +579,11 @@ input {
 .katex-formula {
   display: inline-block;
   max-width: 100%;
+}
+
+/* Only the large formula on the quiz card scrolls, and only when a long
+   formula genuinely overflows on a narrow screen. */
+.q-formula {
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -588,7 +593,7 @@ input {
 }
 
 .formula-list-formula .katex {
-  font-size: 1.05em;
+  font-size: 1em;
 }
 
 .breakdown-row .katex {
