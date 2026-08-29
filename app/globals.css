@@ -521,3 +521,35 @@ input {
   color: var(--rd-mute-500);
   font-family: var(--rd-font-mono);
 }
+
+/* Formula list on the unit page ------------------------------------- */
+
+.formula-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formula-list li {
+  background: var(--rd-white);
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-md);
+  padding: 10px 12px;
+}
+
+.formula-list-formula {
+  display: block;
+  font-family: var(--rd-font-mono);
+  font-size: 14px;
+  color: var(--rd-ink-900);
+}
+
+.formula-list-name {
+  display: block;
+  font-size: 12px;
+  color: var(--rd-mute-500);
+  margin-top: 2px;
+}

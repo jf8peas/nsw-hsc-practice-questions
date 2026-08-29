@@ -75,9 +75,24 @@ content/
   answer keys**.
 - `content/answers/index.ts` has `import "server-only"` at the top — the build
   fails if anything client-side pulls it in. Only `lib/grading.server.ts` uses it.
-- Question ids are namespaced: `y11-formula-test.q3`. The grade endpoint finds
-  the answer from the id alone, so the client only ever sends `{ questionId,
-  answer }`.
+- Question ids are namespaced: `y11-formula-test.s03` / `.m12`. The grade
+  endpoint finds the answer from the id alone, so the client only ever sends
+  `{ questionId, answer }`.
+- MC option order in `questions.ts` is scrambled deterministically by id
+  (`lib/shuffle.ts`), and the answer key stores the correct option's **text**
+  (`correctText`), not its index — so the public bundle never reveals a
+  "correct option is first" pattern.
+- If `meta.quiz` is set (`{ short, mc, passMark }`), each attempt draws that many
+  of each type at random from the bank. `y11-formula-test` has 50 + 50, so a
+  student gets 10 non-repeating attempts.
+- `meta.formulas` is the list shown on the unit page (below Start quiz, so mobile
+  users can go straight to the quiz).
+
+### Where the questions came from
+
+`docs/y11-formula-test-research.md` records which formulas are in scope (the
+teacher's crossings-out on the NESA formulae sheet) and the MC scenario bank
+mined from the past papers in `resources/y11_year_end_exam/` (gitignored).
 
 ### Adding a unit
 
@@ -88,8 +103,9 @@ content/
    - `content/index.ts` — import its `meta` + `questions`, add to `UNITS`.
    - `content/answers/index.ts` — import its `answers`, spread into `ALL_ANSWERS`.
 4. `npm run validate` — checks id namespacing, uniqueness, that every question
-   has a matching answer key, MC `correctIndex` in range, short answers have a
-   model answer, rubrics are non-empty, and exams reference real units.
+   has a matching answer key, MC `correctText` is one of the options, short
+   answers have a model answer, `short` rubrics have one point per mark, and
+   exams reference real units.
 
 Never renumber a shipped question id — saved `localStorage` history and any
 bookmarked URLs depend on it. Append new ids instead.

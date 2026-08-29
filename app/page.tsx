@@ -57,7 +57,9 @@ export default function HomePage() {
                         {unit.title}
                       </div>
                       <div className="unit-meta">
-                        {unit.questions.length} questions
+                        {unit.quiz
+                          ? `${unit.quiz.short + unit.quiz.mc} questions per attempt`
+                          : `${unit.questions.length} questions`}
                       </div>
                     </div>
                     <span className="chev">›</span>

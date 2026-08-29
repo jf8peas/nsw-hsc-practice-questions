@@ -24,14 +24,18 @@ export async function gradeAnswer(
   const { question } = found;
 
   if (question.type === "mc") {
+    const correctIndex =
+      key.correctText !== undefined
+        ? question.options.indexOf(key.correctText)
+        : (key.correctIndex ?? -1);
     const picked = Number.parseInt(answer, 10);
-    const correct = picked === key.correctIndex;
+    const correct = picked === correctIndex && correctIndex >= 0;
     return {
       questionId,
       type: "mc",
       maxMarks: question.maxMarks,
       marksAwarded: correct ? question.maxMarks : 0,
-      correctIndex: key.correctIndex,
+      correctIndex,
       rubric: key.rubric,
       needsSelfMark: false,
     };

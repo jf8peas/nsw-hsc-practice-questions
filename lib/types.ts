@@ -4,6 +4,24 @@ export type Year = "Year 11" | "Year 12";
 
 export type UnitType = "Topic Quiz" | "Milestone Test";
 
+/** How many questions of each type a quiz attempt draws from the bank. */
+export interface QuizConfig {
+  /** Number of short-answer questions per attempt. */
+  short: number;
+  /** Number of multiple-choice questions per attempt. */
+  mc: number;
+  /** Pass mark as a percentage of available marks. */
+  passMark: number;
+}
+
+/** A formula shown on the unit page (after the Start quiz button). */
+export interface FormulaRef {
+  /** The formula as plain text, e.g. "F = ma". */
+  formula: string;
+  /** What it is, e.g. "Newton's second law". */
+  name: string;
+}
+
 /** Public metadata for a unit. Safe to ship to the browser. */
 export interface UnitMeta {
   /** kebab-case, globally unique, e.g. "y11-formula-test". Never change once shipped. */
@@ -16,6 +34,10 @@ export interface UnitMeta {
   description: string;
   /** Sort order within a topic. */
   order: number;
+  /** If set, a quiz attempt draws a random subset of the question bank. */
+  quiz?: QuizConfig;
+  /** Formulas tested by this unit, shown on the unit page below Start quiz. */
+  formulas?: FormulaRef[];
 }
 
 interface BaseQuestion {
@@ -50,8 +72,14 @@ export interface Unit extends UnitMeta {
  * client component or the public content registry.
  */
 export interface Answer {
-  /** Present for `mc` questions: index into `options`. */
+  /** Present for `mc` questions: index into `options` (legacy — prefer correctText). */
   correctIndex?: number;
+  /**
+   * Present for `mc` questions: the exact text of the correct option. The grader
+   * resolves the index from this, so authored option order can be scrambled
+   * without the answer key drifting.
+   */
+  correctText?: string;
   /** Present for `short` questions: the model answer shown after submitting. */
   modelAnswer?: string;
   /** One bullet per mark-earning point. Used by the LLM grader (step 3). */

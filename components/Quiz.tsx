@@ -8,9 +8,8 @@ import type { GradeResult } from "@/lib/grading";
 import { saveScore } from "@/lib/scores";
 import type { Question, Unit } from "@/lib/types";
 
-const SHUFFLE_QUESTIONS = true;
 const SHUFFLE_OPTIONS = true;
-const PASS_MARK = 70;
+const DEFAULT_PASS_MARK = 70;
 
 interface Prepared {
   question: Question;
@@ -27,9 +26,23 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function prepare(questions: Question[]): Prepared[] {
-  const ordered = SHUFFLE_QUESTIONS ? shuffle(questions) : questions;
-  return ordered.map((question) => {
+function pick<T>(arr: T[], n: number): T[] {
+  return shuffle(arr).slice(0, n);
+}
+
+function prepare(unit: Unit): Prepared[] {
+  let chosen: Question[];
+  if (unit.quiz) {
+    const shorts = unit.questions.filter((q) => q.type === "short");
+    const mcs = unit.questions.filter((q) => q.type === "mc");
+    chosen = shuffle([
+      ...pick(shorts, unit.quiz.short),
+      ...pick(mcs, unit.quiz.mc),
+    ]);
+  } else {
+    chosen = shuffle(unit.questions);
+  }
+  return chosen.map((question) => {
     if (question.type !== "mc") return { question, optionOrder: [] };
     const idx = question.options.map((_, i) => i);
     return { question, optionOrder: SHUFFLE_OPTIONS ? shuffle(idx) : idx };
@@ -37,12 +50,13 @@ function prepare(questions: Question[]): Prepared[] {
 }
 
 export function Quiz({ unit }: { unit: Unit }) {
+  const passMark = unit.quiz?.passMark ?? DEFAULT_PASS_MARK;
   const [runId, setRunId] = useState(0);
   const prepared = useMemo(
-    () => prepare(unit.questions),
+    () => prepare(unit),
     // re-prepare (reshuffle) whenever the run is restarted
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [unit.questions, runId],
+    [unit, runId],
   );
 
   const [i, setI] = useState(0);
@@ -178,7 +192,7 @@ export function Quiz({ unit }: { unit: Unit }) {
   // ---- results view -------------------------------------------------
   if (phase === "results") {
     const scored = marks.reduce<number>((s, v) => s + (v ?? 0), 0);
-    const passed = finalPct >= PASS_MARK;
+    const passed = finalPct >= passMark;
     return (
       <>
         <h1 className="page-h1" style={{ fontSize: 24, margin: "4px 0 20px" }}>

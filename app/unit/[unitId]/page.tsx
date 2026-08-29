@@ -58,6 +58,20 @@ export default async function UnitPage({
       >
         Start quiz
       </Link>
+
+      {unit.formulas && unit.formulas.length > 0 && (
+        <section style={{ marginTop: 32 }}>
+          <div className="eyebrow">Formulas in this test</div>
+          <ul className="formula-list">
+            {unit.formulas.map((f) => (
+              <li key={f.formula}>
+                <span className="formula-list-formula">{f.formula}</span>
+                <span className="formula-list-name">{f.name}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </Shell>
   );
 }

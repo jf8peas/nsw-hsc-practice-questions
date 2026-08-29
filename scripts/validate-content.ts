@@ -60,15 +60,26 @@ async function main() {
       }
       if (!a.rubric || a.rubric.length === 0) {
         err(`${q.id}: rubric must have at least one point`);
+      } else if (q.type === "short" && a.rubric.length !== q.maxMarks) {
+        err(`${q.id}: short rubric has ${a.rubric.length} points but maxMarks is ${q.maxMarks}`);
       }
 
       if (q.type === "mc") {
-        if (typeof a.correctIndex !== "number") {
-          err(`${q.id}: mc question needs a numeric correctIndex`);
-        } else if (a.correctIndex < 0 || a.correctIndex >= q.options.length) {
-          err(`${q.id}: correctIndex ${a.correctIndex} out of range`);
-        }
         if (q.options.length < 2) err(`${q.id}: mc needs at least 2 options`);
+        if (typeof a.correctText === "string") {
+          if (!q.options.includes(a.correctText)) {
+            err(`${q.id}: correctText is not one of the options`);
+          }
+        } else if (typeof a.correctIndex === "number") {
+          if (a.correctIndex < 0 || a.correctIndex >= q.options.length) {
+            err(`${q.id}: correctIndex ${a.correctIndex} out of range`);
+          }
+        } else {
+          err(`${q.id}: mc question needs correctText (or correctIndex)`);
+        }
+        if (new Set(q.options).size !== q.options.length) {
+          err(`${q.id}: mc has duplicate option text`);
+        }
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);
       }
