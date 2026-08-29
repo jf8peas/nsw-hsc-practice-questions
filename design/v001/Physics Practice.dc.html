@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--rd-surface-50); font-family: var(--rd-font-sans); }
+  a { color: var(--rd-blue-500); }
+  a:hover { color: var(--rd-blue-600); }
+  textarea, button { font-family: inherit; }
+</style>
+</helmet>
+
+<div class="rd" style="min-height:100vh; display:flex; flex-direction:column;">
+
+  <header style="height:60px; flex:0 0 60px; background:var(--rd-forest-900); display:flex; align-items:center; gap:12px; padding:0 16px;">
+    <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ backHandler }}" style="width:34px; height:34px; border-radius:var(--rd-r-md); border:1px solid var(--rd-forest-line); background:rgba(255,255,255,.06); color:#fff; font-size:18px; cursor:pointer; flex:0 0 auto;">‹</button>
+    </sc-if>
+    <div style="width:32px; height:32px; border-radius:var(--rd-r-md); background:var(--rd-blue-500); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--rd-font-display); font-weight:700; font-size:15px; flex:0 0 auto;">P</div>
+    <div style="display:flex; flex-direction:column; line-height:1.15; min-width:0;">
+      <span style="font-family:var(--rd-font-display); font-weight:700; font-size:16px; color:#fff; letter-spacing:-0.2px;">Physics Practice</span>
+      <span style="font-family:var(--rd-font-mono); font-size:10px; color:var(--rd-forest-mute); letter-spacing:0.8px; text-transform:uppercase;">Year 11 &amp; 12</span>
+    </div>
+  </header>
+
+  <main style="flex:1; display:flex; justify-content:center; padding:24px 16px 60px;">
+    <div style="width:100%; max-width:560px;">
+
+      <sc-if value="{{ isHomeView }}" hint-placeholder-val="{{ true }}">
+        <h1 style="font-family:var(--rd-font-display); font-size:26px; font-weight:700; letter-spacing:-0.4px; margin:4px 0 4px;">Units</h1>
+        <p style="color:var(--rd-mute-500); font-size:14px; margin:0 0 24px; line-height:1.5;">Pick a unit to practice topic questions or a milestone test.</p>
+
+        <sc-for list="{{ yearGroups }}" as="group" hint-placeholder-count="2">
+          <div style="margin-bottom:28px;">
+            <div style="font-family:var(--rd-font-mono); font-size:11px; color:var(--rd-mute-500); letter-spacing:1.2px; text-transform:uppercase; margin-bottom:10px;">{{ group.year }}</div>
+
+            <sc-for list="{{ group.units }}" as="unit" hint-placeholder-count="1">
+              <button onClick="{{ unit.onOpen }}" style="display:flex; align-items:center; gap:14px; width:100%; text-align:left; background:var(--rd-white); border:1px solid var(--rd-border-100); border-radius:var(--rd-r-lg); box-shadow:var(--rd-shadow-1); padding:16px; cursor:pointer; margin-bottom:10px;">
+                <div style="flex:1; min-width:0;">
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                    <span class="rd-pill blue">{{ unit.type }}</span>
+                  </div>
+                  <div style="font-family:var(--rd-font-display); font-weight:600; font-size:17px; color:var(--rd-ink-900);">{{ unit.title }}</div>
+                  <div style="font-size:12.5px; color:var(--rd-mute-500); margin-top:2px;">{{ unit.questionCount }} questions</div>
+                </div>
+                <span style="color:var(--rd-mute-400); font-size:20px;">›</span>
+              </button>
+            </sc-for>
+
+            <sc-if value="{{ group.isEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px dashed var(--rd-border-200); border-radius:var(--rd-r-lg); padding:20px; color:var(--rd-mute-500); font-size:13.5px; text-align:center;">More units coming soon</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ isUnitView }}" hint-placeholder-val="{{ false }}">
+        <span class="rd-pill blue" style="margin-bottom:12px;">{{ unit.type }}</span>
+        <h1 style="font-family:var(--rd-font-display); font-size:24px; font-weight:700; letter-spacing:-0.3px; margin:8px 0 6px;">{{ unit.title }}</h1>
+        <p style="color:var(--rd-mute-600); font-size:14px; line-height:1.55; margin:0 0 24px;">{{ unit.description }}</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div class="rd-card" style="padding:12px 10px; text-align:center;">
+            <div style="font-family:var(--rd-font-mono); font-size:9.5px; color:var(--rd-mute-500); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">All-time avg</div>
+            <div style="font-family:var(--rd-font-display); font-size:22px; font-weight:700; color:var(--rd-ink-900);">{{ allTimeDisplay }}</div>
+            <div style="font-size:10.5px; color:var(--rd-mute-400); margin-top:3px;">{{ attemptsLabel }}</div>
+          </div>
+          <div class="rd-card" style="padding:12px 10px; text-align:center;">
+            <div style="font-family:var(--rd-font-mono); font-size:9.5px; color:var(--rd-mute-500); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">Last 3 avg</div>
+            <div style="font-family:var(--rd-font-display); font-size:22px; font-weight:700; color:var(--rd-ink-900);">{{ last3Display }}</div>
+          </div>
+          <div class="rd-card" style="padding:12px 10px; text-align:center;">
+            <div style="font-family:var(--rd-font-mono); font-size:9.5px; color:var(--rd-mute-500); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">Last score</div>
+            <div style="font-family:var(--rd-font-display); font-size:22px; font-weight:700; color:var(--rd-ink-900);">{{ lastDisplay }}</div>
+          </div>
+        </div>
+
+        <sc-if value="{{ hasScores }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ resetScores }}" style="background:none; border:0; color:var(--rd-danger-500); font-size:12.5px; padding:4px 0 20px; cursor:pointer; display:block;">Reset all scores for this unit</button>
+        </sc-if>
+        <sc-if value="{{ !hasScores }}" hint-placeholder-val="{{ true }}">
+          <div style="height:20px;"></div>
+        </sc-if>
+
+        <button onClick="{{ startQuiz }}" class="rd-btn primary xl" style="width:100%; justify-content:center; font-weight:600;">Start quiz</button>
+      </sc-if>
+
+      <sc-if value="{{ isQuizView }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; gap:5px; margin-bottom:18px;">
+          <sc-for list="{{ progressDots }}" as="dot" hint-placeholder-count="10">
+            <div style="{{ dot.style }}"></div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <span class="rd-pill" style="{{ typePillStyle }}">{{ typeLabel }}</span>
+          <span style="font-family:var(--rd-font-mono); font-size:12px; color:var(--rd-mute-500);">Question {{ questionNumber }} of {{ totalQuestions }}</span>
+        </div>
+
+        <div class="rd-card" style="padding:20px; margin-bottom:16px;">
+          <div style="font-family:var(--rd-font-mono); font-size:10.5px; color:var(--rd-mute-500); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Formula</div>
+          <div style="font-family:var(--rd-font-display); font-size:28px; font-weight:700; color:var(--rd-ink-900); margin-bottom:16px;">{{ currentQuestion.formula }}</div>
+          <div style="font-size:15px; color:var(--rd-ink-700); line-height:1.5; margin-bottom:18px;">{{ currentQuestion.prompt }}</div>
+
+          <sc-if value="{{ isShort }}" hint-placeholder-val="{{ false }}">
+            <textarea value="{{ draftText }}" onChange="{{ setDraftText }}" placeholder="Type your answer here..." style="width:100%; min-height:90px; border-radius:var(--rd-r-md); border:1px solid var(--rd-border-100); padding:10px 12px; font-size:14px; resize:vertical; box-sizing:border-box; margin-bottom:14px;" style-focus="outline:none; border-color:var(--rd-blue-500); box-shadow:0 0 0 3px var(--rd-blue-100);"></textarea>
+
+            <sc-if value="{{ showReveal }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ reveal }}" class="rd-btn" style="width:100%; justify-content:center;">Reveal model answer</button>
+            </sc-if>
+
+            <sc-if value="{{ revealed }}" hint-placeholder-val="{{ false }}">
+              <div style="background:var(--rd-surface-50); border:1px solid var(--rd-border-100); border-radius:var(--rd-r-md); padding:12px 14px; font-size:14px; color:var(--rd-ink-700); line-height:1.5; margin-bottom:14px;">
+                <div style="font-family:var(--rd-font-mono); font-size:9.5px; color:var(--rd-mute-500); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">Model answer</div>
+                {{ currentQuestion.modelAnswer }}
+              </div>
+              <sc-if value="{{ showSelfMark }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; gap:10px;">
+                  <button onClick="{{ markWrong }}" style="flex:1; padding:10px; border-radius:var(--rd-r-md); border:1.5px solid var(--rd-danger-500); background:var(--rd-white); color:var(--rd-danger-500); font-weight:600; font-size:13.5px; cursor:pointer;">I got it wrong</button>
+                  <button onClick="{{ markCorrect }}" style="flex:1; padding:10px; border-radius:var(--rd-r-md); border:1.5px solid var(--rd-success-500); background:var(--rd-white); color:var(--rd-success-500); font-weight:600; font-size:13.5px; cursor:pointer;">I got it right</button>
+                </div>
+              </sc-if>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ isMc }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <sc-for list="{{ options }}" as="opt" hint-placeholder-count="4">
+                <button onClick="{{ opt.onClick }}" disabled="{{ opt.disabled }}" style="{{ opt.style }}">{{ opt.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ showNext }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ next }}" class="rd-btn primary xl" style="width:100%; justify-content:center; font-weight:600;">{{ nextLabel }}</button>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ isResultsView }}" hint-placeholder-val="{{ false }}">
+        <h1 style="font-family:var(--rd-font-display); font-size:24px; font-weight:700; margin:4px 0 20px;">Quiz complete</h1>
+
+        <div class="rd-card" style="padding:24px; text-align:center; margin-bottom:20px;">
+          <div style="font-family:var(--rd-font-display); font-size:40px; font-weight:700; color:var(--rd-ink-900);">{{ resultCorrect }}/{{ resultTotal }}</div>
+          <div style="font-size:14px; color:var(--rd-mute-500); margin:4px 0 12px;">{{ resultPct }}% correct</div>
+          <span class="rd-pill" style="{{ passBadgeStyle }}">{{ passBadgeText }}</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+          <sc-for list="{{ breakdown }}" as="b" hint-placeholder-count="10">
+            <div style="display:flex; align-items:center; gap:10px; background:var(--rd-white); border:1px solid var(--rd-border-100); border-radius:var(--rd-r-md); padding:10px 12px;">
+              <span style="{{ b.markStyle }}">{{ b.mark }}</span>
+              <span style="font-size:13.5px; color:var(--rd-ink-700); flex:1;">{{ b.formula }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button onClick="{{ backToUnit }}" class="rd-btn" style="flex:1; justify-content:center;">Back to unit</button>
+          <button onClick="{{ retryQuiz }}" class="rd-btn primary" style="flex:1; justify-content:center; font-weight:600;">Retry quiz</button>
+        </div>
+      </sc-if>
+
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;shuffleQuestions&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Quiz behaviour&quot;}, &quot;passMark&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 70, &quot;min&quot;: 0, &quot;max&quot;: 100, &quot;step&quot;: 5, &quot;unit&quot;: &quot;%&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Quiz behaviour&quot;}}">
+const UNITS = [
+  {
+    id: 'y11-formula-test',
+    year: 'Year 11',
+    type: 'Milestone Test',
+    title: 'Formula Test',
+    description: 'Covers five core Year 11 formulas: define a variable and its SI unit, then identify which formula fits a given scenario.',
+    questions: [
+      { type: 'short', formula: 'F = ma', prompt: 'What does the variable m represent in this formula, and what is its SI unit?', modelAnswer: 'm is mass. Its SI unit is the kilogram (kg).' },
+      { type: 'short', formula: 'v = u + at', prompt: 'What does the variable a represent in this formula, and what is its SI unit?', modelAnswer: 'a is acceleration. Its SI unit is metres per second squared (m/s²).' },
+      { type: 'short', formula: 'W = Fd', prompt: 'What does the variable W represent in this formula, and what is its SI unit?', modelAnswer: 'W is work done. Its SI unit is the joule (J).' },
+      { type: 'short', formula: 'p = mv', prompt: 'What does the variable p represent in this formula, and what is its SI unit?', modelAnswer: 'p is momentum. Its SI unit is kilogram metres per second (kg·m/s).' },
+      { type: 'short', formula: 'Ek = ½mv²', prompt: 'What does the variable Ek represent in this formula, and what is its SI unit?', modelAnswer: 'Ek is kinetic energy. Its SI unit is the joule (J).' },
+      { type: 'mc', formula: 'F = ma', prompt: 'Which question could this formula answer?', correctIndex: 0, options: [
+        'Find the net force on a 1200 kg car accelerating at 3 m/s².',
+        'Find the average speed of a car travelling 60 m in 12 s.',
+        'Find how long a ball takes to fall 2 m.',
+        'Find the spring constant of a spring stretched 4 cm by a 10 N load.',
+      ]},
+      { type: 'mc', formula: 'Ek = ½mv²', prompt: 'Which question could this formula answer?', correctIndex: 0, options: [
+        'Find the kinetic energy of a 5 kg object moving at 4 m/s.',
+        'Find the gravitational potential energy of a 5 kg object at a height of 4 m.',
+        'Find the force needed to stop a 5 kg object in 4 s.',
+        'Find the momentum of a 5 kg object moving at 4 m/s.',
+      ]},
+      { type: 'mc', formula: 'v = u + at', prompt: 'Which question could this formula answer?', correctIndex: 0, options: [
+        'Find the final velocity of an object starting at 2 m/s and accelerating at 3 m/s² for 5 s.',
+        'Find the distance travelled in 5 s at a constant 2 m/s.',
+        'Find the force on a 3 kg mass accelerating at 2 m/s².',
+        'Find the kinetic energy of a 3 kg object moving at 2 m/s.',
+      ]},
+      { type: 'mc', formula: 'p = mv', prompt: 'Which question could this formula answer?', correctIndex: 0, options: [
+        'Find the momentum of a 1000 kg car travelling at 15 m/s.',
+        'Find the kinetic energy of a 1000 kg car travelling at 15 m/s.',
+        'Find the force needed to stop a 1000 kg car in 15 s.',
+        'Find the weight of a 1000 kg car.',
+      ]},
+      { type: 'mc', formula: 'Q = mcΔT', prompt: 'Which question could this formula answer?', correctIndex: 0, options: [
+        'Find the energy needed to raise the temperature of 2 kg of water by 10°C.',
+        'Find the energy stored in a stretched spring.',
+        'Find the specific heat capacity of an unknown metal block.',
+        'Find the work done lifting a 2 kg object 10 m.',
+      ]},
+    ],
+  },
+];
+
+const YEARS = ['Year 11', 'Year 12'];
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+class Component extends DCLogic {
+  state = {
+    view: 'home',
+    unitId: null,
+    quizQuestions: null,
+    qIndex: 0,
+    answers: [],
+    draftText: '',
+    revealed: false,
+    marked: false,
+    mcAnswered: false,
+    mcSelected: null,
+    lastResultPct: null,
+  };
+
+  getUnit(id) { return UNITS.find(u => u.id === id); }
+  scoreKey(id) { return 'physics-scores-' + id; }
+
+  getScores(id) {
+    try { return JSON.parse(localStorage.getItem(this.scoreKey(id))) || []; } catch (e) { return []; }
+  }
+
+  computeStats(id) {
+    const scores = this.getScores(id);
+    if (!scores.length) return { hasScores: false, allTime: null, last3: null, last: null, attempts: 0 };
+    const avg = arr => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+    return {
+      hasScores: true,
+      attempts: scores.length,
+      allTime: avg(scores),
+      last3: avg(scores.slice(-3)),
+      last: scores[scores.length - 1],
+    };
+  }
+
+  saveScore(id, pct) {
+    const scores = this.getScores(id);
+    scores.push(pct);
+    localStorage.setItem(this.scoreKey(id), JSON.stringify(scores));
+  }
+
+  resetScores = () => {
+    if (!window.confirm('Reset all saved scores for this unit? This cannot be undone.')) return;
+    localStorage.removeItem(this.scoreKey(this.state.unitId));
+    this.forceUpdate();
+  };
+
+  openUnit = (id) => this.setState({ view: 'unit', unitId: id });
+  goHome = () => this.setState({ view: 'home', unitId: null });
+  backToUnit = () => this.setState({ view: 'unit' });
+
+  startQuiz = () => {
+    const unit = this.getUnit(this.state.unitId);
+    const shuffle = this.props.shuffleQuestions ?? true;
+    let questions = unit.questions.map(q => ({ ...q }));
+    if (shuffle) {
+      questions = shuffleArray(questions).map(q => {
+        if (q.type !== 'mc') return q;
+        const order = shuffleArray(q.options.map((_, i) => i));
+        return { ...q, options: order.map(i => q.options[i]), correctIndex: order.indexOf(q.correctIndex) };
+      });
+    }
+    this.setState({
+      view: 'quiz', quizQuestions: questions, qIndex: 0, answers: [],
+      draftText: '', revealed: false, marked: false, mcAnswered: false, mcSelected: null, lastResultPct: null,
+    });
+  };
+
+  retryQuiz = () => this.startQuiz();
+
+  setDraftText = (e) => this.setState({ draftText: e.target.value });
+  reveal = () => this.setState({ revealed: true });
+
+  markSelf = (correct) => {
+    const answers = [...this.state.answers];
+    answers[this.state.qIndex] = correct ? 1 : 0;
+    this.setState({ answers, marked: true });
+  };
+
+  selectMc = (i) => {
+    if (this.state.mcAnswered) return;
+    const q = this.state.quizQuestions[this.state.qIndex];
+    const correct = i === q.correctIndex;
+    const answers = [...this.state.answers];
+    answers[this.state.qIndex] = correct ? 1 : 0;
+    this.setState({ answers, mcAnswered: true, mcSelected: i });
+  };
+
+  next = () => {
+    const isLast = this.state.qIndex >= this.state.quizQuestions.length - 1;
+    if (isLast) {
+      const total = this.state.answers.reduce((a, b) => a + (b || 0), 0);
+      const pct = Math.round((total / this.state.quizQuestions.length) * 100);
+      this.saveScore(this.state.unitId, pct);
+      this.setState({ view: 'results', lastResultPct: pct });
+      return;
+    }
+    this.setState(s => ({
+      qIndex: s.qIndex + 1, draftText: '', revealed: false, marked: false, mcAnswered: false, mcSelected: null,
+    }));
+  };
+
+  backHandler = () => {
+    if (this.state.view === 'unit') this.goHome();
+    else this.backToUnit();
+  };
+
+  renderVals() {
+    const view = this.state.view;
+    const unit = this.state.unitId ? this.getUnit(this.state.unitId) : null;
+
+    const yearGroups = YEARS.map(year => {
+      const inYear = UNITS.filter(u => u.year === year);
+      return {
+        year,
+        isEmpty: inYear.length === 0,
+        units: inYear.map(u => ({
+          id: u.id, title: u.title, type: u.type, questionCount: u.questions.length,
+          onOpen: () => this.openUnit(u.id),
+        })),
+      };
+    });
+
+    const stats = unit ? this.computeStats(unit.id) : { hasScores: false };
+
+    let currentQuestion = null, isShort = false, isMc = false, options = [], progressDots = [];
+    let questionNumber = 1, totalQuestions = 0, showNext = false, nextLabel = 'Next question';
+    let typeLabel = '', typePillStyle = '';
+    if (view === 'quiz' && this.state.quizQuestions) {
+      totalQuestions = this.state.quizQuestions.length;
+      questionNumber = this.state.qIndex + 1;
+      const q = this.state.quizQuestions[this.state.qIndex];
+      currentQuestion = q;
+      isShort = q.type === 'short';
+      isMc = q.type === 'mc';
+      typeLabel = isShort ? 'Short answer' : 'Multiple choice';
+      typePillStyle = isShort
+        ? 'color:var(--rd-blue-600); background:var(--rd-blue-50); border-color:transparent;'
+        : 'color:#7C3AED; background:#F3EEFD; border-color:transparent;';
+      progressDots = this.state.quizQuestions.map((_, i) => ({
+        key: i,
+        style: 'flex:1; height:5px; border-radius:3px; background:' + (i <= this.state.qIndex ? 'var(--rd-blue-500)' : 'var(--rd-border-100)') + ';',
+      }));
+      if (isMc) {
+        options = q.options.map((label, i) => {
+          let bg = 'var(--rd-white)', border = 'var(--rd-border-100)', color = 'var(--rd-ink-900)', weight = '500', opacity = '1';
+          if (this.state.mcAnswered) {
+            if (i === q.correctIndex) { bg = 'var(--rd-success-50)'; border = 'var(--rd-success-500)'; color = 'var(--rd-success-500)'; weight = '600'; }
+            else if (i === this.state.mcSelected) { bg = 'var(--rd-danger-50)'; border = 'var(--rd-danger-500)'; color = 'var(--rd-danger-500)'; weight = '600'; }
+            else { opacity = '0.55'; color = 'var(--rd-mute-500)'; }
+          }
+          return {
+            key: i, label, disabled: this.state.mcAnswered, onClick: () => this.selectMc(i),
+            style: 'width:100%; text-align:left; padding:12px 14px; border-radius:var(--rd-r-md); border:1.5px solid ' + border +
+              '; background:' + bg + '; color:' + color + '; font-weight:' + weight + '; opacity:' + opacity + '; font-size:13.5px; line-height:1.4; cursor:pointer;',
+          };
+        });
+        showNext = this.state.mcAnswered;
+      } else {
+        showNext = this.state.marked;
+      }
+      nextLabel = questionNumber >= totalQuestions ? 'Finish' : 'Next question';
+    }
+
+    let resultPct = 0, resultCorrect = 0, resultTotal = 0, breakdown = [], passBadgeText = '', passBadgeStyle = '';
+    if (view === 'results' && this.state.quizQuestions) {
+      resultTotal = this.state.quizQuestions.length;
+      resultCorrect = this.state.answers.reduce((a, b) => a + (b || 0), 0);
+      resultPct = this.state.lastResultPct != null ? this.state.lastResultPct : Math.round((resultCorrect / resultTotal) * 100);
+      const passMark = this.props.passMark ?? 70;
+      const passed = resultPct >= passMark;
+      passBadgeText = passed ? 'Pass' : 'Keep practising';
+      passBadgeStyle = passed
+        ? 'color:var(--rd-success-500); background:var(--rd-success-50); border-color:transparent;'
+        : 'color:var(--rd-warn-500); background:var(--rd-warn-50); border-color:transparent;';
+      breakdown = this.state.quizQuestions.map((q, i) => {
+        const correct = !!this.state.answers[i];
+        return {
+          key: i, formula: q.formula, mark: correct ? '✓' : '✕',
+          markStyle: 'font-weight:700; font-size:15px; color:' + (correct ? 'var(--rd-success-500)' : 'var(--rd-danger-500)') + ';',
+        };
+      });
+    }
+
+    return {
+      showBack: view !== 'home', backHandler: this.backHandler,
+      isHomeView: view === 'home', isUnitView: view === 'unit', isQuizView: view === 'quiz', isResultsView: view === 'results',
+      yearGroups,
+      unit,
+      hasScores: !!stats.hasScores,
+      allTimeDisplay: stats.hasScores ? stats.allTime + '%' : '—',
+      last3Display: stats.hasScores ? stats.last3 + '%' : '—',
+      lastDisplay: stats.hasScores ? stats.last + '%' : '—',
+      attemptsLabel: stats.hasScores ? stats.attempts + (stats.attempts === 1 ? ' attempt' : ' attempts') : '',
+      resetScores: this.resetScores, startQuiz: this.startQuiz,
+      currentQuestion, isShort, isMc, options, progressDots, questionNumber, totalQuestions,
+      typeLabel, typePillStyle,
+      draftText: this.state.draftText, setDraftText: this.setDraftText,
+      showReveal: !this.state.revealed, reveal: this.reveal, revealed: this.state.revealed,
+      showSelfMark: !this.state.marked, markCorrect: () => this.markSelf(true), markWrong: () => this.markSelf(false),
+      showNext, nextLabel, next: this.next,
+      resultPct, resultCorrect, resultTotal, breakdown, passBadgeText, passBadgeStyle,
+      backToUnit: this.backToUnit, retryQuiz: this.retryQuiz,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

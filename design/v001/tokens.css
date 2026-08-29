@@ -1,0 +1,192 @@
+/* @runs-deluxe/ui-kit — design tokens
+   Unified system blending the clean white/blue analytics surface (general_ops_page)
+   with the forest-dark structural anchoring (general_ops_page2). */
+
+:root {
+  /* ───── Color · Neutrals ───── */
+  --rd-white:        #FFFFFF;
+  --rd-surface-50:   #F8F9FA;
+  --rd-surface-100:  #F3F4F6;
+  --rd-surface-200:  #ECEEF1;
+  --rd-border-100:   #E5E7EB;
+  --rd-border-200:   #D6DAE0;
+  --rd-mute-400:     #9CA3AF;
+  --rd-mute-500:     #6B7280;
+  --rd-mute-600:     #4B5563;
+  --rd-ink-700:      #2A2F36;
+  --rd-ink-900:      #0B0F0D;
+
+  /* ───── Color · Forest (structural) ───── */
+  --rd-forest-1000:  #06160E;
+  --rd-forest-900:   #0A2A1B;
+  --rd-forest-800:   #103A26;
+  --rd-forest-700:   #16513A;
+  --rd-forest-line:  rgba(255,255,255,.08);
+  --rd-forest-text:  #DDE7E0;
+  --rd-forest-mute:  #8FA59A;
+
+  /* ───── Color · Blue (interactive) ───── */
+  --rd-blue-50:      #EFF4FE;
+  --rd-blue-100:     #DCE7FD;
+  --rd-blue-300:     #7BA1F4;
+  --rd-blue-500:     #1A56DB;
+  --rd-blue-600:     #1448B8;
+  --rd-blue-700:     #0E3796;
+
+  /* ───── Color · Status ───── */
+  --rd-success-50:   #ECF8F1;
+  --rd-success-500:  #1F8A5B;
+  --rd-warn-50:      #FFF6E5;
+  --rd-warn-500:     #B47900;
+  --rd-danger-50:    #FDECEC;
+  --rd-danger-500:   #C0322B;
+
+  /* ───── Typography ───── */
+  --rd-font-display: "Bricolage Grotesque", "Geist", ui-sans-serif, sans-serif;
+  --rd-font-sans:    "Geist", ui-sans-serif, sans-serif;
+  --rd-font-mono:    "Geist Mono", ui-monospace, monospace;
+
+  --rd-fs-xs:    11px;
+  --rd-fs-sm:    12px;
+  --rd-fs-base:  13px;
+  --rd-fs-md:    14px;
+  --rd-fs-lg:    16px;
+  --rd-fs-xl:    20px;
+  --rd-fs-2xl:   28px;
+  --rd-fs-3xl:   40px;
+  --rd-fs-4xl:   56px;
+
+  /* ───── Radii ───── */
+  --rd-r-xs: 4px;
+  --rd-r-sm: 6px;
+  --rd-r-md: 8px;
+  --rd-r-lg: 12px;
+  --rd-r-xl: 16px;
+  --rd-r-2xl: 20px;
+  --rd-r-pill: 999px;
+
+  /* ───── Elevation ───── */
+  --rd-shadow-1: 0 1px 0 rgba(11,15,13,.04), 0 1px 2px rgba(11,15,13,.04);
+  --rd-shadow-2: 0 1px 0 rgba(11,15,13,.04), 0 4px 12px rgba(11,15,13,.06);
+  --rd-shadow-pop: 0 12px 28px rgba(11,15,13,.10), 0 0 0 1px rgba(11,15,13,.06);
+}
+
+/* base resets for inside an artboard */
+.rd, .rd * { box-sizing: border-box; }
+.rd {
+  font-family: var(--rd-font-sans);
+  color: var(--rd-ink-900);
+  font-size: var(--rd-fs-base);
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  font-feature-settings: "ss01", "cv01", "cv02", "tnum";
+  background: var(--rd-white);
+}
+.rd .mono { font-family: var(--rd-font-mono); font-feature-settings: "tnum"; }
+.rd .display { font-family: var(--rd-font-display); letter-spacing: -0.02em; font-weight: 600; }
+
+/* utility primitives used across components */
+.rd-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 22px; padding: 0 8px;
+  border-radius: var(--rd-r-pill);
+  border: 1px solid var(--rd-border-100);
+  background: var(--rd-white);
+  font-size: var(--rd-fs-xs);
+  font-weight: 500;
+  color: var(--rd-ink-700);
+  white-space: nowrap;
+}
+.rd-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--rd-mute-400); }
+.rd-pill.success { color: var(--rd-success-500); background: var(--rd-success-50); border-color: transparent; }
+.rd-pill.success .dot { background: var(--rd-success-500); }
+.rd-pill.warn { color: var(--rd-warn-500); background: var(--rd-warn-50); border-color: transparent; }
+.rd-pill.warn .dot { background: var(--rd-warn-500); }
+.rd-pill.danger { color: var(--rd-danger-500); background: var(--rd-danger-50); border-color: transparent; }
+.rd-pill.danger .dot { background: var(--rd-danger-500); }
+.rd-pill.blue { color: var(--rd-blue-600); background: var(--rd-blue-50); border-color: transparent; }
+.rd-pill.blue .dot { background: var(--rd-blue-500); }
+.rd-pill.ink { color: var(--rd-white); background: var(--rd-forest-900); border-color: transparent; }
+.rd-pill.ink .dot { background: var(--rd-forest-mute); }
+
+.rd-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 14px;
+  border-radius: var(--rd-r-md);
+  border: 1px solid var(--rd-border-100);
+  background: var(--rd-white);
+  color: var(--rd-ink-900);
+  font-family: inherit; font-size: var(--rd-fs-md); font-weight: 500;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, box-shadow .12s;
+}
+.rd-btn:hover { background: var(--rd-surface-50); }
+.rd-btn.primary { background: var(--rd-blue-500); border-color: var(--rd-blue-500); color: var(--rd-white); }
+.rd-btn.primary:hover { background: var(--rd-blue-600); border-color: var(--rd-blue-600); }
+.rd-btn.dark { background: var(--rd-forest-900); border-color: var(--rd-forest-900); color: var(--rd-white); }
+.rd-btn.dark:hover { background: var(--rd-forest-800); }
+.rd-btn.sm { height: 28px; padding: 0 10px; font-size: var(--rd-fs-sm); }
+.rd-btn.xl { height: 44px; padding: 0 18px; font-size: var(--rd-fs-md); }
+.rd-btn.icon { width: 32px; padding: 0; justify-content: center; }
+
+.rd-card {
+  background: var(--rd-white);
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-lg);
+}
+.rd-card.soft {
+  background: var(--rd-surface-50);
+  border-color: var(--rd-border-100);
+}
+
+/* generic input look */
+.rd-input {
+  display: block; width: 100%;
+  height: 40px; padding: 0 12px;
+  background: var(--rd-white);
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-md);
+  font-family: inherit; font-size: var(--rd-fs-md);
+  color: var(--rd-ink-900);
+}
+.rd-input:focus {
+  outline: none;
+  border-color: var(--rd-blue-500);
+  box-shadow: 0 0 0 3px var(--rd-blue-100);
+}
+.rd-input.readonly,
+.rd-input[aria-disabled="true"] {
+  background: var(--rd-surface-100);
+  color: var(--rd-mute-600);
+  border-color: var(--rd-border-100);
+  cursor: not-allowed;
+}
+.rd-label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: var(--rd-fs-sm); font-weight: 500; color: var(--rd-ink-700);
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+.rd-help { font-size: var(--rd-fs-xs); color: var(--rd-mute-500); margin-top: 6px; }
+
+/* Focus ring used on canvas */
+@keyframes rd-pulse {
+  0%, 100% { opacity: .9; }
+  50% { opacity: .35; }
+}
+.rd-pulse { animation: rd-pulse 1.6s ease-in-out infinite; }
+
+@keyframes rd-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+.rd-skel {
+  background: linear-gradient(90deg,
+    var(--rd-surface-100) 0%,
+    var(--rd-surface-200) 40%,
+    var(--rd-surface-100) 80%);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--rd-r-sm);
+  animation: rd-shimmer 1.4s ease-in-out infinite;
+}

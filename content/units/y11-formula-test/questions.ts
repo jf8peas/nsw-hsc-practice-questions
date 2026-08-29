@@ -1,0 +1,105 @@
+import type { Question } from "@/lib/types";
+
+// PUBLIC — no answer keys here. Answer keys live in ./answers.ts
+export const questions: Question[] = [
+  {
+    id: "y11-formula-test.q1",
+    type: "short",
+    formula: "F = ma",
+    prompt: "What does the variable m represent in this formula, and what is its SI unit?",
+    maxMarks: 2,
+  },
+  {
+    id: "y11-formula-test.q2",
+    type: "short",
+    formula: "v = u + at",
+    prompt: "What does the variable a represent in this formula, and what is its SI unit?",
+    maxMarks: 2,
+  },
+  {
+    id: "y11-formula-test.q3",
+    type: "short",
+    formula: "W = Fd",
+    prompt: "What does the variable W represent in this formula, and what is its SI unit?",
+    maxMarks: 2,
+  },
+  {
+    id: "y11-formula-test.q4",
+    type: "short",
+    formula: "p = mv",
+    prompt: "What does the variable p represent in this formula, and what is its SI unit?",
+    maxMarks: 2,
+  },
+  {
+    id: "y11-formula-test.q5",
+    type: "short",
+    formula: "Ek = ½mv²",
+    prompt: "What does the variable Ek represent in this formula, and what is its SI unit?",
+    maxMarks: 2,
+  },
+  {
+    id: "y11-formula-test.q6",
+    type: "mc",
+    formula: "F = ma",
+    prompt: "Which question could this formula answer?",
+    maxMarks: 1,
+    options: [
+      "Find the net force on a 1200 kg car accelerating at 3 m/s².",
+      "Find the average speed of a car travelling 60 m in 12 s.",
+      "Find how long a ball takes to fall 2 m.",
+      "Find the spring constant of a spring stretched 4 cm by a 10 N load.",
+    ],
+  },
+  {
+    id: "y11-formula-test.q7",
+    type: "mc",
+    formula: "Ek = ½mv²",
+    prompt: "Which question could this formula answer?",
+    maxMarks: 1,
+    options: [
+      "Find the kinetic energy of a 5 kg object moving at 4 m/s.",
+      "Find the gravitational potential energy of a 5 kg object at a height of 4 m.",
+      "Find the force needed to stop a 5 kg object in 4 s.",
+      "Find the momentum of a 5 kg object moving at 4 m/s.",
+    ],
+  },
+  {
+    id: "y11-formula-test.q8",
+    type: "mc",
+    formula: "v = u + at",
+    prompt: "Which question could this formula answer?",
+    maxMarks: 1,
+    options: [
+      "Find the final velocity of an object starting at 2 m/s and accelerating at 3 m/s² for 5 s.",
+      "Find the distance travelled in 5 s at a constant 2 m/s.",
+      "Find the force on a 3 kg mass accelerating at 2 m/s².",
+      "Find the kinetic energy of a 3 kg object moving at 2 m/s.",
+    ],
+  },
+  {
+    id: "y11-formula-test.q9",
+    type: "mc",
+    formula: "p = mv",
+    prompt: "Which question could this formula answer?",
+    maxMarks: 1,
+    options: [
+      "Find the momentum of a 1000 kg car travelling at 15 m/s.",
+      "Find the kinetic energy of a 1000 kg car travelling at 15 m/s.",
+      "Find the force needed to stop a 1000 kg car in 15 s.",
+      "Find the weight of a 1000 kg car.",
+    ],
+  },
+  {
+    id: "y11-formula-test.q10",
+    type: "mc",
+    formula: "Q = mcΔT",
+    prompt: "Which question could this formula answer?",
+    maxMarks: 1,
+    options: [
+      "Find the energy needed to raise the temperature of 2 kg of water by 10°C.",
+      "Find the energy stored in a stretched spring.",
+      "Find the specific heat capacity of an unknown metal block.",
+      "Find the work done lifting a 2 kg object 10 m.",
+    ],
+  },
+];
