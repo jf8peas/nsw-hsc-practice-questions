@@ -111,14 +111,32 @@ export async function gradeShortAnswer(p: GradeParams): Promise<ShortGrade | nul
       body,
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error(`[grade] OpenRouter ${res.status} (model ${model}): ${detail.slice(0, 300)}`);
+      return null;
+    }
     const data = await res.json();
     const content: unknown = data?.choices?.[0]?.message?.content;
-    return typeof content === "string" ? parseGradeJson(content, p.maxMarks) : null;
+    if (typeof content !== "string") {
+      console.error(`[grade] OpenRouter response had no message content: ${JSON.stringify(data).slice(0, 300)}`);
+      return null;
+    }
+    const parsed = parseGradeJson(content, p.maxMarks);
+    if (!parsed) console.error(`[grade] could not parse grader JSON: ${content.slice(0, 300)}`);
+    return parsed;
   }
 
-  let out = await attempt().catch(() => null);
-  if (!out) out = await attempt().catch(() => null);
+  let out = await attempt().catch((e) => {
+    console.error(`[grade] OpenRouter call threw: ${e}`);
+    return null;
+  });
+  if (!out) {
+    out = await attempt().catch((e) => {
+      console.error(`[grade] OpenRouter retry threw: ${e}`);
+      return null;
+    });
+  }
   if (!out) return null;
 
   return { ...out, gradedBy: model };

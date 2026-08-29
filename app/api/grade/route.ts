@@ -4,6 +4,7 @@ import { getQuestion } from "@/content";
 import { gateEnabled, hasAccess } from "@/lib/gate.server";
 import type { GradeRequest } from "@/lib/grading";
 import { gradeAnswer } from "@/lib/grading.server";
+import { llmGradingConfigured } from "@/lib/openrouter.server";
 import { checkGradeRateLimit } from "@/lib/ratelimit.server";
 
 function clientIp(req: Request): string {
@@ -62,10 +63,15 @@ export async function POST(req: Request) {
   return NextResponse.json(result);
 }
 
-// Lets the client find out up-front whether short answers will need a code.
+// Lets the client find out up-front whether short answers will need a code,
+// and doubles as a config check: `llm` is true when OPENROUTER_API_KEY is set.
 export async function GET() {
   return NextResponse.json({
     gate: gateEnabled(),
     unlocked: await hasAccess(),
+    llm: llmGradingConfigured(),
+    gradingModel: llmGradingConfigured()
+      ? process.env.GRADING_MODEL || "deepseek/deepseek-chat"
+      : null,
   });
 }
