@@ -25,8 +25,8 @@ function short(n: number, f: FormulaDef, variable: string): ShortQuestion {
     formula: f.text,
     formulaTex: f.tex,
     prompt:
-      `(a) In one sentence, describe what this formula tells you or lets you calculate. ` +
-      `(b) What quantity does “${variable}” represent in this formula? ` +
+      `(a) In one sentence, describe what this formula tells you or lets you calculate.\n` +
+      `(b) What quantity does “${variable}” represent in this formula?\n` +
       `(c) State the SI unit of that quantity (its name or symbol).`,
     maxMarks: 3,
   };
