@@ -4,6 +4,7 @@ import type { Answer, AnswerSet } from "@/lib/types";
 
 import { answers as y11FormulaTestAnswers } from "../units/y11-formula-test/answers";
 import { answers as y11EconSupplyDemandAnswers } from "../units/y11-economics-supply-demand/answers";
+import { answers as y11EconPreliminaryAnswers } from "../units/y11-economics-preliminary/answers";
 
 /**
  * The answer-key registry. SERVER ONLY — the "server-only" import above makes
@@ -14,6 +15,7 @@ import { answers as y11EconSupplyDemandAnswers } from "../units/y11-economics-su
 const ALL_ANSWERS: AnswerSet = {
   ...y11FormulaTestAnswers,
   ...y11EconSupplyDemandAnswers,
+  ...y11EconPreliminaryAnswers,
 };
 
 export function getAnswer(questionId: string): Answer | undefined {
