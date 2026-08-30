@@ -19,7 +19,7 @@ export function Shell({
           <Link href="/" className="app-brand" aria-label="Home">
             <div className="logo">P</div>
             <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
-              <span className="title">Physics Practice</span>
+              <span className="title">NSW HSC Practice</span>
               <span className="subtitle">Year 11 &amp; 12</span>
             </div>
           </Link>

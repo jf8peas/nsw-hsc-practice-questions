@@ -108,8 +108,8 @@ export async function gradeShortAnswer(p: GradeParams): Promise<ShortGrade | nul
       headers: {
         authorization: `Bearer ${key}`,
         "content-type": "application/json",
-        "HTTP-Referer": process.env.SITE_URL || "https://physics-practice.vercel.app",
-        "X-Title": "Physics Practice",
+        "HTTP-Referer": process.env.SITE_URL || "https://nsw-hsc-practice.vercel.app",
+        "X-Title": "NSW HSC Practice",
       },
       body,
       signal: AbortSignal.timeout(TIMEOUT_MS),

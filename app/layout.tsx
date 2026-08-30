@@ -6,8 +6,9 @@ import "./globals.css";
 // (scripts/gen-formula-html.ts), never in the browser.
 
 export const metadata: Metadata = {
-  title: "Physics Practice",
-  description: "HSC Physics practice quizzes — short answer and multiple choice.",
+  title: "NSW HSC Practice",
+  description:
+    "NSW HSC practice quizzes — short answer and multiple choice, marked against a rubric.",
 };
 
 const FONT_LINK =

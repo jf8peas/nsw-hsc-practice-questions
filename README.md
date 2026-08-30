@@ -1,7 +1,8 @@
-# Physics Practice
+# NSW HSC Practice
 
-HSC Physics practice quizzes — short answer and multiple choice, with an LLM
-grading short answers against a rubric. Next.js (App Router) on Vercel.
+NSW HSC practice quizzes — short answer and multiple choice, with an LLM grading
+short answers against a rubric. Physics is the first subject. Next.js (App
+Router) on Vercel.
 
 - **No accounts.** Scores are kept per-browser in `localStorage`.
 - **Content lives in the repo.** Questions are typed TS files, version-controlled,
