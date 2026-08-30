@@ -17,7 +17,18 @@ export function Shell({
             </Link>
           ) : null}
           <Link href="/" className="app-brand" aria-label="Home">
-            <div className="logo">P</div>
+            <div className="logo" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="18" height="18">
+                <path
+                  d="M9 16.5 L14 21.5 L23.5 10"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="3.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
               <span className="title">NSW HSC Practice</span>
               <span className="subtitle">Year 11 &amp; 12</span>
