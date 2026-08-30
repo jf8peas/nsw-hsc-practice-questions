@@ -113,7 +113,7 @@ content/
 | Unit | Source |
 | --- | --- |
 | `y11-formula-test` | NESA Physics formulae sheet (teacher's crossings-out) + past-paper scenarios — see `docs/y11-formula-test-research.md`. 50 short + 50 MC. |
-| `y11-economics-supply-demand` | NESA Economics 11–12 syllabus ("operation of the market") + `resources/topic002` teaching material. 40 MC + 40 curve-shift SA + 20 wider-micro SA, with SVG supply/demand diagrams. |
+| `y11-economics-supply-demand` | NESA Economics 11–12 syllabus ("The Market Economy") + `resources/topic002`. ~84 MC + ~64 diagram SA + 40 written SA covering demand/supply, elasticity (calcs + total outlay), government intervention (ceilings/floors/taxes/subsidies), labour markets and the housing/commodity markets. SVG diagrams from a per-unit `diagram.ts` (curves, shifts, price ceilings/floors, tax/subsidy, labour axes, inelastic housing supply). |
 
 ### Adding a unit
 

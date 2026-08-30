@@ -5,24 +5,47 @@ import { sd } from "./diagram";
 // PUBLIC — no answer keys here. Answer keys live in ./answers.ts, kept in sync
 // by scripts/validate-content.ts.
 //
-// Built from the NESA Economics 11–12 syllabus (Year 11 "operation of the
-// market") and the supply/demand teaching material in resources/topic002.
+// Built from the NESA Economics 11–12 syllabus (Year 11 "The Market Economy":
+// demand & supply, equilibrium, price elasticity, government intervention,
+// labour markets, and the housing/commodity markets) plus the teaching
+// material in resources/topic002.
 //
-// 40 multiple choice (group "mc", 1 mark) + 40 curve-shift short answer
-// (group "shift", 2–3 marks) + 20 wider-micro short answer (group "micro",
-// 2–4 marks). A quiz draws 4 + 4 + 2 at random — 10 non-repeating attempts.
+// Three groups, drawn 4 + 4 + 2 per attempt:
+//   "mc"      — multiple choice, 1 mark (movement vs shift, shifts & equilibrium,
+//               elasticity calcs & concepts, government intervention, labour,
+//               property/commodity).
+//   "diagram" — short answer with a market diagram, 2–3 marks (curve shifts,
+//               price ceilings/floors, taxes/subsidies, labour markets, housing).
+//   "micro"   — written short answer, 2–4 marks (price mechanism, elasticity,
+//               total outlay method, intervention rationale, labour, property).
 
 const U = "y11-economics-supply-demand";
 const p2 = (n: number) => String(n).padStart(2, "0");
 
-// Reused diagrams (kept as a handful of constants so the client bundle stays small).
+// Reused diagrams (a handful of constants so the client bundle stays small).
 const D_BASE = sd();
 const D_DINC = sd({ shift: "demand-increase" });
-const D_DDEC = sd({ shift: "demand-decrease" });
 const D_SINC = sd({ shift: "supply-increase" });
-const D_SDEC = sd({ shift: "supply-decrease" });
 const D_SURPLUS = sd({ priceLine: { p: 0.75, label: "P₁" }, caption: "P₁ is above the equilibrium price" });
 const D_SHORTAGE = sd({ priceLine: { p: 0.26, label: "P₁" }, caption: "P₁ is below the equilibrium price" });
+
+const D_CEILING = sd({ priceLine: { p: 0.3, label: "Pᶜ" }, span: { p: 0.3, label: "Shortage" }, caption: "Pᶜ — a price ceiling set below equilibrium" });
+const D_FLOOR = sd({ priceLine: { p: 0.72, label: "Pᶠ" }, span: { p: 0.72, label: "Surplus" }, caption: "Pᶠ — a price floor set above equilibrium" });
+const D_TAX = sd({ shift: "supply-decrease", shiftLabels: { supply2: "S + tax" }, caption: "Per-unit (indirect) tax on producers" });
+const D_SUBSIDY = sd({ shift: "supply-increase", shiftLabels: { supply2: "S − subsidy" }, caption: "Per-unit subsidy paid to producers" });
+
+const HOUSE_BASE = sd({ steepSupply: true, caption: "Established housing — supply is price-inelastic" });
+const HOUSE_DINC = sd({ steepSupply: true, shift: "demand-increase", caption: "Established housing — supply is price-inelastic" });
+const HOUSE_SINC = sd({ steepSupply: true, shift: "supply-increase", caption: "Housing — supply increases" });
+
+const LAB = { axisLabels: { x: "Quantity of labour", y: "Wage" } } as const;
+const LAB_BASE = sd({ ...LAB });
+const LAB_DINC = sd({ ...LAB, shift: "demand-increase" });
+const LAB_DDEC = sd({ ...LAB, shift: "demand-decrease" });
+const LAB_SINC = sd({ ...LAB, shift: "supply-increase" });
+const LAB_SDEC = sd({ ...LAB, shift: "supply-decrease" });
+const LAB_MINWAGE = sd({ ...LAB, priceLine: { p: 0.72, label: "Wₘ" }, span: { p: 0.72, label: "Surplus" }, caption: "Wₘ — a minimum wage above the equilibrium wage" });
+const LAB_SHORTAGE = sd({ ...LAB, priceLine: { p: 0.3, label: "W₁" }, span: { p: 0.3, label: "Shortage" }, caption: "At wage W₁ the labour demanded exceeds the labour supplied" });
 
 function mc(
   n: number,
@@ -42,14 +65,14 @@ function mc(
   };
 }
 
-function shiftQ(n: number, marks: number, prompt: string): ShortQuestion {
+function shiftQ(n: number, marks: number, prompt: string, diagramSvg: string = D_BASE): ShortQuestion {
   return {
     id: `${U}.s${p2(n)}`,
-    group: "shift",
+    group: "diagram",
     type: "short",
     prompt,
     maxMarks: marks,
-    diagramSvg: D_BASE,
+    diagramSvg,
   };
 }
 
@@ -383,8 +406,355 @@ const microQuestions: ShortQuestion[] = [
   microQ(20, 3, "Explain how a competitive market reaching equilibrium contributes to the efficient allocation of resources."),
 ];
 
+// ==========================================================================
+// EXPANSION — movement vs shift, elasticity, government intervention, labour,
+// property & commodity markets.
+// ==========================================================================
+
+// --- multiple choice, m41..m84 -------------------------------------------
+
+const mcMore: McQuestion[] = [
+  // movement along vs shift of a curve
+  mc(41, "A café sells more cups of coffee this week only because it cut its price. This is best described as:", [
+    "an expansion of demand — a movement down along the demand curve.",
+    "an increase in demand — a rightward shift of the demand curve.",
+    "a decrease in demand.",
+    "a shift of the supply curve.",
+  ]),
+  mc(42, "Wheat growers supply a larger quantity this season only because the market price of wheat is higher. This is:", [
+    "an expansion of supply — a movement up along the supply curve.",
+    "an increase in supply — a rightward shift of the supply curve.",
+    "a decrease in supply.",
+    "a shift of the demand curve.",
+  ]),
+  mc(43, "During a heatwave, far more beach umbrellas are demanded at every price. This is:", [
+    "an increase in demand — a rightward shift of the demand curve.",
+    "an expansion of demand — a movement along the demand curve.",
+    "a contraction of demand.",
+    "a movement along the supply curve.",
+  ]),
+  mc(44, "A bakery is able to supply more bread at every price after installing a faster oven. This is:", [
+    "an increase in supply — a rightward shift of the supply curve.",
+    "an expansion of supply — a movement up along the supply curve.",
+    "a decrease in supply.",
+    "a movement along the demand curve.",
+  ]),
+  // price elasticity of demand — calculation and concept
+  mc(45, "The price of a good rises by 20% and, as a result, the quantity demanded falls by 10%. The price elasticity of demand is:", [
+    "0.5 — demand is price-inelastic.",
+    "2.0 — demand is price-elastic.",
+    "0.5 — demand is price-elastic.",
+    "10 — demand is perfectly elastic.",
+  ]),
+  mc(46, "A 5% fall in the price of a good causes the quantity demanded to rise by 15%. The price elasticity of demand is:", [
+    "3 — demand is price-elastic.",
+    "0.33 — demand is price-inelastic.",
+    "3 — demand is price-inelastic.",
+    "1 — demand is unit elastic.",
+  ]),
+  mc(47, "A good has a price elasticity of demand of 0.4. A 10% increase in its price will change the quantity demanded by about:", [
+    "a 4% decrease.",
+    "a 4% increase.",
+    "a 40% decrease.",
+    "a 2.5% decrease.",
+  ]),
+  mc(48, "Demand for a good is price-inelastic. If the seller raises the price, total revenue (total outlay) will:", [
+    "rise, because the percentage fall in quantity is smaller than the percentage rise in price.",
+    "fall, because the percentage fall in quantity is larger than the percentage rise in price.",
+    "stay the same, because revenue does not depend on elasticity.",
+    "fall to zero.",
+  ]),
+  mc(49, "Demand for a good is price-elastic. If the seller raises the price, total revenue will:", [
+    "fall, because the percentage fall in quantity is larger than the percentage rise in price.",
+    "rise, because higher prices always raise revenue.",
+    "stay the same.",
+    "rise, because demand is elastic.",
+  ]),
+  mc(50, "If the price elasticity of demand for a good is exactly 1 (unit elastic), a change in its price will leave total revenue:", [
+    "unchanged.",
+    "higher.",
+    "lower.",
+    "at zero.",
+  ]),
+  mc(51, "Which good is likely to have the most price-inelastic demand?", [
+    "Insulin for a person with diabetes.",
+    "One particular brand of bottled water among many.",
+    "Restaurant meals.",
+    "Overseas holidays.",
+  ]),
+  mc(52, "The demand for a good tends to be more price-elastic when:", [
+    "it has many close substitutes.",
+    "it is a necessity with no substitutes.",
+    "it takes up a very small share of the consumer's budget.",
+    "consumers must decide immediately, with no time to adjust.",
+  ]),
+  mc(53, "The demand for petrol is price-inelastic in the short run mainly because:", [
+    "there are few substitutes and most drivers cannot quickly change how much they drive.",
+    "petrol takes up a large share of household income.",
+    "there are many close substitutes for petrol.",
+    "consumers have plenty of time to adjust their behaviour.",
+  ]),
+  // price elasticity of supply
+  mc(54, "The price of a good rises by 10% and the quantity supplied rises by 4%. The price elasticity of supply is:", [
+    "0.4 — supply is price-inelastic.",
+    "2.5 — supply is price-elastic.",
+    "0.4 — supply is price-elastic.",
+    "6 — supply is perfectly elastic.",
+  ]),
+  mc(55, "Supply of a good tends to be more price-elastic when:", [
+    "firms have spare (excess) capacity and a longer time to respond.",
+    "the good is perishable and cannot be stored.",
+    "the factors of production are hard to move into the industry.",
+    "the time period considered is very short.",
+  ]),
+  mc(56, "The supply of most agricultural crops is price-inelastic in the short run because:", [
+    "it takes a full growing season to change how much is planted and harvested.",
+    "farmers can instantly grow more when the price rises.",
+    "there are many substitutes for each crop.",
+    "crops can be stored indefinitely at no cost.",
+  ]),
+  // government intervention
+  mc(57, "A government sets a price ceiling (maximum price) below the equilibrium price. The result is:", [
+    "a shortage — the quantity demanded exceeds the quantity supplied.",
+    "a surplus — the quantity supplied exceeds the quantity demanded.",
+    "the market clears at the ceiling price.",
+    "an increase in supply.",
+  ], D_CEILING),
+  mc(58, "A government sets a price floor (minimum price) above the equilibrium price. The result is:", [
+    "a surplus — the quantity supplied exceeds the quantity demanded.",
+    "a shortage — the quantity demanded exceeds the quantity supplied.",
+    "the market clears at the floor price.",
+    "a decrease in demand.",
+  ], D_FLOOR),
+  mc(59, "A binding price ceiling on rents (rent control) is most likely to:", [
+    "create a shortage of rental housing, as landlords supply less and tenants demand more.",
+    "eliminate the shortage of rental housing.",
+    "increase the quantity of rental housing supplied.",
+    "have no effect on the rental market.",
+  ]),
+  mc(60, "A per-unit (indirect) tax imposed on the producers of a good will:", [
+    "shift the supply curve upward/left by the amount of the tax, raising the price and reducing the quantity traded.",
+    "shift the demand curve left.",
+    "shift the supply curve right, lowering the price.",
+    "leave the equilibrium price and quantity unchanged.",
+  ], D_TAX),
+  mc(61, "After a per-unit tax on producers, the burden (incidence) of the tax falls mainly on consumers when demand is:", [
+    "relatively price-inelastic.",
+    "relatively price-elastic.",
+    "perfectly elastic.",
+    "unrelated to who bears the tax.",
+  ]),
+  mc(62, "A per-unit subsidy paid to the producers of a good will most likely change its equilibrium price and quantity in which way?", [
+    "Price falls and quantity rises.",
+    "Price rises and quantity falls.",
+    "Price rises and quantity rises.",
+    "Price falls and quantity falls.",
+  ], D_SUBSIDY),
+  mc(63, "Which of the following is an example of an indirect tax in Australia?", [
+    "The Goods and Services Tax (GST).",
+    "Personal income tax.",
+    "Company tax on profits.",
+    "The Medicare levy on taxable income.",
+  ]),
+  mc(64, "A government might impose a price floor on an agricultural product in order to:", [
+    "support and stabilise farmers' incomes above the level the free market would give.",
+    "make the product cheaper for consumers.",
+    "create a shortage of the product.",
+    "reduce the incomes of farmers.",
+  ]),
+  mc(65, "One likely unintended consequence of a price ceiling set below the equilibrium price is:", [
+    "a persistent shortage, with non-price rationing such as queues or waiting lists.",
+    "a persistent surplus that the government must buy up.",
+    "an increase in the quantity supplied.",
+    "the price rising above the equilibrium price.",
+  ]),
+  mc(66, "A government subsidy for producers of a good, funded from taxation, will tend to:", [
+    "increase the quantity produced and consumed beyond the free-market level.",
+    "reduce the quantity produced and consumed.",
+    "have no effect on the quantity traded.",
+    "raise the price paid by consumers.",
+  ]),
+  // labour markets
+  mc(67, "In the labour market:", [
+    "households supply labour and businesses demand labour.",
+    "households demand labour and businesses supply labour.",
+    "the government supplies all labour.",
+    "labour is neither demanded nor supplied.",
+  ], LAB_BASE),
+  mc(68, "The demand for labour is a 'derived demand', meaning it depends on:", [
+    "the demand for the goods and services that the labour is used to produce.",
+    "the number of people who want to work.",
+    "the minimum wage set by the government.",
+    "the age of the workers.",
+  ]),
+  mc(69, "A minimum wage set above the equilibrium wage in a labour market will most likely cause:", [
+    "a surplus of labour (unemployment) — the quantity of labour supplied exceeds the quantity demanded.",
+    "a shortage of labour — the quantity demanded exceeds the quantity supplied.",
+    "the labour market to clear at the minimum wage.",
+    "an increase in the demand for labour.",
+  ], LAB_MINWAGE),
+  mc(70, "A skill shortage in an occupation means that, at the current wage:", [
+    "the quantity of labour demanded exceeds the quantity supplied, so wages tend to rise.",
+    "the quantity of labour supplied exceeds the quantity demanded, so wages tend to fall.",
+    "the labour market is in equilibrium.",
+    "there is no demand for that type of labour.",
+  ], LAB_SHORTAGE),
+  mc(71, "Which of the following would increase the demand for labour in an industry?", [
+    "A rise in consumer demand for the industry's output.",
+    "A rise in the wage the industry must pay.",
+    "A fall in the productivity of workers.",
+    "An increase in the number of people qualified to do the work.",
+  ], LAB_DINC),
+  mc(72, "Which of the following would increase the supply of labour to a particular occupation?", [
+    "More people gaining the qualifications the occupation requires.",
+    "A fall in the wage paid relative to other occupations.",
+    "A fall in the demand for the goods the occupation produces.",
+    "An increase in the productivity of those workers.",
+  ], LAB_SINC),
+  mc(73, "Firms in an industry replace many workers with automated machinery. In that labour market this will most likely:", [
+    "decrease the demand for labour, lowering the equilibrium wage and level of employment.",
+    "increase the demand for labour, raising the equilibrium wage.",
+    "increase the supply of labour.",
+    "have no effect on wages or employment.",
+  ], LAB_DDEC),
+  mc(74, "The equilibrium wage in a competitive labour market is the wage at which:", [
+    "the quantity of labour demanded equals the quantity of labour supplied.",
+    "every worker is paid the same as every other worker.",
+    "the government sets the award rate.",
+    "firms make the largest possible profit regardless of workers.",
+  ], LAB_BASE),
+  // property & commodity markets
+  mc(75, "The supply of established housing is relatively price-inelastic because:", [
+    "new dwellings take a long time to build and the existing stock is large and slow to change.",
+    "there are many close substitutes for housing.",
+    "houses can be produced instantly when prices rise.",
+    "housing takes up only a small share of household budgets.",
+  ], HOUSE_BASE),
+  mc(76, "Rapid population growth in a city, where the supply of housing responds only slowly, will most likely:", [
+    "push house prices up sharply, with only a small rise in the quantity of housing.",
+    "push house prices down, with a large rise in the quantity of housing.",
+    "leave house prices and quantity unchanged.",
+    "reduce the demand for housing.",
+  ], HOUSE_DINC),
+  mc(77, "Tax concessions such as negative gearing, which make housing a more attractive investment, tend to:", [
+    "increase the demand for housing and put upward pressure on house prices.",
+    "increase the supply of housing and lower house prices.",
+    "decrease the demand for housing.",
+    "have no effect on the housing market.",
+  ], HOUSE_DINC),
+  mc(78, "Australian commodity prices, such as the price of iron ore, tend to be more volatile than the prices of manufactured goods because:", [
+    "demand can change quickly (e.g. with Chinese growth) while supply is slow to adjust, and both are relatively price-inelastic.",
+    "commodities have many close substitutes.",
+    "commodity supply can be changed instantly.",
+    "commodity demand never changes.",
+  ]),
+  mc(79, "A sharp slowdown in Chinese construction reduces demand for Australian iron ore. In the iron ore market this will most likely:", [
+    "lower both the price and the quantity of iron ore sold.",
+    "raise both the price and the quantity sold.",
+    "raise the price and lower the quantity.",
+    "leave the market unchanged.",
+  ]),
+  mc(80, "A government planning reform allows a large number of new apartments to be built quickly in a city. In the housing market this will most likely:", [
+    "increase supply and put downward pressure on prices and rents.",
+    "decrease supply and raise prices.",
+    "increase demand and raise prices.",
+    "have no effect on prices.",
+  ], HOUSE_SINC),
+  mc(81, "House prices in Australian capital cities have risen faster than incomes over recent decades mainly because:", [
+    "strong demand (population growth, investor concessions, low interest rates) has met a slow, inelastic supply response.",
+    "the supply of housing has grown much faster than demand.",
+    "demand for housing has fallen.",
+    "the government has fixed house prices by law.",
+  ]),
+  mc(82, "A large mining company brings a major new iron ore mine into production. All else equal, in the world iron ore market this will:", [
+    "increase supply, putting downward pressure on the price.",
+    "decrease supply, raising the price.",
+    "increase demand, raising the price.",
+    "have no effect on price or quantity.",
+  ]),
+  mc(83, "Which best explains why a fall in interest rates tends to raise house prices?", [
+    "Lower borrowing costs increase the demand for housing, and supply is slow to respond.",
+    "Lower interest rates increase the supply of housing.",
+    "Lower interest rates reduce the demand for housing.",
+    "Interest rates have no link to the housing market.",
+  ], HOUSE_DINC),
+  mc(84, "A price floor (minimum price) is only effective (binding) if it is set:", [
+    "above the market equilibrium price.",
+    "below the market equilibrium price.",
+    "exactly at the equilibrium price.",
+    "at any level — it always changes the market.",
+  ], D_FLOOR),
+];
+
+// --- diagram short answer, s41..s64 ------------------------------------
+
+const GOV3 =
+  "Using the diagram, describe the effect on the quantity supplied, the quantity demanded, and whether the market is in a shortage or a surplus.";
+
+const diagramMore: ShortQuestion[] = [
+  // government intervention
+  shiftQ(41, 3, `The diagram shows the market for rental housing. The government sets a maximum (ceiling) rent Pᶜ below the equilibrium level.\n${GOV3}`, D_CEILING),
+  shiftQ(42, 3, `The diagram shows the market for a farm product. The government guarantees farmers a minimum (floor) price Pᶠ above the equilibrium level.\n${GOV3}`, D_FLOOR),
+  shiftQ(43, 3, `The diagram shows the market for a good. The government imposes a per-unit (indirect) tax on producers.\nUsing the diagram, describe the effect on the supply curve, the price paid by consumers, and the quantity traded.`, D_TAX),
+  shiftQ(44, 3, `The diagram shows the market for a good. The government pays producers a per-unit subsidy.\nUsing the diagram, describe the effect on the supply curve, the price paid by consumers, and the quantity traded.`, D_SUBSIDY),
+  shiftQ(45, 3, `The diagram shows the market for petrol during a supply disruption. The government sets a price ceiling Pᶜ below the equilibrium price.\nUsing the diagram, explain two consequences of this policy for the petrol market.`, D_CEILING),
+  shiftQ(46, 2, `The diagram shows the market for milk. A guaranteed minimum price Pᶠ is set above equilibrium for dairy farmers.\n${GOV3}`, D_FLOOR),
+  shiftQ(47, 3, `The diagram shows the market for cigarettes. The government sharply increases the per-pack excise tax paid by producers.\nUsing the diagram, describe the effect on the equilibrium price and quantity, and explain why a government might want this outcome.`, D_TAX),
+  shiftQ(48, 2, `The diagram shows the market for electric vehicles. The government introduces a per-vehicle subsidy paid to manufacturers.\nUsing the diagram, describe the effect on the equilibrium price and quantity.`, D_SUBSIDY),
+  shiftQ(49, 2, `The diagram shows a price ceiling Pᶜ set below the equilibrium price.\nUsing the diagram, explain why the shortage persists instead of the price simply rising to clear the market.`, D_CEILING),
+  shiftQ(50, 3, `The diagram shows the market for bread. The world price of wheat, the main input, rises steeply.\n${ASK3}`),
+  // labour markets
+  shiftQ(51, 3, `The diagram shows the market for low-skilled labour. The government sets a minimum wage Wₘ above the equilibrium wage.\nUsing the diagram, describe the effect on the quantity of labour demanded, the quantity supplied, and the level of employment.`, LAB_MINWAGE),
+  shiftQ(52, 3, `The diagram shows the labour market for an industry. Consumer demand for the industry's product rises strongly.\nUsing the diagram, describe the effect on the demand for labour, the equilibrium wage, and the level of employment.`, LAB_DINC),
+  shiftQ(53, 3, `The diagram shows the labour market for an industry. Firms introduce automation that replaces many workers.\nUsing the diagram, describe the effect on the demand for labour, the equilibrium wage, and the level of employment.`, LAB_DDEC),
+  shiftQ(54, 3, `The diagram shows the labour market for an occupation. A large rise in immigration increases the number of people available and willing to do this work.\nUsing the diagram, describe the effect on the supply of labour, the equilibrium wage, and employment.`, LAB_SINC),
+  shiftQ(55, 3, `The diagram shows the labour market for an occupation that now requires a long, difficult qualification that few people complete.\nUsing the diagram, describe the effect on the supply of labour, the equilibrium wage, and employment.`, LAB_SDEC),
+  shiftQ(56, 3, `The diagram shows a skill shortage: at the current wage W₁ the quantity of labour demanded exceeds the quantity supplied.\nUsing the diagram, explain how this labour market is likely to adjust over time.`, LAB_SHORTAGE),
+  shiftQ(57, 2, `The diagram shows the labour market for an industry. A rise in workers' productivity makes each worker more valuable to employers.\nUsing the diagram, describe the effect on the demand for labour and the equilibrium wage.`, LAB_DINC),
+  shiftQ(58, 3, `The diagram shows the labour market for a declining industry whose product is falling out of favour with consumers.\nUsing the diagram, describe the effect on the demand for labour, the wage, and employment.`, LAB_DDEC),
+  // property & commodity markets
+  shiftQ(59, 3, `The diagram shows the market for established housing in a growing city, where supply is price-inelastic. The city's population grows rapidly.\nUsing the diagram, describe the effect on house prices and on the quantity of housing.`, HOUSE_DINC),
+  shiftQ(60, 3, `The diagram shows the market for established housing (inelastic supply). Tax concessions such as negative gearing make housing a more attractive investment.\nUsing the diagram, describe the effect on the demand for housing and on house prices.`, HOUSE_DINC),
+  shiftQ(61, 2, `The diagram shows the housing market with inelastic supply. A government planning reform allows many more dwellings to be built.\nUsing the diagram, describe the effect on housing supply, prices and quantity.`, HOUSE_SINC),
+  shiftQ(62, 3, `The diagram shows the market for Australian iron ore. Strong economic growth in China sharply increases demand, while supply expands only slowly.\nUsing the diagram, describe the effect on the price and quantity of iron ore.`, D_DINC),
+  shiftQ(63, 2, `The diagram shows the market for Australian coal exports. A global slowdown reduces demand for coal.\n${ASK2}`),
+  shiftQ(64, 3, `The diagram shows the market for established housing (inelastic supply). Interest rates fall sharply, making mortgages cheaper.\nUsing the diagram, describe the effect on the demand for housing, house prices and the quantity of housing.`, HOUSE_DINC),
+];
+
+// --- written micro short answer, q21..q40 -----------------------------
+
+const microMore: ShortQuestion[] = [
+  // elasticity, total outlay, PES
+  microQ(21, 3, "Explain the total outlay (total revenue) method for judging whether the demand for a good is price-elastic or price-inelastic."),
+  microQ(22, 3, "A bus company faces price-inelastic demand for its tickets. Using the total outlay method, explain what happens to its total revenue if it raises fares, and why."),
+  microQ(23, 3, "The price of a good rises from $4 to $5 and, as a result, the quantity demanded falls from 200 units to 160 units. Calculate the price elasticity of demand and interpret the result."),
+  microQ(24, 2, "Define the price elasticity of supply and state the formula used to calculate it."),
+  microQ(25, 4, "Explain four factors that influence the price elasticity of supply of a good."),
+  microQ(26, 3, "Explain why the demand for a good tends to become more price-elastic the longer the time period considered."),
+  microQ(27, 3, "Explain how the price elasticity of demand for its product affects a business's decision about whether to raise or lower its price."),
+  microQ(28, 3, "A good has a price elasticity of demand of 2.5. Explain what this figure means and what it implies for the seller's total revenue if the price rises."),
+  // government intervention rationale
+  microQ(29, 3, "Explain why a government might impose a price ceiling on a good, and one unintended consequence of doing so."),
+  microQ(30, 3, "Explain why a government might impose a price floor on a good or on wages, and one unintended consequence of doing so."),
+  microQ(31, 4, "Explain how a per-unit indirect tax on producers changes the market for a good, and how the price elasticity of demand affects who bears most of the tax."),
+  microQ(32, 3, "Explain how a per-unit subsidy paid to producers affects the price, the quantity traded, and the allocation of resources in a market."),
+  // labour markets
+  microQ(33, 3, "Explain how the equilibrium wage is determined in a competitive labour market."),
+  microQ(34, 3, "Explain how a skill shortage in an occupation is likely to affect wages and employment in that occupation over time."),
+  microQ(35, 2, "Distinguish between the supply of labour and the demand for labour."),
+  microQ(36, 3, "Explain two factors that affect the supply of labour to a particular occupation."),
+  // property & commodity markets
+  microQ(37, 3, "Explain why the supply of established housing is relatively price-inelastic, and what this means for house prices when demand rises."),
+  microQ(38, 3, "Explain why the prices of commodities such as iron ore and coal tend to be more volatile than the prices of most manufactured goods."),
+  microQ(39, 3, "Analyse the effect of rapid population growth on the Australian housing market when the supply of new housing responds only slowly."),
+  microQ(40, 2, "Explain one demand-side factor and one supply-side factor that have contributed to rising house prices in Australian cities."),
+];
+
 export const questions: Question[] = [
   ...mcQuestions,
+  ...mcMore,
   ...shiftQuestions,
+  ...diagramMore,
   ...microQuestions,
+  ...microMore,
 ];
