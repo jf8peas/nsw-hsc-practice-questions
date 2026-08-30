@@ -31,13 +31,20 @@ function pick<T>(arr: T[], n: number): T[] {
 }
 
 function prepare(unit: Unit): Prepared[] {
-  // Short-answer questions first, then multiple choice. Order within each
-  // group is randomised.
-  const shorts = unit.questions.filter((q) => q.type === "short");
-  const mcs = unit.questions.filter((q) => q.type === "mc");
-  const chosen: Question[] = unit.quiz
-    ? [...pick(shorts, unit.quiz.short), ...pick(mcs, unit.quiz.mc)]
-    : [...shuffle(shorts), ...shuffle(mcs)];
+  let chosen: Question[];
+  if (unit.quiz?.groups) {
+    // Draw n from each named group, in listed order (so quiz order follows it).
+    chosen = unit.quiz.groups.flatMap(({ group, n }) =>
+      pick(unit.questions.filter((q) => q.group === group), n),
+    );
+  } else {
+    // Short-answer questions first, then multiple choice; random within each.
+    const shorts = unit.questions.filter((q) => q.type === "short");
+    const mcs = unit.questions.filter((q) => q.type === "mc");
+    chosen = unit.quiz
+      ? [...pick(shorts, unit.quiz.short), ...pick(mcs, unit.quiz.mc)]
+      : [...shuffle(shorts), ...shuffle(mcs)];
+  }
   return chosen.map((question) => {
     if (question.type !== "mc") return { question, optionOrder: [] };
     const idx = question.options.map((_, i) => i);
@@ -292,6 +299,15 @@ export function Quiz({ unit }: { unit: Unit }) {
           </>
         )}
         <div className="q-prompt">{q.prompt}</div>
+
+        {q.diagramSvg && (
+          <div
+            className="q-diagram"
+            role="img"
+            aria-label="Supply and demand diagram"
+            dangerouslySetInnerHTML={{ __html: q.diagramSvg }}
+          />
+        )}
 
         {isShort ? (
           <>

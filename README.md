@@ -96,16 +96,24 @@ content/
   (`correctText`), not its index — so the public bundle never reveals a
   "correct option is first" pattern.
 - If `meta.quiz` is set (`{ short, mc, passMark }`), each attempt draws that many
-  of each type at random from the bank. `y11-formula-test` has 50 + 50, so a
-  student gets 10 non-repeating attempts.
+  of each type at random from the bank. For finer control, `meta.quiz.groups`
+  (`[{ group, n }]`) draws `n` from each named `group` (a question's `group`
+  field), in listed order — `y11-economics-supply-demand` uses this to draw
+  4 multiple-choice + 4 curve-shift + 2 wider-micro per attempt.
+- MC answers grade instantly server-side; **short answers are LLM-graded** when
+  `OPENROUTER_API_KEY` is set, otherwise the student self-marks.
+- A question may carry an inline `diagramSvg` (built by a per-unit
+  `diagram.ts` — see `y11-economics-supply-demand`), shown between the prompt
+  and the answer box.
 - `meta.formulas` is the list shown on the unit page (below Start quiz, so mobile
   users can go straight to the quiz).
 
-### Where the questions came from
+### Units
 
-`docs/y11-formula-test-research.md` records which formulas are in scope (the
-teacher's crossings-out on the NESA formulae sheet) and the MC scenario bank
-mined from the past papers in `resources/y11_year_end_exam/` (gitignored).
+| Unit | Source |
+| --- | --- |
+| `y11-formula-test` | NESA Physics formulae sheet (teacher's crossings-out) + past-paper scenarios — see `docs/y11-formula-test-research.md`. 50 short + 50 MC. |
+| `y11-economics-supply-demand` | NESA Economics 11–12 syllabus ("operation of the market") + `resources/topic002` teaching material. 40 MC + 40 curve-shift SA + 20 wider-micro SA, with SVG supply/demand diagrams. |
 
 ### Adding a unit
 

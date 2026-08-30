@@ -2,6 +2,8 @@ import type { Unit, UnitMeta, Year } from "@/lib/types";
 
 import { meta as y11FormulaTestMeta } from "./units/y11-formula-test/meta";
 import { questions as y11FormulaTestQuestions } from "./units/y11-formula-test/questions";
+import { meta as y11EconSupplyDemandMeta } from "./units/y11-economics-supply-demand/meta";
+import { questions as y11EconSupplyDemandQuestions } from "./units/y11-economics-supply-demand/questions";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -12,6 +14,7 @@ import { questions as y11FormulaTestQuestions } from "./units/y11-formula-test/q
  */
 export const UNITS: Unit[] = [
   { ...y11FormulaTestMeta, questions: y11FormulaTestQuestions },
+  { ...y11EconSupplyDemandMeta, questions: y11EconSupplyDemandQuestions },
 ];
 
 export const YEARS: Year[] = ["Year 11", "Year 12"];

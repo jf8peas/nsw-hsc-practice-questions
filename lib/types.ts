@@ -4,14 +4,25 @@ export type Year = "Year 11" | "Year 12";
 
 export type UnitType = "Topic Quiz" | "Milestone Test";
 
-/** How many questions of each type a quiz attempt draws from the bank. */
+/** Draw `n` questions whose `group` matches, per quiz attempt. */
+export interface QuizDraw {
+  group: string;
+  n: number;
+}
+
+/** How many questions a quiz attempt draws from the bank. */
 export interface QuizConfig {
-  /** Number of short-answer questions per attempt. */
+  /** Number of short-answer questions per attempt (used when `groups` is unset). */
   short: number;
-  /** Number of multiple-choice questions per attempt. */
+  /** Number of multiple-choice questions per attempt (used when `groups` is unset). */
   mc: number;
   /** Pass mark as a percentage of available marks. */
   passMark: number;
+  /**
+   * If set, overrides `short`/`mc`: draw `n` questions from each named group.
+   * Groups are drawn in listed order, so quiz order follows this list.
+   */
+  groups?: QuizDraw[];
 }
 
 /** A formula shown on the unit page (after the Start quiz button). */
@@ -45,10 +56,14 @@ export interface UnitMeta {
 interface BaseQuestion {
   /** Namespaced by unit id, e.g. "y11-formula-test.q3". Never renumber. */
   id: string;
+  /** Optional grouping used by `QuizConfig.groups` (e.g. "mc", "shift", "micro"). */
+  group?: string;
   /** Optional formula shown above the prompt (plain text). */
   formula?: string;
   /** LaTeX form of `formula` for KaTeX rendering. */
   formulaTex?: string;
+  /** Optional inline SVG (a supply/demand diagram) shown between prompt and answer. */
+  diagramSvg?: string;
   prompt: string;
   /** Marks this question is worth. MC is normally 1. */
   maxMarks: number;

@@ -58,7 +58,11 @@ export default function HomePage() {
                       </div>
                       <div className="unit-meta">
                         {unit.quiz
-                          ? `${unit.quiz.short + unit.quiz.mc} questions per attempt`
+                          ? `${
+                              unit.quiz.groups
+                                ? unit.quiz.groups.reduce((s, g) => s + g.n, 0)
+                                : unit.quiz.short + unit.quiz.mc
+                            } questions per attempt`
                           : `${unit.questions.length} questions`}
                       </div>
                     </div>
