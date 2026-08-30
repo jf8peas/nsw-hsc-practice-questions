@@ -283,6 +283,8 @@ export function Quiz({ unit }: { unit: Unit }) {
       <div className="quiz-topline">
         <span className={`rd-pill ${isShort ? "blue" : ""}`}>
           {isShort ? "Short answer" : "Multiple choice"}
+          {" · "}
+          {q.maxMarks} {q.maxMarks === 1 ? "mark" : "marks"}
         </span>
         <span className="quiz-counter">
           Question {i + 1} of {total}
