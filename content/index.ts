@@ -64,8 +64,8 @@ export function unitAgeDays(unit: Unit, now: Date = new Date()): number {
   return Math.round((today.getTime() - created.getTime()) / 86_400_000);
 }
 
-/** Units created within the last `days` days, sorted newest first. */
-export function newUnits(days = 14, now: Date = new Date()): Unit[] {
+/** Units created within the last `days` days (default 7), sorted newest first. */
+export function newUnits(days = 7, now: Date = new Date()): Unit[] {
   return UNITS.filter((u) => unitAgeDays(u, now) < days).sort(byCreatedDesc);
 }
 
