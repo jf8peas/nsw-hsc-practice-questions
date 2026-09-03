@@ -27,6 +27,8 @@ interface GradeParams {
   rubric: string[];
   maxMarks: number;
   answer: string;
+  /** Extra marking guidance for the grader (from the answer key's `notes`). */
+  markingGuidance?: string;
 }
 
 function clampMarks(v: unknown, max: number): number {
@@ -62,19 +64,20 @@ function parseGradeJson(content: string, maxMarks: number): Omit<ShortGrade, "gr
 
 function buildMessages(p: GradeParams) {
   const system =
-    `You are marking a NSW HSC Year 11 Physics short-answer question against a rubric. ` +
+    `You are marking a NSW HSC Year 11 (Preliminary) short-answer response against a rubric. ` +
     `Award a whole number of marks from 0 to ${p.maxMarks}: one mark for each rubric point the student's answer clearly satisfies. ` +
-    `Accept equivalent wording, and common SI unit forms (e.g. "m/s^2", "m s^-2" and "metres per second squared" are all fine; "kg m/s" and "N s" are both fine for momentum; "V/m" and "N/C" are both fine for electric field). ` +
-    `A dimensionless quantity such as refractive index correctly has no unit. ` +
-    `Do not award marks for correct physics that the question did not ask for. ` +
+    `Mark on the substance of the reasoning, not on matching the model answer's wording — accept equivalent phrasing, alternative valid arguments, correct diagrams described in words, and accurate recent real-world data. ` +
+    `Accept equivalent notation and units (e.g. "m/s^2", "m s^-2" and "metres per second squared" are all the same). ` +
+    `Do not award marks for correct material the question did not ask for. ` +
     `Respond with JSON only, no prose outside it.`;
 
   const user =
-    `Formula: ${p.formula ?? "(none)"}\n` +
+    (p.formula ? `Formula: ${p.formula}\n` : "") +
     `Question: ${p.prompt}\n\n` +
     `Rubric (1 mark each, ${p.maxMarks} available):\n` +
     p.rubric.map((r, i) => `${i + 1}. ${r}`).join("\n") +
     `\n\nModel answer: ${p.modelAnswer}\n\n` +
+    (p.markingGuidance ? `Marking guidance: ${p.markingGuidance}\n\n` : "") +
     `Student's answer:\n"""\n${p.answer}\n"""\n\n` +
     `Reply with exactly this shape:\n` +
     `{"marksAwarded": <integer 0-${p.maxMarks}>, "feedback": "<1-2 sentences to the student>", ` +

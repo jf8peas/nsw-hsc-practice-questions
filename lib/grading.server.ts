@@ -67,6 +67,7 @@ export async function gradeAnswer(
     rubric: key.rubric,
     maxMarks: question.maxMarks,
     answer,
+    markingGuidance: key.notes,
   });
 
   if (llm) {

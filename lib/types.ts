@@ -2,7 +2,7 @@
 
 export type Year = "Year 11" | "Year 12";
 
-export type UnitType = "Topic Quiz" | "Milestone Test";
+export type UnitType = "Topic Quiz" | "Milestone Test" | "Essay Practice";
 
 /** Draw `n` questions whose `group` matches, per quiz attempt. */
 export interface QuizDraw {
@@ -51,6 +51,11 @@ export interface UnitMeta {
   quiz?: QuizConfig;
   /** Formulas tested by this unit, shown on the unit page below Start quiz. */
   formulas?: FormulaRef[];
+  /** A structured "how to" panel shown on the unit page below Start quiz. */
+  guide?: {
+    title: string;
+    items: Array<{ label: string; text: string }>;
+  };
 }
 
 interface BaseQuestion {

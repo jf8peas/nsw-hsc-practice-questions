@@ -38,9 +38,12 @@ index as a string).
 - **MC** — marked instantly against the answer key, server-side.
 - **Short answer** — sent to the LLM grader (`lib/openrouter.server.ts`) when
   `OPENROUTER_API_KEY` is set: it returns `marksAwarded` (partial credit),
-  written `feedback`, and `rubricHits` / `rubricMisses`. On any failure (no key,
-  bad key, timeout, unparseable JSON — retried once) it returns `needsSelfMark`
-  and the client falls back to the student self-marking against the model answer.
+  written `feedback`, and `rubricHits` / `rubricMisses`. It grades one mark per
+  rubric point, on the substance of the reasoning rather than wording, and the
+  answer key's `notes` field is passed through as extra marking guidance
+  (used e.g. by `y11-economics-essay-scaffold` to steer essay-scaffold marking).
+  On any failure (no key, bad key, timeout, unparseable JSON — retried once) it
+  returns `needsSelfMark` and the client falls back to student self-marking.
 
 The browser never holds the API key or the full answer key.
 
@@ -116,6 +119,7 @@ content/
 | `y11-economics-supply-demand` | NESA Economics 11–12 syllabus ("The Market Economy") + `resources/topic002`. ~84 MC + ~64 diagram SA + 40 written SA covering demand/supply, elasticity (calcs + total outlay), government intervention (ceilings/floors/taxes/subsidies), labour markets and the housing/commodity markets. SVG diagrams from a per-unit `diagram.ts` (curves, shifts, price ceilings/floors, tax/subsidy, labour axes, inelastic housing supply). |
 | `y11-economics-preliminary` | Broad prelim-exam revision across all six Year 11 syllabus focus areas — see `docs/y11-economics-preliminary-research.md`. 50 MC + 50 written SA, original questions written to the current (2025) syllabus. Draws 5 MC + 5 SA (MC first). |
 | `y11-physics-preliminary` | Broad prelim-exam revision across the three Year 11 physics modules (mechanics, waves, electricity & magnetism) — see `docs/y11-physics-preliminary-research.md`. 50 MC + 50 SA, all factual/reasoning (no calculations). SVG diagrams from a per-unit `diagram.ts` (motion graphs, free-body forces, transverse wave, ray-at-boundary, charge field lines). Draws 5 MC + 5 SA (MC first). |
+| `y11-economics-essay-scaffold` | Practice planning 20-mark Preliminary Economics essays (Government & the Economy / Financial Markets), many with real-world stimulus. 34 essay prompts; the student writes a 5-part scaffold (intro / 3 body / conclusion), 5 marks (1 per part), LLM-marked on reasoning and structure. Draws 3 per attempt. `meta.guide` renders the essay-structure panel on the unit page; the answer key's `notes` field carries the examiner-LLM grading directive. |
 
 ### Adding a unit
 

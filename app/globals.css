@@ -363,8 +363,13 @@ input {
   border: 1px solid var(--rd-border-100);
   padding: 10px 12px;
   font-size: 14px;
+  line-height: 1.5;
   resize: vertical;
   margin-bottom: 14px;
+}
+
+.q-textarea.tall {
+  min-height: 280px;
 }
 
 .q-textarea:focus {
@@ -645,5 +650,34 @@ input {
   display: block;
   font-size: 12px;
   color: var(--rd-mute-500);
+  margin-top: 2px;
+}
+
+/* Guide panel on the unit page ------------------------------------ */
+
+.guide-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.guide-list li {
+  padding-left: 4px;
+}
+
+.guide-list-label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--rd-ink-900);
+}
+
+.guide-list-text {
+  display: block;
+  font-size: 13px;
+  color: var(--rd-mute-600);
+  line-height: 1.5;
   margin-top: 2px;
 }

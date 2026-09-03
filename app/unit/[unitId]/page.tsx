@@ -75,6 +75,20 @@ export default async function UnitPage({
           </ul>
         </section>
       )}
+
+      {unit.guide && (
+        <section style={{ marginTop: 32 }}>
+          <div className="eyebrow">{unit.guide.title}</div>
+          <ol className="guide-list">
+            {unit.guide.items.map((it) => (
+              <li key={it.label}>
+                <span className="guide-list-label">{it.label}</span>
+                <span className="guide-list-text">{it.text}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
     </Shell>
   );
 }

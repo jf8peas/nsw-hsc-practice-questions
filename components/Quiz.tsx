@@ -282,7 +282,11 @@ export function Quiz({ unit }: { unit: Unit }) {
 
       <div className="quiz-topline">
         <span className={`rd-pill ${isShort ? "blue" : ""}`}>
-          {isShort ? "Short answer" : "Multiple choice"}
+          {q.group === "essay"
+            ? "Essay scaffold"
+            : isShort
+              ? "Short answer"
+              : "Multiple choice"}
           {" · "}
           {q.maxMarks} {q.maxMarks === 1 ? "mark" : "marks"}
         </span>
@@ -314,7 +318,7 @@ export function Quiz({ unit }: { unit: Unit }) {
         {isShort ? (
           <>
             <textarea
-              className="q-textarea"
+              className={`q-textarea${q.maxMarks >= 5 ? " tall" : ""}`}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="Type your answer here..."

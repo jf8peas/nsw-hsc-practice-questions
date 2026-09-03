@@ -8,6 +8,8 @@ import { meta as y11EconPreliminaryMeta } from "./units/y11-economics-preliminar
 import { questions as y11EconPreliminaryQuestions } from "./units/y11-economics-preliminary/questions";
 import { meta as y11PhysPreliminaryMeta } from "./units/y11-physics-preliminary/meta";
 import { questions as y11PhysPreliminaryQuestions } from "./units/y11-physics-preliminary/questions";
+import { meta as y11EconEssayMeta } from "./units/y11-economics-essay-scaffold/meta";
+import { questions as y11EconEssayQuestions } from "./units/y11-economics-essay-scaffold/questions";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -21,6 +23,7 @@ export const UNITS: Unit[] = [
   { ...y11EconSupplyDemandMeta, questions: y11EconSupplyDemandQuestions },
   { ...y11EconPreliminaryMeta, questions: y11EconPreliminaryQuestions },
   { ...y11PhysPreliminaryMeta, questions: y11PhysPreliminaryQuestions },
+  { ...y11EconEssayMeta, questions: y11EconEssayQuestions },
 ];
 
 export const YEARS: Year[] = ["Year 11", "Year 12"];

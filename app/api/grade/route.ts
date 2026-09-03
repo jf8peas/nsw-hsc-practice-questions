@@ -15,7 +15,7 @@ function clientIp(req: Request): string {
 
 export const runtime = "nodejs";
 
-const MAX_ANSWER_LEN = 2000;
+const MAX_ANSWER_LEN = 6000;
 
 export async function POST(req: Request) {
   let body: Partial<GradeRequest>;
