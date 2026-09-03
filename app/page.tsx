@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Shell } from "@/components/Shell";
 import type { Unit } from "@/content";
-import { newUnits, unitsByYear } from "@/content";
+import { unitsByYear } from "@/content";
 
 function quizSize(unit: Unit): string {
   if (!unit.quiz) return `${unit.questions.length} questions`;
@@ -32,7 +32,6 @@ function UnitCard({ unit }: { unit: Unit }) {
 
 export default function HomePage() {
   const groups = unitsByYear();
-  const fresh = newUnits();
 
   return (
     <Shell>
@@ -40,15 +39,6 @@ export default function HomePage() {
       <p className="page-sub">
         Pick a unit to practice topic questions or a milestone test.
       </p>
-
-      {fresh.length > 0 && (
-        <div style={{ marginBottom: 28 }}>
-          <div className="eyebrow">New</div>
-          {fresh.map((unit) => (
-            <UnitCard key={unit.id} unit={unit} />
-          ))}
-        </div>
-      )}
 
       {groups.map((group) => (
         <div key={group.year} style={{ marginBottom: 28 }}>

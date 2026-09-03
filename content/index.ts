@@ -57,16 +57,4 @@ export function unitsByYear(): YearGroup[] {
   });
 }
 
-/** How many days old a unit is, relative to `now`. */
-export function unitAgeDays(unit: Unit, now: Date = new Date()): number {
-  const created = new Date(unit.created + "T00:00:00");
-  const today = new Date(now.toISOString().slice(0, 10) + "T00:00:00");
-  return Math.round((today.getTime() - created.getTime()) / 86_400_000);
-}
-
-/** Units created within the last `days` days (default 7), sorted newest first. */
-export function newUnits(days = 7, now: Date = new Date()): Unit[] {
-  return UNITS.filter((u) => unitAgeDays(u, now) < days).sort(byCreatedDesc);
-}
-
 export type { Unit, UnitMeta };

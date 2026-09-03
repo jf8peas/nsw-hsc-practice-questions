@@ -45,7 +45,7 @@ export interface UnitMeta {
   type: UnitType;
   title: string;
   description: string;
-  /** Creation date, ISO `YYYY-MM-DD`. Shown as a pill; drives ordering and the "New" section. */
+  /** Creation date, ISO `YYYY-MM-DD`. Shown as a pill; units are listed newest first. */
   created: string;
   /** Sort order within a topic. */
   order: number;
