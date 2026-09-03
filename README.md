@@ -115,6 +115,7 @@ content/
 | `y11-formula-test` | NESA Physics formulae sheet (teacher's crossings-out) + past-paper scenarios — see `docs/y11-formula-test-research.md`. 50 short + 50 MC. |
 | `y11-economics-supply-demand` | NESA Economics 11–12 syllabus ("The Market Economy") + `resources/topic002`. ~84 MC + ~64 diagram SA + 40 written SA covering demand/supply, elasticity (calcs + total outlay), government intervention (ceilings/floors/taxes/subsidies), labour markets and the housing/commodity markets. SVG diagrams from a per-unit `diagram.ts` (curves, shifts, price ceilings/floors, tax/subsidy, labour axes, inelastic housing supply). |
 | `y11-economics-preliminary` | Broad prelim-exam revision across all six Year 11 syllabus focus areas — see `docs/y11-economics-preliminary-research.md`. 50 MC + 50 written SA, original questions written to the current (2025) syllabus. Draws 5 MC + 5 SA (MC first). |
+| `y11-physics-preliminary` | Broad prelim-exam revision across the three Year 11 physics modules (mechanics, waves, electricity & magnetism) — see `docs/y11-physics-preliminary-research.md`. 50 MC + 50 SA, all factual/reasoning (no calculations). SVG diagrams from a per-unit `diagram.ts` (motion graphs, free-body forces, transverse wave, ray-at-boundary, charge field lines). Draws 5 MC + 5 SA (MC first). |
 
 ### Adding a unit
 
