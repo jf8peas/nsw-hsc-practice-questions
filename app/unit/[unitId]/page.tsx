@@ -24,9 +24,10 @@ export default async function UnitPage({
 
   return (
     <Shell backHref="/">
-      <span className="rd-pill blue" style={{ marginBottom: 12 }}>
-        {unit.type}
-      </span>
+      <div className="unit-badges" style={{ marginBottom: 12 }}>
+        <span className="rd-pill blue">{unit.type}</span>
+        <span className="rd-pill date-pill">{unit.created}</span>
+      </div>
       <h1 className="page-h1" style={{ fontSize: 24, margin: "8px 0 6px" }}>
         {unit.title}
       </h1>

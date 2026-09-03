@@ -45,6 +45,8 @@ export interface UnitMeta {
   type: UnitType;
   title: string;
   description: string;
+  /** Creation date, ISO `YYYY-MM-DD`. Shown as a pill; drives ordering and the "New" section. */
+  created: string;
   /** Sort order within a topic. */
   order: number;
   /** If set, a quiz attempt draws a random subset of the question bank. */

@@ -204,6 +204,22 @@ input {
   background: var(--rd-surface-50);
 }
 
+.unit-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.rd-pill.date-pill {
+  font-family: var(--rd-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.3px;
+  color: var(--rd-mute-500);
+  background: var(--rd-surface-100);
+  border-color: transparent;
+}
+
 .unit-card .unit-title {
   font-family: var(--rd-font-display);
   font-weight: 600;

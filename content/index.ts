@@ -40,30 +40,33 @@ export function getQuestion(questionId: string) {
   return undefined;
 }
 
-export interface TopicGroup {
-  topic: string;
-  units: Unit[];
-}
-
 export interface YearGroup {
   year: Year;
   isEmpty: boolean;
-  topics: TopicGroup[];
+  units: Unit[];
 }
 
-/** Units grouped year -> topic -> units, each sorted by `order`. */
+/** newest first */
+const byCreatedDesc = (a: Unit, b: Unit) => b.created.localeCompare(a.created);
+
+/** Units grouped by year, each list sorted newest first. */
 export function unitsByYear(): YearGroup[] {
   return YEARS.map((year) => {
-    const inYear = UNITS.filter((u) => u.year === year);
-    const topicNames = [...new Set(inYear.map((u) => u.topic))];
-    const topics: TopicGroup[] = topicNames.map((topic) => ({
-      topic,
-      units: inYear
-        .filter((u) => u.topic === topic)
-        .sort((a, b) => a.order - b.order),
-    }));
-    return { year, isEmpty: inYear.length === 0, topics };
+    const units = UNITS.filter((u) => u.year === year).sort(byCreatedDesc);
+    return { year, isEmpty: units.length === 0, units };
   });
+}
+
+/** How many days old a unit is, relative to `now`. */
+export function unitAgeDays(unit: Unit, now: Date = new Date()): number {
+  const created = new Date(unit.created + "T00:00:00");
+  const today = new Date(now.toISOString().slice(0, 10) + "T00:00:00");
+  return Math.round((today.getTime() - created.getTime()) / 86_400_000);
+}
+
+/** Units created within the last `days` days, sorted newest first. */
+export function newUnits(days = 14, now: Date = new Date()): Unit[] {
+  return UNITS.filter((u) => unitAgeDays(u, now) < days).sort(byCreatedDesc);
 }
 
 export type { Unit, UnitMeta };

@@ -37,6 +37,9 @@ async function main() {
     }
 
     if (unit.questions.length === 0) err(`Unit "${unit.id}" has no questions`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(unit.created)) {
+      err(`Unit "${unit.id}": created "${unit.created}" is not YYYY-MM-DD`);
+    }
 
     let answers: AnswerSet;
     try {

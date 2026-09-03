@@ -12,6 +12,7 @@ export const meta: UnitMeta = {
   title: "Physics Formula Test",
   description:
     "Every question is built from the Year 11 formulae sheet. Short-answer questions ask you to say what a formula tells you and to name a variable and its SI unit. Multiple-choice questions give you a formula and four scenarios — you pick the one it could answer. Each attempt draws 5 short-answer and 5 multiple-choice questions at random.",
+  created: "2026-08-29",
   order: 1,
   quiz: { short: 5, mc: 5, passMark: 70 },
   formulas: list([

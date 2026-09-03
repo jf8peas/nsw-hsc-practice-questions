@@ -8,6 +8,7 @@ export const meta: UnitMeta = {
   title: "Economics Preliminary Essay Scaffold",
   description:
     "Practice planning 20-mark Preliminary Economics essays on Government and the Economy and Financial Markets. Each attempt gives you 3 HSC-style essay questions — many with real-world stimulus on inflation, the RBA cash rate, cost-of-living policy, housing affordability and the federal Budget. For each question you write a scaffold: a short plan of the introduction, three body paragraphs and the conclusion. The plans are marked by an examiner LLM on economic reasoning and structure (the STEEL method), not on matching a model answer word for word.",
+  created: "2026-09-04",
   order: 4,
   quiz: {
     short: 3,
