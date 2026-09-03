@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Shell } from "@/components/Shell";
 import type { Unit } from "@/content";
-import { unitsByYear } from "@/content";
+import { unitIsNew, unitsByYear } from "@/content";
 
 function quizSize(unit: Unit): string {
   if (!unit.quiz) return `${unit.questions.length} questions`;
@@ -17,6 +17,7 @@ function UnitCard({ unit }: { unit: Unit }) {
     <Link href={`/unit/${unit.id}`} className="unit-card">
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="unit-badges">
+          {unitIsNew(unit) && <span className="rd-pill new-pill">NEW</span>}
           <span className="rd-pill blue">{unit.type}</span>
           <span className="rd-pill date-pill">{unit.created}</span>
         </div>

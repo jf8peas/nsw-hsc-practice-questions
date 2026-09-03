@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Formula } from "@/components/Formula";
 import { Shell } from "@/components/Shell";
 import { UnitStatsPanel } from "@/components/UnitStatsPanel";
-import { UNITS, getUnit } from "@/content";
+import { UNITS, getUnit, unitIsNew } from "@/content";
 import { daysUntil, examsForUnit } from "@/content/exams";
 
 export function generateStaticParams() {
@@ -25,6 +25,7 @@ export default async function UnitPage({
   return (
     <Shell backHref="/">
       <div className="unit-badges" style={{ marginBottom: 12 }}>
+        {unitIsNew(unit) && <span className="rd-pill new-pill">NEW</span>}
         <span className="rd-pill blue">{unit.type}</span>
         <span className="rd-pill date-pill">{unit.created}</span>
       </div>

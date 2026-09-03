@@ -57,4 +57,11 @@ export function unitsByYear(): YearGroup[] {
   });
 }
 
+/** True if the unit was created within the last `days` days (default 3). */
+export function unitIsNew(unit: Unit, days = 3, now: Date = new Date()): boolean {
+  const created = new Date(unit.created + "T00:00:00").getTime();
+  const today = new Date(now.toISOString().slice(0, 10) + "T00:00:00").getTime();
+  return Math.round((today - created) / 86_400_000) < days;
+}
+
 export type { Unit, UnitMeta };
