@@ -323,6 +323,103 @@ const mcMoreAnswers: Array<[string, Answer]> = [
   ma(84, "above the market equilibrium price.", "A price floor only binds if it is above equilibrium; below equilibrium the market price is already higher and the floor has no effect."),
 ];
 
+// ==========================================================================
+// SECOND EXPANSION — answers for m85..m168, s65..s128, q41..q80.
+// ==========================================================================
+
+const mcMore2Answers: Array<[string, Answer]> = [
+  // movement along vs shift of a curve
+  ma(85, "an expansion of demand — a movement down along the demand curve.", "A change in the good's own price causes a movement along the demand curve, not a shift — here a fall in price expands the quantity demanded."),
+  ma(86, "an increase in demand — a rightward shift of the demand curve.", "Hot weather is a non-price factor (tastes/conditions), so the whole demand curve shifts right at every price."),
+  ma(87, "a contraction of demand — a movement up along the demand curve.", "A rise in the good's own price causes a movement up along the existing demand curve, not a shift."),
+  ma(88, "an expansion of supply — a movement up along the supply curve.", "A change in the good's own price causes a movement along the supply curve — here a price rise expands the quantity supplied."),
+  ma(89, "a decrease in supply — the supply curve shifts to the left.", "The regulation raises production costs, a non-price factor, so the whole supply curve shifts left."),
+  ma(90, "an increase in demand — the demand curve shifts to the right.", "For a normal good, higher income is a non-price factor that shifts demand right at every price."),
+  ma(91, "a decrease in demand — the demand curve shifts to the left.", "For an inferior good, higher income reduces demand as consumers switch to preferred alternatives, shifting demand left."),
+  ma(92, "increase the demand for cartridges — a rightward shift of the demand curve.", "Consoles and cartridges are complements, so a cheaper console raises demand for the complementary good."),
+  ma(93, "increase the demand for bus travel — a rightward shift of the demand curve.", "Train and bus travel are substitutes, so dearer trains lead commuters to switch to buses, raising bus demand."),
+  ma(94, "decrease now, as consumers wait for the cheaper new model.", "Expecting a cheaper substitute soon reduces the incentive to buy the current model now, shifting its demand left."),
+  ma(95, "increase the demand for share-house rentals — a rightward shift of the demand curve.", "More students is an increase in the number of buyers, a non-price factor that shifts demand right."),
+  ma(96, "increase — the supply curve shifts to the right.", "Lower unit costs from automation are a non-price factor that shifts the supply curve right."),
+  ma(97, "increase — the supply curve shifts to the right.", "More firms in the market raises the quantity supplied at every price, shifting supply right."),
+  ma(98, "decrease now, as they withhold stock to sell later at the higher price.", "Expecting a much higher future price gives producers an incentive to hold back current supply."),
+  // equilibrium & the effect of shifts
+  ma(99, "push the price down towards equilibrium, because a surplus exists.", "Above equilibrium, quantity supplied exceeds quantity demanded; unsold stock pushes the price back down."),
+  ma(100, "push the price up towards equilibrium, because a shortage exists.", "Below equilibrium, quantity demanded exceeds quantity supplied; competition among buyers pushes the price back up."),
+  ma(101, "definitely rise, but the effect on quantity traded depends on the relative size of the two shifts.", "An increase in demand and a decrease in supply both push price up, so price definitely rises; but they push quantity in opposite directions, so quantity is ambiguous."),
+  ma(102, "definitely fall, but the effect on quantity traded depends on the relative size of the two shifts.", "A decrease in demand and an increase in supply both push price down, so price definitely falls; but they push quantity in opposite directions, so quantity is ambiguous."),
+  ma(103, "definitely rise, but the effect on price depends on the relative size of the two shifts.", "An increase in demand and an increase in supply both raise quantity, so quantity definitely rises; but they push price in opposite directions, so price is ambiguous."),
+  ma(104, "definitely fall, but the effect on price depends on the relative size of the two shifts.", "A decrease in demand and a decrease in supply both lower quantity, so quantity definitely falls; but they push price in opposite directions, so price is ambiguous."),
+  ma(105, "An increase in demand, with the supply curve unchanged.", "With supply fixed, an increase in demand alone raises both the equilibrium price and quantity — the only option here with no offsetting shift."),
+  ma(106, "A decrease in supply, with demand unchanged.", "With demand fixed, a decrease in supply raises the equilibrium price while lowering the equilibrium quantity."),
+  ma(107, "definitely rise, while the effect on price is ambiguous without knowing the relative size of the shifts.", "Both a demand increase and a supply increase raise quantity, so quantity definitely rises; the two shifts push price in opposite directions, so price is ambiguous."),
+  ma(108, "the price to remain stable, since the quantity demanded equals the quantity supplied.", "At equilibrium the plans of buyers and sellers coincide, so there is no tendency for the price to move unless something else changes."),
+  ma(109, "both rise, as demand for the original good increases.", "Removing a substitute increases demand for the remaining good (a rightward shift with supply unchanged), raising both price and quantity."),
+  ma(110, "definitely fall, while the effect on price is ambiguous without knowing the relative size of the shifts.", "Both a demand decrease and a supply decrease lower quantity, so quantity definitely falls; the two shifts push price in opposite directions, so price is ambiguous."),
+  ma(111, "The equilibrium quantity rises.", "Both an increase in demand and an increase in supply push quantity up, so quantity is certain to rise regardless of the relative size of the shifts; price depends on which shift is larger."),
+  ma(112, "The equilibrium price falls.", "Both a decrease in demand and an increase in supply push price down, so price is certain to fall regardless of the relative size of the shifts; quantity depends on which shift is larger."),
+  // price elasticity of demand & supply
+  ma(113, "2.5 — demand is price-elastic.", "PED = %ΔQd ÷ %ΔP = 20 ÷ 8 = 2.5. Because it is greater than 1, demand is price-elastic."),
+  ma(114, "0.2 — demand is price-inelastic.", "PED = %ΔQd ÷ %ΔP = 3 ÷ 15 = 0.2. Because it is less than 1, demand is price-inelastic."),
+  ma(115, "price-elastic.", "Many close substitutes and a large budget share both make demand more responsive to price — price-elastic."),
+  ma(116, "A particular brand of soft drink, among many available brands.", "With many close substitute brands, buyers can easily switch away if its price rises, making demand for that one brand elastic. The others are necessities with few substitutes."),
+  ma(117, "price-inelastic.", "If a price cut lowers total revenue, the percentage rise in quantity must be smaller than the percentage fall in price, so demand is inelastic."),
+  ma(118, "price-inelastic.", "If a price rise raises total revenue, the percentage fall in quantity must be smaller than the percentage rise in price — demand is inelastic."),
+  ma(119, "2.5 — supply is price-elastic.", "PES = %ΔQs ÷ %ΔP = 20 ÷ 8 = 2.5. Because it is greater than 1, supply is price-elastic."),
+  ma(120, "0.25 — supply is price-inelastic.", "PES = %ΔQs ÷ %ΔP = 3 ÷ 12 = 0.25. Because it is less than 1, supply is price-inelastic."),
+  ma(121, "it cannot be stored, so the quantity available on a given day is largely fixed regardless of price.", "Perishability prevents producers from holding stock to release later, so the quantity supplied responds little to price changes in the short run."),
+  ma(122, "perfectly inelastic — the quantity supplied is essentially fixed and cannot respond to price.", "In the momentary period there is no time to produce more, so the available quantity is fixed no matter what happens to price."),
+  ma(123, "passed on almost entirely to consumers, who continue to buy the same quantity.", "With perfectly inelastic demand, consumers keep buying the same quantity regardless of price, so they end up bearing the tax."),
+  ma(124, "producers, because consumers can easily switch away if the price rises much.", "With elastic demand, raising the price much would lose too many sales, so producers absorb most of the tax instead of passing it on."),
+  ma(125, "Bread (a necessity) — inelastic; overseas cruises (a luxury) — elastic.", "Necessities with few substitutes have inelastic demand; discretionary luxuries with many alternatives (including not travelling) have elastic demand."),
+  ma(126, "higher (more elastic), because consumers can switch to more fuel-efficient cars or alternatives over time.", "Given more time, consumers have more ways to respond to a price change, so demand becomes more elastic in the long run."),
+  // government intervention
+  ma(127, "producers supply less bread at the low price, worsening the shortage.", "Because the ceiling holds price below equilibrium, producers are only willing to supply the smaller quantity corresponding to that low price, widening the gap between quantity demanded and supplied."),
+  ma(128, "petrol stations run short of stock and queues form, as a shortage develops.", "A price held below equilibrium means quantity demanded exceeds quantity supplied — a shortage, often rationed by queues."),
+  ma(129, "increase demand for housing and mostly raise prices rather than the quantity of housing.", "The grant raises what buyers can pay, shifting demand right; since supply is price-inelastic, most of the adjustment shows up as higher prices."),
+  ma(130, "buy up and store (or otherwise dispose of) the resulting surplus.", "A binding floor creates a persistent surplus (quantity supplied exceeds quantity demanded) that the government must absorb to maintain the floor price."),
+  ma(131, "decrease supply, raising the price paid by buyers and reducing the number of luxury cars sold.", "A per-unit tax raises producers' costs, shifting supply left, which raises the price and lowers the quantity traded."),
+  ma(132, "reduces the quantity consumed by raising the price, discouraging a good with negative health effects.", "The tax shifts supply left, raising price and reducing the quantity of alcohol consumed — the intended health effect."),
+  ma(133, "keep their price lower for consumers, since supply does not shift left as it would with a tax.", "Without the GST added, producers' effective costs (and hence the price) are lower than they would be if the tax applied."),
+  ma(134, "discourage investment in new rental housing, worsening the long-run shortage.", "A binding rent ceiling reduces the return to landlords, discouraging new rental supply and deepening the shortage over time."),
+  ma(135, "lowers the price paid by consumers while still raising the return to producers, whereas a price floor raises the price paid by consumers.", "A subsidy shifts supply right (lower consumer price, more output); a price floor instead holds the price above equilibrium, raising what consumers pay."),
+  ma(136, "none — the ceiling is not binding because the market already trades at that price.", "A ceiling only has an effect if it is set below the equilibrium price; set at equilibrium it does not constrain the market."),
+  ma(137, "have no effect, because the market price is already above the (non-binding) floor.", "A floor only binds if set above equilibrium; a floor below equilibrium is irrelevant because the market already trades higher than it."),
+  ma(138, "A subsidy.", "A subsidy is a government payment to producers, typically funded from general taxation, to lower their effective costs."),
+  ma(139, "a per-unit indirect tax intended to raise the price and reduce the quantity of sugary drinks consumed.", "Levied on manufacturers per unit sold, the sugar tax shifts supply left, raising price and reducing quantity — the policy's goal."),
+  ma(140, "Indirect tax — producers pay the tax to the government; subsidy — the government pays producers.", "A tax is a payment from producers to government; a subsidy is a payment from government to producers — opposite directions of cash flow."),
+  // labour markets
+  ma(141, "raise the equilibrium wage and increase employment.", "Stronger demand for tradespeople shifts the labour demand curve right, raising both the wage and the quantity of labour employed."),
+  ma(142, "restrict the supply of labour to that profession, keeping wages higher than they would otherwise be.", "A costly, lengthy qualification limits how many people can enter, shifting labour supply left and keeping wages elevated."),
+  ma(143, "slow the adjustment of wages and employment across regional labour markets.", "If workers cannot move to where jobs and higher wages are, wage and employment differences between regions persist longer."),
+  ma(144, "decrease the supply of labour, raising the equilibrium wage.", "Fewer working-age people means the labour supply curve shifts left, raising the equilibrium wage."),
+  ma(145, "an increase in the supply of labour to that kind of work.", "More people willing to do this work at each wage is a rightward shift of the labour supply curve."),
+  ma(146, "increase.", "A more valuable marginal product raises what firms are willing to pay for an extra worker, shifting labour demand right."),
+  ma(147, "attract workers from the lower-paying occupation, increasing labour supply to the higher-paying one and narrowing the gap.", "Workers move toward better-paid opportunities over time, increasing supply to the higher-paying job and easing the wage gap."),
+  ma(148, "hiring fewer workers or reducing hours, since labour is now relatively more expensive.", "A binding minimum wage above equilibrium raises the cost of hiring, so firms in low-margin industries respond by cutting jobs or hours."),
+  ma(149, "A fall in nurses' wages relative to other professions requiring similar training.", "Lower relative pay makes nursing less attractive, reducing the number of people willing to train for and enter the profession."),
+  ma(150, "A housing construction boom increasing the demand for new dwellings.", "More building activity raises the derived demand for construction labour, shifting labour demand right. The other options reduce demand or don't affect it."),
+  ma(151, "More people undertaking electrical apprenticeships, increasing the supply of qualified electricians.", "A rightward shift in the supply of qualified electricians closes the gap between quantity demanded and quantity supplied at the current wage."),
+  ma(152, "The long, costly training required for doctors restricts labour supply relative to strong demand, while checkout work needs little training and has abundant labour supply.", "Scarce, hard-to-obtain skills combined with strong demand raise the equilibrium wage; abundant, easily obtained skills keep it low."),
+  ma(153, "reduce the demand for labour in that industry, lowering wages and employment.", "Because labour demand is derived from the demand for output, less demand for the industry's product reduces the demand for its workers."),
+  ma(154, "either the demand for labour or the supply of labour shifts.", "As in any competitive market, the equilibrium wage and quantity change only when one of the two curves shifts."),
+  // property & commodity markets
+  ma(155, "decrease demand for housing, and because supply is slow to adjust, prices fall more than the quantity of housing does.", "Costlier mortgages reduce what buyers can afford, shifting demand left; with inelastic supply most of the adjustment is in price."),
+  ma(156, "make the supply of housing more price-inelastic, so demand-side pressures mainly raise prices rather than the quantity of homes.", "Zoning restricts how much new housing can be built even if prices rise, making supply less responsive to price."),
+  ma(157, "price-inelastic, so most of the initial adjustment happens through price rather than quantity.", "Because new mines take years to develop, the quantity supplied cannot respond quickly, so demand shocks mostly move the price."),
+  ma(158, "decrease supply, raising the price and lowering the quantity traded.", "A coordinated production cut shifts the supply curve left, raising the price and reducing the quantity traded."),
+  ma(159, "fall, as supply increases relative to demand.", "A bumper harvest shifts supply right; with demand unchanged, the equilibrium price falls and quantity rises."),
+  ma(160, "speculative demand, which adds to demand alongside people who want somewhere to live.", "Buying an asset mainly for expected future price gains is speculative demand, a component of total demand for housing."),
+  ma(161, "increase the supply of housing, easing upward pressure on prices.", "More available land lets more dwellings be built, shifting the housing supply curve right and moderating prices."),
+  ma(162, "Demand for rental housing rises faster than supply, so a larger share of the relatively fixed rental stock is occupied.", "With population growing faster than new dwellings, a greater proportion of existing rentals are tenanted, so vacancy rates fall."),
+  ma(163, "commodity supply cannot expand or contract quickly, so shifts in demand cause large price swings rather than large quantity changes.", "Inelastic supply means quantity barely adjusts to a demand shock, so nearly all of the adjustment shows up as a price change."),
+  ma(164, "decrease the demand for housing from investors, easing some upward pressure on prices.", "A less attractive after-tax return makes property investment less appealing, shifting investor demand left."),
+  ma(165, "lower prices, since supply cannot quickly contract to match the fall in demand.", "With supply slow to adjust, a fall in demand for commodities mostly shows up as a lower price rather than a large quantity change."),
+  ma(166, "increase the supply of housing in that area and moderate price growth compared with areas without the reform.", "More approvals allow more dwellings to be built, shifting supply right and easing price pressure relative to areas without the reform."),
+  ma(167, "raise its price rather than the quantity produced.", "Because new supply cannot be brought on quickly, an unexpected demand increase mostly raises price with only a small change in quantity."),
+  ma(168, "restrict the supply of new housing in the short run, adding to upward pressure on prices.", "Holding land off the market keeps it out of the supply of developable housing, reducing how much new supply reaches buyers."),
+];
+
 // diagram short answers — s41..s64
 const diagramMoreAnswers: Array<[string, Answer]> = [
   [`${U}.s41`, {
@@ -524,6 +621,332 @@ const diagramMoreAnswers: Array<[string, Answer]> = [
   }],
 ];
 
+// more general curve-shift diagrams — s65..s96
+const shiftAnswers2: Array<[string, Answer]> = [
+  shiftAns(65, 3, "demand", "decrease", "the operating system update makes older models much less desirable, so tastes shift away from them and less is demanded at every price", "falls", "falls"),
+  shiftAns(66, 3, "demand", "increase", "streaming is a substitute for cinema, so dearer cinema tickets lead consumers to switch to streaming, raising its demand at every price", "rises", "rises"),
+  shiftAns(67, 3, "demand", "increase", "the health article shifts consumer tastes towards avocados, raising demand at every price", "rises", "rises"),
+  shiftAns(68, 3, "demand", "decrease", "the cheaper digital textbook is a substitute, so students switch away from the printed textbook, reducing its demand at every price", "falls", "falls"),
+  shiftAns(69, 3, "supply", "decrease", "petrol is a major cost for ride-share drivers, so a higher petrol price raises costs and less is supplied at every price", "rises", "falls"),
+  shiftAns(70, 3, "supply", "increase", "a second airline adds to the number of suppliers, so more seats are supplied at every price", "falls", "rises"),
+  shiftAns(71, 3, "supply", "decrease", "the poor cocoa harvest reduces a key input, raising costs, so less chocolate can be supplied at every price", "rises", "falls"),
+  shiftAns(72, 3, "demand", "increase", "the awareness campaign shifts tastes towards using sunscreen, raising demand at every price", "rises", "rises"),
+  shiftAns(73, 3, "supply", "decrease", "fewer retailers means fewer suppliers, so less camping gear is supplied at every price", "rises", "falls"),
+  shiftAns(74, 3, "supply", "decrease", "the chip shortage raises the cost of key components, so fewer gaming PCs can be supplied at every price", "rises", "falls"),
+  shiftAns(75, 3, "demand", "increase", "exam anxiety shifts tastes towards seeking tutoring, raising demand at every price", "rises", "rises"),
+  shiftAns(76, 3, "demand", "decrease", "the rival's cheaper, better model is a substitute, so consumers switch away from this brand, reducing its demand at every price", "falls", "falls"),
+  shiftAns(77, 3, "demand", "increase", "new cars are a substitute, so their higher price leads buyers to switch to secondhand cars, raising demand at every price", "rises", "rises"),
+  shiftAns(78, 3, "supply", "increase", "wider stocking and cheaper processing lower costs and raise availability, so more is supplied at every price", "falls", "rises"),
+  shiftAns(79, 3, "demand", "increase", "the forecast heatwaves shift tastes towards buying air conditioners, raising demand at every price", "rises", "rises"),
+  shiftAns(80, 3, "supply", "decrease", "restricting suppliers to plantation timber only reduces the sources of firewood, so less can be supplied at every price", "rises", "falls"),
+  shiftAns(81, 3, "demand", "decrease", "ride-share is a substitute for taxis, so cheaper ride-share fares lead consumers to switch away from taxis, reducing demand at every price", "falls", "falls"),
+  shiftAns(82, 3, "supply", "decrease", "the drought damages the olive harvest, reducing the quantity of olive oil that can be supplied at every price", "rises", "falls"),
+  shiftAns(83, 3, "supply", "decrease", "the bee disease reduces honey production, so less can be supplied at every price", "rises", "falls"),
+  shiftAns(84, 3, "demand", "increase", "the colder forecast shifts tastes towards wool jumpers, raising demand at every price", "rises", "rises"),
+  shiftAns(85, 3, "demand", "decrease", "losing headline acts makes the festival less appealing, shifting tastes away from it and reducing demand for tickets at every price", "falls", "falls"),
+  shiftAns(86, 3, "supply", "increase", "approving many more sharing schemes adds to the number of suppliers, so more e-scooter trips are supplied at every price", "falls", "rises"),
+  shiftAns(87, 2, "supply", "increase", "compatibility with many more brands increases the number of pod suppliers, so more pods are supplied at every price", "falls", "rises"),
+  shiftAns(88, 2, "demand", "increase", "the social media trend shifts tastes towards board games, raising demand at every price", "rises", "rises"),
+  shiftAns(89, 2, "supply", "decrease", "the storm season disrupts fishing fleets, reducing the catch that can be supplied at every price", "rises", "falls"),
+  shiftAns(90, 2, "demand", "increase", "the health advisory shifts tastes towards using hand sanitiser, raising demand at every price", "rises", "rises"),
+  shiftAns(91, 2, "supply", "decrease", "higher driver wages raise costs for delivery companies, so less is supplied at every price", "rises", "falls"),
+  shiftAns(92, 2, "demand", "decrease", "consumers expect a cheaper e-bike once the rebate starts, so they delay buying and demand less now", "falls", "falls"),
+  shiftAns(93, 2, "demand", "increase", "the early warm spring shifts tastes towards garden furniture, raising demand at every price", "rises", "rises"),
+  shiftAns(94, 2, "supply", "increase", "the cheaper pigment lowers production costs, so more paint is supplied at every price", "falls", "rises"),
+  shiftAns(95, 2, "demand", "decrease", "with the drought over, tastes shift away from umbrellas, reducing demand at every price", "falls", "falls"),
+  shiftAns(96, 2, "demand", "increase", "driving is a substitute for public transport, so dearer petrol leads commuters to switch to public transport, raising its demand at every price", "rises", "rises"),
+];
+
+// more government intervention diagrams — s97..s106
+const diagramGov2Answers: Array<[string, Answer]> = [
+  [`${U}.s97`, {
+    modelAnswer:
+      "At the ceiling price Pᶜ, below equilibrium, the quantity of the medicine demanded exceeds the quantity supplied. Suppliers offer less at the low price while demand stays high, so the market is in a shortage that persists because the price is not allowed to rise to clear it.",
+    rubric: [
+      "States that at Pᶜ the quantity demanded rises / quantity supplied falls compared with equilibrium",
+      "Identifies that quantity demanded exceeds quantity supplied",
+      "Concludes the market is in a (persistent) shortage",
+    ],
+  }],
+  [`${U}.s98`, {
+    modelAnswer:
+      "At the floor price Pᶠ, above equilibrium, coffee growers supply more while buyers purchase less. Quantity supplied exceeds quantity demanded, so there is a surplus of coffee beans that the agreement's members may need to buy up or store.",
+    rubric: [
+      "States that at Pᶠ the quantity supplied rises / quantity demanded falls compared with equilibrium",
+      "Identifies that quantity supplied exceeds quantity demanded",
+      "Concludes the market is in a (persistent) surplus",
+    ],
+  }],
+  [`${U}.s99`, {
+    modelAnswer:
+      "The per-bag tax adds to retailers' costs, so the supply curve shifts up/left by the amount of the tax. At the new equilibrium the price paid by consumers is higher and the quantity of bags traded is lower.",
+    rubric: [
+      "States the supply curve shifts up / to the left (by the amount of the tax)",
+      "States the price paid by consumers rises",
+      "States the quantity traded falls",
+    ],
+  }],
+  [`${U}.s100`, {
+    modelAnswer:
+      "The per-unit subsidy lowers installers' effective costs, so the supply curve shifts down/right by the amount of the subsidy. At the new equilibrium the price paid by consumers is lower and the quantity of installations is higher.",
+    rubric: [
+      "States the supply curve shifts down / to the right (by the amount of the subsidy)",
+      "States the price paid by consumers falls",
+      "States the quantity traded rises",
+    ],
+  }],
+  [`${U}.s101`, {
+    modelAnswer:
+      "At the ceiling price Pᶜ, below the rapidly rising equilibrium price, the quantity demanded exceeds the quantity supplied. Retailers have less sanitiser than shoppers want at the low price, so the market is in a shortage — often rationed by limits per customer or empty shelves.",
+    rubric: [
+      "States quantity demanded rises / quantity supplied falls at Pᶜ",
+      "Concludes there is a (persistent) shortage",
+    ],
+  }],
+  [`${U}.s102`, {
+    modelAnswer:
+      "The luxury car tax raises manufacturers'/importers' costs, shifting the supply curve up/left, so the equilibrium price of luxury cars rises and the quantity traded falls. A government might want this because luxury cars are bought mainly by higher-income buyers, so the tax raises revenue relatively equitably while only modestly affecting overall car ownership.",
+    rubric: [
+      "States the equilibrium price rises",
+      "States the equilibrium quantity falls",
+      "Gives a valid government motive (revenue from higher-income buyers / equity, with limited effect on essential transport)",
+    ],
+  }],
+  [`${U}.s103`, {
+    modelAnswer:
+      "At the floor price Pᶠ, above equilibrium, farmers supply a larger quantity of the grain while buyers purchase a smaller quantity. Quantity supplied exceeds quantity demanded, so the market is in a surplus equal to the difference.",
+    rubric: [
+      "States quantity supplied rises and quantity demanded falls at Pᶠ",
+      "Concludes there is a surplus (quantity supplied exceeds quantity demanded)",
+    ],
+  }],
+  [`${U}.s104`, {
+    modelAnswer:
+      "The per-vehicle subsidy lowers manufacturers' effective costs, shifting the supply curve down/right. At the new equilibrium the price paid by consumers for electric vehicles is lower and the quantity sold is higher, encouraging the switch away from petrol cars.",
+    rubric: [
+      "States the supply curve shifts down / to the right (by the amount of the subsidy)",
+      "States the price paid by consumers falls",
+      "States the quantity traded rises",
+    ],
+  }],
+  [`${U}.s105`, {
+    modelAnswer:
+      "First, because Pᶜ is below equilibrium, the quantity of rental housing demanded exceeds the quantity supplied, creating a persistent shortage of rentals. Second, landlords earn a lower return at the capped rent, so some withdraw properties from the rental market or stop maintaining them, and fewer new rental properties are built, worsening the shortage over time.",
+    rubric: [
+      "Consequence 1: a persistent shortage of rental housing (quantity demanded exceeds quantity supplied at Pᶜ)",
+      "Consequence 2: reduced landlord returns discourage new rental supply / maintenance over time",
+      "Links both consequences to the rent being held below the market-clearing level",
+    ],
+  }],
+  [`${U}.s106`, {
+    modelAnswer:
+      "The per-unit tax raises manufacturers' costs, shifting the supply curve up/left, so the equilibrium price of sugary cereals rises and the quantity traded falls.",
+    rubric: [
+      "States the equilibrium price rises",
+      "States the equilibrium quantity falls",
+    ],
+  }],
+];
+
+// more labour market diagrams — s107..s117
+const diagramLabour2Answers: Array<[string, Answer]> = [
+  [`${U}.s107`, {
+    modelAnswer:
+      "The gig economy attracts many more people willing to work flexible hours, so the supply of labour for delivery riding increases — the labour supply curve shifts right. This lowers the equilibrium wage per delivery, but the equilibrium quantity of riders employed rises.",
+    rubric: [
+      "States the supply of labour increases (shifts right)",
+      "States the equilibrium wage falls",
+      "States the quantity of labour employed rises",
+    ],
+  }],
+  [`${U}.s108`, {
+    modelAnswer:
+      "Self-service checkouts substitute machines for workers, so firms need fewer checkout operators at every wage — the labour demand curve shifts left. This lowers the equilibrium wage and reduces the level of employment for checkout operators.",
+    rubric: [
+      "States the demand for labour decreases (shifts left)",
+      "States the equilibrium wage falls",
+      "States employment falls",
+    ],
+  }],
+  [`${U}.s109`, {
+    modelAnswer:
+      "Easier entry for qualified overseas nurses increases the number of people able to work in the profession, so the supply of labour increases — the labour supply curve shifts right. This lowers the equilibrium wage but raises the quantity of nurses employed.",
+    rubric: [
+      "States the supply of labour increases (shifts right)",
+      "States the equilibrium wage falls",
+      "States the quantity of labour employed rises",
+    ],
+  }],
+  [`${U}.s110`, {
+    modelAnswer:
+      "The new mining project raises the demand for FIFO workers, shifting the labour demand curve right. This raises the equilibrium wage and increases the level of employment in that occupation.",
+    rubric: [
+      "States the demand for labour increases (shifts right)",
+      "States the equilibrium wage rises",
+      "States employment rises",
+    ],
+  }],
+  [`${U}.s111`, {
+    modelAnswer:
+      "With venues closed, the derived demand for hospitality workers falls, shifting the labour demand curve left. This lowers the equilibrium wage and reduces the level of employment in hospitality.",
+    rubric: [
+      "States the demand for labour decreases (shifts left)",
+      "States the equilibrium wage falls",
+      "States employment falls",
+    ],
+  }],
+  [`${U}.s112`, {
+    modelAnswer:
+      "The stricter, more costly licensing requirements make it harder to become an electrician, reducing the supply of labour — the labour supply curve shifts left. This raises the equilibrium wage but reduces the quantity of electricians employed.",
+    rubric: [
+      "States the supply of labour decreases (shifts left)",
+      "States the equilibrium wage rises",
+      "States the quantity of labour employed falls",
+    ],
+  }],
+  [`${U}.s113`, {
+    modelAnswer:
+      "The popular new degree increases the number of graduates qualified as data analysts, increasing the supply of labour — the labour supply curve shifts right. This lowers the equilibrium wage for data analysts.",
+    rubric: [
+      "States the supply of labour increases (shifts right)",
+      "States the equilibrium wage falls",
+    ],
+  }],
+  [`${U}.s114`, {
+    modelAnswer:
+      "At the minimum wage Wₘ, above the equilibrium wage for junior retail workers, the quantity of labour supplied rises (more people want these jobs) while the quantity demanded falls (firms hire fewer workers at the higher wage). Employment falls to the quantity demanded at Wₘ, leaving a labour surplus (unemployment) equal to the gap between quantity supplied and quantity demanded.",
+    rubric: [
+      "States the quantity of labour demanded falls at Wₘ",
+      "States the quantity of labour supplied rises at Wₘ",
+      "Concludes employment falls and there is a labour surplus (unemployment)",
+    ],
+  }],
+  [`${U}.s115`, {
+    modelAnswer:
+      "At W₁ there is excess demand for aged-care labour — a shortage. Providers competing for scarce workers bid the wage up. As the wage rises, the quantity of labour demanded contracts and the quantity supplied expands (and, over time, more people may train for or enter the occupation), until the shortage is reduced at a higher equilibrium wage.",
+    rubric: [
+      "Identifies the shortage as excess demand for labour at W₁",
+      "Explains that competition among providers bids the wage up",
+      "Explains that the higher wage reduces quantity demanded and raises quantity supplied until the market adjusts",
+    ],
+  }],
+  [`${U}.s116`, {
+    modelAnswer:
+      "The relocation subsidy makes rural teaching more attractive, increasing the number of teachers willing to work there — the labour supply curve shifts right. This lowers the equilibrium wage needed to attract teachers to rural schools.",
+    rubric: [
+      "States the supply of labour increases (shifts right)",
+      "States the equilibrium wage falls",
+    ],
+  }],
+  [`${U}.s117`, {
+    modelAnswer:
+      "As readers move online, demand for the industry's print product falls, and because labour demand is derived from the demand for output, the demand for print journalists falls too — the labour demand curve shifts left. This lowers the equilibrium wage and reduces employment among print journalists.",
+    rubric: [
+      "States the demand for labour decreases (shifts left)",
+      "States the equilibrium wage falls",
+      "States employment falls",
+    ],
+  }],
+];
+
+// more property & commodity diagrams — s118..s128
+const diagramProperty2Answers: Array<[string, Answer]> = [
+  [`${U}.s118`, {
+    modelAnswer:
+      "Higher mortgage costs reduce what buyers can afford to pay, so the demand for housing decreases — the demand curve shifts left. Because the supply of established housing is price-inelastic, house prices fall substantially while the quantity of housing sold falls only slightly.",
+    rubric: [
+      "States the demand for housing decreases (shifts left)",
+      "States house prices fall (substantially, given inelastic supply)",
+      "States the quantity of housing falls only slightly",
+    ],
+  }],
+  [`${U}.s119`, {
+    modelAnswer:
+      "The production cut decreases supply — the supply curve shifts left. With demand unchanged, the equilibrium price of oil rises and the quantity traded falls.",
+    rubric: [
+      "States supply decreases (shifts left)",
+      "States the price rises",
+      "States the quantity falls",
+    ],
+  }],
+  [`${U}.s120`, {
+    modelAnswer:
+      "The bumper harvest increases supply — the supply curve shifts right. With demand unchanged, the equilibrium price of wheat falls and the quantity traded rises.",
+    rubric: [
+      "States supply increases (shifts right)",
+      "States the price falls and the quantity rises",
+    ],
+  }],
+  [`${U}.s121`, {
+    modelAnswer:
+      "Releasing more land allows more dwellings to be built, so the supply of housing increases — the supply curve shifts right. This lowers house prices and raises the quantity of housing available.",
+    rubric: [
+      "States the supply of housing increases (shifts right)",
+      "States house prices fall",
+      "States the quantity of housing rises",
+    ],
+  }],
+  [`${U}.s122`, {
+    modelAnswer:
+      "The mine closure decreases supply — the supply curve shifts left. Because new supply cannot be brought on quickly, the equilibrium price of copper rises and the quantity traded falls.",
+    rubric: [
+      "States supply decreases (shifts left)",
+      "States the price rises and the quantity falls",
+    ],
+  }],
+  [`${U}.s123`, {
+    modelAnswer:
+      "Becoming the most liveable place shifts tastes towards living in the town, increasing the demand for housing there — the demand curve shifts right. Because supply is price-inelastic, house prices rise sharply while the quantity of housing rises only slightly.",
+    rubric: [
+      "States the demand for housing increases (shifts right)",
+      "States house prices rise sharply because supply is inelastic",
+      "States the quantity of housing rises only a little",
+    ],
+  }],
+  [`${U}.s124`, {
+    modelAnswer:
+      "Rapid growth in electric vehicle production increases demand for lithium — the demand curve shifts right. Because mining output takes years to expand, the equilibrium price of lithium rises sharply while the quantity traded rises only modestly.",
+    rubric: [
+      "States demand for lithium increases (shifts right)",
+      "States the price rises (sharply, given slow supply) and the quantity rises only modestly",
+    ],
+  }],
+  [`${U}.s125`, {
+    modelAnswer:
+      "Removing the tax concession makes property investment less attractive, so the demand for housing decreases — the demand curve shifts left. With price-inelastic supply, house prices fall substantially while the quantity of housing falls only slightly.",
+    rubric: [
+      "States the demand for housing decreases (shifts left)",
+      "States house prices fall (substantially, given inelastic supply)",
+      "States the quantity of housing falls only slightly",
+    ],
+  }],
+  [`${U}.s126`, {
+    modelAnswer:
+      "Political instability disrupts mining and reduces supply — the supply curve shifts left. With demand unchanged, the equilibrium price of the commodity rises and the quantity traded falls.",
+    rubric: [
+      "States supply decreases (shifts left)",
+      "States the price rises and the quantity falls",
+    ],
+  }],
+  [`${U}.s127`, {
+    modelAnswer:
+      "Allowing many more apartments to be approved and built increases the supply of housing in the area — the supply curve shifts right. This lowers prices in the area and raises the quantity of housing available.",
+    rubric: [
+      "States the supply of housing increases (shifts right)",
+      "States prices fall",
+      "States the quantity of housing rises",
+    ],
+  }],
+  [`${U}.s128`, {
+    modelAnswer:
+      "The global slowdown reduces demand for Australian coal — the demand curve shifts left. Because mines cannot quickly reduce output, the equilibrium price of coal falls while the quantity sold falls only slightly.",
+    rubric: [
+      "States demand for coal decreases (shifts left)",
+      "States the price falls (with only a small change in quantity, given slow-adjusting supply)",
+    ],
+  }],
+];
+
 // written micro — q21..q40
 const microMoreAnswers: Array<[string, Answer]> = [
   micro(21,
@@ -667,11 +1090,292 @@ const microMoreAnswers: Array<[string, Answer]> = [
     ]),
 ];
 
+// written micro — q41..q80
+const microMore2Answers: Array<[string, Answer]> = [
+  micro(41,
+    "The price fell by 10% and quantity demanded rose by 18%. PED = %ΔQd ÷ %ΔP = 18 ÷ 10 = 1.8. Because this is greater than 1, demand for the good is price-elastic — quantity demanded is quite responsive to the price change.",
+    [
+      "Identifies the percentage change in price (10%) and in quantity demanded (18%)",
+      "Computes PED = 18 ÷ 10 = 1.8",
+      "Interprets 1.8 as price-elastic demand",
+    ]),
+  micro(42,
+    "The price rose by 12% and quantity supplied rose by 6%. PES = %ΔQs ÷ %ΔP = 6 ÷ 12 = 0.5. Because this is less than 1, supply of the good is price-inelastic — quantity supplied is not very responsive to the price change.",
+    [
+      "Identifies the percentage change in price (12%) and in quantity supplied (6%)",
+      "Computes PES = 6 ÷ 12 = 0.5",
+      "Interprets 0.5 as price-inelastic supply",
+    ]),
+  micro(43,
+    "In the short run drivers are locked into their existing cars and routines, so they cannot easily reduce how much petrol they buy when its price rises. In the long run they can buy more fuel-efficient or electric vehicles, move closer to work, or use public transport more, giving them far more ways to respond. This greater scope to adjust makes demand for petrol more price-elastic the longer the time period considered.",
+    [
+      "Explains that in the short run consumers are constrained (existing vehicles/routines)",
+      "Explains that over time consumers can adopt substitutes (efficient cars, public transport, relocating)",
+      "Concludes demand becomes more elastic over a longer time period",
+    ]),
+  micro(44,
+    "Total revenue is price multiplied by quantity, so how it responds to a price change depends on elasticity. If demand is inelastic, a price rise increases revenue (quantity falls proportionally less than price rises) and a price fall decreases revenue. If demand is elastic, a price rise decreases revenue and a price fall increases revenue. If demand is unit elastic, revenue is unchanged either way.",
+    [
+      "States that total revenue = price × quantity",
+      "Explains the inelastic case (price and revenue move together)",
+      "Explains the elastic case (price and revenue move in opposite directions)",
+    ]),
+  micro(45,
+    "When a good has many close substitutes, consumers can easily switch to an alternative if its price rises, so the quantity demanded falls by a large percentage — demand is elastic. When a good has few or no substitutes, consumers have nowhere else to go and keep buying roughly the same quantity, so demand is inelastic.",
+    [
+      "Explains that many close substitutes let buyers switch away easily, making demand more elastic",
+      "Explains that few substitutes mean buyers have no alternative, making demand more inelastic",
+    ]),
+  micro(46,
+    "A perishable good cannot be held back and sold later, so producers must sell whatever they have produced regardless of the current price — the quantity supplied barely changes when price changes, making supply inelastic. A good that can be stockpiled lets producers release more from storage when the price rises and hold back stock when it falls, so the quantity supplied responds much more to price, making supply more elastic.",
+    [
+      "Explains that a perishable good must be sold regardless of price, so quantity supplied is largely fixed",
+      "Concludes this makes supply of the perishable good inelastic",
+      "Explains that a storable good lets producers vary how much reaches the market, making its supply more elastic",
+    ]),
+  micro(47,
+    "When a good takes up only a small share of a consumer's budget (e.g. salt), a price change has little effect on their overall spending power, so they keep buying roughly the same quantity — demand is inelastic. When a good takes up a large share of the budget (e.g. rent or a car), a price change noticeably affects what consumers can afford, so they respond more strongly by changing the quantity they buy — demand is more elastic.",
+    [
+      "Explains that a small budget share means a price change barely affects spending power",
+      "Concludes this makes demand for that good inelastic",
+      "Explains that a large budget share makes demand more elastic, since a price change noticeably affects what consumers can afford",
+    ]),
+  micro(48,
+    "Demand is price-elastic when the percentage change in quantity demanded is larger than the percentage change in price (PED > 1); a price rise then reduces total revenue and a price fall raises it. Demand is price-inelastic when the percentage change in quantity is smaller than the percentage change in price (PED < 1); a price rise then raises total revenue and a price fall reduces it. Demand is unit elastic when the two percentage changes are equal (PED = 1); a price change then leaves total revenue unchanged.",
+    [
+      "Defines elastic (PED > 1) and states a price rise lowers revenue",
+      "Defines inelastic (PED < 1) and states a price rise raises revenue",
+      "Defines unit elastic (PED = 1)",
+      "States a price change leaves revenue unchanged when unit elastic",
+    ]),
+  micro(49,
+    "A binding price ceiling holds the price below equilibrium, so the quantity demanded exceeds the quantity supplied — a shortage. Because it is illegal to charge more than the ceiling in the legal market, some buyers who cannot obtain the good legally are willing to pay more, creating an incentive for an illegal (black) market where the good is resold above the ceiling price.",
+    [
+      "States the ceiling creates a shortage (quantity demanded exceeds quantity supplied)",
+      "Explains that frustrated buyers are willing to pay more than the ceiling",
+      "Concludes this creates an incentive for illegal resale above the ceiling price (a black market)",
+    ]),
+  micro(50,
+    "A per-unit tax shifts the supply curve up/left, raising the price consumers pay and lowering the quantity traded. If demand is price-inelastic, consumers keep buying nearly the same quantity despite the higher price, so most of the tax is passed on to them. If demand is price-elastic, consumers cut back sharply rather than pay much more, so producers must absorb more of the tax themselves by accepting a lower after-tax price.",
+    [
+      "States the tax shifts supply left, raising the consumer price",
+      "Explains that inelastic demand means consumers bear most of the tax",
+      "Explains that elastic demand means producers bear more of the tax",
+    ]),
+  micro(51,
+    "A price floor and a subsidy can both raise producers' income, but they work differently. A price floor holds the market price above equilibrium, which raises the price consumers pay and can create an unsold surplus that the government may need to buy and store. A subsidy instead pays producers directly per unit, which lowers the price consumers pay and raises the quantity traded without necessarily creating an unsold surplus. An advantage of the subsidy is that it supports producer income while keeping the good more affordable for consumers.",
+    [
+      "Describes a price floor: raises the price paid by consumers and can create a surplus",
+      "Describes a subsidy: a direct payment that lowers the price paid by consumers and raises the quantity traded",
+      "States an advantage of the subsidy (keeps the good affordable / avoids an unsold surplus)",
+    ]),
+  micro(52,
+    "A price ceiling only affects a market if it is set below the equilibrium price, forcing sellers to charge less than they otherwise would. If the ceiling is set above equilibrium, the market already trades at a lower, equilibrium price, so the ceiling is not binding and has no effect on the price or quantity traded.",
+    [
+      "States a ceiling above equilibrium is not binding",
+      "Explains that the market continues to trade at the (lower) equilibrium price and quantity",
+    ]),
+  micro(53,
+    "A direct tax is paid straight to the government by the person or business it is levied on and cannot easily be passed on to someone else — for example, personal income tax. An indirect tax is levied on producers or sellers of a good or service but is typically passed on to consumers through a higher price — for example, the Goods and Services Tax (GST).",
+    [
+      "Defines a direct tax: paid directly by the taxed party, not easily shifted",
+      "Gives a valid Australian example of a direct tax (e.g. income tax)",
+      "Defines an indirect tax (levied on sellers but passed on via price) with a valid Australian example (e.g. GST)",
+    ]),
+  micro(54,
+    "A per-unit tax raises producers' costs, shifting supply up/left and raising the equilibrium price. When demand is price-inelastic, consumers keep buying almost the same quantity even at the higher price, so producers can pass on most of the tax as a higher price without losing many sales.",
+    [
+      "States the tax shifts supply left",
+      "States this raises the equilibrium price",
+      "Explains that inelastic demand means quantity barely falls, so producers can pass on most of the tax",
+    ]),
+  micro(55,
+    "A government might subsidise a good to make it more affordable or to encourage its production and consumption — for example, subsidising renewable energy to support the transition away from fossil fuels. The subsidy lowers producers' effective costs, shifting the supply curve down/right, which lowers the price consumers pay and increases the quantity produced and consumed.",
+    [
+      "Gives a valid reason for a subsidy (affordability / encouraging a socially desirable good)",
+      "States the subsidy shifts supply down/right",
+      "States this lowers the price consumers pay and raises the quantity traded",
+    ]),
+  micro(56,
+    "A shortage of workers means that at the current wage the quantity of labour demanded exceeds the quantity supplied. Employers compete for the scarce workers, bidding the wage up. The higher wage makes the occupation more attractive, and over time more people train for or move into it, increasing the supply of labour until the shortage narrows and a new, higher equilibrium wage is reached.",
+    [
+      "Identifies the shortage as excess demand for labour at the current wage",
+      "Explains that competition among employers bids the wage up",
+      "Explains that the higher wage attracts more workers over time, increasing supply and narrowing the shortage",
+    ]),
+  micro(57,
+    "Labour is not wanted for its own sake but because it is used to produce goods and services that consumers want. The demand for labour is therefore 'derived' from the demand for the output that labour helps to produce — if demand for that output rises or falls, the demand for the labour used to make it rises or falls with it.",
+    [
+      "States labour demand comes from the demand for the output labour is used to produce",
+      "Explains that a change in output demand causes a matching change in labour demand",
+    ]),
+  micro(58,
+    "A minimum wage set above the equilibrium wage raises the cost of hiring, so firms reduce the quantity of labour they demand, while the higher wage attracts more people wanting to work, increasing the quantity of labour supplied. Because the quantity supplied now exceeds the quantity demanded, there is a surplus of labour — unemployment — among those willing to work at the minimum wage but unable to find a job.",
+    [
+      "States the quantity of labour demanded falls at the minimum wage",
+      "States the quantity of labour supplied rises at the minimum wage",
+      "Concludes the resulting surplus of labour is unemployment",
+    ]),
+  micro(59,
+    "The demand for labour in an industry increases when demand for the industry's output rises, since labour demand is derived from output demand. It also increases when workers become more productive (each worker adds more value to output), making firms willing to hire more workers or pay higher wages for the same number of workers.",
+    [
+      "Factor 1: a rise in demand for the industry's output (derived demand) increases labour demand",
+      "Explains why (more output needed → more workers hired)",
+      "Factor 2: an increase in worker productivity increases labour demand",
+    ]),
+  micro(60,
+    "The supply of labour to an occupation increases when the wage paid rises relative to other occupations, attracting more workers to switch in. It also increases when more people gain the qualifications or training the occupation requires, or when migration brings in more workers with the relevant skills.",
+    [
+      "Factor 1: a higher relative wage attracts more workers, increasing labour supply",
+      "Factor 2: more people gaining the required qualifications increases labour supply",
+      "Factor 2 (alt.): skilled migration into the occupation increases labour supply",
+    ]),
+  micro(61,
+    "Where machines can perform tasks previously done by workers, automation reduces the number of workers firms need for a given level of output, so the demand for labour in that industry decreases — the labour demand curve shifts left. This tends to lower the equilibrium wage and reduce employment for the workers whose tasks are automated, although it may increase demand for other workers (such as technicians who maintain the machines).",
+    [
+      "States automation decreases the demand for labour whose tasks are replaced (shifts left)",
+      "States this lowers the equilibrium wage and/or reduces employment for those workers",
+      "Notes automation may increase demand for other labour (e.g. technicians/maintenance)",
+    ]),
+  micro(62,
+    "The demand for labour comes from firms: it is the quantity of labour firms are willing and able to hire at each wage, and it slopes downward because labour becomes relatively more expensive at a higher wage. The supply of labour comes from households: it is the quantity of labour people are willing and able to offer at each wage, and it slopes upward because a higher wage attracts more people into the workforce or occupation.",
+    [
+      "Defines labour demand: firms, downward sloping (quantity hired at each wage)",
+      "Defines labour supply: households, upward sloping (quantity offered at each wage)",
+    ]),
+  micro(63,
+    "Faster population growth increases the demand for housing more strongly in fast-growing cities. Because the supply of established housing is price-inelastic in every city — new dwellings take years to build regardless of location — most of this extra demand shows up as higher prices rather than a much larger quantity of housing, so prices rise more where population growth (and hence demand growth) is fastest.",
+    [
+      "States that faster population growth means a bigger increase in housing demand",
+      "States that inelastic supply means most of the adjustment is through price, not quantity",
+      "Concludes prices rise more in the faster-growing city",
+    ]),
+  micro(64,
+    "The supply of housing is price-inelastic in the short run because new dwellings take a long time to plan, approve and build, so builders cannot quickly add to the housing stock even if prices rise. In addition, the amount of well-located, buildable land is limited, especially in established suburbs, further constraining how much new supply can be brought to market quickly.",
+    [
+      "Reason 1: construction and approval times mean new supply cannot be added quickly",
+      "Explains this limits how much the quantity supplied can respond to price in the short run",
+      "Reason 2: limited available (well-located) land further constrains how much new housing can be built",
+    ]),
+  micro(65,
+    "Commodity demand can shift quickly — for example, when a large economy's industrial activity speeds up or slows down — while commodity supply is largely fixed by existing mines or farms and takes years to expand or contract. Because supply is slow and price-inelastic, a shift in demand has to be absorbed mostly through price rather than quantity, making commodity prices swing much more than the prices of manufactured goods, whose producers can more easily adjust output.",
+    [
+      "Explains that commodity demand can shift quickly (e.g. changes in industrial activity)",
+      "Explains that commodity supply is slow to adjust / price-inelastic (fixed mines, land, long lead times)",
+      "Concludes that inelastic supply forces price to do most of the adjusting, making commodity prices more volatile",
+    ]),
+  micro(66,
+    "Lower interest rates reduce mortgage repayments and increase how much buyers can borrow, so the demand for housing increases — the demand curve shifts right. Because the supply of established housing is price-inelastic, this extra demand raises house prices substantially while the quantity of housing sold rises only slightly.",
+    [
+      "States lower interest rates increase the demand for housing (shifts right)",
+      "Explains that inelastic supply means most of the adjustment is through price",
+      "Concludes house prices rise substantially while quantity rises only a little",
+    ]),
+  micro(67,
+    "A government can influence the supply side of the housing market through planning and zoning reform — for example, approving more land for development or allowing higher-density building — which makes it easier and faster for developers to add new dwellings, shifting the housing supply curve to the right.",
+    [
+      "Gives a valid supply-side policy (e.g. planning/zoning reform, land release, faster approvals)",
+      "Explains that it shifts the housing supply curve right (more dwellings can be built)",
+    ]),
+  micro(68,
+    "A sudden increase in world demand for a mineral shifts the demand curve for it to the right. Because bringing a new mine into production takes years of exploration, approval and construction, the quantity supplied cannot increase quickly to match the higher demand. As a result, most of the adjustment happens through price: the price of the mineral rises sharply in the short run, and only rises in quantity once new supply eventually comes online.",
+    [
+      "States the demand increase shifts the demand curve right",
+      "Explains that supply cannot expand quickly (long lead times for new mines)",
+      "Concludes the price rises sharply in the short run while quantity adjusts only slowly",
+    ]),
+  micro(69,
+    "A bumper harvest shifts the supply curve for the crop to the right, increasing the quantity sold but lowering its price. Demand for many agricultural staples is price-inelastic, meaning the percentage fall in price is larger than the percentage rise in quantity sold. Since total income is price multiplied by quantity, the large fall in price can outweigh the rise in quantity, so farmers' total income falls even though they have produced and sold more.",
+    [
+      "States the bumper harvest increases supply, lowering price and raising quantity sold",
+      "States that demand for the crop is price-inelastic",
+      "Explains that with inelastic demand a large price fall can outweigh the quantity rise, reducing total income",
+    ]),
+  micro(70,
+    "A change in the quantity supplied is a movement along the existing supply curve, caused only by a change in the good's own price. A change in supply is a shift of the whole supply curve, caused by a change in a non-price factor such as input costs, technology, taxes or the number of firms in the industry.",
+    [
+      "Defines a change in quantity supplied as a movement along the curve caused by the good's own price",
+      "Defines a change in supply as a shift of the curve caused by a non-price factor",
+    ]),
+  micro(71,
+    "A change in the price of a substitute good is a non-price factor for the good in question — its own price has not changed. Because only a change in a good's own price causes a movement along its demand curve, a change in a substitute's price must instead shift the whole demand curve, changing the quantity demanded at every price.",
+    [
+      "States a substitute's price change is a non-price factor for the good itself",
+      "Explains this is why it shifts the demand curve rather than causing a movement along it",
+    ]),
+  micro(72,
+    "The price mechanism allocates scarce resources in a market economy through its three functions: the signalling function, where changing prices tell producers and consumers about changing scarcity or demand; the incentive function, where price changes motivate producers to expand or contract output and motivate consumers to buy more or less; and the rationing function, where the price distributes a limited quantity to the buyers most willing and able to pay for it. Together these functions direct resources towards producing what consumers value most, without any central planner.",
+    [
+      "Names and explains at least two of the three functions (signalling, incentive, rationing)",
+      "Links the functions to the allocation of scarce resources without central planning",
+      "Explanation is coherent and accurate for each function named",
+    ]),
+  micro(73,
+    "One determinant of demand other than price is consumer income. If income rises and the good is a normal good, consumers can afford to buy more of it at every price, so the whole demand curve shifts to the right (an increase in demand).",
+    [
+      "Names a valid non-price determinant of demand (income, tastes, price of a substitute/complement, population, expectations)",
+      "Correctly explains how a change in it shifts the demand curve (direction and reasoning)",
+    ]),
+  micro(74,
+    "One determinant of supply other than price is the cost of production. If input costs (such as wages or raw materials) fall, it becomes cheaper to produce the good, so firms are willing to supply more at every price, shifting the whole supply curve to the right (an increase in supply).",
+    [
+      "Names a valid non-price determinant of supply (input costs, technology, taxes/subsidies, number of firms, expectations)",
+      "Correctly explains how a change in it shifts the supply curve (direction and reasoning)",
+    ]),
+  micro(75,
+    "The demand curve already shows, for a fixed set of other conditions, how the quantity demanded changes as the good's own price changes — so a change in that price simply moves buyers to a different point on the same curve (a movement along it). A non-price factor, such as income or tastes, is not represented on the axes of the diagram; when it changes, the whole relationship between price and quantity demanded changes, which can only be shown by drawing a new curve — a shift of the curve.",
+    [
+      "Explains that the curve already plots quantity demanded against the good's own price",
+      "States a price change therefore moves buyers along the same curve",
+      "Explains that a non-price factor changes the underlying relationship, requiring a new curve — a shift",
+    ]),
+  micro(76,
+    "An increase in demand and a decrease in supply both push the equilibrium price up, so the price is certain to rise. However, the increase in demand raises the equilibrium quantity while the decrease in supply lowers it, so these two effects work in opposite directions on quantity — without knowing which shift is larger, the effect on the equilibrium quantity cannot be determined.",
+    [
+      "States the price is certain to rise (both shifts push price in the same direction)",
+      "States the two shifts push quantity in opposite directions",
+      "Concludes the effect on quantity is ambiguous without knowing the relative size of the shifts",
+    ]),
+  micro(77,
+    "If the price is above equilibrium, quantity supplied exceeds quantity demanded — sellers are left with unsold stock and cut their price to sell it, pushing the price down towards equilibrium. If the price is below equilibrium, quantity demanded exceeds quantity supplied — buyers who cannot obtain the good bid the price up, pushing it towards equilibrium. In both cases, the imbalance between quantity demanded and supplied itself creates pressure that moves the price back to the level where the two are equal.",
+    [
+      "Explains that a surplus (price above equilibrium) causes sellers to cut the price",
+      "Explains that a shortage (price below equilibrium) causes buyers to bid the price up",
+      "Concludes both cases push the price back towards equilibrium",
+    ]),
+  micro(78,
+    "A shortage occurs when the price is below equilibrium, so the quantity demanded exceeds the quantity supplied. A surplus occurs when the price is above equilibrium, so the quantity supplied exceeds the quantity demanded.",
+    [
+      "Defines a shortage: price below equilibrium, quantity demanded exceeds quantity supplied",
+      "Defines a surplus: price above equilibrium, quantity supplied exceeds quantity demanded",
+    ]),
+  micro(79,
+    "If consumers expect the price of a good to rise in the near future, they have an incentive to buy it now before the price goes up, increasing current demand — for example, shoppers stockpiling fuel before an expected price rise, shifting the demand curve for fuel to the right at today's price.",
+    [
+      "States that expecting a higher future price increases current demand",
+      "Explains why (an incentive to buy now before the price rises)",
+      "Gives a valid, correctly reasoned example, identifying the rightward shift of demand",
+    ]),
+  micro(80,
+    "If producers expect the price of a good to rise significantly in the near future, they have an incentive to hold back some of their current output and sell it later at the higher price, decreasing current supply — for example, wine producers ageing stock instead of selling it now, shifting the current supply curve for wine to the left.",
+    [
+      "States that expecting a higher future price decreases current supply",
+      "Explains why (an incentive to withhold stock and sell later at the higher price)",
+      "Gives a valid, correctly reasoned example, identifying the leftward shift of supply",
+    ]),
+];
+
 export const answers: AnswerSet = Object.fromEntries([
   ...mcAnswers,
   ...mcMoreAnswers,
+  ...mcMore2Answers,
   ...shiftAnswers,
   ...diagramMoreAnswers,
+  ...shiftAnswers2,
+  ...diagramGov2Answers,
+  ...diagramLabour2Answers,
+  ...diagramProperty2Answers,
   ...microAnswers,
   ...microMoreAnswers,
+  ...microMore2Answers,
 ]);
