@@ -9,8 +9,8 @@ import { chargeField, forces, motionGraph, rays, wave } from "./diagram";
 // Year 11 — see docs/y11-physics-preliminary-research.md. Every question is
 // factual or reasoning-based (no calculations).
 //
-// 50 multiple choice (group "mc", 1 mark) + 50 short answer (group "sa",
-// 2–4 marks). A quiz draws 5 + 5 — 10 non-repeating attempts.
+// 100 multiple choice (group "mc", 1 mark) + 100 short answer (group "sa",
+// 2–4 marks). A quiz draws 5 + 5 — 20 non-repeating attempts.
 
 const U = "y11-physics-preliminary";
 const p2 = (n: number) => String(n).padStart(2, "0");
@@ -405,6 +405,316 @@ const mcQuestions: McQuestion[] = [
 ];
 
 // ========================================================================
+// Multiple choice — m51..m100 (second bank)
+// ========================================================================
+
+const mcQuestions2: McQuestion[] = [
+  // --- Fundamentals of mechanics ---
+  mc(51, "A cyclist travels around a circular track at constant speed. Which statement is correct?", [
+    "The cyclist's velocity is continually changing because its direction changes, even though speed is constant.",
+    "The cyclist's velocity is constant, since speed is constant.",
+    "The cyclist has zero acceleration, since speed is constant.",
+    "The cyclist's speed must be changing too.",
+  ]),
+  mc(52, "Which pair correctly identifies a scalar quantity and a vector quantity?", [
+    "Mass (scalar) and force (vector).",
+    "Force (scalar) and time (vector).",
+    "Speed (vector) and displacement (scalar).",
+    "Energy (vector) and mass (scalar).",
+  ]),
+  mc(53, "A ball is dropped and falls freely under gravity, ignoring air resistance. Its acceleration during the fall is:", [
+    "constant and directed downward, regardless of its speed.",
+    "increasing as it speeds up.",
+    "decreasing as it speeds up.",
+    "zero once it reaches a high speed.",
+  ]),
+  mc(54, "The velocity–time graph shown is a horizontal line above the time axis. This tells you that the object is:", [
+    "moving at a constant, non-zero velocity, since its acceleration is zero.",
+    "at rest.",
+    "accelerating uniformly.",
+    "decelerating to rest.",
+  ], G_VT_FLAT),
+  mc(55, "On a velocity–time graph, a straight line with a constant, positive slope represents an object undergoing:", [
+    "uniform (constant) acceleration.",
+    "constant velocity.",
+    "uniform deceleration only.",
+    "no motion at all.",
+  ]),
+  mc(56, "Which of Newton's laws best explains why a passenger without a seatbelt continues moving forward when a car suddenly stops?", [
+    "The first law — the passenger's body tends to remain in its state of motion (inertia) until an external force acts on it.",
+    "The second law, because F = ma applies only to the car, not the passenger.",
+    "The third law, because the car and passenger exert equal and opposite forces on each other.",
+    "The law of conservation of energy.",
+  ]),
+  mc(57, "Two objects of different mass are dropped from the same height in a vacuum (no air resistance). They will:", [
+    "hit the ground at the same time, since both accelerate at the same rate due to gravity.",
+    "the heavier object will land first.",
+    "the lighter object will land first.",
+    "this cannot be determined without knowing their exact masses.",
+  ]),
+  mc(58, "A force of friction acting on a moving object always acts:", [
+    "in the direction opposing the object's relative motion.",
+    "in the same direction as the object's motion.",
+    "perpendicular to the object's motion.",
+    "in a fixed direction, regardless of the object's motion.",
+  ]),
+  mc(59, "According to Newton's second law, doubling the net force on an object while keeping its mass constant will:", [
+    "double its acceleration.",
+    "halve its acceleration.",
+    "leave its acceleration unchanged.",
+    "quadruple its acceleration.",
+  ]),
+  mc(60, "A skydiver reaches 'terminal velocity' when:", [
+    "air resistance has increased to exactly balance their weight, so the net force is zero and velocity is constant.",
+    "gravity has stopped acting on them.",
+    "their parachute has automatically opened.",
+    "air resistance has disappeared entirely.",
+  ]),
+  mc(61, "Which of the following is an example of work being done on an object?", [
+    "A person pushes a box and it slides forward across the floor.",
+    "A person pushes against a wall that does not move.",
+    "A person holds a heavy bag stationary above the ground.",
+    "A satellite moves at constant speed in a circular orbit.",
+  ]),
+  mc(62, "As a pendulum bob swings from its highest point to its lowest point, its gravitational potential energy and kinetic energy respectively:", [
+    "decrease and increase.",
+    "increase and decrease.",
+    "both increase.",
+    "both stay the same.",
+  ]),
+  mc(63, "A satellite moves in a circular orbit around the Earth at constant speed. The work done by gravity on the satellite over one complete orbit is:", [
+    "zero, because the gravitational force is always perpendicular to the satellite's velocity.",
+    "positive throughout the orbit.",
+    "negative throughout the orbit.",
+    "equal to the satellite's kinetic energy.",
+  ]),
+  mc(64, "In an elastic collision between two objects:", [
+    "both momentum and total kinetic energy are conserved.",
+    "only momentum is conserved.",
+    "only kinetic energy is conserved.",
+    "neither momentum nor kinetic energy is conserved.",
+  ]),
+  mc(65, "A moving object collides with, and sticks to, a stationary object. This is an example of:", [
+    "a perfectly inelastic collision.",
+    "a perfectly elastic collision.",
+    "a collision with no momentum transfer.",
+    "a collision that conserves kinetic energy.",
+  ]),
+  mc(66, "Airbags in cars reduce injury during a collision mainly by:", [
+    "increasing the time over which the passenger's momentum changes, reducing the average force experienced.",
+    "increasing the force on the passenger.",
+    "decreasing the passenger's mass.",
+    "decreasing the time over which the collision occurs.",
+  ]),
+  mc(67, "Two identical trolleys move toward each other at the same speed and collide, sticking together. After the collision the combined trolleys are:", [
+    "stationary, since their equal and opposite momenta cancel out.",
+    "moving at double the original speed.",
+    "moving at half the original speed, in the direction of one of the trolleys.",
+    "moving faster than either trolley was before the collision.",
+  ]),
+  mc(68, "A cricket fielder catching a fast-moving ball moves their hands backward as the ball arrives. This technique:", [
+    "increases the time of contact, reducing the force needed to stop the ball.",
+    "decreases the time of contact, increasing the force needed to stop the ball.",
+    "has no effect on the force experienced.",
+    "increases the momentum of the ball.",
+  ]),
+  // --- Waves ---
+  mc(69, "Which of the following correctly separates wave properties that are distances from those that are time-based?", [
+    "Wavelength and amplitude are distances; period is a time.",
+    "Period and frequency are distances; wavelength is a time.",
+    "Amplitude and period are distances; wavelength is a time.",
+    "All four properties are measured in units of time.",
+  ]),
+  mc(70, "A wave transfers:", [
+    "energy from one place to another, without transferring matter.",
+    "matter from one place to another, without transferring energy.",
+    "both matter and energy from one place to another.",
+    "neither matter nor energy.",
+  ]),
+  mc(71, "Two waves have the same frequency, but wave A has twice the amplitude of wave B. Wave A carries:", [
+    "more energy than wave B.",
+    "less energy than wave B.",
+    "the same energy as wave B.",
+    "twice the wavelength of wave B.",
+  ]),
+  mc(72, "Which of the following is a correct example of a longitudinal wave?", [
+    "A sound wave in air, where compressions and rarefactions travel in the direction of energy transfer.",
+    "A wave travelling along a plucked guitar string.",
+    "A light wave travelling through space.",
+    "A ripple spreading across the surface of a pond.",
+  ]),
+  mc(73, "As a wave passes from one medium into a denser medium, which properties change while the frequency stays the same?", [
+    "The wave's speed and its wavelength both change.",
+    "Only the wave's frequency changes.",
+    "Only the wave's amplitude changes.",
+    "None of the wave's properties change.",
+  ]),
+  mc(74, "The Doppler effect describes the change in observed:", [
+    "frequency (and wavelength) of a wave due to relative motion between the source and the observer.",
+    "amplitude of a wave due to the distance from the source.",
+    "speed of the wave itself.",
+    "direction of the wave only, never its frequency.",
+  ]),
+  mc(75, "Which colour of visible light has the shortest wavelength?", [
+    "Violet.",
+    "Red.",
+    "Orange.",
+    "Green.",
+  ]),
+  mc(76, "Compared with visible light, X-rays have:", [
+    "a shorter wavelength and higher frequency.",
+    "a longer wavelength and lower frequency.",
+    "exactly the same wavelength.",
+    "no defined wavelength.",
+  ]),
+  mc(77, "A ray of light travels from glass into air. Since air is optically less dense than glass, the ray:", [
+    "speeds up and bends away from the normal.",
+    "slows down and bends toward the normal.",
+    "speeds up and bends toward the normal.",
+    "does not change direction at all.",
+  ], RAY_OUT_OF_GLASS),
+  mc(78, "The critical angle for a glass–air boundary is the angle of incidence in the glass at which:", [
+    "the refracted ray travels exactly along the boundary, at a refraction angle of 90°.",
+    "the light is completely absorbed by the glass.",
+    "the light ray reverses back exactly along its original path.",
+    "the light travels perpendicular to the boundary.",
+  ]),
+  mc(79, "Which observation would be the clearest evidence that light behaves as a wave?", [
+    "Light diffracts (spreads out) when passing through a very narrow slit.",
+    "Light travels in straight lines through a vacuum.",
+    "Light reflects off a flat mirror.",
+    "Light can be focused to a point by a lens.",
+  ]),
+  mc(80, "When two identical waves arrive at a point exactly in phase (crest meets crest), the resulting displacement is an example of:", [
+    "constructive interference, producing a larger amplitude.",
+    "destructive interference, producing zero displacement.",
+    "refraction of the wave.",
+    "diffraction of the wave.",
+  ]),
+  mc(81, "A standing wave pattern on a string requires:", [
+    "waves travelling in opposite directions that interfere to produce fixed nodes and antinodes.",
+    "a single wave travelling in only one direction.",
+    "two waves of very different frequency.",
+    "a wave travelling through a vacuum.",
+  ]),
+  mc(82, "The pitch of a musical note is most closely related to a sound wave's:", [
+    "frequency.",
+    "amplitude.",
+    "speed in air.",
+    "direction of travel.",
+  ]),
+  mc(83, "Two radio stations broadcast at different frequencies. Since all radio waves travel at the same speed in air, their signals must have:", [
+    "different wavelengths.",
+    "the same wavelength.",
+    "different speeds through the air.",
+    "no relationship between their wavelengths at all.",
+  ]),
+  mc(84, "Compared with visible light, the microwaves used in a microwave oven have a wavelength that is:", [
+    "longer than visible light but shorter than most radio waves.",
+    "shorter than visible light.",
+    "exactly the same as visible light.",
+    "longer than all radio waves.",
+  ]),
+  // --- Electricity and magnetism ---
+  mc(85, "An object becomes positively charged when it:", [
+    "loses electrons, leaving an excess of positive charge.",
+    "gains electrons.",
+    "gains protons.",
+    "creates new positive charge.",
+  ]),
+  mc(86, "Charging by induction differs from charging by conduction because induction:", [
+    "does not require direct contact between the charged object and the object being charged.",
+    "requires the two objects to touch directly.",
+    "transfers no charge at all.",
+    "only works between two insulators.",
+  ]),
+  mc(87, "An electric field is defined as a region in which:", [
+    "a charged object experiences a force.",
+    "only positive charges can exist.",
+    "electric current always flows.",
+    "magnetic effects always occur.",
+  ]),
+  mc(88, "The direction of an electric field at a point is defined as the direction of the force on:", [
+    "a small positive test charge placed at that point.",
+    "a small negative test charge placed at that point.",
+    "any charge, regardless of its sign.",
+    "the nearest free electron.",
+  ]),
+  mc(89, "Two like charges (both positive, or both negative) placed near each other will:", [
+    "repel each other.",
+    "attract each other.",
+    "exert no force on each other.",
+    "neutralise each other.",
+  ]),
+  mc(90, "According to Coulomb's law, if the magnitude of one of two point charges is doubled while the distance between them stays the same, the force between them:", [
+    "doubles.",
+    "quadruples.",
+    "halves.",
+    "stays the same.",
+  ]),
+  mc(91, "A charged object placed between two oppositely charged parallel plates experiences an electric force that is:", [
+    "constant in size and direction anywhere between the plates, due to the uniform field.",
+    "strongest only near one of the plates.",
+    "zero at the centre of the gap.",
+    "always directed along the plates, not between them.",
+  ]),
+  mc(92, "Electric current in a metal wire is carried by the movement of:", [
+    "free (delocalised) electrons through the metal's lattice.",
+    "protons moving through the wire.",
+    "the metal's positive ions.",
+    "positive 'holes' only.",
+  ]),
+  mc(93, "Which of the following would decrease the resistance of a metal wire?", [
+    "Increasing its cross-sectional area.",
+    "Increasing its length.",
+    "Increasing its temperature.",
+    "Using a less conductive material.",
+  ]),
+  mc(94, "For a non-ohmic device such as a filament globe, the relationship between voltage and current:", [
+    "is not a straight line, because the globe's resistance changes as it heats up.",
+    "is a straight line through the origin.",
+    "is always exactly proportional.",
+    "does not exist.",
+  ]),
+  mc(95, "In a series circuit, if one globe's filament breaks, the other globes in the same loop will:", [
+    "also go out, because the circuit is broken and no current can flow.",
+    "stay lit as normal.",
+    "become brighter.",
+    "be completely unaffected.",
+  ]),
+  mc(96, "In a parallel circuit, if one branch is disconnected, the other branches will:", [
+    "continue to operate normally, since each branch has its own complete path for current.",
+    "also stop working.",
+    "become dimmer.",
+    "carry no current at all.",
+  ]),
+  mc(97, "Adding more resistors in series in a circuit will cause the total resistance to:", [
+    "increase, since the current must pass through each resistor in turn.",
+    "decrease.",
+    "stay exactly the same.",
+    "become the average of the resistances.",
+  ]),
+  mc(98, "A galvanometer adapted to work as an ammeter needs a very low resistance because:", [
+    "it is connected in series and should not significantly change the current it is measuring.",
+    "it is connected in parallel and needs to draw as much current as possible.",
+    "high resistance would make it read voltage instead of current.",
+    "resistance is irrelevant to how an ammeter works.",
+  ]),
+  mc(99, "The strength of the magnetic field produced by a solenoid can be increased by:", [
+    "increasing the number of turns of wire or adding a soft iron core.",
+    "decreasing the current through it.",
+    "reducing the number of turns of wire.",
+    "removing any iron core from inside it.",
+  ]),
+  mc(100, "A magnetic compass placed near a current-carrying wire will:", [
+    "deflect, showing that the current produces a magnetic field around the wire.",
+    "not be affected at all by the current.",
+    "only be affected by permanent magnets, not currents.",
+    "always point directly at the wire, regardless of the current's direction.",
+  ]),
+];
+
+// ========================================================================
 // Short answer — s01..s50 (factual / reasoning only, no calculations)
 // ========================================================================
 
@@ -464,4 +774,69 @@ const saQuestions: ShortQuestion[] = [
   sa(50, 2, "Explain why a soft iron core, rather than a steel core, is used in an electromagnet."),
 ];
 
-export const questions: Question[] = [...mcQuestions, ...saQuestions];
+// ========================================================================
+// Short answer — s51..s100 (second bank, factual / reasoning only)
+// ========================================================================
+
+const saQuestions2: ShortQuestion[] = [
+  // --- Fundamentals of mechanics ---
+  sa(51, 2, "Explain why velocity is a vector quantity but speed is a scalar quantity."),
+  sa(52, 2, "Explain why an object moving at constant speed around a circular path is still accelerating."),
+  sa(53, 3, "Describe the shape of a velocity–time graph for an object that starts at rest and undergoes constant acceleration, then travels at constant velocity, then decelerates uniformly back to rest."),
+  sa(54, 2, "Explain the difference between average velocity and instantaneous velocity."),
+  sa(55, 3, "Explain why all objects in free fall near Earth's surface (ignoring air resistance) have the same acceleration, regardless of their mass."),
+  sa(56, 2, "State Newton's first law of motion and explain what is meant by 'inertia'."),
+  sa(57, 3, "Explain, using Newton's second law, why a heavily loaded truck is harder to accelerate than an empty one, for the same driving force."),
+  sa(58, 2, "Explain what is meant by a 'net force' and state what happens to an object's motion when the net force on it is zero."),
+  sa(59, 3, "Explain why, according to Newton's third law, forces always occur in pairs, and explain why these paired forces do not cancel out for a single object."),
+  sa(60, 2, "Distinguish between mass and weight."),
+  sa(61, 3, "Explain why friction can sometimes be a useful force and sometimes an unwanted force, giving one example of each."),
+  sa(62, 2, "Define kinetic energy and gravitational potential energy."),
+  sa(63, 3, "Explain the law of conservation of energy and describe one example of energy being transformed from one form to another."),
+  sa(64, 2, "Explain what is meant by an 'isolated system' in the context of the conservation of momentum."),
+  sa(65, 3, "Explain, in terms of Newton's third law, why the total momentum of two colliding objects is conserved even though each object's individual momentum changes."),
+  sa(66, 2, "Distinguish between elastic and inelastic collisions in terms of what quantities are conserved."),
+  sa(67, 3, "Explain why a longer stopping time for a car (for example, braking gently rather than sharply) results in a smaller average force on the passengers."),
+  sa(68, 2, "Explain why wearing a seatbelt reduces the risk of injury in a car crash, in terms of impulse and momentum."),
+  // --- Waves ---
+  sa(69, 2, "Explain what is meant by the amplitude of a wave and how it relates to the energy the wave carries."),
+  sa(70, 3, "Explain the difference between the way a wave transfers energy and the way a moving object transfers matter."),
+  sa(71, 2, "Explain, in words, the relationship between a wave's speed, its frequency and its wavelength."),
+  sa(72, 3, "The diagram shows a ray of light passing from glass into air. Explain why the light's frequency stays the same even though its speed and wavelength change at the boundary.", RAY_OUT_OF_GLASS),
+  sa(73, 2, "Describe what happens to the wavelength and frequency of a wave as it moves from a denser medium into a less dense one, given that its speed increases."),
+  sa(74, 3, "Explain why sound waves can be heard around corners more easily than light waves can be seen around them, in terms of diffraction and wavelength."),
+  sa(75, 2, "Explain what happens during total internal reflection at a boundary between a denser and a less dense medium."),
+  sa(76, 3, "Explain how an optical fibre uses total internal reflection to transmit light over long distances."),
+  sa(77, 2, "Explain the principle of superposition of waves."),
+  sa(78, 3, "Distinguish between constructive interference and destructive interference, describing the conditions needed for each."),
+  sa(79, 3, "Explain how a standing wave forms when a wave reflects back along a string that is fixed at one end."),
+  sa(80, 2, "Explain why the Doppler effect causes a police siren to sound higher in pitch as it approaches and lower as it moves away."),
+  sa(81, 2, "Explain what redshift indicates about the motion of a distant galaxy relative to Earth."),
+  sa(82, 3, "Order the following regions of the electromagnetic spectrum from longest to shortest wavelength: visible light, gamma rays, radio waves, X-rays. Explain the general relationship between a region's wavelength and its energy."),
+  sa(83, 2, "Explain why all electromagnetic waves can travel through a vacuum, unlike sound waves."),
+  sa(84, 3, "Explain the difference between reflection and refraction of a light ray at a boundary between two media."),
+  // --- Electricity and magnetism ---
+  sa(85, 2, "Explain how an object becomes negatively charged, in terms of the movement of electrons."),
+  sa(86, 3, "Explain the process of charging an object by induction, without the charged and neutral objects ever touching."),
+  sa(87, 2, "Explain what electric field lines represent, in terms of their direction and their spacing."),
+  sa(88, 2, "The diagram shows the electric field between two point charges. Explain why electric field lines never cross one another.", FIELD_DIPOLE),
+  sa(89, 3, "Explain how the electrostatic force between two charged objects changes as (a) the size of the charges changes and (b) the distance between them changes, without using numbers."),
+  sa(90, 2, "Distinguish between an insulator and a conductor in terms of the movement of electrons."),
+  sa(91, 2, "Explain why the electric field between two oppositely charged parallel plates is uniform."),
+  sa(92, 3, "Explain the difference between electric potential energy and electric potential difference (voltage)."),
+  sa(93, 2, "Explain the difference between conventional current and the actual flow of electrons in a circuit."),
+  sa(94, 3, "Explain how the resistance of a wire is affected by its length, its cross-sectional area and its temperature."),
+  sa(95, 3, "Compare an ohmic conductor with a non-ohmic device such as a filament globe, in terms of the relationship between voltage and current."),
+  sa(96, 3, "Compare how current and voltage are shared among components connected in series with how they are shared among components connected in parallel."),
+  sa(97, 2, "Explain why adding resistors in parallel decreases a circuit's total resistance."),
+  sa(98, 2, "Explain why an ammeter is designed to have a very low resistance, and a voltmeter a very high resistance."),
+  sa(99, 3, "Describe the magnetic field pattern produced by a current-carrying solenoid, and explain how it compares with the field of a bar magnet."),
+  sa(100, 2, "Explain two ways in which the strength of the magnetic field produced by an electromagnet could be increased."),
+];
+
+export const questions: Question[] = [
+  ...mcQuestions,
+  ...mcQuestions2,
+  ...saQuestions,
+  ...saQuestions2,
+];
