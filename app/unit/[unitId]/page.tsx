@@ -1,24 +1,32 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AttemptHistory } from "@/components/AttemptHistory";
 import { Formula } from "@/components/Formula";
+import { HistoryUnavailable } from "@/components/HistoryUnavailable";
 import { Shell } from "@/components/Shell";
-import { UnitStatsPanel } from "@/components/UnitStatsPanel";
-import { UNITS, getUnit, unitIsNew } from "@/content";
+import { StartQuiz } from "@/components/StartQuiz";
+import { getUnit, unitIsNew } from "@/content";
 import { daysUntil, examsForUnit } from "@/content/exams";
-
-export function generateStaticParams() {
-  return UNITS.map((u) => ({ unitId: u.id }));
-}
+import { requirePageUser } from "@/lib/auth.server";
+import { loadUnitHistory } from "@/lib/db/queries/history.server";
 
 export default async function UnitPage({
   params,
 }: {
   params: Promise<{ unitId: string }>;
 }) {
+  const { user, degraded } = await requirePageUser();
   const { unitId } = await params;
   const unit = getUnit(unitId);
   if (!unit) notFound();
+
+  // The database being down must never break the page: the history section
+  // shows a notice, and "Start quiz" still works (research R19).
+  const history = degraded
+    ? ({ status: "unavailable" } as const)
+    : await loadUnitHistory(user.id, unit.id);
+  const resume = history.status === "ok" ? history.data.resume : null;
 
   const exams = examsForUnit(unit.id);
 
@@ -52,15 +60,25 @@ export default async function UnitPage({
         );
       })}
 
-      <UnitStatsPanel unitId={unit.id} />
+      {/* Start / continue come first, above the history and the reference material (mobile-first). */}
+      <div className="start-actions">
+        {resume ? (
+          <>
+            <Link
+              href={`/unit/${unit.id}/quiz?attempt=${resume.attemptId}`}
+              className="rd-btn primary xl"
+              style={{ width: "100%", justifyContent: "center", fontWeight: 600 }}
+            >
+              Continue attempt ({resume.answered} of {resume.total} answered)
+            </Link>
+            <StartQuiz unitId={unit.id} label="Start new attempt" primary={false} />
+          </>
+        ) : (
+          <StartQuiz unitId={unit.id} />
+        )}
+      </div>
 
-      <Link
-        href={`/unit/${unit.id}/quiz`}
-        className="rd-btn primary xl"
-        style={{ width: "100%", justifyContent: "center", fontWeight: 600 }}
-      >
-        Start quiz
-      </Link>
+      {history.status === "ok" ? <AttemptHistory history={history.data} /> : <HistoryUnavailable />}
 
       {unit.formulas && unit.formulas.length > 0 && (
         <section style={{ marginTop: 32 }}>

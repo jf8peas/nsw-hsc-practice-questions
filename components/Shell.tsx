@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { UserMenu } from "@/components/UserMenu";
+
 export function Shell({
   backHref,
   children,
@@ -34,6 +36,7 @@ export function Shell({
               <span className="subtitle">Year 11 &amp; 12</span>
             </div>
           </Link>
+          <UserMenu />
         </div>
       </header>
       <main className="app-main">

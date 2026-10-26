@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Shell } from "@/components/Shell";
+import { requirePageUser } from "@/lib/auth.server";
 import type { Unit } from "@/content";
 import { unitIsNew, unitsByYear } from "@/content";
 
@@ -31,7 +32,8 @@ function UnitCard({ unit }: { unit: Unit }) {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  await requirePageUser();
   const groups = unitsByYear();
 
   return (

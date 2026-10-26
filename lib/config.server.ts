@@ -1,0 +1,30 @@
+import "server-only";
+
+export interface AppConfig {
+  /** AI-graded short answers per student per Sydney day. 0 turns LLM grading off. */
+  llmDailyCap: number;
+  /** Short-answer submissions per user per minute. */
+  gradeRateLimit: number;
+  /** Short-answer submissions per IP per minute (looser backstop: schools share IPs). */
+  gradeIpRateLimit: number;
+  /** New attempts per user per minute. */
+  attemptRateLimit: number;
+}
+
+function intOr(value: string | undefined, fallback: number, min: number): number {
+  if (value === undefined || value.trim() === "") return fallback;
+  const n = Number(value);
+  return Number.isInteger(n) && n >= min ? n : fallback;
+}
+
+/** Parsed numeric settings. Never throws, so importing it is safe during `next build`. */
+export function getConfig(
+  env: Record<string, string | undefined> = process.env,
+): AppConfig {
+  return {
+    llmDailyCap: intOr(env.LLM_DAILY_CAP, 40, 0),
+    gradeRateLimit: intOr(env.GRADE_RATE_LIMIT, 20, 1),
+    gradeIpRateLimit: intOr(env.GRADE_IP_RATE_LIMIT, 150, 1),
+    attemptRateLimit: intOr(env.ATTEMPT_RATE_LIMIT, 20, 1),
+  };
+}

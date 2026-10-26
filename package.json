@@ -9,22 +9,41 @@
     "lint": "next lint",
     "gen:formulas": "tsx scripts/gen-formula-html.ts",
     "validate": "tsx scripts/validate-content.ts",
-    "prebuild": "tsx scripts/gen-formula-html.ts && tsx scripts/validate-content.ts"
+    "prebuild": "tsx scripts/gen-formula-html.ts && tsx scripts/validate-content.ts",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "delete-student": "tsx --conditions=react-server scripts/delete-student.ts",
+    "vercel-build": "npm run db:migrate && npm run build"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
     "@upstash/ratelimit": "^2.0.5",
     "@upstash/redis": "^1.34.3",
+    "drizzle-orm": "^0.45.4",
     "katex": "^0.16.11",
     "next": "^15.1.0",
+    "next-auth": "5.0.0-beta.32",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "@eslint/eslintrc": "^3.3.7",
+    "@next/env": "15.5.24",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/katex": "^0.16.7",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.28",
+    "jsdom": "^29.1.1",
+    "server-only": "^0.0.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^5.0.5"
   }
 }
