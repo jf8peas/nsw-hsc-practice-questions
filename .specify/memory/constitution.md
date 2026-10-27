@@ -1,45 +1,40 @@
 <!--
 Sync Impact Report
-- Version change: 2.3.0 → 2.4.0 (MINOR: expanded guidance in Principles I, II, III, IV, VI, VII
-  and IX, plus the Quality Gates; nothing removed or redefined). Driven by the "Learn From
-  Mistakes" requirements (spec 002): concept tags, shared concept summaries and illustrations,
-  and MC wrong-option explanations.
+- Version change: 2.6.0 → 2.7.0 (MINOR: expanded guidance; nothing removed or redefined).
+  Driven by spec 002 (Learn From Mistakes). Earlier uncommitted amendments are included in the
+  same commit: 2.5.0 (independent review of concept content: Principles II, VI, VII and the
+  Quality Gates testing list) and 2.6.0 (per-unit concept-ready and explanations-complete
+  markers: Principles III and IV).
 - Modified principles:
-  - I. New bullets: MC wrong-option explanations MUST live in the server-only answer key
-    (answers.ts) and MAY be shown only after the student answers that question. Concept summaries
-    MUST NOT reproduce any model answer, rubric text or correct MC option.
-  - II. New bullets: no new per-student fields (concept counts MUST be derived from stored
-    results). Other server-side state MAY include shared concept content (summary, illustration
-    and brief, model, generation time, status), which is not personal data and MUST NOT contain
-    any student's answers or name.
-  - III. New bullets: each unit MUST list its concepts in concepts.ts; every question MUST carry
-    a concept tag from its unit's list; shipped concept ids MUST NEVER be renamed or reused.
-  - IV. New bullet: the validator MUST check concept tags, concept id uniqueness and MC
-    wrong-option explanations.
-  - VI. New bullet: if a concept summary or illustration cannot be generated, the unit page MUST
-    still list weak concepts by their one-line descriptions, with no error and no blocked retest.
-  - VII. New bullets: concept generation has its own daily cap (separate from LLM_DAILY_CAP) and
-    runs only for a concept with nothing stored or on teacher regeneration; ILLUSTRATION_MODEL
-    and its key follow the server-only secret rules; illustrations MUST be shown via <img>, never
-    as inline HTML or SVG.
-  - IX. New bullet: the concept review/regenerate page MUST check ADMIN_EMAILS on the server.
-  - All other principles unchanged.
+  - I. New bullet: concept review and past-attempt MC explanations MUST get answer-key material
+    only by calling functions exported from lib/grading.server.ts. That material MUST stay
+    server-side and MUST NOT be stored per result.
+  - II. Per-attempt storage now includes whether the attempt is a retest. The R6 reference is
+    replaced by the rule itself. The two "other server-side state" bullets are merged into one
+    that lists shared concept content in full (summary and illustration, each with generator
+    model, generation time, review status, reviewer model, reviewer reason, review time and who
+    approved it, plus at most one pending or failed replacement for each). The reviewer's reason
+    MAY quote model answers or rubrics, so it MUST be shown to teachers only.
+  - VII. Concept generation MUST run only in four cases: a concept with nothing stored, a
+    teacher's regeneration, the single automatic regeneration after a failed review (Principle
+    VI), and a retry of a pending review.
+  - All other principles unchanged by 2.7.0.
 - Added sections: none
 - Removed sections: none
-- Quality Gates: constitution check gains three items (no MC explanation in any client bundle;
-  illustrations rendered only through <img>; concept generation enforces its own cap). Testing
-  gains three items (concept cap falls back to descriptions only; concept counts follow the
-  R6 rule; the regenerate route rejects non-allowlisted emails).
+- Quality Gates: the "R6 rule" test item is replaced by the rule itself.
 - Templates requiring updates:
   - .specify/templates/plan-template.md ⚠ pending: its Constitution Check is still the generic
     placeholder; it must reference Principles I–IX and the Quality Gates (task in tasks.md).
   - .specify/templates/spec-template.md ✅ no change needed
   - .specify/templates/tasks-template.md ✅ no change needed
   - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
-    ⚠ pending: not yet reviewed against 2.4.0 (additive rules only, no conflicts expected)
-  - specs/002 (Learn From Mistakes) ⚠ pending: spec not yet created in the repo
+    ⚠ pending: not yet reviewed against 2.7.0 (additive rules only, no conflicts expected)
+  - specs/002-learn-from-mistakes/spec.md ⚠ pending: FR-001/FR-002 scope, Concept Content
+    versions, the retest-when-DB-down edge case, the retest question mix, and the self-marking
+    open question
   - README.md ⚠ pending (task in tasks.md)
-  - .env.example ⚠ pending (task in tasks.md; also add ILLUSTRATION_MODEL and the concept cap)
+  - .env.example ⚠ pending (task in tasks.md; also add ILLUSTRATION_MODEL, REVIEW_MODEL and the
+    concept cap)
 - Follow-up TODOs: TODO(ACCESSIBILITY_TARGET)
 Legend: rules marked [PRACTICE] describe what the repo already does today. Rules marked
 [DECISION] are team decisions that are not yet current practice.
@@ -80,6 +75,9 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   shown to the student only after they answer that question.
 - Concept summaries explain a concept in general. They MUST NOT reproduce any question's model
   answer, rubric text or correct MC option.
+- Concept review and past-attempt MC explanations MUST get answer-key material only by calling
+  functions exported from `lib/grading.server.ts`. That material MUST stay server-side and MUST
+  NOT be stored per result.
 
 Rationale: a practice tool whose answers can be read from the page source is worthless. The
 `server-only` import makes the build fail if client code ever pulls the key in.
@@ -97,7 +95,7 @@ Rationale: a practice tool whose answers can be read from the page source is wor
   - per student: Google account id (`sub`), name, email, and the timestamps created, last
     sign-in and last answer;
   - per quiz attempt: the unit id, start and completion times, the ordered list of question ids
-    drawn, and the MC option display order;
+    drawn, the MC option display order, and whether the attempt is a retest;
   - per result: a quiz-attempt id, unit id, question id, answer submitted, marks awarded, max
     marks, graded-by LLM/self/auto, and timestamp;
   - per AI-graded result: the feedback text and the rubric points hit and missed, exactly as
@@ -112,12 +110,16 @@ Rationale: a practice tool whose answers can be read from the page source is wor
   delete one student's data immediately on request.
 - Students are minors. Before production launch the project MUST have school approval / consent
   covering this data.
-- No new per-student fields. A student's concept counts (R6) MUST be derived from their stored
-  results, not stored separately.
-- Other server-side state is limited to rate-limit and daily-cap counters (Principle VII).
-- Other server-side state MAY include shared concept content: per concept id, the summary text,
-  the illustration and its brief, the model used, the generation time and a status. This is
-  shared content, not personal data, and MUST NOT contain any student's answers or name.
+- No new per-student fields. A student's concept counts MUST be derived from their stored
+  results, not stored separately: a wrong answer sets the concept's count to 3, a correct answer
+  takes 1 away, and the concept clears at 0.
+- Other server-side state is limited to rate-limit and daily-cap counters (Principle VII)
+  and shared concept content. Shared concept content is, per concept id: the summary and the
+  illustration (with its brief), each with its own generator model, generation time, review
+  status, reviewer model, reviewer reason, review time and who approved it (reviewer or
+  teacher), plus at most one pending or failed replacement for each. It is not personal data and
+  MUST NOT contain any student's answers or name. The reviewer's reason MAY quote model answers
+  or rubrics, so it MUST be shown to teachers only.
 
 Rationale: scores must follow the student across devices and give the teacher a view of
 progress. Collection is limited to what that needs, and data does not outlive its use.
@@ -132,10 +134,16 @@ progress. Collection is limited to what that needs, and data does not outlive it
   [DECISION] Question ids are also foreign keys in the results table, which is one more reason.
   New questions get new ids appended.
 - [DECISION] Removing a question from a unit MUST NOT delete its stored results.
-- Each unit MUST list its concepts in `content/units/<unit-id>/concepts.ts`: an id and a one-line
-  description each.
-- Every question MUST carry a concept tag from its unit's list.
+- Each concept-ready unit MUST list its concepts in `content/units/<unit-id>/concepts.ts`: an id
+  and a one-line description each.
+- Every question in a concept-ready unit MUST carry a concept tag from its unit's list.
 - Shipped concept ids MUST NEVER be renamed or reused, because student progress depends on them.
+- [DECISION] Units adopt concepts and MC wrong-option explanations one at a time. `meta.ts` MAY
+  mark a unit concept-ready only when every question in it is tagged, and MAY mark it
+  explanations-complete only when every wrong MC option in it has an explanation. A unit that is
+  not marked keeps working as it did before: it has no "Things you need to know", no retest and
+  no wrong-option explanations, and it MUST NOT show an error. The markers are public metadata
+  and MUST NOT contain answers.
 
 Rationale: versioning content with the code means a deploy can never serve questions without
 matching answers.
@@ -148,8 +156,9 @@ matching answers.
 - Build-time generation is preferred over shipping heavy libraries to the client. For example,
   KaTeX formulas are pre-rendered by `scripts/gen-formula-html.ts`, which keeps KaTeX out of the
   client bundle.
-- The validator MUST check that every question has a valid concept tag, every concept id is
-  unique, and every wrong MC option has an explanation.
+- The validator MUST check that every question in a concept-ready unit has a valid concept tag
+  and every concept id is unique, and that every wrong MC option in an explanations-complete unit
+  has an explanation. It MUST fail the build if a unit is marked but does not meet this.
 
 Rationale: the validator already checks id namespacing and uniqueness, answer-key coverage, MC
 `correctText` membership, model answers, one rubric point per mark, and exam-to-unit references.
@@ -187,6 +196,11 @@ mandatory here. Current units follow it, but the README does not yet say so.
 - If a concept summary or illustration cannot be generated (no key, failure, over the cap), the
   unit page MUST still list the student's weak concepts by their one-line descriptions. It MUST
   NOT show an error or block a retest.
+- Every concept summary and illustration MUST pass an independent reviewer LLM, using a different
+  model from the generator, before students see it. The reviewer checks it against the concept
+  description and the unit's model answers and rubrics. A failed item is regenerated once; if it
+  fails again it MUST be held back, students see only the one-line description, and it is flagged
+  for teacher review.
 
 Rationale: students need to trust their marks, and a flaky or missing LLM or database must never
 block practice.
@@ -201,7 +215,8 @@ block practice.
   - (b) the existing per-IP rate limit, plus a per-user per-minute limit
     (`lib/ratelimit.server.ts`: Upstash, with in-memory fallback).
 - Concept generation MUST have its own daily cap, separate from `LLM_DAILY_CAP`, and MUST run
-  only for a concept with nothing stored yet, or when a teacher asks to regenerate it.
+  only in four cases: a concept with nothing stored yet, a teacher's regeneration, the single
+  automatic regeneration after a failed review (Principle VI), and a retry of a pending review.
 - Secrets MUST be read only in server-side code: `app/api/**`, `lib/*.server.ts`,
   `middleware.ts`, `drizzle.config.ts` and `scripts/**`. They MUST NOT be read in client
   components or anything bundled for the browser, and nothing may be prefixed `NEXT_PUBLIC_`.
@@ -213,6 +228,8 @@ block practice.
     and take secrets from the environment or `.env.local`, which is never committed.
 - `ILLUSTRATION_MODEL` and any key it needs follow the same server-only rules as
   `OPENROUTER_API_KEY`.
+- `REVIEW_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. Reviewer calls count
+  toward the concept-generation cap.
 - In production, missing auth or database config MUST fail closed (refuse to serve), never fall
   back to open access. In local development only, a documented dev-login MAY stand in for Google,
   and results MAY be stored in a local or branch database. Without `OPENROUTER_API_KEY`, short
@@ -282,8 +299,10 @@ Every feature plan MUST satisfy:
   - production fails closed when auth/DB config is missing;
   - the daily cap falls back to self-marking;
   - the concept cap falls back to descriptions only;
-  - concept counts follow the R6 rule;
-  - the regenerate route rejects non-allowlisted emails.
+  - concept counts follow the rule: a wrong answer sets the count to 3, a correct answer takes 1
+    away, and the concept clears at 0;
+  - the regenerate route rejects non-allowlisted emails;
+  - an item that fails review twice is never shown to students.
   Other logic MAY have tests but is not required to.
 - Accessibility: no target is currently set.
   TODO(ACCESSIBILITY_TARGET): decide a target for quiz flows (e.g. WCAG 2.2 AA), or omit.
@@ -308,4 +327,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.4.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
+**Version**: 2.7.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
