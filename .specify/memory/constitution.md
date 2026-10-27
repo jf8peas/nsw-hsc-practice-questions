@@ -1,37 +1,35 @@
 <!--
 Sync Impact Report
-- Version change: 2.6.0 → 2.7.0 (MINOR: expanded guidance; nothing removed or redefined).
-  Driven by spec 002 (Learn From Mistakes). Earlier uncommitted amendments are included in the
-  same commit: 2.5.0 (independent review of concept content: Principles II, VI, VII and the
-  Quality Gates testing list) and 2.6.0 (per-unit concept-ready and explanations-complete
-  markers: Principles III and IV).
+- Version change: 2.7.0 → 2.8.0 (MINOR: retest attempts replaced by weighted normal quizzes; no
+  principle removed). Decision (spec 002): there is no separate retest. Every normal quiz in a
+  concept-ready unit fills up to half its places with questions on the student's uncleared
+  concepts; the rest are drawn as usual. These quizzes count normally toward averages, best,
+  latest and trend. The "whether the attempt is a retest" flag added in 2.7.0 is withdrawn.
 - Modified principles:
-  - I. New bullet: concept review and past-attempt MC explanations MUST get answer-key material
-    only by calling functions exported from lib/grading.server.ts. That material MUST stay
-    server-side and MUST NOT be stored per result.
-  - II. Per-attempt storage now includes whether the attempt is a retest. The R6 reference is
-    replaced by the rule itself. The two "other server-side state" bullets are merged into one
-    that lists shared concept content in full (summary and illustration, each with generator
-    model, generation time, review status, reviewer model, reviewer reason, review time and who
-    approved it, plus at most one pending or failed replacement for each). The reviewer's reason
-    MAY quote model answers or rubrics, so it MUST be shown to teachers only.
-  - VII. Concept generation MUST run only in four cases: a concept with nothing stored, a
-    teacher's regeneration, the single automatic regeneration after a failed review (Principle
-    VI), and a retry of a pending review.
-  - All other principles unchanged by 2.7.0.
+  - II. Per-attempt storage no longer includes whether the attempt is a retest.
+  - III. The unit-readiness bullet now says an unmarked unit has no weighting toward weak
+    concepts (instead of no retest). New bullet: quiz questions MUST come only from the unit's
+    question bank; no quiz question is written by an LLM.
+  - VI. The concept-generation fallback bullet now says the unit page MUST NOT show an error or
+    stop the student starting a quiz (instead of block a retest). New bullet: weighting a quiz
+    toward weak concepts needs the student's saved results; if the database cannot be read, the
+    quiz MUST still start, drawn without weighting, as in the existing degraded mode.
+  - All other principles unchanged by 2.8.0.
 - Added sections: none
 - Removed sections: none
-- Quality Gates: the "R6 rule" test item is replaced by the rule itself.
+- Quality Gates: unchanged.
 - Templates requiring updates:
   - .specify/templates/plan-template.md ⚠ pending: its Constitution Check is still the generic
     placeholder; it must reference Principles I–IX and the Quality Gates (task in tasks.md).
   - .specify/templates/spec-template.md ✅ no change needed
   - .specify/templates/tasks-template.md ✅ no change needed
   - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
-    ⚠ pending: not yet reviewed against 2.7.0 (additive rules only, no conflicts expected)
-  - specs/002-learn-from-mistakes/spec.md ⚠ pending: FR-001/FR-002 scope, Concept Content
-    versions, the retest-when-DB-down edge case, the retest question mix, and the self-marking
-    open question
+    ⚠ pending: not yet reviewed against 2.8.0 (additive rules only, no conflicts expected)
+  - specs/002-learn-from-mistakes/spec.md ⚠ pending: replace User Story 4 and FR-033–FR-041
+    (retests) with weighted quizzes; remove the Retest Attempt entity and the retest flag in
+    FR-053; update other mentions of retests; plus FR-001/FR-002 scope, Concept Content
+    versions, the retest question mix (becomes the weighted-quiz MC/short-answer mix), the
+    database-down case (becomes an unweighted quiz), and the self-marking open question
   - README.md ⚠ pending (task in tasks.md)
   - .env.example ⚠ pending (task in tasks.md; also add ILLUSTRATION_MODEL, REVIEW_MODEL and the
     concept cap)
@@ -95,7 +93,7 @@ Rationale: a practice tool whose answers can be read from the page source is wor
   - per student: Google account id (`sub`), name, email, and the timestamps created, last
     sign-in and last answer;
   - per quiz attempt: the unit id, start and completion times, the ordered list of question ids
-    drawn, the MC option display order, and whether the attempt is a retest;
+    drawn, and the MC option display order;
   - per result: a quiz-attempt id, unit id, question id, answer submitted, marks awarded, max
     marks, graded-by LLM/self/auto, and timestamp;
   - per AI-graded result: the feedback text and the rubric points hit and missed, exactly as
@@ -141,9 +139,11 @@ progress. Collection is limited to what that needs, and data does not outlive it
 - [DECISION] Units adopt concepts and MC wrong-option explanations one at a time. `meta.ts` MAY
   mark a unit concept-ready only when every question in it is tagged, and MAY mark it
   explanations-complete only when every wrong MC option in it has an explanation. A unit that is
-  not marked keeps working as it did before: it has no "Things you need to know", no retest and
-  no wrong-option explanations, and it MUST NOT show an error. The markers are public metadata
-  and MUST NOT contain answers.
+  not marked keeps working as it did before: it has no "Things you need to know", no weighting
+  toward weak concepts, and no wrong-option explanations, and it MUST NOT show an error. The
+  markers are public metadata and MUST NOT contain answers.
+- Quiz questions MUST come only from the unit's question bank. No quiz question is written by an
+  LLM.
 
 Rationale: versioning content with the code means a deploy can never serve questions without
 matching answers.
@@ -195,12 +195,14 @@ mandatory here. Current units follow it, but the README does not yet say so.
   unreachable: if it can be read and the student's row is missing, the session MUST be refused.
 - If a concept summary or illustration cannot be generated (no key, failure, over the cap), the
   unit page MUST still list the student's weak concepts by their one-line descriptions. It MUST
-  NOT show an error or block a retest.
+  NOT show an error or stop the student starting a quiz.
 - Every concept summary and illustration MUST pass an independent reviewer LLM, using a different
   model from the generator, before students see it. The reviewer checks it against the concept
   description and the unit's model answers and rubrics. A failed item is regenerated once; if it
   fails again it MUST be held back, students see only the one-line description, and it is flagged
   for teacher review.
+- Weighting a quiz toward weak concepts needs the student's saved results. If the database cannot
+  be read, the quiz MUST still start, drawn without weighting, as in the existing degraded mode.
 
 Rationale: students need to trust their marks, and a flaky or missing LLM or database must never
 block practice.
@@ -327,4 +329,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.7.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
+**Version**: 2.8.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
