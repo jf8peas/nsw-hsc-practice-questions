@@ -25,11 +25,9 @@ Sync Impact Report
   - .specify/templates/tasks-template.md ✅ no change needed
   - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
     ⚠ pending: not yet reviewed against 2.8.0 (additive rules only, no conflicts expected)
-  - specs/002-learn-from-mistakes/spec.md ⚠ pending: replace User Story 4 and FR-033–FR-041
-    (retests) with weighted quizzes; remove the Retest Attempt entity and the retest flag in
-    FR-053; update other mentions of retests; plus FR-001/FR-002 scope, Concept Content
-    versions, the retest question mix (becomes the weighted-quiz MC/short-answer mix), the
-    database-down case (becomes an unweighted quiz), and the self-marking open question
+  - specs/002-learn-from-mistakes/spec.md ✅ updated for 2.8.0 (weighted quizzes replace
+    retests; concept-ready scope; Concept Content versions). One open question remains in the
+    spec: how self-marked answers count for concept tracking (FR-005).
   - README.md ⚠ pending (task in tasks.md)
   - .env.example ⚠ pending (task in tasks.md; also add ILLUSTRATION_MODEL, REVIEW_MODEL and the
     concept cap)
