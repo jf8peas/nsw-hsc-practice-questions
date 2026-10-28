@@ -15,6 +15,9 @@ import type { Question } from "@/lib/types";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh: vi.fn() }) }));
+// jsdom 29 freezes `location`, so the reload is reached through lib/navigation (the app's
+// only full-page reload), which is stubbed here instead of the global.
+vi.mock("@/lib/navigation", () => ({ reloadPage: vi.fn() }));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
     <a href={href} {...rest}>
@@ -390,8 +393,8 @@ describe("offline mode: the server could not load the attempt (research R19)", (
 
 describe("a rejected attempt token", () => {
   it("reloads the page to get a fresh token, keeping the draft", async () => {
-    const reload = vi.fn();
-    vi.stubGlobal("location", { ...window.location, reload, pathname: "/unit/x/quiz", search: "?attempt=1" });
+    const { reloadPage } = await import("@/lib/navigation");
+    const reload = vi.mocked(reloadPage);
     mount();
     responder = () => json({ error: "invalid_attempt_token" }, 400);
     saveDraft(ATTEMPT, SHORT.id, "my draft");

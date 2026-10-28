@@ -3,6 +3,9 @@
 :root {
   /* Shared content width — keep the header bar and the page column aligned. */
   --content-max: 820px;
+  /* "to review" pill on the home page unit cards (a borderless orange tint). */
+  --rd-review-50: #FFEDD5;
+  --rd-review-700: #9A3412;
 }
 
 *,
@@ -226,6 +229,12 @@ input {
   border-color: transparent;
   font-weight: 700;
   letter-spacing: 0.6px;
+}
+
+.rd-pill.review {
+  background: var(--rd-review-50);
+  color: var(--rd-review-700);
+  border-color: transparent;
 }
 
 .unit-card .unit-title {

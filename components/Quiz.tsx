@@ -18,6 +18,7 @@ import {
   type GradedState,
 } from "@/lib/drafts";
 import type { AlreadyAnswered, GradeResponse, GradeResult } from "@/lib/grading";
+import { reloadPage } from "@/lib/navigation";
 import { enqueueReceipt, flushOutbox, pendingCount, sendReceipt } from "@/lib/outbox";
 import { startAttempt } from "@/lib/startAttempt";
 import { formatResetMessage } from "@/lib/sydney";
@@ -183,7 +184,7 @@ export function Quiz({
         const body = await res.json().catch(() => ({}));
         if (body.error === "invalid_attempt_token") {
           // the token expired: reload for a fresh one (the draft survives in this tab)
-          window.location.reload();
+          reloadPage();
           return;
         }
       }

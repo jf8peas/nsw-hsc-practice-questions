@@ -74,3 +74,36 @@ export function conceptProgress(unit: Unit, results: readonly ConceptResult[]): 
       (a.conceptId < b.conceptId ? -1 : a.conceptId > b.conceptId ? 1 : 0),
   );
 }
+
+/** One saved result from any unit (the home page's "to review" counts). */
+export interface ConceptResultWithUnit extends ConceptResult {
+  unitId: string;
+}
+
+/**
+ * How many concepts are not yet cleared, per unit, for the units listed — the home page's
+ * "to review" numbers ("Things you need to know" on the unit page, in one pass for every
+ * card). Only units in `units` are counted, so a result for a unit id that is no longer in
+ * content is ignored; a unit with nothing to review is absent from the map. A unit that has
+ * not adopted concepts naturally never appears, because its untagged questions count toward
+ * nothing.
+ */
+export function conceptReviewCounts(
+  units: readonly Unit[],
+  results: readonly ConceptResultWithUnit[],
+): Map<string, number> {
+  const perUnit = new Map<string, ConceptResult[]>();
+  for (const r of results) {
+    const list = perUnit.get(r.unitId);
+    if (list) list.push(r);
+    else perUnit.set(r.unitId, [r]);
+  }
+  const out = new Map<string, number>();
+  for (const unit of units) {
+    const list = perUnit.get(unit.id);
+    if (!list) continue;
+    const n = conceptProgress(unit, list).length;
+    if (n > 0) out.set(unit.id, n);
+  }
+  return out;
+}

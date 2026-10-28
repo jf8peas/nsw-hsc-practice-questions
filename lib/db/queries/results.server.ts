@@ -2,7 +2,7 @@ import "server-only";
 
 import { and, asc, eq, sql } from "drizzle-orm";
 
-import type { ConceptResult } from "@/lib/concepts/progress";
+import type { ConceptResult, ConceptResultWithUnit } from "@/lib/concepts/progress";
 import type { Db } from "@/lib/db/index.server";
 import { results, users, type ResultRow } from "@/lib/db/schema";
 
@@ -99,6 +99,27 @@ export async function listUnitResultsForProgress(
     })
     .from(results)
     .where(and(eq(results.userId, userId), eq(results.unitId, unitId)))
+    .orderBy(asc(results.createdAt), asc(results.id));
+}
+
+/**
+ * One student's results across EVERY unit, in answer order, for the home page's "to review"
+ * counts: one query instead of one per unit card. Same fields as `listUnitResultsForProgress`
+ * plus the unit id (results are grouped and replayed per unit by `conceptReviewCounts`).
+ * Always scoped to the session user's id (Principle IX).
+ */
+export async function listAllResultsForProgress(db: Db, userId: string): Promise<ConceptResultWithUnit[]> {
+  return db
+    .select({
+      id: results.id,
+      unitId: results.unitId,
+      questionId: results.questionId,
+      marks: results.marksAwarded,
+      max: results.maxMarks,
+      answeredAt: results.createdAt,
+    })
+    .from(results)
+    .where(eq(results.userId, userId))
     .orderBy(asc(results.createdAt), asc(results.id));
 }
 

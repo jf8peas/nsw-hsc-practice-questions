@@ -3,7 +3,7 @@ import "server-only";
 import { and, eq, inArray } from "drizzle-orm";
 
 import { UNITS, conceptsOf } from "@/content";
-import { conceptProgress, type ConceptState } from "@/lib/concepts/progress";
+import { conceptProgress, conceptReviewCounts, type ConceptState } from "@/lib/concepts/progress";
 import {
   contentVersionHash,
   getVersionsByIds,
@@ -16,7 +16,7 @@ import { conceptSlots, conceptVersions, type ConceptVersionRow } from "@/lib/db/
 import type { Unit } from "@/lib/types";
 
 import { load, type Loaded } from "./history.server";
-import { listUnitResultsForProgress } from "./results.server";
+import { listAllResultsForProgress, listUnitResultsForProgress } from "./results.server";
 
 /**
  * What a student may see of a concept's shared content. Deliberately small: no review reason,
@@ -93,6 +93,18 @@ export const loadConceptContentViewForPage = (conceptIds: string[]) =>
 export function loadUnitConceptProgress(userId: string, unit: Unit): Promise<Loaded<ConceptState[]>> {
   if (!unit.conceptsReady) return Promise.resolve({ status: "ok", data: [] });
   return load(async (db) => conceptProgress(unit, await listUnitResultsForProgress(db, userId, unit.id)));
+}
+
+/**
+ * The home page's "to review" counts: how many concepts are not yet cleared in each unit,
+ * so every unit card gets its pill from ONE query across all the student's results. Like the
+ * other page loaders this never throws for an outage: it reports `unavailable`.
+ */
+export function loadHomeReviewCounts(
+  userId: string,
+  units: readonly Unit[],
+): Promise<Loaded<Map<string, number>>> {
+  return load(async (db) => conceptReviewCounts(units, await listAllResultsForProgress(db, userId)));
 }
 
 /**
