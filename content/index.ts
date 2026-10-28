@@ -1,15 +1,22 @@
 import type { Concept, Unit, UnitMeta, Year } from "@/lib/types";
 
-import { meta as y11FormulaTestMeta } from "./units/y11-formula-test/meta";
-import { questions as y11FormulaTestQuestions } from "./units/y11-formula-test/questions";
+import { tagQuestions } from "./concept-helpers";
+
 import { meta as y11EconSupplyDemandMeta } from "./units/y11-economics-supply-demand/meta";
 import { questions as y11EconSupplyDemandQuestions } from "./units/y11-economics-supply-demand/questions";
+import { concepts as y11EconSupplyDemandConcepts, retired as y11EconSupplyDemandRetired } from "./units/y11-economics-supply-demand/concepts";
+import { conceptOfQuestionId as y11EconSupplyDemandTags } from "./units/y11-economics-supply-demand/concept-tags";
 import { meta as y11EconPreliminaryMeta } from "./units/y11-economics-preliminary/meta";
 import { questions as y11EconPreliminaryQuestions } from "./units/y11-economics-preliminary/questions";
+import { concepts as y11EconPreliminaryConcepts, retired as y11EconPreliminaryRetired } from "./units/y11-economics-preliminary/concepts";
+import { conceptOfQuestionId as y11EconPreliminaryTags } from "./units/y11-economics-preliminary/concept-tags";
 import { meta as y11PhysPreliminaryMeta } from "./units/y11-physics-preliminary/meta";
 import { questions as y11PhysPreliminaryQuestions } from "./units/y11-physics-preliminary/questions";
+import { concepts as y11PhysPreliminaryConcepts, retired as y11PhysPreliminaryRetired } from "./units/y11-physics-preliminary/concepts";
 import { meta as y11EconEssayMeta } from "./units/y11-economics-essay-scaffold/meta";
 import { questions as y11EconEssayQuestions } from "./units/y11-economics-essay-scaffold/questions";
+import { concepts as y11EconEssayConcepts, retired as y11EconEssayRetired } from "./units/y11-economics-essay-scaffold/concepts";
+import { conceptOfQuestionId as y11EconEssayTags } from "./units/y11-economics-essay-scaffold/concept-tags";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -19,11 +26,30 @@ import { questions as y11EconEssayQuestions } from "./units/y11-economics-essay-
  * PUBLIC — safe to import from client components. No answer keys.
  */
 export const UNITS: Unit[] = [
-  { ...y11FormulaTestMeta, questions: y11FormulaTestQuestions },
-  { ...y11EconSupplyDemandMeta, questions: y11EconSupplyDemandQuestions },
-  { ...y11EconPreliminaryMeta, questions: y11EconPreliminaryQuestions },
-  { ...y11PhysPreliminaryMeta, questions: y11PhysPreliminaryQuestions },
-  { ...y11EconEssayMeta, questions: y11EconEssayQuestions },
+  {
+    ...y11EconSupplyDemandMeta,
+    questions: tagQuestions(y11EconSupplyDemandQuestions, y11EconSupplyDemandTags),
+    concepts: y11EconSupplyDemandConcepts,
+    retired: y11EconSupplyDemandRetired,
+  },
+  {
+    ...y11EconPreliminaryMeta,
+    questions: tagQuestions(y11EconPreliminaryQuestions, y11EconPreliminaryTags),
+    concepts: y11EconPreliminaryConcepts,
+    retired: y11EconPreliminaryRetired,
+  },
+  {
+    ...y11PhysPreliminaryMeta,
+    questions: y11PhysPreliminaryQuestions,
+    concepts: y11PhysPreliminaryConcepts,
+    retired: y11PhysPreliminaryRetired,
+  },
+  {
+    ...y11EconEssayMeta,
+    questions: tagQuestions(y11EconEssayQuestions, y11EconEssayTags),
+    concepts: y11EconEssayConcepts,
+    retired: y11EconEssayRetired,
+  },
 ];
 
 export const YEARS: Year[] = ["Year 11", "Year 12"];

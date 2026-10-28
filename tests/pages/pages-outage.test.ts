@@ -17,7 +17,7 @@ afterEach(async () => {
   await env?.close();
 });
 
-const unit = UNITS.find((u) => u.id === "y11-formula-test")!;
+const unit = UNITS.find((u) => u.id === "y11-physics-preliminary")!;
 const [q1, q2] = unit.questions.slice(0, 2).map((q) => q.id);
 
 /** Find elements in a React element tree (server components are not rendered, just inspected). */

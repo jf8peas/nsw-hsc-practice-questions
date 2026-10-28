@@ -64,7 +64,7 @@ export interface StartedAttempt {
 }
 
 /** Start an attempt through the real POST /api/attempts handler. */
-export async function startAttempt(unitId = "y11-formula-test"): Promise<StartedAttempt> {
+export async function startAttempt(unitId = "y11-physics-preliminary"): Promise<StartedAttempt> {
   const { POST } = await import("@/app/api/attempts/route");
   const res = await POST(post("/api/attempts", { unitId }));
   const body = await res.json();
@@ -92,7 +92,7 @@ export const firstOf = (questions: Question[], type: "mc" | "short") => {
 };
 
 export function unitWithBoth() {
-  return UNITS.find((u) => u.id === "y11-formula-test")!;
+  return UNITS.find((u) => u.id === "y11-physics-preliminary")!;
 }
 
 /** Collect every object key in a JSON-able value. */

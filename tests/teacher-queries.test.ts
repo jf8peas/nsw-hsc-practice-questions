@@ -167,7 +167,7 @@ describe("units_by_class_average (3 weakest units)", () => {
 
 describe("questions_in_unit_by_average (5 weakest questions)", () => {
   it("ranks the unit's questions lowest first", async () => {
-    const rows = await run("questions_in_unit_by_average", (s) => s.replace("'y11-formula-test'::text", `'${A}'::text`));
+    const rows = await run("questions_in_unit_by_average", (s) => s.replace("'y11-physics-preliminary'::text", `'${A}'::text`));
     // a2 and a3 tie at 0%: more answers first, then question id
     expect(rows.map((r) => r.question_id)).toEqual(["unit-a.a2", "unit-a.a3", "unit-a.a1"]);
     expect(Number(rows[0].average_mark_pct)).toBe(0);
@@ -176,14 +176,14 @@ describe("questions_in_unit_by_average (5 weakest questions)", () => {
   });
 
   it("only returns the chosen unit, honours max_rows and include_self", async () => {
-    const forB = await run("questions_in_unit_by_average", (s) => s.replace("'y11-formula-test'::text", `'${B}'::text`));
+    const forB = await run("questions_in_unit_by_average", (s) => s.replace("'y11-physics-preliminary'::text", `'${B}'::text`));
     expect(forB.map((r) => r.question_id).sort()).toEqual(["unit-b.b1", "unit-b.b2"]);
     const noSelf = await run("questions_in_unit_by_average", (s) =>
-      s.replace("'y11-formula-test'::text", `'${B}'::text`).replace("true                     AS include_self", "false                    AS include_self"),
+      s.replace("'y11-physics-preliminary'::text", `'${B}'::text`).replace("true                     AS include_self", "false                    AS include_self"),
     );
     expect(noSelf.map((r) => r.question_id)).toEqual(["unit-b.b1"]);
     const limited = await run("questions_in_unit_by_average", (s) =>
-      s.replace("'y11-formula-test'::text", `'${A}'::text`).replace("5                        AS max_rows", "2                        AS max_rows"),
+      s.replace("'y11-physics-preliminary'::text", `'${A}'::text`).replace("5                        AS max_rows", "2                        AS max_rows"),
     );
     expect(limited).toHaveLength(2);
   });

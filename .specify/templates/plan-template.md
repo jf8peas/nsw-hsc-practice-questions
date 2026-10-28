@@ -48,7 +48,7 @@ Check the plan against `.specify/memory/constitution.md` (read the current versi
 | II. Signed-in students, minimal personal data | | Every route needs a session (except sign-in, auth callback, secret-protected retention endpoint); only the permitted fields stored; Australian region; 2-year retention; delete path |
 | III. Content is code | | Question ids never renumbered or reused; removing a question keeps its results |
 | IV. Validation gates the build | | `npm run validate` still passes; new content conventions extend the validator |
-| V. Syllabus fidelity, original content | | Sources documented; no copyrighted material committed |
+| V. Syllabus fidelity, original content | | Sources documented; questions original, or verbatim school-paper questions that show school/year/paper type/question number (non-commercial only); no real HSC questions; diagrams redrawn in code; no other copyrighted material committed |
 | VI. Grading fair, explainable, graceful | | LLM failure, daily cap and a database outage all fall back to self-marking / queued saves; MC never capped or rate limited |
 | VII. Cost and abuse controls | | Daily cap, per-user and per-IP limits on the LLM path; secrets only in the permitted server-side locations; production fails closed |
 | VIII. Simplicity | | New dependencies justified in Complexity Tracking; mobile-first; design tokens from `styles/tokens.css` |

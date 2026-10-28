@@ -13,6 +13,12 @@ export const MAX_CONCEPT_DESCRIPTION = 120;
 export interface ShippedIds {
   questions: string[];
   concepts: string[];
+  /**
+   * Units removed on purpose. Their shipped question and concept ids may be absent from the
+   * content (students' saved results for them stay in the database). A unit listed here must
+   * not also exist.
+   */
+  retiredUnits?: string[];
 }
 
 /**
@@ -132,14 +138,26 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
  */
 export function validateShippedIds(snapshot: ShippedIds, units: Unit[]): string[] {
   const errors: string[] = [];
+  const retiredUnits = snapshot.retiredUnits ?? [];
+  const inRetiredUnit = (id: string) => retiredUnits.some((unitId) => id.startsWith(`${unitId}.`));
+
+  for (const unitId of retiredUnits) {
+    if (units.some((u) => u.id === unitId)) {
+      errors.push(`${unitId}: listed in retiredUnits of content/shipped-ids.json but the unit still exists`);
+    }
+  }
 
   for (const questionId of snapshot.questions) {
+    if (inRetiredUnit(questionId)) continue;
     // the longest matching unit id, in case one unit id is a prefix of another
     const owner = units
       .filter((u) => questionId.startsWith(`${u.id}.`))
       .sort((a, b) => b.id.length - a.id.length)[0];
     if (!owner) {
-      errors.push(`${questionId}: shipped question id, but its unit no longer exists`);
+      errors.push(
+        `${questionId}: shipped question id, but its unit no longer exists. If the unit was removed on purpose, ` +
+          `add its id to retiredUnits in content/shipped-ids.json`,
+      );
       continue;
     }
     if (owner.questions.some((q) => q.id === questionId)) continue;
@@ -152,6 +170,7 @@ export function validateShippedIds(snapshot: ShippedIds, units: Unit[]): string[
 
   const concepts = new Set(units.flatMap((u) => (u.concepts ?? []).map((c) => c.id)));
   for (const conceptId of snapshot.concepts) {
+    if (inRetiredUnit(conceptId)) continue;
     if (!concepts.has(conceptId)) {
       errors.push(`${conceptId}: shipped concept id has disappeared; concept ids are never renamed, reused or removed`);
     }

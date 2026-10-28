@@ -16,14 +16,14 @@ describe("POST /api/attempts", () => {
   it("creates an attempt owned by the session user with ordered question_ids and mc_option_order", async () => {
     env = await setupRouteEnv();
     const user = await signedInStudent(env);
-    const started = await startAttempt("y11-formula-test");
+    const started = await startAttempt("y11-physics-preliminary");
     expect(started.status).toBe(201);
     expect(started.persisted).toBe(true);
 
     const rows = await env.db.select().from(attempts).where(eq(attempts.userId, user.id));
     expect(rows).toHaveLength(1);
     expect(rows[0].id).toBe(started.attemptId);
-    expect(rows[0].unitId).toBe("y11-formula-test");
+    expect(rows[0].unitId).toBe("y11-physics-preliminary");
     expect(rows[0].questionIds).toEqual(started.questions.map((q) => q.id));
     expect(rows[0].completedAt).toBeNull();
     const mcIds = started.questions.filter((q) => q.type === "mc").map((q) => q.id);
@@ -69,7 +69,7 @@ describe("POST /api/attempts", () => {
   it("answers 401 when signed out", async () => {
     env = await setupRouteEnv();
     const { POST } = await import("@/app/api/attempts/route");
-    const res = await POST(post("/api/attempts", { unitId: "y11-formula-test" }));
+    const res = await POST(post("/api/attempts", { unitId: "y11-physics-preliminary" }));
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "unauthenticated" });
   });
@@ -79,7 +79,7 @@ describe("POST /api/attempts", () => {
     const user = await signedInStudent(env);
     await env.testDb.pg.query("delete from users where id = $1", [user.id]);
     const { POST } = await import("@/app/api/attempts/route");
-    expect((await POST(post("/api/attempts", { unitId: "y11-formula-test" }))).status).toBe(401);
+    expect((await POST(post("/api/attempts", { unitId: "y11-physics-preliminary" }))).status).toBe(401);
   });
 
   it("limits attempts per user per minute (ATTEMPT_RATE_LIMIT) with retryAfter", async () => {
@@ -88,9 +88,9 @@ describe("POST /api/attempts", () => {
     await signedInStudent(env);
     const { POST } = await import("@/app/api/attempts/route");
     for (let i = 0; i < 3; i++) {
-      expect((await POST(post("/api/attempts", { unitId: "y11-formula-test" }))).status).toBe(201);
+      expect((await POST(post("/api/attempts", { unitId: "y11-physics-preliminary" }))).status).toBe(201);
     }
-    const res = await POST(post("/api/attempts", { unitId: "y11-formula-test" }));
+    const res = await POST(post("/api/attempts", { unitId: "y11-physics-preliminary" }));
     expect(res.status).toBe(429);
     const body = await res.json();
     expect(body.error).toBe("rate_limited");
@@ -102,7 +102,7 @@ describe("POST /api/attempts", () => {
     env = await setupRouteEnv();
     const user = await signedInStudent(env);
     env.databaseDown();
-    const started = await startAttempt("y11-formula-test");
+    const started = await startAttempt("y11-physics-preliminary");
     expect(started.status).toBe(201);
     expect(started.persisted).toBe(false);
     expect(started.questions.length).toBeGreaterThan(0);
@@ -121,7 +121,7 @@ describe("POST /api/attempts", () => {
     env = await setupRouteEnv();
     await signedInStudent(env);
     env.failAfterCalls(1); // the session lookup succeeds, the insert fails
-    const started = await startAttempt("y11-formula-test");
+    const started = await startAttempt("y11-physics-preliminary");
     expect(started.status).toBe(201);
     expect(started.persisted).toBe(false);
     env.databaseUp();
@@ -133,6 +133,6 @@ describe("POST /api/attempts", () => {
     await signedInStudent(env);
     env.state.genericError = true;
     const { POST } = await import("@/app/api/attempts/route");
-    await expect(POST(post("/api/attempts", { unitId: "y11-formula-test" }))).rejects.toThrow("boom");
+    await expect(POST(post("/api/attempts", { unitId: "y11-physics-preliminary" }))).rejects.toThrow("boom");
   });
 });

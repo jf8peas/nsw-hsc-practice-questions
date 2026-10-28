@@ -12,7 +12,7 @@ afterEach(async () => {
   await env?.close();
 });
 
-const unit = UNITS.find((u) => u.id === "y11-formula-test")!;
+const unit = UNITS.find((u) => u.id === "y11-physics-preliminary")!;
 const [q1, q2, q3, q4] = unit.questions.slice(0, 4).map((q) => q.id);
 const day = (n: number) => new Date(Date.UTC(2026, 0, n, 10));
 

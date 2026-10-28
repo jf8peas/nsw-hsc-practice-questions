@@ -265,9 +265,29 @@ describe("validateShippedIds", () => {
     expect(errors[0]).toContain(C2);
   });
 
-  it("flags a shipped question whose whole unit is gone", () => {
+  it("flags a shipped question whose whole unit is gone, and says how to retire a unit on purpose", () => {
     const errors = validateShippedIds({ questions: ["gone-unit.m1"], concepts: [] }, [current()]);
     expect(errors).toHaveLength(1);
     expect(errors[0]).toContain("gone-unit.m1");
+    expect(errors[0]).toContain("retiredUnits");
+  });
+
+  it("accepts a unit retired on purpose: its question and concept ids may be gone", () => {
+    const retired = { questions: ["gone-unit.m1", "gone-unit.s2"], concepts: ["gone-unit.c-a"], retiredUnits: ["gone-unit"] };
+    expect(validateShippedIds(retired, [current()])).toEqual([]);
+  });
+
+  it("a retired unit does not excuse ids of other units, and must really be gone", () => {
+    const withOther = { ...snapshot, retiredUnits: ["gone-unit"] };
+    expect(validateShippedIds(withOther, [current({ questions: [mc(1), short(1)] })])).toHaveLength(1); // m2 still missing
+    const stillThere = { questions: [], concepts: [], retiredUnits: [U] };
+    const errors = validateShippedIds(stillThere, [current()]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain("still exists");
+  });
+
+  it("does not treat a unit whose id merely starts the same as retired", () => {
+    const errors = validateShippedIds({ questions: ["gone-unit-2.m1"], concepts: [], retiredUnits: ["gone-unit"] }, [current()]);
+    expect(errors).toHaveLength(1);
   });
 });

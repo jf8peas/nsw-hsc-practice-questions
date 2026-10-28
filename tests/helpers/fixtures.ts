@@ -31,7 +31,7 @@ export async function seedAttempt(
     .insert(attempts)
     .values({
       userId,
-      unitId: "y11-formula-test",
+      unitId: "y11-physics-preliminary",
       questionIds: [],
       mcOptionOrder: {},
       ...overrides,
@@ -49,8 +49,8 @@ export async function seedResult(
   const [row] = await db
     .insert(results)
     .values({
-      unitId: "y11-formula-test",
-      questionId: `y11-formula-test.q${counter}`,
+      unitId: "y11-physics-preliminary",
+      questionId: `y11-physics-preliminary.q${counter}`,
       answer: "an answer",
       marksAwarded: 1,
       maxMarks: 1,

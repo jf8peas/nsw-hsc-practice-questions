@@ -1,5 +1,9 @@
 import type { Answer, AnswerSet } from "@/lib/types";
 
+import { withWrongExplanations } from "../../explanation-helpers";
+import { explanations } from "./explanations";
+import { questions } from "./questions";
+
 // Answer key for y11-physics-preliminary. NO "server-only" import here (the
 // validator reads it); only re-exported via content/answers/index.ts, which is
 // server-only. Never import from a client component.
@@ -443,9 +447,11 @@ const saAnswers2: Array<[string, Answer]> = [
     ["Way 1: increase the current through the coil", "Way 2: increase the number of turns of wire in the coil (or add/use a soft iron core)"]),
 ];
 
-export const answers: AnswerSet = Object.fromEntries([
+const keyWithoutExplanations: AnswerSet = Object.fromEntries([
   ...mcAnswers,
   ...mcAnswers2,
   ...saAnswers,
   ...saAnswers2,
 ]);
+
+export const answers: AnswerSet = withWrongExplanations(keyWithoutExplanations, questions, U, explanations);

@@ -16,7 +16,7 @@
 --
 -- Notes
 --   * Ids are the same readable ids used in the content files, e.g.
---     y11-formula-test and y11-formula-test.m12.
+--     y11-physics-preliminary and y11-physics-preliminary.m12.
 --   * graded_by is 'auto' (multiple choice, or an empty answer), 'llm' (AI marked)
 --     or 'self' (the student marked themselves).
 --   * Multiple-choice rows are the 'auto' rows with a non-empty answer: the stored
@@ -63,7 +63,7 @@ LIMIT (SELECT max_rows FROM params);
 -- Questions within one unit ranked by average mark, lowest first. The top 5 rows are
 -- the weakest questions. Change unit_id in params to the unit you are looking at.
 WITH params AS (
-  SELECT 'y11-formula-test'::text AS unit_id,
+  SELECT 'y11-physics-preliminary'::text AS unit_id,
          DATE '2000-01-01'        AS from_date,
          DATE '2999-12-31'        AS to_date,
          true                     AS include_self,
@@ -84,7 +84,7 @@ LIMIT (SELECT max_rows FROM params);
 
 -- QUERY: common_wrong_mc_option
 -- For each multiple-choice question, the wrong option students chose most often.
--- Leave unit_id as NULL to cover every unit, or set it (for example to 'y11-formula-test').
+-- Leave unit_id as NULL to cover every unit, or set it (for example to 'y11-physics-preliminary').
 -- (include_self does not matter here: multiple choice is never self-marked.)
 WITH params AS (
   SELECT NULL::text        AS unit_id,

@@ -23,7 +23,7 @@ afterEach(async () => {
   await env?.close();
 });
 
-const unit = UNITS.find((u) => u.id === "y11-formula-test")!;
+const unit = UNITS.find((u) => u.id === "y11-physics-preliminary")!;
 const QIDS = unit.questions.slice(0, 3).map((q) => q.id);
 const TEN_MINUTES = 10 * 60_000;
 

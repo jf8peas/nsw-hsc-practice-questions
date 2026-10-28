@@ -27,21 +27,21 @@ beforeAll(() => {
 const attemptInput = () => ({
   uid: UID,
   attemptId: ATTEMPT,
-  unitId: "y11-formula-test",
-  questionIds: ["y11-formula-test.s01", "y11-formula-test.m01"],
-  mcOptionOrder: { "y11-formula-test.m01": [2, 0, 1, 3] },
+  unitId: "y11-physics-preliminary",
+  questionIds: ["y11-physics-preliminary.s01", "y11-physics-preliminary.m01"],
+  mcOptionOrder: { "y11-physics-preliminary.m01": [2, 0, 1, 3] },
 });
 
 const receiptInput = (): ReceiptInput => ({
   uid: UID,
   attemptId: ATTEMPT,
   attempt: {
-    unitId: "y11-formula-test",
-    questionIds: ["y11-formula-test.m01"],
-    mcOptionOrder: { "y11-formula-test.m01": [1, 0] },
+    unitId: "y11-physics-preliminary",
+    questionIds: ["y11-physics-preliminary.m01"],
+    mcOptionOrder: { "y11-physics-preliminary.m01": [1, 0] },
     issuedAt: T0 / 1000,
   },
-  questionId: "y11-formula-test.m01",
+  questionId: "y11-physics-preliminary.m01",
   answer: "9.8 m/s^2",
   marks: 1,
   max: 1,
@@ -67,7 +67,7 @@ describe("attempt token", () => {
     expect(r.payload).toMatchObject({ v: 1, ...attemptInput(), iat: T0 / 1000 });
     expect(r.payload.exp).toBe(T0 / 1000 + ATTEMPT_TTL_SECONDS);
     expect(attemptFieldsOf(r.payload)).toEqual({
-      unitId: "y11-formula-test",
+      unitId: "y11-physics-preliminary",
       questionIds: attemptInput().questionIds,
       mcOptionOrder: attemptInput().mcOptionOrder,
       issuedAt: T0 / 1000,

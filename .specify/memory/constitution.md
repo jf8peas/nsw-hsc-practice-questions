@@ -1,29 +1,33 @@
 <!--
 Sync Impact Report
-- Version change: 2.9.0 → 2.9.1 (PATCH: clarification in Principle VI; no rule added, removed or
-  redefined). Resolves /speckit-analyze finding H1 on spec 002: when an item fails review twice,
-  the one-line-only fallback applies to a concept with no approved version; a failed replacement
-  leaves any previously approved version on show.
+- Version change: 2.9.1 → 2.10.0 (MINOR: materially expanded guidance in Principle V; the
+  "questions MUST be original" rule becomes a conditional permission with hard limits).
+- Reason (amendment log): the teacher wants to use questions from school trial and half-yearly
+  papers, word for word, while the app is non-commercial. Real HSC questions stay out so past HSC
+  papers remain unseen for full practice exams, and diagrams are always redrawn in code.
 - Modified principles:
-  - VI. The review bullet now says students see the previously approved version if there is
-    one, otherwise only the one-line description.
-  - All other principles unchanged by 2.9.1. (2.9.0 expanded I, II and VIII: resource ids on
-    non-answer routes, pipeline bookkeeping for concept content, and `@resvg/resvg-js`.)
+  - V. Syllabus Fidelity and Original Content: now allows verbatim school trial / half-yearly
+    questions that show their source (school, year, paper type, question number), only while the
+    app is non-commercial (they MUST be rewritten as original before it goes commercial); forbids
+    real HSC questions absolutely; requires every diagram to be redrawn in code, never scanned.
+  - All other principles unchanged by 2.10.0.
 - Added sections: none
 - Removed sections: none
-- Quality Gates: unchanged.
+- Quality Gates: added a constitution-check item for question sources, HSC exclusion and diagrams.
 - Templates requiring updates:
-  - .specify/templates/plan-template.md ✅ already checks plans against the current constitution
+  - .specify/templates/plan-template.md ✅ updated (Principle V row)
   - .specify/templates/spec-template.md ✅ no change needed
   - .specify/templates/tasks-template.md ✅ no change needed
   - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
     ✅ reviewed against 2.9.1 and spec 002; no conflicts, wording updated where now inaccurate
-  - specs/002-learn-from-mistakes/{spec,plan,tasks}.md ✅ updated for 2.9.1 (plan exceptions
-    CT-1 to CT-3 resolved; H1 clarified)
-  - README.md ✅ updated (spec 002 section, routes, settings, authoring rules)
-  - .env.example ✅ updated (CONCEPT_MODEL, ILLUSTRATION_MODEL, REVIEW_MODEL, concept cap and
-    rate limit, ADMIN_EMAILS, OPENROUTER_BASE_URL)
-- Follow-up TODOs: TODO(ACCESSIBILITY_TARGET)
+  - specs/002-learn-from-mistakes/{spec,plan,tasks}.md ✅ unaffected (no question-sourcing rules)
+  - README.md ⚠ pending: units table / authoring notes do not yet describe the school-paper source
+    rule (add when the first such unit is created)
+  - .env.example ✅ no change needed
+- Follow-up TODOs: TODO(ACCESSIBILITY_TARGET); TODO(SCHOOL_PAPER_SOURCE_FIELD): no unit uses
+  verbatim school-paper questions yet, so the question type has no `source` field and
+  `scripts/validate-content.ts` does not yet enforce it. Add both (and show the source with the
+  question) in the spec that first adds such a unit.
 Legend: rules marked [PRACTICE] describe what the repo already does today. Rules marked
 [DECISION] are team decisions that are not yet current practice.
 -->
@@ -166,12 +170,27 @@ Automated checks do not drift.
 
 - Questions MUST align to the current NESA syllabus for the subject.
 - Each unit's sources MUST be documented, in `docs/<unit>-research.md` or the README units table.
-- Questions MUST be original. Copyrighted past papers and source material stay in `/resources/`
-  (gitignored) and MUST NOT be committed or reproduced verbatim.
+- Questions MUST be original, with one exception. While the app is non-commercial, a question MAY
+  be copied word for word from a school trial or half-yearly paper, provided it shows its
+  source: the school, the year, the paper type (trial or half-yearly) and the question number.
+  The source MUST be recorded in the question's public data and shown with the question.
+- Before the app goes commercial (for example by charging students, selling access or carrying
+  advertising), every question copied under that exception MUST be rewritten as an original
+  question.
+- Real HSC questions (from NESA past papers or exams) MUST NEVER be included, whether copied,
+  lightly reworded or recreated, so that past HSC papers stay unseen for full practice exams.
+- Every diagram MUST be redrawn in code (for example a per-unit `diagram.ts`). Scanned,
+  photographed or otherwise copied images MUST NOT be committed or served.
+- Other copyrighted past papers and source material stay in `/resources/` (gitignored) and MUST
+  NOT be committed or reproduced, apart from the school-paper exception above.
 
 Rationale: students are practising for a specific exam, and the repo is not a vehicle for
-redistributing copyrighted papers. [DECISION]: the "documented sources" rule is stated as
-mandatory here. Current units follow it, but the README does not yet say so.
+redistributing copyrighted papers. School papers are used only for private, non-commercial
+practice, with credit, and on the condition that this stops if the app becomes commercial; HSC
+papers are kept out entirely so students can still sit them cold as a real test. Redrawing
+diagrams in code keeps them accurate, accessible and free of scanned third-party artwork.
+[DECISION]: the "documented sources" rule is stated as mandatory here. Current units follow it,
+but the README does not yet say so.
 
 ### VI. Grading Is Fair, Explainable and Degrades Gracefully [PRACTICE + DECISION]
 
@@ -295,7 +314,9 @@ Every feature plan MUST satisfy:
   - the LLM path enforces the daily cap;
   - no MC explanation in any client bundle;
   - illustrations are rendered only through `<img>`;
-  - concept generation enforces its own cap.
+  - concept generation enforces its own cap;
+  - every question copied from a school paper shows its source (school, year, paper type,
+    question number), no real HSC question is included, and no diagram is a scanned image.
 - Testing: authorization and cost-control logic MUST ship with automated tests covering:
   - students can only read their own results;
   - admin routes reject non-allowlisted emails;
@@ -330,4 +351,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.9.1 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
+**Version**: 2.10.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28

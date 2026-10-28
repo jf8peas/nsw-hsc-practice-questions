@@ -1,5 +1,6 @@
 import type { McQuestion, Question, ShortQuestion } from "@/lib/types";
 import { shuffleBySeed } from "@/lib/shuffle";
+import { conceptOfQuestionId } from "./concept-tags";
 import { chargeField, forces, motionGraph, rays, wave } from "./diagram";
 
 // PUBLIC — no answer keys here. Answer keys live in ./answers.ts, kept in sync
@@ -839,4 +840,4 @@ export const questions: Question[] = [
   ...mcQuestions2,
   ...saQuestions,
   ...saQuestions2,
-];
+].map((q) => ({ ...q, concept: conceptOfQuestionId[q.id] }));

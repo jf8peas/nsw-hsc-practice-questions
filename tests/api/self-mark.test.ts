@@ -250,7 +250,7 @@ describe("POST /api/results/self-mark", () => {
     expect(v.ok).toBe(true);
     if (v.ok) {
       expect(v.payload.attempt).toMatchObject({
-        unitId: "y11-formula-test",
+        unitId: "y11-physics-preliminary",
         questionIds: started.questions.map((x) => x.id),
       });
       expect(v.payload.marks).toBe(0);

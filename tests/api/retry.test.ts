@@ -13,7 +13,7 @@ afterEach(async () => {
   await env?.close();
 });
 
-const unit = UNITS.find((u) => u.id === "y11-formula-test")!;
+const unit = UNITS.find((u) => u.id === "y11-physics-preliminary")!;
 const QIDS = unit.questions.slice(0, 3).map((q) => q.id);
 const ISSUED_AT = 1_800_000_000; // seconds
 

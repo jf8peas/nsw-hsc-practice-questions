@@ -26,7 +26,7 @@ function fakeStorage(): StorageLike & { data: Map<string, string> } {
 }
 
 const A = "attempt-1";
-const Q = "y11-formula-test.s01";
+const Q = "y11-physics-preliminary.s01";
 
 describe("the typed answer (FR-028)", () => {
   it("is saved per attempt and question, and restored on reload", () => {
@@ -93,7 +93,7 @@ describe("the attempt payload (lets a quiz run when the database is down)", () =
     const tab = fakeStorage();
     const payload = {
       attemptToken: "tok",
-      unitId: "y11-formula-test",
+      unitId: "y11-physics-preliminary",
       passMark: 70,
       questions: [{ id: Q, type: "short" as const, prompt: "p", maxMarks: 3 }],
       answered: { [Q]: { marks: 2, max: 3 } },

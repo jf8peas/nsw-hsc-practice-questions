@@ -228,12 +228,18 @@ late save keeps its answer time. Nothing about concepts is stored per student.
 - Add a `concept` to every question, then set `conceptsReady: true` in the unit's
   `meta.ts`. Set `explanationsComplete: true` only once every MC question has an
   explanation for each wrong option. `npm run validate` enforces both rules.
+- **Wrong-option explanations** go in the unit's `explanations.ts`: for each MC question number, one
+  `[start of the wrong option's text, explanation]` entry per wrong option. `answers.ts` merges them
+  with `withWrongExplanations` (`content/explanation-helpers.ts`), which fails the build if a start
+  matches no option, several options, or the correct one.
 - **Removing a question needs a tombstone.** Add its id to `retired` in `concepts.ts`
   with the concept it carried, or `null` in a unit not yet tagged (a `conceptsReady`
   unit may not have `null` tombstones). A `concepts.ts` may hold only `retired`.
 - `content/shipped-ids.json` is a snapshot of every question and concept id ever shipped.
   `npm run validate:shipped` adds new ids to it (commit the file); it never removes one,
-  so a removed or renumbered id fails the build unless it is tombstoned.
+  so a removed or renumbered id fails the build unless it is tombstoned. To remove a **whole unit**,
+  delete its folder and registry entries and add its id to `retiredUnits` in `content/shipped-ids.json`;
+  students' saved results for it stay in the database and show under its id in their history.
 
 ### Trying it locally
 
@@ -249,7 +255,7 @@ prefix must match.**
 ```
 content/
   units/
-    y11-formula-test/
+    y11-physics-preliminary/
       meta.ts        # PUBLIC  — id, year, topic, type, title, description, order
       questions.ts   # PUBLIC  — prompt, formula, MC option text, maxMarks
       answers.ts     # KEY     — correctIndex / modelAnswer / rubric / notes / wrongExplanations
@@ -263,7 +269,7 @@ content/
   answer keys**.
 - `content/answers/index.ts` has `import "server-only"` at the top — the build
   fails if anything client-side pulls it in. Only `lib/grading.server.ts` uses it.
-- Question ids are namespaced: `y11-formula-test.s03` / `.m12`. The grade
+- Question ids are namespaced: `y11-physics-preliminary.s03` / `.m12`. The grade
   endpoint finds the answer from the id alone, so the client sends only the
   question id, the answer, the attempt id with its signed token (and, for a
   self-mark or a save retry, the signed token or receipt the server issued) —
@@ -289,7 +295,6 @@ content/
 
 | Unit | Source |
 | --- | --- |
-| `y11-formula-test` | NESA Physics formulae sheet (teacher's crossings-out) + past-paper scenarios — see `docs/y11-formula-test-research.md`. 50 short + 50 MC. |
 | `y11-economics-supply-demand` | NESA Economics 11–12 syllabus ("The Market Economy") + `resources/topic002`. ~84 MC + ~64 diagram SA + 40 written SA covering demand/supply, elasticity (calcs + total outlay), government intervention (ceilings/floors/taxes/subsidies), labour markets and the housing/commodity markets. SVG diagrams from a per-unit `diagram.ts` (curves, shifts, price ceilings/floors, tax/subsidy, labour axes, inelastic housing supply). |
 | `y11-economics-preliminary` | Broad prelim-exam revision across all six Year 11 syllabus focus areas — see `docs/y11-economics-preliminary-research.md`. 50 MC + 50 written SA, original questions written to the current (2025) syllabus. Draws 5 MC + 5 SA (MC first). |
 | `y11-physics-preliminary` | Broad prelim-exam revision across the three Year 11 physics modules (mechanics, waves, electricity & magnetism) — see `docs/y11-physics-preliminary-research.md`. 50 MC + 50 SA, all factual/reasoning (no calculations). SVG diagrams from a per-unit `diagram.ts` (motion graphs, free-body forces, transverse wave, ray-at-boundary, charge field lines). Draws 5 MC + 5 SA (MC first). |

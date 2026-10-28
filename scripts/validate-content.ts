@@ -27,16 +27,17 @@ const errors: string[] = [];
 const err = (m: string) => errors.push(m);
 
 function readShipped(): ShippedIds {
-  if (!existsSync(SHIPPED_FILE)) return { questions: [], concepts: [] };
+  if (!existsSync(SHIPPED_FILE)) return { questions: [], concepts: [], retiredUnits: [] };
   try {
     const raw = JSON.parse(readFileSync(SHIPPED_FILE, "utf8")) as Partial<ShippedIds>;
     return {
       questions: Array.isArray(raw.questions) ? raw.questions.filter((x): x is string => typeof x === "string") : [],
       concepts: Array.isArray(raw.concepts) ? raw.concepts.filter((x): x is string => typeof x === "string") : [],
+      retiredUnits: Array.isArray(raw.retiredUnits) ? raw.retiredUnits.filter((x): x is string => typeof x === "string") : [],
     };
   } catch {
     err("content/shipped-ids.json is not valid JSON");
-    return { questions: [], concepts: [] };
+    return { questions: [], concepts: [], retiredUnits: [] };
   }
 }
 
@@ -135,6 +136,7 @@ async function main() {
     const next: ShippedIds = {
       questions: [...new Set([...snapshot.questions, ...UNITS.flatMap((u) => u.questions.map((q) => q.id))])].sort(),
       concepts: [...new Set([...snapshot.concepts, ...UNITS.flatMap((u) => (u.concepts ?? []).map((c) => c.id))])].sort(),
+      ...(snapshot.retiredUnits?.length ? { retiredUnits: [...snapshot.retiredUnits].sort() } : {}),
     };
     writeFileSync(SHIPPED_FILE, JSON.stringify(next, null, 2) + "\n");
     console.log(

@@ -45,8 +45,10 @@ describe("groups draw (y11-economics-supply-demand)", () => {
   });
 });
 
-describe("shorts-first draw (y11-formula-test)", () => {
-  const u = unit("y11-formula-test");
+describe("shorts-first draw (a quiz with short and mc counts but no groups)", () => {
+  // no shipped unit uses this older shape any more, so build it from a real unit's bank
+  const base = unit("y11-physics-preliminary");
+  const u: Unit = { ...base, quiz: { short: 5, mc: 5, passMark: 55 } };
 
   it("draws quiz.short short answers then quiz.mc multiple choice", () => {
     const { questionIds } = drawAttempt(u, seeded(7));
@@ -61,7 +63,7 @@ describe("shorts-first draw (y11-formula-test)", () => {
 
 describe("a unit with no quiz config", () => {
   it("draws every question, shorts first", () => {
-    const base = unit("y11-formula-test");
+    const base = unit("y11-physics-preliminary");
     const noQuiz: Unit = { ...base, quiz: undefined };
     const { questionIds } = drawAttempt(noQuiz, seeded(3));
     expect(questionIds).toHaveLength(base.questions.length);
@@ -76,7 +78,7 @@ describe("a unit with no quiz config", () => {
 
 describe("MC option order", () => {
   it("is a permutation per MC question and absent for short questions", () => {
-    for (const id of ["y11-formula-test", "y11-economics-supply-demand"]) {
+    for (const id of ["y11-physics-preliminary", "y11-economics-supply-demand"]) {
       const u = unit(id);
       const { questionIds, mcOptionOrder } = drawAttempt(u, seeded(11));
       const q = byId(u);
@@ -97,7 +99,7 @@ describe("MC option order", () => {
 
 describe("toPublicQuestions", () => {
   it("returns MC options in display order and short questions unchanged", () => {
-    const u = unit("y11-formula-test");
+    const u = unit("y11-physics-preliminary");
     const { questionIds, mcOptionOrder } = drawAttempt(u, seeded(5));
     const out = toPublicQuestions(questionIds, mcOptionOrder);
     expect(out.map((x) => x.id)).toEqual(questionIds);
@@ -113,7 +115,7 @@ describe("toPublicQuestions", () => {
   });
 
   it("skips retired question ids", () => {
-    const u = unit("y11-formula-test");
+    const u = unit("y11-physics-preliminary");
     const real = u.questions[0].id;
     expect(toPublicQuestions(["retired.q9", real], {}).map((x) => x.id)).toEqual([real]);
   });

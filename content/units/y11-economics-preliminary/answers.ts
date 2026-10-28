@@ -1,5 +1,9 @@
 import type { Answer, AnswerSet } from "@/lib/types";
 
+import { withWrongExplanations } from "../../explanation-helpers";
+import { explanations } from "./explanations";
+import { questions } from "./questions";
+
 // Answer key for y11-economics-preliminary. NO "server-only" import here (the
 // validator reads it); only re-exported via content/answers/index.ts, which is
 // server-only. Never import from a client component.
@@ -778,9 +782,11 @@ const saAnswers2: Array<[string, Answer]> = [
     ]),
 ];
 
-export const answers: AnswerSet = Object.fromEntries([
+const keyWithoutExplanations: AnswerSet = Object.fromEntries([
   ...mcAnswers,
   ...mcAnswers2,
   ...saAnswers,
   ...saAnswers2,
 ]);
+
+export const answers: AnswerSet = withWrongExplanations(keyWithoutExplanations, questions, U, explanations);

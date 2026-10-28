@@ -12,7 +12,7 @@ afterEach(async () => {
   await env?.close();
 });
 
-const unitA = UNITS.find((u) => u.id === "y11-formula-test")!;
+const unitA = UNITS.find((u) => u.id === "y11-physics-preliminary")!;
 const unitB = UNITS.find((u) => u.id === "y11-economics-preliminary")!;
 const qa = unitA.questions.slice(0, 6).map((q) => q.id);
 const qb = unitB.questions.slice(0, 3).map((q) => q.id);

@@ -201,7 +201,7 @@ describe("ownership and token checks (SC-002)", () => {
       {
         uid: user.id,
         attemptId: started.attemptId,
-        unitId: "y11-formula-test",
+        unitId: "y11-physics-preliminary",
         questionIds: started.questions.map((x) => x.id),
         mcOptionOrder: {},
       },
@@ -213,7 +213,7 @@ describe("ownership and token checks (SC-002)", () => {
 
     const [body, sig] = started.attemptToken.split(".");
     const json = JSON.parse(Buffer.from(body, "base64url").toString());
-    json.questionIds.push("y11-formula-test.s01");
+    json.questionIds.push("y11-physics-preliminary.s01");
     const forged = `${Buffer.from(JSON.stringify(json)).toString("base64url")}.${sig}`;
     const b = await grade({ ...started, attemptToken: forged }, q.id, "0");
     expect(b.status).toBe(400);

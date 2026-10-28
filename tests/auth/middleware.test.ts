@@ -7,9 +7,9 @@ const FULL_ENV = Object.fromEntries(REQUIRED_ENV.map((n) => [n, "x"]));
 
 describe("signed-out access (SC-007)", () => {
   it("redirects signed-out page requests to /signin with a callbackUrl", () => {
-    expect(decideAccess({ pathname: "/unit/y11-formula-test", search: "?a=1", authed: false, nodeEnv: "development" })).toEqual({
+    expect(decideAccess({ pathname: "/unit/y11-physics-preliminary", search: "?a=1", authed: false, nodeEnv: "development" })).toEqual({
       type: "redirect-signin",
-      callbackUrl: "/unit/y11-formula-test?a=1",
+      callbackUrl: "/unit/y11-physics-preliminary?a=1",
     });
     expect(decideAccess({ pathname: "/", authed: false, nodeEnv: "development" }).type).toBe("redirect-signin");
   });
