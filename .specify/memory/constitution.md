@@ -1,20 +1,19 @@
 <!--
 Sync Impact Report
-- Version change: 2.7.0 → 2.8.0 (MINOR: retest attempts replaced by weighted normal quizzes; no
-  principle removed). Decision (spec 002): there is no separate retest. Every normal quiz in a
-  concept-ready unit fills up to half its places with questions on the student's uncleared
-  concepts; the rest are drawn as usual. These quizzes count normally toward averages, best,
-  latest and trend. The "whether the attempt is a retest" flag added in 2.7.0 is withdrawn.
+- Version change: 2.8.0 → 2.9.0 (MINOR: expanded guidance in Principles I, II and VIII; nothing
+  removed or redefined). Resolves the plan exceptions CT-1, CT-2 and CT-3 in
+  specs/002-learn-from-mistakes/plan.md.
 - Modified principles:
-  - II. Per-attempt storage no longer includes whether the attempt is a retest.
-  - III. The unit-readiness bullet now says an unmarked unit has no weighting toward weak
-    concepts (instead of no retest). New bullet: quiz questions MUST come only from the unit's
-    question bank; no quiz question is written by an LLM.
-  - VI. The concept-generation fallback bullet now says the unit page MUST NOT show an error or
-    stop the student starting a quiz (instead of block a retest). New bullet: weighting a quiz
-    toward weak concepts needs the student's saved results; if the database cannot be read, the
-    quiz MUST still start, drawn without weighting, as in the existing degraded mode.
-  - All other principles unchanged by 2.8.0.
+  - I. The "client MAY send only" list now applies to answer-submission routes (grading,
+    self-mark, save retry). New bullet: other routes MAY take only resource identifiers the
+    server re-checks (unit id, concept id, version id, item kind) and MUST NOT accept a user
+    id, marks, max marks, grading method or answer. (CT-2)
+  - II. Shared concept content MAY also hold pipeline bookkeeping that is not personal data:
+    a processing lease (owner and expiry), a retry-after time and the last error per item, and
+    each version's origin and attempt number. (CT-3)
+  - VIII. `@resvg/resvg-js` is added to the allowed runtime dependencies, server-side only, to
+    render generated illustrations for the reviewer. (CT-1)
+  - All other principles unchanged by 2.9.0. (2.8.0 replaced retests with weighted quizzes.)
 - Added sections: none
 - Removed sections: none
 - Quality Gates: unchanged.
@@ -23,10 +22,9 @@ Sync Impact Report
   - .specify/templates/spec-template.md ✅ no change needed
   - .specify/templates/tasks-template.md ✅ no change needed
   - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
-    ⚠ pending: not yet reviewed against 2.8.0 (additive rules only, no conflicts expected)
-  - specs/002-learn-from-mistakes/spec.md ✅ updated for 2.8.0 (weighted quizzes replace
-    retests; concept-ready scope; Concept Content versions; self-marked answers count like any
-    other)
+    ⚠ pending: not yet reviewed against 2.9.0 (additive rules only, no conflicts expected)
+  - specs/002-learn-from-mistakes/{spec,plan,tasks}.md ✅ updated for 2.9.0 (plan exceptions
+    CT-1 to CT-3 resolved)
   - README.md ⚠ pending (task in tasks.md)
   - .env.example ⚠ pending (task in tasks.md; also add ILLUSTRATION_MODEL, REVIEW_MODEL and the
     concept cap)
@@ -51,12 +49,17 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   `lib/grading.server.ts` MAY import it.
 - Public files (`meta.ts`, `questions.ts`, `content/index.ts`) MUST NOT contain correct answers,
   model answers, rubrics or marking notes.
-- The client MAY send only: `questionId`, `answer`, an opaque `attemptId` together with the
+- On answer-submission routes (grading, self-mark and save retry), the client MAY send only:
+  `questionId`, `answer`, an opaque `attemptId` together with the
   server-issued signed attempt token; for a self-mark, a binary `correct` flag together with the
   server-issued signed self-mark token; and, for a save retry, the server-issued signed result
   receipt.
 - The client MUST NOT send a user id, marks, max marks or grading method. The only exception is
   the binary self-mark flag, which the server accepts only with a valid token.
+- Other routes MAY take from the client only resource identifiers that the server re-checks: a
+  unit id, concept id, version id, or the kind of concept item (summary or illustration). They
+  MUST NOT accept a user id, marks, max marks, grading method or answer, and the server MUST
+  authorise every such request from the session (Principle IX for teacher routes).
 - Before acting on any request, the server MUST verify that every `attemptId` belongs to the
   session user (by database lookup, or by a valid signed attempt token bound to that user), and
   that every token or receipt is correctly signed, unexpired and bound to that user, attempt and
@@ -114,7 +117,10 @@ Rationale: a practice tool whose answers can be read from the page source is wor
   status, reviewer model, reviewer reason, review time and who approved it (reviewer or
   teacher), plus at most one pending or failed replacement for each. It is not personal data and
   MUST NOT contain any student's answers or name. The reviewer's reason MAY quote model answers
-  or rubrics, so it MUST be shown to teachers only.
+  or rubrics, so it MUST be shown to teachers only. Shared concept content MAY also hold pipeline
+  bookkeeping that is not personal data: per concept item, a processing lease (owner and
+  expiry), a retry-after time and the last error; and per version, its origin (first
+  generation, automatic regeneration or teacher regeneration) and attempt number.
 
 Rationale: scores must follow the student across devices and give the teacher a view of
 progress. Collection is limited to what that needs, and data does not outlive its use.
@@ -244,8 +250,10 @@ exposing student data.
 
 - [DECISION] Keep the dependency footprint small. Runtime dependencies are `next`, `react`,
   `react-dom`, `katex`, the two Upstash packages, Neon Postgres and Auth.js. The last two are
-  now justified for cross-device scores and teacher visibility. Any further database, ORM or
-  auth addition, or any state library, requires a written justification in the plan.
+  now justified for cross-device scores and teacher visibility. `@resvg/resvg-js` is also allowed,
+  server-side only, to render generated illustrations for the reviewer (spec 002). Any further
+  database, ORM or auth addition, or any state library, requires a written justification in the
+  plan.
 - [DECISION] Mobile-first: students mostly use phones, so key actions (e.g. "Start quiz") MUST
   be reachable without scrolling past reference material (the unit page already places
   `meta.formulas` below Start quiz).
@@ -326,4 +334,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.8.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
+**Version**: 2.9.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28

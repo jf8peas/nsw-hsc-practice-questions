@@ -35,6 +35,7 @@
 - Also updated: FR-001 and FR-002 apply to concept-ready units only; Story 5 applies to explanations-complete units only; Concept Content holds a live approved version plus at most one pending or failed replacement for each of the summary and the illustration, with who approved each (FR-018, FR-054, FR-057).
 - Earlier changes still in force: independent review step (User Story 7, FR-024 to FR-029), reviewer calls counted in the generation cap (FR-030), teacher approval in the backend (FR-056, FR-057), per-unit readiness (FR-047 to FR-051), partial credit counts as wrong (FR-005).
 - Resolved: self-marked answers count like any other answer (FR-005, Option A). Nothing is outstanding before planning.
+- Updated after `/speckit-analyze`: a removed question keeps a recorded concept (FR-006, FR-008), the release check also covers shipped ids (FR-003, FR-008), a teacher-approved item is not re-reviewed (FR-057), and FR-028 points at FR-031. No requirement numbers changed.
 - Known consequence, accepted: weighted quizzes count in averages, best, latest and trend (FR-043), so students with weak concepts will see tougher quizzes affect those figures.
 - Defaults chosen instead of clarification markers: half a quiz's places is rounded up, and exact half takes priority over the usual MC/short-answer mix; the default generation daily limit is set in planning.
 - The "flagged items" query named in FR-056 is not written yet; the SQL file will be updated when the tables exist (planning and tasks).
