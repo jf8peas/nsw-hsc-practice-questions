@@ -19,15 +19,14 @@ Sync Impact Report
 - Removed sections: none
 - Quality Gates: unchanged.
 - Templates requiring updates:
-  - .specify/templates/plan-template.md ⚠ pending: its Constitution Check is still the generic
-    placeholder; it must reference Principles I–IX and the Quality Gates (task in tasks.md).
+  - .specify/templates/plan-template.md ✅ already checks plans against the current constitution
   - .specify/templates/spec-template.md ✅ no change needed
   - .specify/templates/tasks-template.md ✅ no change needed
   - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
     ⚠ pending: not yet reviewed against 2.8.0 (additive rules only, no conflicts expected)
   - specs/002-learn-from-mistakes/spec.md ✅ updated for 2.8.0 (weighted quizzes replace
-    retests; concept-ready scope; Concept Content versions). One open question remains in the
-    spec: how self-marked answers count for concept tracking (FR-005).
+    retests; concept-ready scope; Concept Content versions; self-marked answers count like any
+    other)
   - README.md ⚠ pending (task in tasks.md)
   - .env.example ⚠ pending (task in tasks.md; also add ILLUSTRATION_MODEL, REVIEW_MODEL and the
     concept cap)
