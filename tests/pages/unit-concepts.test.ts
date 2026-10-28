@@ -1,4 +1,4 @@
-// The "Things you need to know" section on the unit page (spec 002 User Story 1).
+// The "Concepts to review" section on the unit page (spec 002 User Story 1).
 
 import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -68,7 +68,7 @@ async function render(unitId: string) {
   };
 }
 
-describe("Things you need to know", () => {
+describe("Concepts to review", () => {
   it("lists the uncleared concepts with their descriptions and counts, highest count first, then most recently missed", async () => {
     const { me, attempt } = await setup();
     const base = { attemptId: attempt.id, userId: me.id };
@@ -78,7 +78,7 @@ describe("Things you need to know", () => {
     await seedResultAt(env.db, base, READY, `${READY}.m09`, 1, 1, at(6)); // ... then 2
 
     const { html } = await render(READY);
-    expect(html).toContain("Things you need to know");
+    expect(html).toContain("Concepts to review");
     const order = ["Concept B", "Concept A", "Concept C"].map((d) => html.indexOf(d));
     expect(order.every((i) => i >= 0)).toBe(true);
     expect([...order].sort((x, y) => x - y)).toEqual(order); // B, then A, then C
@@ -100,7 +100,7 @@ describe("Things you need to know", () => {
   it("shows a short positive message, not an empty list or an error, when nothing is weak", async () => {
     await setup();
     const { html } = await render(READY);
-    expect(html).toContain("Things you need to know");
+    expect(html).toContain("Concepts to review");
     expect(html).not.toContain("<li");
     expect(html).toMatch(/no weak concepts|nothing to catch up on|all clear|well done/i);
   });
@@ -134,7 +134,7 @@ describe("Things you need to know", () => {
     env.databaseDown();
     const { html, panelEl } = await render(READY);
     expect(panelEl).toBeDefined();
-    expect(html).toContain("Things you need to know");
+    expect(html).toContain("Concepts to review");
     expect(html).toContain("We could not load your weak concepts right now");
   });
 

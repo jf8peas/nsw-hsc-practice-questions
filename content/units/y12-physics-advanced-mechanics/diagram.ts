@@ -30,6 +30,14 @@ function txt(x: number, y: number, s: string, o: TxtOpts = {}): string {
   return `<text x="${f(x)}" y="${f(y)}" fill="${o.color ?? C.text}" font-size="${o.size ?? 11}" font-family="${FONT}"${w}${i}${a}>${esc(s)}</text>`;
 }
 
+/** Text with a subscript, e.g. r_A. */
+function subTxt(x: number, y: number, base: string, sub: string, o: { size?: number; anchor?: "start" | "middle" | "end"; italic?: boolean } = {}): string {
+  const a = o.anchor ? ` text-anchor="${o.anchor}"` : "";
+  const i = o.italic ? ' font-style="italic"' : "";
+  const size = o.size ?? 11;
+  return `<text x="${f(x)}" y="${f(y)}" fill="${C.text}" font-size="${size}" font-family="${FONT}"${a}${i}>${esc(base)}<tspan font-size="${f(size * 0.72)}" dy="3">${esc(sub)}</tspan></text>`;
+}
+
 function f(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
@@ -219,11 +227,14 @@ export function orbitPathPanels(panels: Array<{ label: string; path: OrbitPathKi
 // ---- data table ---------------------------------------------------------------
 
 /** A small data table drawn as SVG, so it keeps its layout inside the plain-text prompt. */
-export function dataTable(o: { headers: string[]; rows: string[][]; colWidths?: number[]; italicHeaders?: boolean }): string {
+export function dataTable(o: { headers: string[]; rows: string[][]; colWidths?: number[]; italicHeaders?: boolean; fontSize?: number }): string {
   const widths = o.colWidths ?? o.headers.map(() => 110);
   const W = widths.reduce((s, w) => s + w, 0) + 2;
   const RH = 22;
-  const H = RH * (o.rows.length + 1) + 2;
+  const fs = o.fontSize ?? 10.5;
+  const hLines = Math.max(...o.headers.map((h) => h.split("\n").length));
+  const HH = RH + (hLines - 1) * 13;
+  const H = HH + RH * o.rows.length + 2;
   const parts: string[] = [];
   let x = 1;
   const xs = widths.map((w) => {
@@ -232,11 +243,15 @@ export function dataTable(o: { headers: string[]; rows: string[][]; colWidths?: 
     return s;
   });
   parts.push(`<rect x="1" y="1" width="${W - 2}" height="${H - 2}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
-  for (let r = 1; r <= o.rows.length; r++) parts.push(line(1, 1 + r * RH, W - 1, 1 + r * RH, { width: 0.8 }));
+  for (let r = 0; r < o.rows.length; r++) parts.push(line(1, 1 + HH + r * RH, W - 1, 1 + HH + r * RH, { width: 0.8 }));
   for (let c = 1; c < widths.length; c++) parts.push(line(xs[c], 1, xs[c], H - 1, { width: 0.8 }));
-  o.headers.forEach((h, c) => parts.push(txt(xs[c] + widths[c] / 2, 1 + RH / 2 + 4, h, { anchor: "middle", size: 10.5, italic: o.italicHeaders ?? true })));
+  o.headers.forEach((h, c) => {
+    const ls = h.split("\n");
+    const y0 = 1 + HH / 2 + 4 - ((ls.length - 1) * 13) / 2;
+    ls.forEach((l, k) => parts.push(txt(xs[c] + widths[c] / 2, y0 + k * 13, l, { anchor: "middle", size: fs, italic: o.italicHeaders ?? true })));
+  });
   o.rows.forEach((row, r) =>
-    row.forEach((cell, c) => parts.push(txt(xs[c] + widths[c] / 2, 1 + (r + 1) * RH + RH / 2 + 4, cell, { anchor: "middle", size: 10.5 }))),
+    row.forEach((cell, c) => parts.push(txt(xs[c] + widths[c] / 2, 1 + HH + r * RH + RH / 2 + 4, cell, { anchor: "middle", size: fs }))),
   );
   return svg(W, H, parts.join(""));
 }
@@ -288,8 +303,13 @@ export function concentricOrbits(o: {
   bodies: Array<{ orbit: number; at: number; label: string; labelDx?: number; labelDy?: number }>;
   radials?: Array<{ orbit: number; at: number; label: string; labelDx?: number; labelDy?: number; labelAt?: number }>;
   size?: number;
+  /** Extra width on the right for a note such as "NOT TO SCALE". */
+  note?: string;
+  centralLabelInside?: boolean;
 }): string {
   const S = o.size ?? 250;
+  const below = !!o.note && o.note.length > 14;
+  const extra = o.note && !below ? 150 : 0;
   const cx = S / 2;
   const cy = S / 2;
   const parts: string[] = [];
@@ -314,7 +334,9 @@ export function concentricOrbits(o: {
     parts.push(dot(x, y, 5));
     parts.push(txt(x + (b.labelDx ?? 8), y + (b.labelDy ?? -8), b.label, { size: 12, bold: true }));
   }
-  return svg(S, S, parts.join(""));
+  if (o.note && !below) parts.push(txt(S + 44, cy + 4, o.note, { size: 11, bold: true }));
+  if (below) parts.push(txt(S / 2, S + 14, o.note!, { size: 11, anchor: "middle" }));
+  return svg(S + extra, S + (below ? 22 : 0), parts.join(""));
 }
 
 // ---- velocity vectors on two orbits (James Ruse 2021 Q14) ----------------------
@@ -388,13 +410,14 @@ export function orbitChangePanels(panels: Array<{ label: string; final: OrbitCha
 
 // ---- field strength against distance (James Ruse 2022 Q13) ---------------------
 
-export function fieldStrengthGraph(o: { gm: number; rMin: number; rMax: number; gMax: number }): string {
+export function fieldStrengthGraph(o: { gm: number; rMin: number; rMax: number; gMax: number; ticks?: number; xLabel?: string; yLabel?: string }): string {
+  const NT = o.ticks ?? 5;
   const L = 44, T = 22, PW = 300, PH = 200;
   const X = (r: number) => L + (r / o.rMax) * PW;
   const Y = (g: number) => T + PH - (g / o.gMax) * PH;
   const parts: string[] = [];
-  for (let k = 0; k <= 20; k++) {
-    const r = (k * o.rMax) / 20;
+  for (let k = 0; k <= NT * 4; k++) {
+    const r = (k * o.rMax) / (NT * 4);
     parts.push(line(X(r), T, X(r), T + PH, { color: k % 4 === 0 ? C.guide : C.grid, width: k % 4 === 0 ? 0.8 : 0.5 }));
   }
   for (let k = 0; k <= o.gMax * 2; k++) {
@@ -405,15 +428,15 @@ export function fieldStrengthGraph(o: { gm: number; rMin: number; rMax: number; 
   parts.push(line(L, T + PH, L + PW, T + PH, { color: C.axis, width: 1 }));
   for (let g = 0; g <= o.gMax; g += 2) parts.push(txt(L - 6, Y(g) + 3.5, String(g), { anchor: "end", size: 9.5 }));
   const sup = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
-  for (let k = 1; k <= 5; k++) {
-    const r = (k * o.rMax) / 5;
+  for (let k = 1; k <= NT; k++) {
+    const r = (k * o.rMax) / NT;
     const e = Math.floor(Math.log10(r));
-    const m = Math.round(r / 10 ** e);
+    const m = +(r / 10 ** e).toFixed(1);
     const label = `${m}×10${String(e).split("").map((d) => sup[Number(d)]).join("")}`;
     parts.push(txt(X(r), T + PH + 13, label, { anchor: "middle", size: 9.5 }));
   }
-  parts.push(txt(L - 4, T - 8, "g (m s⁻²)", { size: 10, italic: true }));
-  parts.push(txt(L + PW / 2, T + PH + 30, "r (m)", { anchor: "middle", size: 10.5, italic: true }));
+  parts.push(txt(L - 4, T - 8, o.yLabel ?? "g (m s⁻²)", { size: 10, italic: !o.yLabel }));
+  parts.push(txt(L + PW / 2, T + PH + 30, o.xLabel ?? "r (m)", { anchor: "middle", size: 10.5, italic: !o.xLabel }));
   const pts: string[] = [];
   for (let r = o.rMin; r <= o.rMax + 1; r += o.rMax / 200) pts.push(`${f(X(r))},${f(Y(o.gm / (r * r)))}`);
   parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.c}" stroke-width="2"/>`);
@@ -710,4 +733,561 @@ export function twoSpheres(): string {
   parts.push(txt(cx + 70, 130, "Mass = 300g", { size: 11, bold: true }));
   parts.push(txt(cx + 70, 144, "Radius = 0.4m", { size: 11, bold: true }));
   return svg(260, 206, parts.join(""));
+}
+
+// ---- circular and elliptical orbits with velocity arrows (Sydney Boys 2023 Q2) ----
+
+export function circleAndEllipseVelocities(): string {
+  const parts: string[] = [];
+  const ex = 120, ey = 135; // Earth
+  const rA = 52;
+  const a = 190, b = 102, ecx = ex - 86 + a; // ellipse: left end P 86 left of Earth
+  parts.push(`<ellipse cx="${ecx}" cy="${ey}" rx="${a}" ry="${b}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 3"/>`);
+  parts.push(`<circle cx="${ex}" cy="${ey}" r="${rA}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 3"/>`);
+  parts.push(`<circle cx="${ex}" cy="${ey}" r="14" fill="${C.guide}"/>`);
+  const arrow = (x: number, y: number, dx: number, dy: number) => line(x, y, x + dx, y + dy, { head: "end", width: 1.3 });
+  // P: left end of the ellipse; R: left of the circle; S: top of the circle; Q: top of the ellipse
+  const px = ex - 86, rx = ex - rA;
+  parts.push(dot(px, ey, 3.2, C.ink), arrow(px, ey - 3, 0, -72), txt(px - 8, ey + 4, "P", { italic: true, size: 12, anchor: "end" }));
+  parts.push(dot(rx, ey, 3.2, C.ink), arrow(rx, ey - 3, 0, -52), txt(rx - 7, ey + 4, "R", { italic: true, size: 12, anchor: "end" }));
+  parts.push(dot(ex, ey - rA, 3.2, C.ink), arrow(ex + 3, ey - rA, 52, 0), txt(ex, ey - rA - 8, "S", { italic: true, size: 12, anchor: "middle" }));
+  parts.push(dot(ecx, ey - b, 3.2, C.ink), arrow(ecx + 3, ey - b, 34, 0), txt(ecx, ey - b - 8, "Q", { italic: true, size: 12, anchor: "middle" }));
+  parts.push(txt(ex + rA + 4, ey - 2, "orbit of", { size: 11 }), txt(ex + rA + 4, ey + 12, "Satellite A", { size: 11, italic: true }));
+  parts.push(txt(ecx + a + 6, ey - 2, "orbit of", { size: 11 }), txt(ecx + a + 6, ey + 12, "Satellite B", { size: 11, italic: true }));
+  return svg(ecx + a + 80, ey + b + 12, parts.join(""));
+}
+
+// ---- ellipse on a grid with chords through the foci (Sydney Girls 2020 Q13) ------
+
+export function ellipseFociChords(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 110, a = 112, b = 66, g = 14;
+  for (let x = cx - 8 * g; x <= cx + 8 * g; x += g) parts.push(line(x, cy - 6 * g, x, cy + 6 * g, { color: C.grid, width: 0.6 }));
+  for (let y = cy - 6 * g; y <= cy + 6 * g; y += g) parts.push(line(cx - 8 * g, y, cx + 8 * g, y, { color: C.grid, width: 0.6 }));
+  parts.push(line(cx - 8.5 * g, cy, cx + 8.5 * g, cy, { color: C.axis, width: 0.9 }));
+  parts.push(line(cx, cy - 6 * g, cx, cy + 6 * g, { color: C.axis, width: 0.9 }));
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${a}" ry="${b}" fill="none" stroke="${C.ink}" stroke-width="2.2"/>`);
+  const c = 66; // focal distance for this drawing (Q, R, P, S at the chord ends)
+  const yy = b * Math.sqrt(1 - (c * c) / (a * a));
+  for (const s of [-1, 1]) parts.push(line(cx + s * c, cy - 6.6 * g, cx + s * c, cy + 6.6 * g, { width: 2 }));
+  parts.push(dot(cx, cy, 2.6, "#db2777"));
+  parts.push(line(cx - c - 6, cy, cx - c + 6, cy, { color: "#db2777", width: 2 }));
+  parts.push(line(cx + c - 6, cy, cx + c + 6, cy, { color: "#db2777", width: 2 }));
+  parts.push(txt(cx - c - 4, cy - 5, "A", { size: 10, anchor: "end" }), txt(cx - 4, cy - 5, "B", { size: 10, anchor: "end" }), txt(cx + c - 4, cy - 5, "C", { size: 10, anchor: "end" }));
+  parts.push(txt(cx - c - 4, cy - yy - 4, "Q", { size: 10, anchor: "end" }), txt(cx + c + 4, cy - yy - 4, "R", { size: 10 }));
+  parts.push(txt(cx - c - 4, cy + yy + 12, "P", { size: 10, anchor: "end" }), txt(cx + c + 4, cy + yy + 12, "S", { size: 10 }));
+  return svg(300, 225, parts.join(""));
+}
+
+// ---- straight-line data graph on a grid (Barker 2021 Q32) --------------------------
+
+export function linearDataGraph(o: {
+  title?: string;
+  xMax: number;
+  yMax: number;
+  xStep: number;
+  yStep: number;
+  xLabel: string;
+  yLabel: string;
+  from: [number, number];
+  to: [number, number];
+  points?: Array<[number, number]>;
+  dashed?: boolean;
+}): string {
+  const L = 52, T = o.title ? 26 : 10, PW = 300, PH = 200;
+  const X = (x: number) => L + (x / o.xMax) * PW;
+  const Y = (y: number) => T + PH - (y / o.yMax) * PH;
+  const parts: string[] = [];
+  if (o.title) parts.push(txt(L + PW / 2, 15, o.title, { anchor: "middle", size: 11, bold: true }));
+  for (let k = 0; k <= 5 * (o.xMax / o.xStep); k++) {
+    const x = (k * o.xStep) / 5;
+    parts.push(line(X(x), T, X(x), T + PH, { color: k % 5 === 0 ? C.guide : C.grid, width: k % 5 === 0 ? 0.8 : 0.5 }));
+  }
+  for (let k = 0; k <= 5 * (o.yMax / o.yStep); k++) {
+    const y = (k * o.yStep) / 5;
+    parts.push(line(L, Y(y), L + PW, Y(y), { color: k % 5 === 0 ? C.guide : C.grid, width: k % 5 === 0 ? 0.8 : 0.5 }));
+  }
+  for (let x = 0; x <= o.xMax; x += o.xStep) parts.push(txt(X(x), T + PH + 13, String(x), { anchor: "middle", size: 9.5 }));
+  for (let y = 0; y <= o.yMax; y += o.yStep) parts.push(txt(L - 5, Y(y) + 3.5, String(y), { anchor: "end", size: 9.5 }));
+  parts.push(txt(L + PW / 2, T + PH + 30, o.xLabel, { anchor: "middle", size: 10.5 }));
+  parts.push(
+    `<text x="14" y="${T + PH / 2}" fill="${C.text}" font-size="10.5" font-family="${FONT}" text-anchor="middle" transform="rotate(-90 14 ${T + PH / 2})">${esc(o.yLabel)}</text>`,
+  );
+  parts.push(line(X(o.from[0]), Y(o.from[1]), X(o.to[0]), Y(o.to[1]), { width: 1.6, ...(o.dashed ? { dash: "3 3", color: C.a } : {}) }));
+  for (const [x, y] of o.points ?? []) parts.push(dot(X(x), Y(y), 3.5, C.a));
+  return svg(L + PW + 12, T + PH + 38, parts.join(""));
+}
+
+// ---- elliptical orbit with two swept segments (Barker 2021 Q32) ------------------
+
+export function sweptSegments(): string {
+  const parts: string[] = [];
+  const cx = 210, cy = 90, a = 180, b = 70;
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${a}" ry="${b}" fill="none" stroke="${C.a}" stroke-width="1.3" stroke-dasharray="5 4"/>`);
+  const ox = cx - 130; // planet near the left focus
+  const P = (deg: number) => [cx + a * Math.cos(rad(deg)), cy - b * Math.sin(rad(deg))] as const;
+  parts.push(`<circle cx="${ox}" cy="${cy}" r="16" fill="#b45309" opacity="0.85"/>`);
+  parts.push(txt(ox + 4, cy - 20, "O", { italic: true, size: 12 }));
+  const pts: Array<[number, string, number, number]> = [
+    [128, "B", -12, -6],
+    [-128, "A", -12, 16],
+    [62, "C", 6, -8],
+    [22, "D", 8, -2],
+  ];
+  for (const [deg, l, dx, dy] of pts) {
+    const [x, y] = P(deg);
+    parts.push(line(ox, cy, x, y, { width: 0.8 }));
+    parts.push(dot(x, y, 2.5, C.ink));
+    parts.push(txt(x + dx, y + dy, l, { italic: true, size: 13 }));
+  }
+  parts.push(txt(6, 22, "NOT TO", { size: 10 }), txt(8, 35, "SCALE", { size: 10 }));
+  return svg(400, 175, parts.join(""));
+}
+
+// ---- planets X and Y five years apart (Caringbah 2020 Q31) ------------------------
+
+export function alignedPlanetsPanels(): string {
+  const parts: string[] = [];
+  const panel = (ox: number, title: string, xAt: number, yAt: number) => {
+    const cx = ox + 95, cy = 110, rX = 32, rY = 80;
+    parts.push(txt(cx, 16, title, { anchor: "middle", size: 10.5 }));
+    parts.push(`<circle cx="${cx}" cy="${cy}" r="${rX}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
+    parts.push(`<circle cx="${cx}" cy="${cy}" r="${rY}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
+    parts.push(`<circle cx="${cx}" cy="${cy}" r="7" fill="${C.star}"/>`);
+    const xx = cx + rX * Math.cos(rad(xAt)), xy = cy - rX * Math.sin(rad(xAt));
+    const yx = cx + rY * Math.cos(rad(yAt)), yy = cy - rY * Math.sin(rad(yAt));
+    parts.push(`<circle cx="${f(xx)}" cy="${f(xy)}" r="6" fill="${C.guide}" stroke="${C.ink}" stroke-width="0.8"/>`);
+    parts.push(`<circle cx="${f(yx)}" cy="${f(yy)}" r="6" fill="${C.guide}" stroke="${C.ink}" stroke-width="0.8"/>`);
+    parts.push(txt(xx - 2, xy - 10, "Planet X", { size: 10, anchor: "middle" }));
+    parts.push(txt(yx - 4, yy + (yAt < 45 ? 22 : -10), "Planet Y", { size: 10, anchor: "middle" }));
+  };
+  panel(0, "Initial position of planets", 0, 0);
+  panel(210, "Position of planets 5 years later", 120, 0 + (120 * Math.pow(2 / 5, 1.5)));
+  return svg(420, 200, parts.join(""));
+}
+
+// ---- satellite in circular orbit around Venus (Caringbah 2024 Q24) ----------------
+
+export function venusOrbit(): string {
+  const parts: string[] = [];
+  const cx = 110, cy = 100, R = 82;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="2"/>`);
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="26" fill="${C.ink}"/>`);
+  parts.push(txt(cx, cy + 4, "Venus", { anchor: "middle", size: 11, color: "#fff" }));
+  parts.push(line(cx + 28, cy, cx + R - 8, cy, { dash: "3 2", width: 3 }));
+  parts.push(txt(cx + 50, cy + 16, "Orbit", { anchor: "middle", size: 11 }));
+  parts.push(`<rect x="${cx + R - 8}" y="${cy - 8}" width="16" height="16" fill="${C.ink}"/>`);
+  parts.push(`<rect x="216" y="130" width="12" height="12" fill="${C.ink}"/>`);
+  parts.push(txt(234, 140, "Satellite", { size: 11 }));
+  parts.push(txt(216, 162, "Not to scale", { size: 11 }));
+  return svg(300, 200, parts.join(""));
+}
+
+// ---- satellite at height h above a planet (Cheltenham Girls 2011 Q22) -------------
+
+export function satelliteAtHeight(): string {
+  const parts: string[] = [];
+  const cx = 100, cy = 95, R = 50, h = 22;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R + h}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 3"/>`);
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#fff" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(txt(cx, cy - 18, "planet", { anchor: "middle", size: 10.5 }), txt(cx, cy - 6, "mass M", { anchor: "middle", size: 10.5 }));
+  parts.push(line(cx, cy, cx - R + 3, cy, { head: "both", width: 1 }));
+  parts.push(txt(cx - R / 2, cy + 14, "R", { anchor: "middle", size: 11 }));
+  parts.push(line(cx, cy + R + 2, cx, cy + R + h - 2, { head: "both", width: 1 }));
+  parts.push(txt(cx + 6, cy + R + h / 2 + 4, "h", { size: 11 }));
+  const sx = cx + (R + h) * Math.cos(rad(45)), sy = cy - (R + h) * Math.sin(rad(45));
+  parts.push(dot(sx, sy, 7, C.ink));
+  parts.push(txt(sx + 12, sy + 4, "Satellite, mass m", { size: 11 }));
+  return svg(300, 180, parts.join(""));
+}
+
+// ---- perihelion and aphelion (Cherrybrook Tech 2025 Q34) --------------------------
+
+export function perihelionAphelion(): string {
+  const parts: string[] = [];
+  const cx = 230, cy = 90, a = 120, b = 80;
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${a}" ry="${b}" fill="none" stroke="${C.a}" stroke-width="1.3"/>`);
+  const sx = cx - 72;
+  parts.push(`<circle cx="${sx}" cy="${cy}" r="9" fill="${C.star}"/>`);
+  parts.push(txt(sx + 12, cy + 18, "Sun", { size: 11 }));
+  const P = (deg: number) => [cx + a * Math.cos(rad(deg)), cy - b * Math.sin(rad(deg))] as const;
+  const [px, py] = P(50);
+  parts.push(`<circle cx="${f(px)}" cy="${f(py)}" r="5" fill="${C.guide}" stroke="${C.ink}"/>`);
+  parts.push(txt(px + 8, py - 2, "planet", { size: 11 }));
+  const [ax, ay] = P(98);
+  parts.push(`<path d="M ${f(ax + 6)} ${f(ay - 4)} l -10 4 l 10 4 z" fill="${C.a}"/>`);
+  parts.push(line(20, cy, cx - a - 8, cy, { color: C.b, head: "end", width: 1.4 }));
+  parts.push(txt(30, cy - 6, "perihelion", { size: 11 }));
+  parts.push(line(450, cy, cx + a + 8, cy, { color: C.b, head: "end", width: 1.4 }));
+  parts.push(txt(390, cy - 6, "aphelion", { size: 11 }));
+  return svg(460, 180, parts.join(""));
+}
+
+// ---- Cassini between Saturn and Jupiter (James Ruse 2019 Q22) ---------------------
+
+export function cassiniLine(): string {
+  const parts: string[] = [];
+  const y = 60;
+  parts.push(`<circle cx="50" cy="${y - 20}" r="16" fill="#fde68a" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(`<ellipse cx="50" cy="${y - 20}" rx="30" ry="7" fill="none" stroke="${C.ink}" stroke-width="1" transform="rotate(-20 50 ${y - 20})"/>`);
+  parts.push(`<rect x="196" y="${y - 26}" width="10" height="10" fill="${C.ink}"/>`);
+  parts.push(`<circle cx="370" cy="${y - 20}" r="22" fill="#fed7aa" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(line(50, y + 20, 199, y + 20, { head: "both", width: 1 }));
+  parts.push(line(203, y + 20, 370, y + 20, { head: "both", width: 1 }));
+  parts.push(txt(125, y + 14, "3.9 × 10¹¹ m", { anchor: "middle", size: 10 }));
+  parts.push(txt(287, y + 14, "4.2 × 10¹¹ m", { anchor: "middle", size: 10 }));
+  parts.push(txt(50, y + 40, "Saturn", { anchor: "middle", size: 10.5 }), txt(201, y + 40, "Cassini", { anchor: "middle", size: 10.5 }), txt(370, y + 40, "Jupiter", { anchor: "middle", size: 10.5 }));
+  parts.push(txt(400, 14, "not to scale", { anchor: "end", size: 9.5 }));
+  return svg(410, y + 50, parts.join(""));
+}
+
+// ---- DSCOVR between Earth and Sun (James Ruse 2022 Q33) ---------------------------
+
+export function dscovrDiagram(): string {
+  const parts: string[] = [];
+  const sx = 120, sy = 150, R = 118;
+  parts.push(`<circle cx="${sx}" cy="${sy}" r="${R}" fill="none" stroke="${C.guide}" stroke-width="1" stroke-dasharray="2 3"/>`);
+  parts.push(`<circle cx="${sx}" cy="${sy}" r="${R - 14}" fill="none" stroke="${C.guide}" stroke-width="1" stroke-dasharray="2 3"/>`);
+  parts.push(`<circle cx="${sx}" cy="${sy}" r="9" fill="#fff" stroke="${C.ink}"/>`);
+  parts.push(txt(sx + 12, sy + 10, "Sun", { size: 11 }));
+  parts.push(`<circle cx="${sx}" cy="${sy - R}" r="7" fill="${C.guide}" stroke="${C.ink}"/>`);
+  parts.push(txt(sx, sy - R - 12, "Earth", { size: 11, anchor: "middle" }));
+  parts.push(dot(sx, sy - R + 14, 2.5, C.ink));
+  parts.push(txt(sx - 8, sy - R + 30, "DSCOVR", { size: 10.5 }));
+  parts.push(line(sx - 10, sy - R, sx - 10, sy - 2, { head: "both", width: 1 }));
+  parts.push(txt(sx - 20, sy - R / 2, "R", { size: 11, anchor: "end" }));
+  parts.push(line(sx + 12, sy - R + 1, sx + 12, sy - R + 13, { head: "both", width: 1 }));
+  parts.push(txt(sx + 17, sy - R + 11, "d", { size: 11 }));
+  parts.push(txt(4, 286, "NOT TO SCALE", { size: 10 }));
+  parts.push(`<rect x="262" y="40" width="190" height="170" fill="none" stroke="${C.ink}"/>`);
+  const lines = ["Data:", "Mass of the DSCOVR:", "m = 570 kg", "Mass of the Sun:", "M_S = 2.0 × 10³⁰ kg", "Period of the Earth’s orbit:", "T_E = 3.16 × 10⁷ s."];
+  lines.forEach((l, i) => parts.push(txt(272, 62 + i * 21 + (i > 0 ? 6 : 0) + (i > 2 ? 6 : 0) + (i > 4 ? 6 : 0), l, { size: 11 })));
+  return svg(460, 292, parts.join(""));
+}
+
+// ---- force on a 1000 kg mass against distance from the Moon (James Ruse 2024 Q30) ----
+
+export function moonForceGraph(): string {
+  const L = 52, T = 14, PW = 330, PH = 210;
+  const xMax = 6.6e6, yMax = 2.0e3;
+  const X = (r: number) => L + (r / xMax) * PW;
+  const Y = (F: number) => T + PH - (F / yMax) * PH;
+  const parts: string[] = [];
+  for (let k = 0; k <= 66; k++) {
+    const r = k * 1e5;
+    parts.push(line(X(r), T, X(r), T + PH, { color: k % 10 === 0 ? C.guide : C.grid, width: k % 10 === 0 ? 0.8 : 0.4 }));
+  }
+  for (let k = 0; k <= 40; k++) {
+    const F = k * 50;
+    parts.push(line(L, Y(F), L + PW, Y(F), { color: k % 10 === 0 ? C.guide : C.grid, width: k % 10 === 0 ? 0.8 : 0.4 }));
+  }
+  for (let k = 0; k <= 6; k++) parts.push(txt(X(k * 1e6), T + PH + 13, String(k), { anchor: "middle", size: 9.5 }));
+  for (const v of [0, 0.5, 1.0, 1.5, 2.0]) parts.push(txt(L - 5, Y(v * 1e3) + 3.5, v === 0 ? "0" : v.toFixed(1), { anchor: "end", size: 9.5 }));
+  parts.push(txt(L + PW / 2, T + PH + 30, "r (× 10⁶ m)", { anchor: "middle", size: 10.5 }));
+  parts.push(
+    `<text x="16" y="${T + PH / 2}" fill="${C.text}" font-size="10.5" font-family="${FONT}" text-anchor="middle" transform="rotate(-90 16 ${T + PH / 2})">F (× 10³ N)</text>`,
+  );
+  const GMm = 4.905e15;
+  const pts: string[] = [];
+  for (let r = 1.74e6; r <= 6.6e6; r += 5e4) pts.push(`${f(X(r))},${f(Y(GMm / (r * r)))}`);
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+  parts.push(line(X(1.74e6), Y(GMm / 1.74e6 ** 2), X(1.74e6), T + PH, { dash: "3 3", width: 1 }));
+  parts.push(txt(X(1.74e6) - 30, Y(400), "radius of", { size: 9.5 }), txt(X(1.74e6) - 30, Y(400) + 11, "Moon", { size: 9.5 }));
+  return svg(L + PW + 12, T + PH + 38, parts.join(""));
+}
+
+// ---- equal-area sectors in an elliptical orbit (Knox 2023 Q24) ---------------------
+
+export function equalAreaSectors(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 95, a = 120, b = 72;
+  const sx = cx - 80; // Sun near the left focus
+  const P = (deg: number) => [cx + a * Math.cos(rad(deg)), cy - b * Math.sin(rad(deg))] as const;
+  const sector = (d1: number, d2: number) => {
+    const pts: string[] = [`${sx},${cy}`];
+    for (let d = d1; d <= d2; d += 2) {
+      const [x, y] = P(d);
+      pts.push(`${f(x)},${f(y)}`);
+    }
+    return `<polygon points="${pts.join(" ")}" fill="#cbd5e1" stroke="${C.ink}" stroke-width="0.8"/>`;
+  };
+  parts.push(sector(124, 236)); // A to B, near the Sun
+  parts.push(sector(-14, 14)); // C to D, far end
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${a}" ry="${b}" fill="none" stroke="${C.ink}" stroke-width="1.6"/>`);
+  parts.push(`<circle cx="${sx}" cy="${cy}" r="9" fill="${C.ink}"/>`);
+  parts.push(txt(sx + 22, cy - 10, "Sun", { size: 11, anchor: "middle" }));
+  const lab = (deg: number, l: string, dx: number, dy: number) => {
+    const [x, y] = P(deg);
+    parts.push(txt(x + dx, y + dy, l, { size: 12, anchor: "middle" }));
+  };
+  lab(124, "B", -6, -6);
+  lab(236, "A", -6, 14);
+  lab(14, "C", 8, -4);
+  lab(-14, "D", 8, 12);
+  return svg(300, 190, parts.join(""));
+}
+
+// ---- unlabelled energy graphs (Knox 2025 Q29, Kotara 2020 Q26) -----------------------
+
+export function potentialHeightSketch(): string {
+  const parts: string[] = [];
+  const L = 50, T = 10, W = 280, H = 240, zy = T + 120;
+  for (let k = 0; k <= 12; k++) parts.push(line(L + (k * W) / 12, T, L + (k * W) / 12, T + H, { color: C.grid, width: 0.6, dash: "3 2" }));
+  for (let k = 0; k <= 12; k++) parts.push(line(L, T + (k * H) / 12, L + W, T + (k * H) / 12, { color: C.grid, width: 0.6, dash: "3 2" }));
+  parts.push(line(L, T, L, T + H, { width: 1.8 }));
+  parts.push(line(L, zy, L + W, zy, { width: 1.8 }));
+  parts.push(txt(L - 8, zy + 4, "0", { anchor: "end", size: 11 }));
+  parts.push(txt(L + W + 8, zy - 4, "Height above Earth’s", { size: 11 }), txt(L + W + 8, zy + 10, "surface (m)", { size: 11 }));
+  parts.push(`<text x="18" y="${zy}" fill="${C.text}" font-size="11" font-family="${FONT}" text-anchor="middle" transform="rotate(-90 18 ${zy})">Energy (kJ)</text>`);
+  // U ∝ −1/(R + h): about −120 px at the surface, rising towards zero at the right edge
+  const pts2: string[] = [];
+  for (let x = 0; x <= W; x += 4) {
+    const k = 1 / (1 + 3.2 * (x / W));
+    pts2.push(`${f(L + x)},${f(zy + 120 * k - 8)}`);
+  }
+  parts.push(`<polyline points="${pts2.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="2"/>`);
+  return svg(L + W + 140, T + H + 8, parts.join(""));
+}
+
+export function totalEnergyRadiusSketch(): string {
+  const parts: string[] = [];
+  const L = 34, T = 10, W = 280, H = 270;
+  const X = (r: number) => L + (r / 3.6) * W;
+  const Y = (e: number) => T + ((3.2 - e) / 6.4) * H;
+  for (let r = 1; r <= 3; r++) parts.push(line(X(r), T, X(r), T + H, { color: C.grid, width: 0.7 }));
+  for (let e = -3; e <= 3; e++) parts.push(line(L, Y(e), L + W, Y(e), { color: C.grid, width: 0.7 }));
+  parts.push(`<rect x="${L}" y="${T}" width="${W}" height="${H}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(line(L, Y(0), L + W, Y(0), { width: 1.2 }));
+  for (let e = -3; e <= 3; e++) parts.push(txt(L - 5, Y(e) + 3.5, String(e), { anchor: "end", size: 9 }));
+  for (let r = 1; r <= 3; r++) parts.push(txt(X(r), Y(0) + 12, String(r), { anchor: "middle", size: 9 }));
+  parts.push(txt(L + 6, T + 14, "Energy", { size: 10.5 }));
+  parts.push(txt(L + W - 4, Y(0) - 6, "Orbital radius", { anchor: "end", size: 10.5 }));
+  const pts: string[] = [];
+  for (let r = 0.35; r <= 3.6; r += 0.02) {
+    const e = -1 / r;
+    if (e >= -3.2) pts.push(`${f(X(r))},${f(Y(e))}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.b}" stroke-width="1.6"/>`);
+  parts.push(`<text x="${f(X(1.0))}" y="${f(Y(-0.75))}" fill="${C.b}" font-size="11" font-family="${FONT}" font-style="italic">E<tspan font-size="8" dy="3">total</tspan></text>`);
+  return svg(L + W + 10, T + H + 8, parts.join(""));
+}
+
+// ---- binary star system (Normanhurst Boys 2021 Q22) -------------------------------
+
+export function binaryStars(): string {
+  const parts: string[] = [];
+  const y = 90;
+  const x1 = 90, x2 = 330, xX = x1 + (x2 - x1) / 4;
+  parts.push(`<circle cx="${x1}" cy="${y}" r="42" fill="#fff" stroke="${C.ink}" stroke-width="1.4"/>`);
+  parts.push(`<circle cx="${x2}" cy="${y}" r="24" fill="#fff" stroke="${C.ink}" stroke-width="1.4"/>`);
+  parts.push(txt(x1 - 50, y + 4, "Star 1", { anchor: "end", size: 11 }));
+  parts.push(txt(x2 + 30, y + 4, "Star 2", { size: 11 }));
+  parts.push(line(x1, y, xX - 2, y, { head: "end", width: 1 }));
+  parts.push(line(x2, y, xX + 2, y, { head: "end", width: 1 }));
+  parts.push(dot(xX, y, 2.5, C.ink));
+  parts.push(txt(xX, y + 16, "X", { anchor: "middle", size: 11, bold: true }));
+  parts.push(txt((x1 + xX) / 2, y - 6, "r₁", { anchor: "middle", size: 11, italic: true }));
+  parts.push(txt((xX + x2) / 2, y - 6, "r₂", { anchor: "middle", size: 11, italic: true }));
+  parts.push(line(x1 + 20, y - 40, x1 + 44, y - 66, { head: "end", width: 1.2 }));
+  parts.push(line(x2 + 6, y + 26, x2 - 6, y + 56, { head: "end", width: 1.2 }));
+  parts.push(txt(210, y + 80, "NOT TO SCALE", { anchor: "middle", size: 11, bold: true }));
+  return svg(420, y + 92, parts.join(""));
+}
+
+// ---- Saturn and the A ring (North Sydney Boys 2023 Q18) ----------------------------
+
+export function saturnRing(): string {
+  const parts: string[] = [];
+  const cx = 160, cy = 70;
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="130" ry="30" fill="none" stroke="${C.ink}" stroke-width="7" opacity="0.35"/>`);
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="48" fill="#fef3c7" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(`<path d="M ${cx - 130} ${cy} A 130 30 0 0 0 ${cx + 130} ${cy}" fill="none" stroke="${C.ink}" stroke-width="7" opacity="0.5"/>`);
+  parts.push(txt(cx + 40, 16, "Saturn", { size: 11 }));
+  parts.push(txt(cx + 140, cy - 22, "A ring", { size: 11 }));
+  parts.push(line(cx - 130, cy + 50, cx + 130, cy + 50, { head: "both", width: 1 }));
+  parts.push(line(cx - 130, cy + 6, cx - 130, cy + 54, { dash: "3 3", width: 0.8 }));
+  parts.push(line(cx + 130, cy + 6, cx + 130, cy + 54, { dash: "3 3", width: 0.8 }));
+  parts.push(txt(cx, cy + 66, "2.72 × 10⁸ m", { anchor: "middle", size: 11 }));
+  return svg(340, cy + 74, parts.join(""));
+}
+
+// ---- Newton's cannon (Cheltenham Girls 2008 Q17) ------------------------------------
+
+export function newtonsCannon(): string {
+  const parts: string[] = [];
+  const cx = 200, cy = 160, R = 80;
+  parts.push(planet(cx, cy, R));
+  parts.push(`<rect x="${cx - 4}" y="${cy - R - 12}" width="16" height="7" fill="${C.ink}"/>`);
+  parts.push(line(cx, cy - R, cx, cy - R - 6, { width: 2 }));
+  const top = cy - R - 8;
+  const path = (d: string, dash = "4 3") => `<path d="${d}" fill="none" stroke="${C.ink}" stroke-width="1.1" stroke-dasharray="${dash}"/>`;
+  parts.push(path(`M ${cx} ${top} Q ${cx - 45} ${top - 6} ${cx - 52} ${cy - R + 18}`));
+  parts.push(txt(cx - 44, top - 8, "a", { size: 11, italic: true }));
+  parts.push(path(`M ${cx} ${top} Q ${cx - 110} ${top - 12} ${cx - 86} ${cy - 6}`));
+  parts.push(txt(cx - 104, cy - 60, "b", { size: 11, italic: true }));
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R + 8}" fill="none" stroke="${C.ink}" stroke-width="1.1" stroke-dasharray="4 3"/>`);
+  parts.push(txt(cx + R + 12, cy + 40, "c", { size: 11, italic: true }));
+  parts.push(path(`M ${cx} ${top} Q ${cx - 170} ${top - 20} ${cx - 192} ${cy + 30}`));
+  parts.push(txt(cx - 165, cy - R - 10, "d", { size: 11, italic: true }));
+  return svg(330, 260, parts.join(""));
+}
+
+// ---- satellite path between a planet and its moon (North Sydney Girls 2020 Q29) -----
+
+export function planetMoonPath(): string {
+  const parts: string[] = [];
+  const px = 230, py = 110;
+  parts.push(`<circle cx="${px}" cy="${py}" r="100" fill="none" stroke="${C.guide}" stroke-width="0.8" stroke-dasharray="2 3"/>`);
+  parts.push(`<circle cx="${px}" cy="${py}" r="32" fill="#fff" stroke="${C.ink}" stroke-width="1.3"/>`);
+  parts.push(txt(px, py + 4, "planet", { anchor: "middle", size: 10 }));
+  parts.push(`<circle cx="${px - 100}" cy="${py}" r="10" fill="#fff" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(txt(px - 100, py - 16, "moon", { anchor: "middle", size: 10 }));
+  // dashed path: arrives from below, loops once around the planet, then leaves to the left past the moon
+  parts.push(
+    `<path d="M ${px} ${py + 130} C ${px} ${py + 90}, ${px + 60} ${py + 70}, ${px + 62} ${py} S ${px + 10} ${py - 66}, ${px - 40} ${py - 50} S ${px - 70} ${py + 30}, ${px - 120} ${py + 40} L ${px - 190} ${py + 40}" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="5 3"/>`,
+  );
+  return svg(400, 250, parts.join(""));
+}
+
+// ---- spacecraft returning to a geostationary orbit (North Sydney Girls 2021 Q25) ----
+
+export function geoReturnPanels(): string {
+  const parts: string[] = [];
+  const earth = (cx: number, cy: number) => {
+    parts.push(planet(cx, cy, 32));
+    parts.push(txt(cx, cy + 50, "Earth", { anchor: "middle", size: 10.5, bold: true }));
+  };
+  // panel 1: A at 5.5 × 10⁷ m, B on the geostationary orbit
+  const c1x = 110, c1y = 120, R1 = 82;
+  parts.push(`<circle cx="${c1x}" cy="${c1y}" r="${R1}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 3"/>`);
+  earth(c1x, c1y);
+  const ax = c1x + 170, ay = c1y - 50, bx = c1x - 6, by = c1y - R1;
+  parts.push(`<path d="M ${ax} ${ay} Q ${c1x + 110} ${c1y - 100} ${bx + 4} ${by}" fill="none" stroke="${C.ink}" stroke-width="1.4" marker-end="url(#ah)"/>`);
+  parts.push(dot(ax, ay, 3.2, C.ink), txt(ax + 6, ay + 4, "A", { size: 11, bold: true }));
+  parts.push(dot(bx, by, 3.2, C.ink), txt(bx, by - 8, "B", { size: 11, bold: true, anchor: "middle" }));
+  parts.push(line(ax, ay, c1x + 2, c1y - 1, { head: "end", width: 0.9 }));
+  parts.push(txt(c1x + 92, c1y - 10, "5.5 × 10⁷ m", { size: 10.5 }));
+  parts.push(txt(c1x + 140, c1y + 50, "NOT TO SCALE", { size: 10, bold: true }));
+  // panel 2: descent from B to C on the surface
+  const c2x = 430, c2y = 120;
+  parts.push(`<circle cx="${c2x}" cy="${c2y}" r="${R1}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 3"/>`);
+  earth(c2x, c2y);
+  const b2x = c2x, b2y = c2y - R1;
+  const cxp = c2x - 31, cyp = c2y - 8;
+  parts.push(`<path d="M ${b2x} ${b2y} Q ${c2x - 42} ${c2y - 70} ${cxp} ${cyp}" fill="none" stroke="${C.ink}" stroke-width="1.4" marker-end="url(#ah)"/>`);
+  parts.push(dot(b2x, b2y, 3.2, C.ink), txt(b2x, b2y - 8, "B", { size: 11, bold: true, anchor: "middle" }));
+  parts.push(dot(cxp, cyp, 3.2, C.ink), txt(cxp - 8, cyp + 4, "C", { size: 11, bold: true, anchor: "end" }));
+  parts.push(txt(c2x + 70, c2y + 70, "NOT TO SCALE", { size: 10, bold: true }));
+  return svg(600, 230, parts.join(""));
+}
+
+// ---- shuttle launched from A into a circular orbit at B (North Sydney Girls 2022 Q31) ----
+
+export function launchToOrbit(): string {
+  const parts: string[] = [];
+  const cx = 130, cy = 110, R = 85;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 3"/>`);
+  parts.push(planet(cx, cy, 40));
+  parts.push(txt(cx, cy + 58, "Earth", { anchor: "middle", size: 10.5, bold: true }));
+  const ax = cx - 40, ay = cy - 4;
+  parts.push(`<path d="M ${ax} ${ay} Q ${cx - 46} ${cy - 70} ${cx} ${cy - R}" fill="none" stroke="${C.ink}" stroke-width="1.4" marker-end="url(#ah)"/>`);
+  parts.push(dot(ax, ay, 3.2, C.ink), txt(ax - 8, ay + 4, "A", { size: 11, bold: true, anchor: "end" }));
+  parts.push(dot(cx, cy - R, 3.2, C.ink), txt(cx, cy - R - 8, "B", { size: 11, bold: true, anchor: "middle" }));
+  parts.push(line(cx, cy, cx + R * Math.cos(rad(15)) - 2, cy - R * Math.sin(rad(15)), { head: "end", width: 1, dash: "3 2" }));
+  parts.push(txt(cx + 50, cy - 4, "R", { size: 11, bold: true }));
+  parts.push(txt(cx + R + 16, cy + 50, "NOT TO", { size: 10, bold: true }), txt(cx + R + 16, cy + 63, "SCALE", { size: 10, bold: true }));
+  return svg(300, 220, parts.join(""));
+}
+
+// ---- two identical masses a distance d apart (North Sydney Girls 2023 Q22) ----------
+
+export function twoMasses(): string {
+  const parts: string[] = [];
+  parts.push(`<circle cx="70" cy="60" r="22" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(`<circle cx="250" cy="60" r="22" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(line(70, 60, 248, 60, { head: "both", width: 1, dash: "4 3" }));
+  parts.push(txt(160, 52, "d m", { anchor: "middle", size: 11, italic: true }));
+  parts.push(txt(160, 18, "Identical masses", { anchor: "middle", size: 11 }));
+  return svg(320, 100, parts.join(""));
+}
+
+// ---- Molniya orbit (Sydney Boys 2022 Q30) -------------------------------------------
+
+export function molniyaOrbit(): string {
+  const parts: string[] = [];
+  const ex = 110, ey = 225, R = 34;
+  const a = 112, b = 30, c = Math.sqrt(a * a - b * b);
+  const th = -58; // long axis tilted up and to the right
+  const ccx = ex + (c - 6) * Math.cos(rad(-th)), ccy = ey - (c - 6) * Math.sin(rad(-th));
+  parts.push(planet(ex, ey, R));
+  parts.push(`<ellipse cx="${f(ccx)}" cy="${f(ccy)}" rx="${a}" ry="${b}" transform="rotate(${th} ${f(ccx)} ${f(ccy)})" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`);
+  const px = ccx + a * Math.cos(rad(-th)), py = ccy - a * Math.sin(rad(-th));
+  parts.push(dot(px, py, 3.5, C.ink));
+  parts.push(txt(px - 8, py + 4, "P", { size: 12, italic: true, anchor: "end" }));
+  return svg(260, 270, parts.join(""));
+}
+
+// ---- projectile on an elliptical path between two points on Earth (Sydney Grammar 2021 Q36) ----
+
+export function projectileEllipse(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 180, R = 70;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#bfdbfe" stroke="${C.ink}" stroke-width="1"/>`);
+  // ellipse with the Earth's centre as a focus, top at 2R, crossing the surface at ±60°
+  const top = 2 * R; // distance from the centre to the furthest point
+  const sx = cx - R * Math.sin(rad(60)), syy = cy - R * Math.cos(rad(60));
+  const fxp = cx + R * Math.sin(rad(60));
+  parts.push(`<path d="M ${f(sx)} ${f(syy)} C ${f(sx - 8)} ${f(cy - 150)}, ${f(fxp + 8)} ${f(cy - 150)}, ${f(fxp)} ${f(syy)}" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#ah)"/>`);
+  parts.push(`<path d="M ${f(sx)} ${f(syy)} C ${f(sx - 4)} ${f(cy + 60)}, ${f(fxp + 4)} ${f(cy + 60)}, ${f(fxp)} ${f(syy)}" fill="none" stroke="#dc2626" stroke-width="1" stroke-dasharray="4 3"/>`);
+  parts.push(dot(cx, cy - top, 3.5, "#dc2626"), dot(sx, syy, 3.5, "#dc2626"), dot(fxp, syy, 3.5, "#dc2626"), dot(cx, cy, 2.5, C.ink));
+  parts.push(line(cx, cy, cx, cy - top + 4, { dash: "4 3", width: 1, head: "end" }));
+  parts.push(txt(cx + 6, cy - R - 30, "2R", { size: 11, italic: true }));
+  parts.push(line(cx, cy, sx + 2, syy + 1, { width: 1, head: "end" }), line(cx, cy, fxp - 2, syy + 1, { width: 1, head: "end" }));
+  parts.push(txt((cx + sx) / 2 - 2, (cy + syy) / 2 - 4, "R", { size: 11, italic: true }), txt((cx + fxp) / 2 + 4, (cy + syy) / 2 - 4, "R", { size: 11, italic: true }));
+  parts.push(line(cx + 3, cy - top, cx + 40, cy - top, { color: "#16a34a", dash: "3 2", head: "end", width: 1.2 }));
+  parts.push(txt(cx + 44, cy - top + 4, "Velocity v", { size: 10, color: "#16a34a" }));
+  parts.push(txt(cx, cy - top - 10, "Furthest point", { size: 10.5, anchor: "middle" }));
+  parts.push(txt(sx - 6, syy, "Start", { size: 10.5, anchor: "end" }), txt(fxp + 6, syy, "Finish", { size: 10.5 }));
+  return svg(320, 260, parts.join(""));
+}
+
+// ---- planet at its closest (A) and furthest (B) points (Sydney Grammar 2022 Q38) -----
+
+export function perihelionAphelionPoints(): string {
+  const parts: string[] = [];
+  const cx = 170, cy = 70, a = 130, b = 46;
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${a}" ry="${b}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 3"/>`);
+  const ax = cx - a, bx = cx + a, sx = cx - 70;
+  parts.push(`<circle cx="${sx}" cy="${cy}" r="12" fill="${C.star}"/>`, txt(sx, cy + 4, "S", { anchor: "middle", size: 10, bold: true }));
+  parts.push(`<circle cx="${ax}" cy="${cy}" r="7" fill="#60a5fa"/>`, `<circle cx="${bx}" cy="${cy}" r="7" fill="#60a5fa"/>`);
+  parts.push(txt(ax - 12, cy + 4, "A", { size: 11, anchor: "end" }), txt(bx + 12, cy + 4, "B", { size: 11 }));
+  parts.push(line(ax + 8, cy, sx - 13, cy, { head: "both", width: 1 }), line(sx + 13, cy, bx - 8, cy, { head: "both", width: 1 }));
+  parts.push(subTxt((ax + sx) / 2, cy - 6, "r", "A", { italic: true, anchor: "middle" }), subTxt((sx + bx) / 2, cy - 6, "r", "B", { italic: true, anchor: "middle" }));
+  parts.push(line(ax, cy - 8, ax, cy - 30, { color: "#dc2626", head: "end", width: 1.4 }), subTxt(ax + 4, cy - 30, "v", "A", { italic: true }));
+  parts.push(line(bx, cy + 8, bx, cy + 22, { color: "#dc2626", head: "end", width: 1.4 }), subTxt(bx - 4, cy + 34, "v", "B", { italic: true, anchor: "end" }));
+  return svg(340, 140, parts.join(""));
+}
+
+// ---- circular and elliptical orbits with the same total energy (Sydney Grammar 2024 Q31) ----
+
+export function sameEnergyOrbits(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 130, r = 105;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="5 4"/>`);
+  // ellipse with semi-major axis a = r (same total energy), the Earth at one focus
+  const a = r, b = 52, c = Math.sqrt(a * a - b * b), th = 33;
+  const ecx = cx + c * Math.cos(rad(th)), ecy = cy + c * Math.sin(rad(th));
+  parts.push(`<ellipse cx="${f(ecx)}" cy="${f(ecy)}" rx="${a}" ry="${b}" transform="rotate(${th} ${f(ecx)} ${f(ecy)})" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="2 3"/>`);
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="11" fill="${C.ink}"/>`);
+  const px = ecx - a * Math.cos(rad(th)), py = ecy - a * Math.sin(rad(th));
+  const qx = ecx + a * Math.cos(rad(th)), qy = ecy + a * Math.sin(rad(th));
+  parts.push(line(px, py, qx, qy, { color: C.c, dash: "2 2", width: 1 }));
+  parts.push(dot(px, py, 3, C.ink), txt(px - 6, py - 4, "P", { size: 11, bold: true, anchor: "end" }));
+  parts.push(dot(qx, qy, 3, C.ink), txt(qx + 6, qy + 10, "A", { size: 11, bold: true }));
+  const ccx = cx + r * Math.cos(rad(222)), ccy = cy - r * Math.sin(rad(222));
+  parts.push(line(cx, cy, ccx, ccy, { color: C.c, dash: "2 2", width: 1 }));
+  parts.push(dot(ccx, ccy, 3, C.ink), txt(ccx - 6, ccy + 12, "C", { size: 11, bold: true, anchor: "end" }));
+  parts.push(txt((cx + ccx) / 2 - 8, (cy + ccy) / 2, "r", { size: 11, italic: true }));
+  parts.push(txt(cx + 120, cy + 30, "Elliptical orbit", { size: 10 }), txt(cx - 20, cy + r + 18, "Circular orbit", { size: 10 }));
+  return svg(360, 270, parts.join(""));
 }

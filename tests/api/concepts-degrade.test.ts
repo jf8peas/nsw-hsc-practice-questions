@@ -77,6 +77,8 @@ async function page() {
 }
 
 const NO_ERROR = /error|failed|unavailable|try again|something went wrong|generat|review|cap/i;
+// The section's own heading and count pill (class rd-pill review) say "to review"; that is not a reviewer status.
+const withoutHeading = (html: string) => html.replace(/Concepts to review|\d+ to review|rd-pill review/g, "");
 
 describe("a used-up daily cap", () => {
   it("leaves the weak concept listed by its description, with no error, and nothing new is prepared", async () => {
@@ -90,7 +92,7 @@ describe("a used-up daily cap", () => {
     const { html, hasStart } = await page();
     expect(html).toContain("Concept A");
     expect(html).toContain("3 more correct answers needed");
-    expect(html).not.toMatch(NO_ERROR);
+    expect(withoutHeading(html)).not.toMatch(NO_ERROR);
     expect(html).not.toContain("<details");
     expect(hasStart).toBe(true);
 
@@ -120,7 +122,7 @@ describe("a generator that fails", () => {
     expect(port.count("generateSummary")).toBe(1);
     const { html } = await page();
     expect(html).toContain("Concept A");
-    expect(html).not.toMatch(NO_ERROR);
+    expect(withoutHeading(html)).not.toMatch(NO_ERROR);
 
     // inside the backoff, opening the page makes no call
     vi.setSystemTime(new Date("2026-10-28T10:10:00Z"));
@@ -154,7 +156,7 @@ describe("a reviewer that is missing, the same model, or down", () => {
       const { html } = await page();
       expect(html).toContain("Concept A");
       expect(html).not.toContain("<details");
-      expect(html).not.toMatch(NO_ERROR);
+      expect(withoutHeading(html)).not.toMatch(NO_ERROR);
     }
   });
 

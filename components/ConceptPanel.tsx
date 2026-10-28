@@ -1,5 +1,6 @@
 import { conceptsOf } from "@/content";
 import { ConceptLive } from "@/components/ConceptLive";
+import { SectionHead } from "@/components/SectionHead";
 import type { ApprovedContent, ConceptContentView } from "@/lib/db/queries/concepts.server";
 import type { Loaded } from "@/lib/db/queries/history.server";
 import type { ConceptState } from "@/lib/concepts/progress";
@@ -10,8 +11,32 @@ export const CONCEPTS_UNAVAILABLE = "We could not load your weak concepts right 
 
 const countLabel = (count: number) => `${count} more correct ${count === 1 ? "answer" : "answers"} needed`;
 
+/** Correct answers in a row that clear a concept (a miss sets the count back to this). */
+const TO_CLEAR = 3;
+
 /**
- * "Things you need to know": the student's uncleared concepts in a unit, highest count first,
+ * How close a concept is to being cleared: one pip per correct answer needed, filled as they
+ * are earned, with "n to go" beside them. Screen readers get the full sentence instead.
+ */
+function ConceptProgress({ count }: { count: number }) {
+  const earned = TO_CLEAR - count;
+  return (
+    <span className="concept-progress">
+      <span className="concept-pips" aria-hidden="true">
+        {Array.from({ length: TO_CLEAR }, (_, i) => (
+          <span key={i} className={i < earned ? "pip on" : "pip"} />
+        ))}
+      </span>
+      <span className="concept-togo" aria-hidden="true">
+        {count} to go
+      </span>
+      <span className="visually-hidden">{countLabel(count)}</span>
+    </span>
+  );
+}
+
+/**
+ * "Concepts to review": the student's uncleared concepts in a unit, highest count first,
  * each with its one-line description and how many correct answers are still needed. A concept
  * whose summary has been reviewed and approved opens to show it (and its picture, if any); one
  * that has not is just its description, with no error and no empty space (spec 002 FR-031).
@@ -36,19 +61,26 @@ export function ConceptPanel({
   const needsContent = states.some((s) => !content.get(s.conceptId)?.summary);
 
   return (
-    <section className="concept-panel" aria-labelledby="concepts-title">
-      <h2 id="concepts-title" className="eyebrow" style={{ margin: "0 0 8px" }}>
-        Things you need to know
-      </h2>
+    <section className="unit-section concept-panel" aria-labelledby="concepts-title">
+      <SectionHead
+        id="concepts-title"
+        title="Concepts to review"
+        aside={states.length > 0 ? <span className="rd-pill review">{states.length} to review</span> : undefined}
+        sub={
+          states.length > 0
+            ? `Ideas you have missed in this quiz. Answer each one correctly ${TO_CLEAR} times in a row to clear it; your next attempts include extra questions on them.`
+            : undefined
+        }
+      />
 
       {progress.status === "unavailable" ? (
         <div className="notice" role="status">
           {CONCEPTS_UNAVAILABLE}
         </div>
       ) : states.length === 0 ? (
-        <p className="page-sub" style={{ margin: 0 }}>
-          No weak concepts right now — nice work. Keep practising to stay sharp.
-        </p>
+        <div className="section-empty">
+          All clear — nothing to review right now. Any concept you miss in a quiz will show up here.
+        </div>
       ) : (
         <ul className="concept-list">
           {states.map((state) => {
@@ -58,7 +90,7 @@ export function ConceptPanel({
               return (
                 <li key={state.conceptId} className="concept-item">
                   <span className="concept-desc">{description}</span>
-                  <span className="concept-count">{countLabel(state.count)}</span>
+                  <ConceptProgress count={state.count} />
                 </li>
               );
             }
@@ -67,7 +99,10 @@ export function ConceptPanel({
                 <details className="concept-details">
                   <summary>
                     <span className="concept-desc">{description}</span>
-                    <span className="concept-count">{countLabel(state.count)}</span>
+                    <span className="concept-end">
+                      <ConceptProgress count={state.count} />
+                      <span className="concept-chev" aria-hidden="true" />
+                    </span>
                   </summary>
                   <ul className="concept-bullets">
                     {approved.summary.bullets.map((bullet, i) => (

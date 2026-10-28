@@ -191,7 +191,7 @@ sets it to 3, a full-marks answer on any question with that tag takes 1 off, and
 the concept is cleared. Results are replayed in the order they were **answered**, and a
 late save keeps its answer time. Nothing about concepts is stored per student.
 
-- **"Things you need to know"** on the unit page lists the student's uncleared concepts
+- **"Concepts to review"** on the unit page lists the student's uncleared concepts
   (highest count first, then most recently missed). "Start quiz" stays above it.
 - **Weighted quizzes.** In a unit with a `quiz`, exactly half the places, rounded up,
   go to questions on the student's uncleared concepts whenever enough exist: highest
