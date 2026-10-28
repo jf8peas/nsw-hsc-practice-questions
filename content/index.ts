@@ -55,7 +55,8 @@ export const UNITS: Unit[] = [
   },
 ];
 
-export const YEARS: Year[] = ["Year 11", "Year 12"];
+/** The order the home page lists them in: the HSC year first, then the preliminary year. */
+export const YEARS: Year[] = ["Year 12", "Year 11"];
 
 export function getUnit(id: string): Unit | undefined {
   return UNITS.find((u) => u.id === id);
@@ -103,7 +104,7 @@ export interface YearGroup {
 /** newest first */
 const byCreatedDesc = (a: Unit, b: Unit) => b.created.localeCompare(a.created);
 
-/** Units grouped by year, each list sorted newest first. */
+/** Units grouped by year in `YEARS` order (Year 12, then Year 11), each list newest first. */
 export function unitsByYear(): YearGroup[] {
   return YEARS.map((year) => {
     const units = UNITS.filter((u) => u.year === year).sort(byCreatedDesc);
