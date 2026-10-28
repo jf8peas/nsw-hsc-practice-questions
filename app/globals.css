@@ -763,15 +763,6 @@ input {
   white-space: nowrap;
 }
 
-.user-menu-email {
-  color: var(--rd-forest-mute);
-  font-size: var(--rd-fs-xs);
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .user-menu-btn {
   height: 30px;
   padding: 0 10px;
@@ -789,11 +780,9 @@ input {
 }
 
 @media (max-width: 480px) {
-  .user-menu-email {
-    display: none;
-  }
+  /* Leaves room for the progress icon and the sign-out button at 360px. */
   .user-menu-name {
-    max-width: 90px;
+    max-width: 72px;
   }
   .app-brand .subtitle {
     display: none;
@@ -1087,11 +1076,34 @@ input {
   text-decoration: underline;
 }
 
+/* Wide screens read the link as a label; below 480px it collapses to a bar-chart icon. */
+.user-menu-link-icon {
+  display: none;
+}
+
 @media (max-width: 480px) {
   .user-menu {
     gap: 6px;
   }
-  .user-menu-name {
+  /* The icon replaces the "My progress" label, freeing room for the name; 30px is a tappable box. */
+  .user-menu-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+  }
+  .user-menu-link-text {
+    display: none;
+  }
+  .user-menu-link-icon {
+    display: block;
+    line-height: 0;
+  }
+  /* With a back button the row is tighter still: the wordmark steps aside (the logo stays a home
+     link) so the student's name and the controls still fit at 360px without overflowing. */
+  .app-header-inner:has(.back-btn) .app-brand .title {
     display: none;
   }
 }
