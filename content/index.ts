@@ -13,6 +13,8 @@ import { conceptOfQuestionId as y11EconPreliminaryTags } from "./units/y11-econo
 import { meta as y11PhysPreliminaryMeta } from "./units/y11-physics-preliminary/meta";
 import { questions as y11PhysPreliminaryQuestions } from "./units/y11-physics-preliminary/questions";
 import { concepts as y11PhysPreliminaryConcepts, retired as y11PhysPreliminaryRetired } from "./units/y11-physics-preliminary/concepts";
+import { meta as y12PhysAdvMechMeta } from "./units/y12-physics-advanced-mechanics/meta";
+import { questions as y12PhysAdvMechQuestions } from "./units/y12-physics-advanced-mechanics/questions";
 import { meta as y11EconEssayMeta } from "./units/y11-economics-essay-scaffold/meta";
 import { questions as y11EconEssayQuestions } from "./units/y11-economics-essay-scaffold/questions";
 import { concepts as y11EconEssayConcepts, retired as y11EconEssayRetired } from "./units/y11-economics-essay-scaffold/concepts";
@@ -26,6 +28,7 @@ import { conceptOfQuestionId as y11EconEssayTags } from "./units/y11-economics-e
  * PUBLIC — safe to import from client components. No answer keys.
  */
 export const UNITS: Unit[] = [
+  { ...y12PhysAdvMechMeta, questions: y12PhysAdvMechQuestions },
   {
     ...y11EconSupplyDemandMeta,
     questions: tagQuestions(y11EconSupplyDemandQuestions, y11EconSupplyDemandTags),

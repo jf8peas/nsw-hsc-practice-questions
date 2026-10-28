@@ -41,6 +41,8 @@ function readShipped(): ShippedIds {
   }
 }
 
+const SOURCE_RE = /^[A-Z][A-Za-z'’ .-]+ (19|20)\d{2} (Trial|Half-yearly|Common Test 1|Interim), Q\d{1,2}$/;
+
 async function main() {
   const seenQuestionIds = new Set<string>();
   const seenUnitIds = new Set<string>();
@@ -88,6 +90,14 @@ async function main() {
 
       if (q.maxMarks < 1) err(`${q.id}: maxMarks must be >= 1`);
 
+      // Principle V: a verbatim school-paper question names its source, and never an HSC paper
+      if (q.source !== undefined) {
+        if (!SOURCE_RE.test(q.source)) {
+          err(`${q.id}: source "${q.source}" must look like "<School> <Year> <Trial|Half-yearly|Common Test 1>, Q<n>"`);
+        }
+        if (/\b(HSC|NESA)\b/i.test(q.source)) err(`${q.id}: source "${q.source}" names an HSC/NESA paper; HSC questions are not allowed`);
+      }
+
       const a = answers[q.id];
       if (!a) {
         err(`${q.id}: no entry in answers.ts`);
@@ -118,6 +128,12 @@ async function main() {
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);
       }
+    }
+
+    // a unit either sources every question or none (no silent gaps in attribution)
+    const sourced = unit.questions.filter((q) => q.source !== undefined).length;
+    if (sourced > 0 && sourced < unit.questions.length) {
+      err(`Unit "${unit.id}": ${unit.questions.length - sourced} question(s) have no source but others do`);
     }
 
     // answer keys with no matching question

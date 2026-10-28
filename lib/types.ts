@@ -89,8 +89,15 @@ interface BaseQuestion {
   formula?: string;
   /** LaTeX form of `formula` for KaTeX rendering. */
   formulaTex?: string;
-  /** Optional inline SVG (a supply/demand diagram) shown between prompt and answer. */
+  /** Optional inline SVG diagram shown between prompt and answer. */
   diagramSvg?: string;
+  /** Short description of the diagram for screen readers (defaults to "Diagram"). */
+  diagramAlt?: string;
+  /**
+   * Where a verbatim school-paper question came from (constitution Principle V), e.g.
+   * "Knox 2022 Trial, Q16". Public: shown with the question. Original questions have none.
+   */
+  source?: string;
   prompt: string;
   /** Marks this question is worth. MC is normally 1. */
   maxMarks: number;

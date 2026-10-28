@@ -439,12 +439,13 @@ export function Quiz({
           </>
         )}
         <div className="q-prompt">{q.prompt}</div>
+        {q.source && <div className="q-source">Source: {q.source}</div>}
 
         {q.diagramSvg && (
           <div
             className="q-diagram"
             role="img"
-            aria-label="Supply and demand diagram"
+            aria-label={q.diagramAlt ?? "Diagram"}
             dangerouslySetInnerHTML={{ __html: q.diagramSvg }}
           />
         )}
