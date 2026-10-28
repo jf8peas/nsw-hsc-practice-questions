@@ -72,6 +72,12 @@ Short answers are marked by the LLM when `OPENROUTER_API_KEY` is set; without it
 | `app/api/results/self-mark/route.ts` | Saves a student's own mark for a short answer the AI could not mark |
 | `app/api/results/retry/route.ts` | Saves a result whose first save failed (idempotent) |
 | `app/api/cron/retention/route.ts` | Weekly job: deletes students 2 years after their last activity |
+| `app/api/units/[unitId]/concepts/{ensure,status}/route.ts` | Starts preparing the student's weak-concept content in the background; the cheap poll the unit page uses to pick it up |
+| `app/api/concepts/[conceptId]/illustration/route.ts` | A concept's live, approved picture, for `<img>` only |
+| `app/admin/concepts/page.tsx`, `app/api/admin/concepts/**` | Teacher review page, regenerate route and picture preview (allow-listed, verified email only) |
+| `lib/concepts/*` | Concept progress (pure replay of results), the weighted-draw loader, the generate → review → regenerate → flag pipeline, the model port, SVG checking, the database store, and `approve.server.ts` behind `npm run concept:approve` |
+| `lib/admin.server.ts` | The only reader of `ADMIN_EMAILS` |
+| `lib/background.server.ts` | `after()` wrapper that runs model work after the response |
 | `lib/grading.server.ts` | Server-only grading logic (touches the answer key) |
 | `lib/db/schema.ts`, `drizzle/` | Database schema and the committed SQL migrations |
 | `lib/auth.server.ts`, `lib/session.server.ts` | Auth.js setup and the "does this student still exist?" check |
@@ -155,15 +161,17 @@ practise, but nothing is saved for them; resume and history are unavailable.
 
 ### For the teacher
 
-There are no teacher pages in the app. Work from the database console and these
-repo commands:
+There is one teacher page, `/admin/concepts` (see "Learn From Mistakes" below);
+everything else is the database console and these repo commands:
 
 - **Class analysis:** open `docs/teacher-queries.sql`, paste one query into the
   Neon SQL Editor, edit the small `params` block at the top (date range, include
   or exclude self-marked answers, unit, student email) and run it. It has: units
   by class average (lowest first), questions in a unit by average mark, the most
   common wrong multiple-choice option per question, one student's history,
-  students' last-active dates, and AI-graded answers used today.
+  students' last-active dates, AI-graded answers used today, concept content that
+  was held back after failing review (`flagged_concept_content`), and concept
+  generation calls used on a day (`concept_generation_usage`).
 - **Delete one student immediately** (on request): `npm run delete-student --
   student@example.com` shows what will be removed and asks you to type the email
   to confirm (`--yes` skips the prompt). Their account, attempts and results are
@@ -173,6 +181,65 @@ repo commands:
   `/api/cron/retention` (protected by `CRON_SECRET`) deletes any student whose
   last activity — the later of their last answer and last sign-in, or account
   creation — is more than 2 years old, and prunes old daily-usage rows.
+
+## Learn From Mistakes
+
+Every question in a unit that has adopted concepts carries a `concept` tag from the
+unit's `concepts.ts`. From the student's saved results the app derives, per concept, a
+count of correct answers still needed: a wrong answer (any answer short of full marks)
+sets it to 3, a full-marks answer on any question with that tag takes 1 off, and at 0
+the concept is cleared. Results are replayed in the order they were **answered**, and a
+late save keeps its answer time. Nothing about concepts is stored per student.
+
+- **"Things you need to know"** on the unit page lists the student's uncleared concepts
+  (highest count first, then most recently missed). "Start quiz" stays above it.
+- **Weighted quizzes.** In a unit with a `quiz`, exactly half the places, rounded up,
+  go to questions on the student's uncleared concepts whenever enough exist: highest
+  count first, unseen questions first, spread across concepts. That beats the unit's
+  MC / short-answer mix, which is kept only as far as it does not cost a weighted
+  place. If the database cannot be read, the quiz is drawn as before.
+- **Concept summaries and pictures** are written by a model once per concept, and shared.
+  A different model (`REVIEW_MODEL`) must approve each one against the concept
+  description and the unit's answer key before any student sees it. A failed item is
+  regenerated once; if it fails again it is held back (students see only the one-line
+  description) and flagged. With `REVIEW_MODEL` unset, or the same as the generator,
+  nothing is approved. Generation runs after the response (`after()`), never
+  while a student waits, and has its own daily cap (`CONCEPT_DAILY_CAP`), separate from
+  AI marking. The page picks up approved content without a reload.
+- **Pictures** are SVG from `ILLUSTRATION_MODEL`, checked against an allowlist (rejected,
+  never repaired), rendered for the reviewer, and shown only through `<img>`.
+- **Wrong-option explanations.** A unit with `explanationsComplete` has a written
+  explanation for every wrong multiple-choice option in its answer key
+  (`wrongExplanations`, keyed by option text). It is shown after the student answers
+  and on the attempt page; nothing is stored per result.
+- **Teacher page.** Teachers on `ADMIN_EMAILS` with a verified Google email open
+  `/admin/concepts` to see every concept's live and replacement content, reviewer
+  reason, models and times, and to regenerate a summary or picture. The student's
+  version stays live until the replacement is approved. To fix a held-back item by
+  hand, edit it in the SQL console and run
+  `npm run concept:approve -- --concept <id> --kind summary|illustration`
+  (add `--bullets-file` to replace a summary's bullets from a file).
+
+### Authoring concepts
+
+- `content/units/<unit>/concepts.ts` exports `concepts` (`{ id, description }`, ids of the
+  form `<unit-id>.c-<slug>`, never renamed or reused; descriptions up to 120 characters)
+  and `retired`. Register both in `content/index.ts`.
+- Add a `concept` to every question, then set `conceptsReady: true` in the unit's
+  `meta.ts`. Set `explanationsComplete: true` only once every MC question has an
+  explanation for each wrong option. `npm run validate` enforces both rules.
+- **Removing a question needs a tombstone.** Add its id to `retired` in `concepts.ts`
+  with the concept it carried, or `null` in a unit not yet tagged (a `conceptsReady`
+  unit may not have `null` tombstones). A `concepts.ts` may hold only `retired`.
+- `content/shipped-ids.json` is a snapshot of every question and concept id ever shipped.
+  `npm run validate:shipped` adds new ids to it (commit the file); it never removes one,
+  so a removed or renumbered id fails the build unless it is tombstoned.
+
+### Trying it locally
+
+`npm run fake-openrouter` starts a stand-in model server (`FAKE_REVIEW=pass|fail|fail-once|down`).
+Point `OPENROUTER_BASE_URL` at it in `.env.local`; the variable is ignored in production. The
+steps are in `specs/002-learn-from-mistakes/quickstart.md`.
 
 ## Content structure
 
@@ -185,7 +252,8 @@ content/
     y11-formula-test/
       meta.ts        # PUBLIC  — id, year, topic, type, title, description, order
       questions.ts   # PUBLIC  — prompt, formula, MC option text, maxMarks
-      answers.ts     # KEY     — correctIndex / modelAnswer / rubric / notes
+      answers.ts     # KEY     — correctIndex / modelAnswer / rubric / notes / wrongExplanations
+      concepts.ts    # PUBLIC  — the unit's concepts and retired-question tombstones (optional)
   index.ts           # PUBLIC registry — the only file that imports every unit
   answers/index.ts   # `import "server-only"` registry of answer keys
   exams.ts           # upcoming exams, referencing unit ids
@@ -243,7 +311,8 @@ content/
 Never renumber or reuse a shipped question id — students' saved results (the
 `results.question_id` column) and any bookmarked URLs depend on it. Append new
 ids instead. Removing a question is safe: past results stay in the database and
-show as "retired" in the student's history.
+show as "retired" in the student's history. Record the removal as a tombstone in the
+unit's `concepts.ts` (see "Authoring concepts"); the validator fails otherwise.
 
 ### Adding an exam
 
@@ -280,6 +349,13 @@ Production and Preview **separately** (Preview must use a different database).
 | `GRADE_IP_RATE_LIMIT` | no | looser per-IP backstop per minute (default 150) |
 | `ATTEMPT_RATE_LIMIT` | no | attempts a student can start per minute (default 20) |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` | no | distributed rate limiting (create the database in `ap-southeast-2`); falls back to in-memory |
+| `CONCEPT_MODEL` | no | model that writes concept summaries (default `deepseek/deepseek-chat`) |
+| `ILLUSTRATION_MODEL` | no | model that draws concept pictures as SVG; unset = no pictures |
+| `REVIEW_MODEL` | no, but nothing is approved without it | independent reviewer; must differ from the generator (case and `:variant` ignored) |
+| `CONCEPT_DAILY_CAP` | no | model calls (generate, review, regenerate) per Sydney day across all students (default 100; `0` = off) |
+| `CONCEPT_RATE_LIMIT` | no | concept preparation requests per student per minute (default 10) |
+| `ADMIN_EMAILS` | no | comma-separated teacher emails for `/admin/concepts`; empty admits nobody, and the email must be verified by Google |
+| `OPENROUTER_BASE_URL` | no | local fake model server only; ignored when `NODE_ENV` is `production` |
 
 `CLASS_CODE` and `SKIP_CLASS_CODE` are gone: signing in replaces the class code.
 Remove them from Vercel if they are still set.

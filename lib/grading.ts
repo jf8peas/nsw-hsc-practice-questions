@@ -23,6 +23,11 @@ export interface GradeResult {
   marksAwarded: number | null;
   /** MC only: DISPLAY index of the correct option. */
   correctDisplayIndex?: number;
+  /**
+   * MC only, wrong answers only: why the option the student chose is wrong. Present only
+   * for a unit whose explanations are complete. Never stored with the result (spec 002 FR-041).
+   */
+  optionExplanation?: string;
   /** Short only: revealed after submitting. */
   modelAnswer?: string;
   /** Short only: mark-scheme points. */
@@ -63,6 +68,13 @@ export interface AlreadyAnswered {
   error: "already_answered";
   result: Pick<
     GradeResult,
-    "questionId" | "type" | "maxMarks" | "marksAwarded" | "feedback" | "rubricHits" | "rubricMisses"
+    | "questionId"
+    | "type"
+    | "maxMarks"
+    | "marksAwarded"
+    | "feedback"
+    | "rubricHits"
+    | "rubricMisses"
+    | "optionExplanation"
   > & { needsSelfMark: false };
 }

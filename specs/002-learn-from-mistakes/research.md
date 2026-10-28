@@ -10,7 +10,8 @@ Items that need your confirmation are collected at the end under **Open items**.
 
 - **Decision**:
   - `content/units/<unit-id>/concepts.ts` exports `concepts: Concept[]` (`{ id, description }`)
-    and `retired: Record<string, string>` (see R3).
+    and `retired: Record<string, string | null>` (see R3). A unit that is not concept-ready may
+    have a `concepts.ts` holding only `retired` (with `concepts: []`).
   - A concept id is `<unit-id>.c-<slug>`, for example `y11-economics-preliminary.c-scarcity`. It is
     globally unique by construction, like question ids, and is safe in a URL.
   - Each public question gains an optional `concept?: string` field. A tag is not an answer, so it
@@ -35,8 +36,10 @@ Items that need your confirmation are collected at the end under **Open items**.
     FR-003 are enforced);
   - a `concepts.ts` in a unit folder that the registry never imported is an error;
   - a unit with neither marker is validated exactly as today;
-  - a `retired` tombstone key must not equal a live question id, must be namespaced to the unit,
-    and must point at a real concept.
+  - a `retired` tombstone key must not equal a live question id and must be namespaced to the
+    unit. Its value must be a real concept of the unit, or `null` for a question removed before
+    the unit was tagged. A `conceptsReady` unit may not have `null` tombstones: when a unit is
+    tagged, the content team gives each earlier tombstone its concept.
 - **Authoring**: 200-question units are tagged with a helper or a map applied in `questions.ts`
   (for example `tag(questions, TAGS)`); either way the public question carries `concept`. Tagging
   and explanation writing are content work, done unit by unit, outside this plan's code tasks.
@@ -87,7 +90,10 @@ Items that need your confirmation are collected at the end under **Open items**.
 - **Decision (proposed)**: when a tagged question is removed from a concept-ready unit, its id is
   added to the unit's `retired` map in `concepts.ts` with the concept it belonged to
   (`{ "y11-x.m07": "y11-x.c-scarcity" }`). The replay uses the tombstone, so FR-006 and FR-008 both
-  hold, nothing is stored per result, and no tag is looked up from the database. The validator
+  hold, nothing is stored per result, and no tag is looked up from the database. A question
+  removed from a unit that is not yet concept-ready gets a `null` tombstone (in a `concepts.ts`
+  that may hold only `retired`), so the removal is recorded and the shipped-ids check passes;
+  its results count toward no concept until the unit is tagged and the tombstone is given one. The validator
   checks the map is well formed (R1). It cannot detect a removal that forgot the tombstone, because
   it has no history, so the rule is a documented authoring step and a code-review item.
 - **Alternatives**: let retired results stop counting (rejected: contradicts FR-008, and a student
@@ -239,14 +245,14 @@ Items that need your confirmation are collected at the end under **Open items**.
   text model, so the picture is rendered to a PNG on the server and sent as an image input along
   with the source. If rendering fails or the reviewer cannot take images, the version stays
   `pending_review` and is not shown (FR-028).
-- **Rasteriser (new dependency, needs sign-off)**: `@resvg/resvg-js` 2.6.2 (MPL-2.0, small JS
+- **Rasteriser (new dependency, allowed by constitution Principle VIII since 2.9.0)**: `@resvg/resvg-js` 2.6.2 (MPL-2.0, small JS
   wrapper with a prebuilt native binary per platform, no build step). It renders SVG text with a
   font file we ship (`assets/fonts/NotoSans-Regular.ttf`, OFL), so output does not depend on fonts
   installed on the Vercel runtime. `next.config.mjs` gets
   `serverExternalPackages: ["@resvg/resvg-js"]` and `outputFileTracingIncludes` for the font on the
   two routes that run the pipeline. This is the only new runtime dependency. It is justified
   because FR-024 requires the reviewer to check "labels, axes and shapes", and a text-only reading
-  of SVG paths cannot do that reliably (Complexity Tracking).
+  of SVG paths cannot do that reliably.
   - **Alternatives**: `@resvg/resvg-wasm` (no native binary, but a 2.5 MB wasm blob and manual
     initialisation); `sharp` (not installed, relies on system fonts for text); no rasteriser, text
     review of the SVG only (rejected for the reason above; it remains the fallback if you decline
@@ -401,16 +407,15 @@ the test files are named in `plan.md`.
 
 ## Open items
 
-These need your decision or sign-off before `/speckit-tasks`. The plan proceeds on the stated
-default for each.
+Items 1 to 3 are settled. Items 4 to 7 use the stated defaults and can still change before or
+during implementation.
 
-1. **Retired questions and tags** (R3): tombstones in `concepts.ts`. Default: yes.
-2. **Rasteriser dependency** (R7): `@resvg/resvg-js` so the reviewer can see a picture. Default:
-   yes; fallback is text-only review of the SVG.
-3. **Principle wording** (Complexity Tracking): the plan reads Principle I's "client MAY send only"
-   as governing answer-submission routes, and treats the slot lease, retry-after, last-error and
-   version origin columns as pipeline bookkeeping that Principle II's concept-content list does not
-   spell out. A one-line constitution clarification would remove the doubt. Default: proceed, flag.
+1. **Retired questions and tags** (R3): decided. Tombstones in `concepts.ts` (`null` for a question
+   removed before its unit is tagged); recorded in the spec as FR-006 and FR-008.
+2. **Rasteriser dependency** (R7): decided. `@resvg/resvg-js`, allowed by constitution 2.9.0; the
+   text-only fallback is no longer needed.
+3. **Principle wording**: decided. Constitution 2.9.0 clarified Principles I and II, and 2.9.1
+   clarified Principle VI.
 4. **Admin hardening** (R10): admin checks require Google's `email_verified`, so existing teachers
    sign in once more. Default: yes.
 5. **Preference order in the draw** (R4): mix before unseen. Default: as written.

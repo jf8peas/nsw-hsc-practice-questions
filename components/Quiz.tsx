@@ -548,6 +548,15 @@ export function Quiz({
           </div>
         )}
 
+        <div aria-live="polite">
+          {result?.type === "mc" && result.optionExplanation && (
+            <div className="explanation">
+              <div className="label">Why this is wrong</div>
+              {result.optionExplanation}
+            </div>
+          )}
+        </div>
+
         {error && (
           <div style={{ color: "var(--rd-danger-500)", fontSize: 13, marginTop: 12 }}>
             {error} — try again.

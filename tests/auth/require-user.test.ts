@@ -118,7 +118,9 @@ describe("identityFromClaims", () => {
       id: uid,
       name: "A",
       email: "a@x",
+      ev: false, // not verified unless the claim says so
     });
+    expect(session.identityFromClaims({ uid, name: "A", email: "a@x", ev: true })?.ev).toBe(true);
     expect(session.identityFromClaims({ uid: "nope" })).toBeNull();
     expect(session.identityFromClaims({})).toBeNull();
     expect(session.identityFromClaims(null)).toBeNull();

@@ -24,6 +24,18 @@
 --   * A "class average" is total marks earned / total marks available, so a 3-mark
 --     answer counts three times as much as a 1-mark answer.
 --   * Read-only: none of these change any data.
+--
+-- Fixing a flagged item
+--   A concept summary or picture that failed the reviewer twice is held back: students
+--   see only the one-line description. flagged_concept_content lists them with the
+--   reviewer's reason (the reason may quote the answer key, so it appears only here).
+--   To fix one yourself:
+--     1. Edit summary_bullets (or illustration_svg) on that version_id in the SQL Editor
+--        (summaries keep 3 to 6 bullets; a picture must still pass the SVG rules).
+--     2. Run:  npm run concept:approve -- --concept <concept_id> --kind summary
+--        (or --kind illustration). Add  --bullets-file path.txt  (one bullet per line)
+--        to replace the bullets from a file instead. This makes the version live.
+--   Or open /admin/concepts and press "Regenerate" for a fresh attempt.
 -- ============================================================================
 
 
@@ -175,3 +187,36 @@ JOIN users u ON u.id = d.user_id,
 WHERE d.sydney_date = p.day
   AND d.count > 0
 ORDER BY d.count DESC, u.email;
+
+
+-- QUERY: flagged_concept_content
+-- Concept summaries and pictures that failed review twice and are held back from students,
+-- newest first. reason is what the reviewer said (teacher eyes only). To fix one, see
+-- "Fixing a flagged item" at the top.
+SELECT s.concept_id,
+       s.unit_id,
+       v.kind,
+       v.reviewer_reason                                   AS reason,
+       v.generator_model,
+       v.reviewer_model,
+       v.generated_at AT TIME ZONE 'Australia/Sydney'      AS generated_at_sydney,
+       v.reviewed_at  AT TIME ZONE 'Australia/Sydney'      AS reviewed_at_sydney,
+       v.id                                                AS version_id
+FROM concept_slots s
+JOIN concept_versions v ON v.id = s.replacement_version_id
+WHERE v.status = 'failed_review'
+  AND v.attempt_no = 2
+ORDER BY v.reviewed_at DESC NULLS LAST, s.concept_id, v.kind;
+
+
+-- QUERY: concept_generation_usage
+-- Model calls (generation, review, regeneration) used on a given Sydney day across all
+-- students. This is the same counter that enforces CONCEPT_DAILY_CAP. Today by default;
+-- change the date in params to look at another day.
+WITH params AS (
+  SELECT (now() AT TIME ZONE 'Australia/Sydney')::date AS day
+)
+SELECT p.day                   AS sydney_date,
+       coalesce(d.count, 0)    AS concept_calls_used
+FROM params p
+LEFT JOIN daily_concept_usage d ON d.sydney_date = p.day;

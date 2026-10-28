@@ -18,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: buildProviders(),
   callbacks: {
-    jwt: ({ token, user, account }) => jwtCallback({ token, user, account }),
+    jwt: ({ token, user, account, profile }) => jwtCallback({ token, user, account, profile }),
     session: ({ session, token }) => sessionCallback({ session, token }),
   },
 });
@@ -26,8 +26,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 /** The identity in the Auth.js JWT (no database access). */
 async function currentIdentity() {
   const session = await auth();
-  const u = session?.user as { id?: string; name?: string | null; email?: string | null } | undefined;
-  return identityFromClaims(u ? { uid: u.id, name: u.name, email: u.email } : null);
+  const u = session?.user as
+    | { id?: string; name?: string | null; email?: string | null; ev?: boolean }
+    | undefined;
+  return identityFromClaims(u ? { uid: u.id, name: u.name, email: u.email, ev: u.ev } : null);
 }
 
 /**

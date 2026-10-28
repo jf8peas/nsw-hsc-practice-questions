@@ -208,7 +208,7 @@ export async function attemptDetail(
 
 // ---- loaders for pages: never throw for an outage ----------------------------
 
-async function load<T>(fn: (db: Db) => Promise<T>): Promise<Loaded<T>> {
+export async function load<T>(fn: (db: Db) => Promise<T>): Promise<Loaded<T>> {
   try {
     return { status: "ok", data: await dbCall(fn, HISTORY_TIMEOUT_MS) };
   } catch (error) {

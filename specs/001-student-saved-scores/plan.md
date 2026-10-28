@@ -270,5 +270,11 @@ Recorded after implementation so the plan stays honest:
   `answer`, because no question-type column is stored (Principle II field list).
 - **The delete-student command** runs as `tsx --conditions=react-server`, so the `server-only` marker resolves
   to its empty module outside Next.
+- **Reviewed against constitution v2.9.1 and spec 002** (while implementing spec 002): the stored personal-data
+  fields are unchanged and nothing here conflicts. Updated for accuracy: the `created_at` semantics of a late-saved
+  result (`data-model.md`, `contracts/tokens.md`), the new `(user_id, unit_id, created_at, id)` index, the "other
+  server-side state" wording (`research.md`, `contracts/tokens.md`), and the "no teacher pages" assumption in
+  `spec.md` (spec 002 adds one teacher page for concept content). The route-guard test also accepts
+  `authenticateAdmin()` and `requireAdminPage()` now.
 - **Not done in code** (manual launch work): measuring SC-003 in a deployed Preview, the full quickstart in a real
   browser against real Google and Neon, and the launch checklist. See `tasks.md`.

@@ -7,7 +7,7 @@ import { getResult } from "@/lib/db/queries/results.server";
 import type { ResultRow } from "@/lib/db/schema";
 import { getConfig } from "@/lib/config.server";
 import type { AlreadyAnswered, GradeResponse } from "@/lib/grading";
-import { gradeAnswer } from "@/lib/grading.server";
+import { getOptionExplanation, gradeAnswer } from "@/lib/grading.server";
 import { llmGradingConfigured } from "@/lib/openrouter.server";
 import { checkIpRateLimit, checkUserRateLimit } from "@/lib/ratelimit.server";
 import { buildReceipt, saveResult, type ResultFields } from "@/lib/results/save.server";
@@ -51,6 +51,9 @@ function alreadyAnswered(row: ResultRow, type: "mc" | "short"): NextResponse {
       feedback: row.feedback ?? undefined,
       rubricHits: row.rubricHits ?? undefined,
       rubricMisses: row.rubricMisses ?? undefined,
+      // recomputed from the stored option text, never stored (spec 002 FR-041)
+      optionExplanation:
+        type === "mc" && row.marksAwarded === 0 ? getOptionExplanation(row.questionId, row.answer) : undefined,
       needsSelfMark: false,
     },
   };

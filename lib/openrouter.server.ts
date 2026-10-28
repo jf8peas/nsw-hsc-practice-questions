@@ -1,16 +1,107 @@
 import "server-only";
 
-// Short-answer grading via OpenRouter. Configured with OPENROUTER_API_KEY and
-// (optionally) GRADING_MODEL. If the key is absent, gradeShortAnswer returns
-// null and the caller falls back to student self-marking.
+// Model calls via OpenRouter. Configured with OPENROUTER_API_KEY. `gradeShortAnswer` marks
+// short answers (GRADING_MODEL); `chatCompletion` is the shared request used by the concept
+// pipeline too (spec 002). If the key is absent, grading returns null and the caller falls
+// back to student self-marking.
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "deepseek/deepseek-chat";
 const TIMEOUT_MS = 20_000;
 
+/**
+ * Where requests go. `OPENROUTER_BASE_URL` points the app at a local stand-in
+ * (scripts/fake-openrouter.ts) for development, and is IGNORED in production so it can never
+ * redirect real traffic.
+ */
+function endpoint(): string {
+  const override = process.env.OPENROUTER_BASE_URL?.trim();
+  return override && process.env.NODE_ENV !== "production" ? override : ENDPOINT;
+}
+
 export function llmGradingConfigured(): boolean {
   return Boolean(process.env.OPENROUTER_API_KEY);
 }
+
+/** Same check, named for the concept pipeline. */
+export function conceptLlmConfigured(): boolean {
+  return Boolean(process.env.OPENROUTER_API_KEY);
+}
+
+// ---- shared request ----------------------------------------------------------
+
+export type ChatContent =
+  | string
+  | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
+
+export interface ChatMessage {
+  role: "system" | "user" | "assistant";
+  content: ChatContent;
+}
+
+export interface ChatParams {
+  model: string;
+  messages: ChatMessage[];
+  temperature: number;
+  maxTokens: number;
+  timeoutMs: number;
+  /** Ask for a JSON object reply. */
+  json?: boolean;
+}
+
+export type ChatResult =
+  | { ok: true; content: string }
+  | { ok: false; reason: "unconfigured" | "network" | "http" | "empty"; status?: number; detail?: string };
+
+/**
+ * One chat completion. Never throws: a missing key, a network error, a non-2xx reply and an
+ * empty reply all come back as `{ ok: false, reason }` so callers can fall back. No retry here.
+ */
+export async function chatCompletion(p: ChatParams): Promise<ChatResult> {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return { ok: false, reason: "unconfigured" };
+
+  let res: Response;
+  try {
+    res = await fetch(endpoint(), {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${key}`,
+        "content-type": "application/json",
+        "HTTP-Referer": process.env.SITE_URL || "https://nsw-hsc-practice.vercel.app",
+        "X-Title": "NSW HSC Practice",
+      },
+      body: JSON.stringify({
+        model: p.model,
+        messages: p.messages,
+        temperature: p.temperature,
+        max_tokens: p.maxTokens,
+        ...(p.json ? { response_format: { type: "json_object" } } : {}),
+      }),
+      signal: AbortSignal.timeout(p.timeoutMs),
+    });
+  } catch (error) {
+    return { ok: false, reason: "network", detail: String(error).slice(0, 200) };
+  }
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    return { ok: false, reason: "http", status: res.status, detail: detail.slice(0, 300) };
+  }
+  let data: unknown;
+  try {
+    data = await res.json();
+  } catch {
+    return { ok: false, reason: "empty", detail: "reply was not JSON" };
+  }
+  const content = (data as { choices?: Array<{ message?: { content?: unknown } }> })?.choices?.[0]?.message?.content;
+  if (typeof content !== "string" || !content.trim()) {
+    return { ok: false, reason: "empty", detail: JSON.stringify(data).slice(0, 300) };
+  }
+  return { ok: true, content };
+}
+
+// ---- short-answer grading -------------------------------------------------------
 
 export interface ShortGrade {
   marksAwarded: number;
@@ -62,7 +153,7 @@ function parseGradeJson(content: string, maxMarks: number): Omit<ShortGrade, "gr
   };
 }
 
-function buildMessages(p: GradeParams) {
+function buildMessages(p: GradeParams): ChatMessage[] {
   const system =
     `You are marking a NSW HSC Year 11 (Preliminary) short-answer response against a rubric. ` +
     `Award a whole number of marks from 0 to ${p.maxMarks}: one mark for each rubric point the student's answer clearly satisfies. ` +
@@ -90,59 +181,39 @@ function buildMessages(p: GradeParams) {
 }
 
 export async function gradeShortAnswer(p: GradeParams): Promise<ShortGrade | null> {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) {
+  if (!process.env.OPENROUTER_API_KEY) {
     console.warn("[grade] OPENROUTER_API_KEY not set — short answer falls back to self-marking");
     return null;
   }
   const model = process.env.GRADING_MODEL || DEFAULT_MODEL;
-
-  const body = JSON.stringify({
-    model,
-    messages: buildMessages(p),
-    temperature: 0,
-    max_tokens: 500,
-    response_format: { type: "json_object" },
-  });
+  const messages = buildMessages(p);
 
   async function attempt(): Promise<Omit<ShortGrade, "gradedBy"> | null> {
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${key}`,
-        "content-type": "application/json",
-        "HTTP-Referer": process.env.SITE_URL || "https://nsw-hsc-practice.vercel.app",
-        "X-Title": "NSW HSC Practice",
-      },
-      body,
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+    const res = await chatCompletion({
+      model,
+      messages,
+      temperature: 0,
+      maxTokens: 500,
+      timeoutMs: TIMEOUT_MS,
+      json: true,
     });
     if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      console.error(`[grade] OpenRouter ${res.status} (model ${model}): ${detail.slice(0, 300)}`);
+      if (res.reason === "http") {
+        console.error(`[grade] OpenRouter ${res.status} (model ${model}): ${res.detail ?? ""}`);
+      } else if (res.reason === "empty") {
+        console.error(`[grade] OpenRouter response had no message content: ${res.detail ?? ""}`);
+      } else {
+        console.error(`[grade] OpenRouter call threw: ${res.detail ?? res.reason}`);
+      }
       return null;
     }
-    const data = await res.json();
-    const content: unknown = data?.choices?.[0]?.message?.content;
-    if (typeof content !== "string") {
-      console.error(`[grade] OpenRouter response had no message content: ${JSON.stringify(data).slice(0, 300)}`);
-      return null;
-    }
-    const parsed = parseGradeJson(content, p.maxMarks);
-    if (!parsed) console.error(`[grade] could not parse grader JSON: ${content.slice(0, 300)}`);
+    const parsed = parseGradeJson(res.content, p.maxMarks);
+    if (!parsed) console.error(`[grade] could not parse grader JSON: ${res.content.slice(0, 300)}`);
     return parsed;
   }
 
-  let out = await attempt().catch((e) => {
-    console.error(`[grade] OpenRouter call threw: ${e}`);
-    return null;
-  });
-  if (!out) {
-    out = await attempt().catch((e) => {
-      console.error(`[grade] OpenRouter retry threw: ${e}`);
-      return null;
-    });
-  }
+  let out = await attempt();
+  if (!out) out = await attempt();
   if (!out) return null;
 
   console.info(`[grade] ${model} → ${out.marksAwarded}/${p.maxMarks}`);

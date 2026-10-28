@@ -213,7 +213,7 @@ A student's account and all of their results are deleted automatically 2 years a
 
 ## Assumptions
 
-- Students are the only users of the app in this feature; the teacher works directly with the database console and repo scripts, and no in-app teacher or admin pages exist.
+- Students are the only users of the app in this feature; the teacher works directly with the database console and repo scripts, and no in-app teacher or admin pages exist in this feature (spec 002 later adds one teacher page, for reviewing concept content only).
 - Students mostly use phones, so the sign-in page, "My progress" and attempt detail must work well on a small screen.
 - A "quiz attempt" is one run through a unit's drawn set of questions, started when the student begins the quiz. The attempt score is the total marks earned over total marks available for the answers graded in it. An attempt is "completed" once every question drawn for it has been answered; otherwise it is "incomplete". Incomplete attempts are shown in the history with the score so far, but are excluded from best, latest and trend.
 - "Trend" on "My progress" compares the most recent attempts' percentages with the earlier ones (up, down or steady). The exact rule is a planning detail.
@@ -223,4 +223,4 @@ A student's account and all of their results are deleted automatically 2 years a
 - The daily limit is configured by the teacher outside the app. Teacher-run queries and scripts need database access and are not exposed in the app.
 - Students must be shown a clear data notice before or at sign-in. School approval / consent for holding minors' data is required before production launch but is outside this feature's scope.
 - Constitution v2.3.0 Principle II (stored fields unchanged since v2.1.0) permits the stored fields this feature needs: the attempt id, the question ids drawn per attempt, the AI feedback with rubric hits/misses, and the per-student created, last sign-in and last answer timestamps. Retention runs from last activity as defined in FR-025.
-- Out of scope: any in-app teacher/admin pages, student groups or classes, assigning quizzes, emailing reports, data export, parent access, and changes to quiz content or grading rubrics.
+- Out of scope for this feature: any in-app teacher/admin pages, student groups or classes, assigning quizzes, emailing reports, data export, parent access, and changes to quiz content or grading rubrics.

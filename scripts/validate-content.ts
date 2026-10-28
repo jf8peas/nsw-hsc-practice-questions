@@ -5,18 +5,40 @@
  * meta.ts, questions.ts and answers.ts, and every question id is
  * "<unit.id>.<something>".
  */
-import { readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { UNITS } from "../content/index";
 import { EXAMS } from "../content/exams";
 import { F } from "../content/formulas";
 import { FORMULA_HTML } from "../content/formulas.generated";
+import {
+  validateConceptRules,
+  validateExplanationRules,
+  validateShippedIds,
+  type ShippedIds,
+} from "../lib/content-rules";
 import type { AnswerSet } from "../lib/types";
 
 const UNITS_DIR = join(process.cwd(), "content", "units");
+const SHIPPED_FILE = join(process.cwd(), "content", "shipped-ids.json");
+const UPDATE_SHIPPED = process.argv.includes("--update-shipped");
 const errors: string[] = [];
 const err = (m: string) => errors.push(m);
+
+function readShipped(): ShippedIds {
+  if (!existsSync(SHIPPED_FILE)) return { questions: [], concepts: [] };
+  try {
+    const raw = JSON.parse(readFileSync(SHIPPED_FILE, "utf8")) as Partial<ShippedIds>;
+    return {
+      questions: Array.isArray(raw.questions) ? raw.questions.filter((x): x is string => typeof x === "string") : [],
+      concepts: Array.isArray(raw.concepts) ? raw.concepts.filter((x): x is string => typeof x === "string") : [],
+    };
+  } catch {
+    err("content/shipped-ids.json is not valid JSON");
+    return { questions: [], concepts: [] };
+  }
+}
 
 async function main() {
   const seenQuestionIds = new Set<string>();
@@ -48,6 +70,13 @@ async function main() {
       err(`Cannot load content/units/${unit.id}/answers.ts`);
       continue;
     }
+
+    // a concepts.ts the registry never imported would be silently ignored
+    if (existsSync(join(UNITS_DIR, unit.id, "concepts.ts")) && unit.concepts === undefined) {
+      err(`Unit "${unit.id}" has content/units/${unit.id}/concepts.ts but content/index.ts never imported it`);
+    }
+    for (const m of validateConceptRules(unit)) err(m);
+    for (const m of validateExplanationRules(unit, answers)) err(m);
 
     for (const q of unit.questions) {
       if (!q.id.startsWith(`${unit.id}.`)) {
@@ -98,6 +127,26 @@ async function main() {
     }
   }
 
+  // shipped ids: a removed or renumbered question, or any removed concept, fails the build
+  // unless it is tombstoned (spec 002 FR-003, FR-008). `--update-shipped` records new ids first
+  // and never removes one, so it cannot hide a removal.
+  const snapshot = readShipped();
+  if (UPDATE_SHIPPED) {
+    const next: ShippedIds = {
+      questions: [...new Set([...snapshot.questions, ...UNITS.flatMap((u) => u.questions.map((q) => q.id))])].sort(),
+      concepts: [...new Set([...snapshot.concepts, ...UNITS.flatMap((u) => (u.concepts ?? []).map((c) => c.id))])].sort(),
+    };
+    writeFileSync(SHIPPED_FILE, JSON.stringify(next, null, 2) + "\n");
+    console.log(
+      `Updated content/shipped-ids.json: ${next.questions.length} question id(s), ${next.concepts.length} concept id(s)`,
+    );
+    snapshot.questions = next.questions;
+    snapshot.concepts = next.concepts;
+  } else if (!existsSync(SHIPPED_FILE)) {
+    err("content/shipped-ids.json is missing; run `npm run validate:shipped` and commit it");
+  }
+  for (const m of validateShippedIds(snapshot, UNITS)) err(m);
+
   // pre-rendered formula HTML must cover every formula
   for (const def of Object.values(F)) {
     if (!FORMULA_HTML[def.text]) {
@@ -122,8 +171,11 @@ async function main() {
     console.error("");
     process.exit(1);
   }
+  const ready = UNITS.filter((u) => u.conceptsReady).length;
+  const explained = UNITS.filter((u) => u.explanationsComplete).length;
   console.log(
-    `✓ Content OK — ${UNITS.length} unit(s), ${seenQuestionIds.size} question(s), ${EXAMS.length} exam(s)`,
+    `✓ Content OK — ${UNITS.length} unit(s), ${seenQuestionIds.size} question(s), ${EXAMS.length} exam(s); ` +
+      `${ready} concept-ready, ${explained} explanations-complete`,
   );
 }
 

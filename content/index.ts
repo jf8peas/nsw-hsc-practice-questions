@@ -1,4 +1,4 @@
-import type { Unit, UnitMeta, Year } from "@/lib/types";
+import type { Concept, Unit, UnitMeta, Year } from "@/lib/types";
 
 import { meta as y11FormulaTestMeta } from "./units/y11-formula-test/meta";
 import { questions as y11FormulaTestQuestions } from "./units/y11-formula-test/questions";
@@ -38,6 +38,31 @@ export function getQuestion(questionId: string) {
     if (q) return { unit, question: q };
   }
   return undefined;
+}
+
+/** The concepts a unit has adopted (empty for a unit that has not). */
+export function conceptsOf(unit: Unit): Concept[] {
+  return unit.concepts ?? [];
+}
+
+/** A concept by id, with the unit that owns it. */
+export function getConcept(conceptId: string): { unit: Unit; concept: Concept } | undefined {
+  for (const unit of UNITS) {
+    const concept = unit.concepts?.find((c) => c.id === conceptId);
+    if (concept) return { unit, concept };
+  }
+  return undefined;
+}
+
+/**
+ * The concept a question counts toward: its own tag, or, for a question that has been
+ * removed, the concept recorded in the unit's `retired` map. A question with no tag, a
+ * removed question recorded as having none (`null`), and an unknown id all give `undefined`.
+ */
+export function conceptOfQuestion(unit: Unit, questionId: string): string | undefined {
+  const question = unit.questions.find((q) => q.id === questionId);
+  if (question) return question.concept;
+  return unit.retired?.[questionId] ?? undefined;
 }
 
 export interface YearGroup {

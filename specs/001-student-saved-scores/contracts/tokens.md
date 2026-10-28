@@ -1,7 +1,8 @@
 # Signed Tokens
 
 Three stateless tokens let the server hand the browser a verifiable claim without storing anything
-(constitution Principle II limits other server-side state to rate-limit and cap counters).
+(constitution Principle II limits other server-side state to rate-limit and cap counters, plus, as amended for spec 002,
+shared concept content and its generation bookkeeping, none of it about any student).
 
 ## Format
 
@@ -41,6 +42,10 @@ Issued by `/api/grade` or `/api/results/self-mark` only when the database save f
   iat: number, exp: number   // seconds; exp = iat + 7 days
 }
 ```
+
+`iat` is also **when the student answered**. Spec 002 stores it as the result's `created_at` when a
+receipt is saved late (`POST /api/results/retry`), so concept progress replays results in the order
+they were answered, not the order they reached the database.
 
 Replay is harmless: the insert is `ON CONFLICT (attempt_id, question_id) DO NOTHING`.
 Contains only the student's own answer and the feedback they were shown, never the answer key.

@@ -23,7 +23,7 @@ interface SignInAccount {
 
 /**
  * JWT callback. On sign-in it creates/refreshes the student row and keeps only
- * `uid`, `name` and `email` in the token — no profile photo and no provider
+ * `uid`, `name`, `email` and the verified-email flag `ev` in the token — no profile photo and no provider
  * tokens — so the header and pages still show the identity during an outage.
  * On later calls the token is returned unchanged.
  */
@@ -31,16 +31,22 @@ export async function jwtCallback<T extends TokenLike>({
   token,
   user,
   account,
+  profile,
 }: {
   token: T;
   user?: SignInUser | null;
   account?: SignInAccount | null;
+  profile?: { email_verified?: unknown } | null;
 }): Promise<T & Partial<TokenClaims>> {
   if (account && user) {
     // Google: the stable account id. Dev login: the `dev:<name>` id from authorize().
     const sub = account.provider === "google" ? account.providerAccountId : String(user.id ?? "");
     if (!sub) throw new Error("sign-in without a stable account id");
-    const claims = await claimsOnSignIn({ sub, name: user.name, email: user.email });
+    // Google says whether it verified the email; the dev login (which exists only outside
+    // production) stands in for a verified teacher so the admin pages can be tried locally.
+    const emailVerified =
+      account.provider === "google" ? profile?.email_verified === true : process.env.NODE_ENV !== "production";
+    const claims = await claimsOnSignIn({ sub, name: user.name, email: user.email, emailVerified });
     return applyClaims(token, claims);
   }
   return token;

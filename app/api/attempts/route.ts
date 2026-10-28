@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { getUnit } from "@/content";
 import { resolveSession } from "@/lib/auth.server";
 import { DEFAULT_PASS_MARK, drawAttempt, toPublicQuestions } from "@/lib/attempts/draw.server";
+import { loadWeighting, type Weighting } from "@/lib/concepts/weighting.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { createAttempt } from "@/lib/db/queries/attempts.server";
 import { checkAttemptRateLimit } from "@/lib/ratelimit.server";
@@ -49,7 +50,17 @@ export async function POST(req: Request) {
     );
   }
 
-  const drawn = drawAttempt(unit);
+  // Weighted toward the student's weak concepts (spec 002 US4). Any failure to read their
+  // results means an ordinary draw: a quiz always starts (FR-046, Principle VI).
+  let weighting: Weighting | null = null;
+  if (session.kind === "user" && unit.conceptsReady) {
+    try {
+      weighting = await dbCall((db) => loadWeighting(db, user.id, unit));
+    } catch {
+      weighting = null;
+    }
+  }
+  const drawn = drawAttempt(unit, undefined, weighting ?? undefined);
   const attemptId = randomUUID();
 
   let persisted = session.kind === "user";

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AttemptHistory } from "@/components/AttemptHistory";
+import { ConceptPanel } from "@/components/ConceptPanel";
 import { Formula } from "@/components/Formula";
 import { HistoryUnavailable } from "@/components/HistoryUnavailable";
 import { Shell } from "@/components/Shell";
@@ -9,6 +10,7 @@ import { StartQuiz } from "@/components/StartQuiz";
 import { getUnit, unitIsNew } from "@/content";
 import { daysUntil, examsForUnit } from "@/content/exams";
 import { requirePageUser } from "@/lib/auth.server";
+import { loadConceptContentViewForPage, loadUnitConceptProgress } from "@/lib/db/queries/concepts.server";
 import { loadUnitHistory } from "@/lib/db/queries/history.server";
 
 export default async function UnitPage({
@@ -23,9 +25,15 @@ export default async function UnitPage({
 
   // The database being down must never break the page: the history section
   // shows a notice, and "Start quiz" still works (research R19).
-  const history = degraded
-    ? ({ status: "unavailable" } as const)
-    : await loadUnitHistory(user.id, unit.id);
+  const [history, conceptProgress] = await Promise.all([
+    degraded ? ({ status: "unavailable" } as const) : loadUnitHistory(user.id, unit.id),
+    degraded ? ({ status: "unavailable" } as const) : loadUnitConceptProgress(user.id, unit),
+  ]);
+  // approved summaries and pictures for the weak concepts listed (descriptions only if this fails)
+  const conceptView =
+    conceptProgress.status === "ok" && conceptProgress.data.length > 0
+      ? await loadConceptContentViewForPage(conceptProgress.data.map((s) => s.conceptId))
+      : undefined;
   const resume = history.status === "ok" ? history.data.resume : null;
 
   const exams = examsForUnit(unit.id);
@@ -77,6 +85,9 @@ export default async function UnitPage({
           <StartQuiz unitId={unit.id} />
         )}
       </div>
+
+      {/* The student's weak concepts, below Start/Continue and above the history (mobile-first). */}
+      <ConceptPanel unit={unit} progress={conceptProgress} view={conceptView} />
 
       {history.status === "ok" ? <AttemptHistory history={history.data} /> : <HistoryUnavailable />}
 

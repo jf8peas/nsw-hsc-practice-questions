@@ -50,6 +50,8 @@ export async function POST(req: Request) {
       feedback: r.feedback,
       hits: r.hits,
       misses: r.misses,
+      // the receipt was signed when the answer was graded, so a late save keeps its answer time
+      answeredAt: new Date(r.iat * 1000),
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AttemptOwnerMismatchError") {

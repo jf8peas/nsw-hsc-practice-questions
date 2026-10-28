@@ -117,3 +117,8 @@ export function checkIpRateLimit(ip: string): Promise<RateResult> {
 export function checkAttemptRateLimit(userId: string): Promise<RateResult> {
   return checkRateLimit("attempt", userId, getConfig().attemptRateLimit);
 }
+
+/** Limit on the unit page asking for concept content to be prepared: per signed-in student. */
+export function checkConceptRateLimit(userId: string): Promise<RateResult> {
+  return checkRateLimit("concept", userId, getConfig().conceptRateLimit);
+}

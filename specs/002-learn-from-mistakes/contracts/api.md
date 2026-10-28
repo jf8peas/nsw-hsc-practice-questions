@@ -127,6 +127,8 @@ Body: `{ "conceptId": string, "kind": "summary" | "illustration" }`
 - `404 no_illustration_brief`: `kind` is `illustration` but neither the live nor the replacement
   summary carries an illustration brief (the summary decided none is needed).
 - `409 busy`: a worker already holds the lease.
+- `503 reviewer_unavailable`: `REVIEW_MODEL` is unset or is the same model as the generator, so a
+  replacement could never be approved. Nothing is generated or spent.
 - `429 cap_reached` with `{ resetsAt }` (Sydney ISO time): the daily concept cap is used up. The
   existing live version is untouched (FR-055).
 - `202 { "queued": true }`: a replacement will be generated and reviewed in the background. The

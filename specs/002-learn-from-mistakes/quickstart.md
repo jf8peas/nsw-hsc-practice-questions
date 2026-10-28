@@ -117,6 +117,10 @@ have been tagged.
 ## Before merging
 
 - `npm run build` (runs `gen:formulas` and `validate`), `npm run lint`, `npm test`.
+- `npm run validate` passes with `content/shipped-ids.json`. If you added questions or concepts,
+  run `npm run validate:shipped` and commit the updated file. If you removed a question, add its
+  `retired` entry in that unit's `concepts.ts` (its concept, or `null` before the unit is tagged)
+  rather than editing the snapshot.
 - `npm audit` shows nothing new beyond the accepted `postcss` advisory.
 - A production-mode check: `NODE_ENV=production` with `REVIEW_MODEL` and `ADMIN_EMAILS` unset
   still serves (these are optional), and `OPENROUTER_BASE_URL` is ignored.

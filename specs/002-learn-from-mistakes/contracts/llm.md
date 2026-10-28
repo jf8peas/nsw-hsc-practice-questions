@@ -94,9 +94,9 @@ px, axes and every curve labelled, no external references.
 
 - Elements: `svg g path line polyline polygon rect circle ellipse text tspan defs marker title desc`.
 - Attributes: geometry and presentation only (`d x y x1 y1 x2 y2 cx cy r rx ry points width height
-  viewBox transform fill stroke stroke-width stroke-dasharray stroke-linecap stroke-linejoin
-  opacity font-size font-family font-weight text-anchor dominant-baseline marker-end marker-start
-  id`), plus `xmlns`, `markerWidth markerHeight refX refY orient`.
+  viewBox transform dx dy fill stroke stroke-width stroke-dasharray stroke-linecap stroke-linejoin
+  fill-opacity stroke-opacity opacity font-size font-family font-weight font-style text-anchor
+  dominant-baseline marker-end marker-start id`), plus `xmlns`, `markerWidth markerHeight refX refY orient`.
 - Never: `href`, `xlink:href`, `style`, any `on*`, `<script>`, `<style>`, `<foreignObject>`,
   `<image>`, `<use>`, `<!DOCTYPE>`, `<!ENTITY>`, `javascript:`, `data:`. `url(...)` is allowed only
   as `url(#id)`. Maximum size 40 KB.

@@ -76,3 +76,40 @@ describe("callbackUrl handling", () => {
     }
   });
 });
+
+describe("the concept routes and the teacher page (spec 002)", () => {
+  const STUDENT_API = [
+    "/api/units/y11-economics-preliminary/concepts/ensure",
+    "/api/units/y11-economics-preliminary/concepts/status",
+    "/api/concepts/y11-economics-preliminary.c-scarcity/illustration",
+  ];
+  const TEACHER_API = [
+    "/api/admin/concepts/regenerate",
+    "/api/admin/concepts/y11-economics-preliminary.c-scarcity/illustration",
+  ];
+
+  it("answers signed-out API requests with 401, and sends a signed-out teacher page to sign-in", () => {
+    for (const p of [...STUDENT_API, ...TEACHER_API]) {
+      expect(decideAccess({ pathname: p, authed: false, nodeEnv: "development" }).type).toBe("unauthenticated-api");
+      expect(isPublicPath(p)).toBe(false);
+    }
+    expect(decideAccess({ pathname: "/admin/concepts", authed: false, nodeEnv: "development" }).type).toBe("redirect-signin");
+    expect(isPublicPath("/admin/concepts")).toBe(false);
+  });
+
+  it("the optional concept settings are not required, so leaving them unset never refuses to serve", () => {
+    const optional = ["REVIEW_MODEL", "ILLUSTRATION_MODEL", "CONCEPT_MODEL", "CONCEPT_DAILY_CAP", "CONCEPT_RATE_LIMIT", "ADMIN_EMAILS", "OPENROUTER_BASE_URL"];
+    for (const name of optional) expect(REQUIRED_ENV).not.toContain(name);
+    // production with only the required variables serves everything for a signed-in student
+    for (const p of [...STUDENT_API, ...TEACHER_API, "/admin/concepts", "/unit/y11-economics-preliminary"]) {
+      expect(decideAccess({ pathname: p, authed: true, nodeEnv: "production", env: FULL_ENV }).type).toBe("next");
+    }
+  });
+
+  it("still fails closed in production when a required variable is missing", () => {
+    for (const name of REQUIRED_ENV) {
+      const d = decideAccess({ pathname: "/admin/concepts", authed: true, nodeEnv: "production", env: { ...FULL_ENV, [name]: undefined } });
+      expect(d).toEqual({ type: "unconfigured", missing: [name] });
+    }
+  });
+});

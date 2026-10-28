@@ -39,8 +39,9 @@ export interface TestEnv {
 }
 
 /** Make a SessionUser from a seeded users row. */
-export function asSessionUser(row: { id: string; name: string; email: string }): SessionUser {
-  return { id: row.id, name: row.name, email: row.email };
+/** A signed-in identity for a seeded row; `ev` is the verified-email flag (unset = not verified). */
+export function asSessionUser(row: { id: string; name: string; email: string }, ev?: boolean): SessionUser {
+  return { id: row.id, name: row.name, email: row.email, ...(ev === undefined ? {} : { ev }) };
 }
 
 /**

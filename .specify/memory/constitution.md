@@ -1,19 +1,14 @@
 <!--
 Sync Impact Report
-- Version change: 2.8.0 → 2.9.0 (MINOR: expanded guidance in Principles I, II and VIII; nothing
-  removed or redefined). Resolves the plan exceptions CT-1, CT-2 and CT-3 in
-  specs/002-learn-from-mistakes/plan.md.
+- Version change: 2.9.0 → 2.9.1 (PATCH: clarification in Principle VI; no rule added, removed or
+  redefined). Resolves /speckit-analyze finding H1 on spec 002: when an item fails review twice,
+  the one-line-only fallback applies to a concept with no approved version; a failed replacement
+  leaves any previously approved version on show.
 - Modified principles:
-  - I. The "client MAY send only" list now applies to answer-submission routes (grading,
-    self-mark, save retry). New bullet: other routes MAY take only resource identifiers the
-    server re-checks (unit id, concept id, version id, item kind) and MUST NOT accept a user
-    id, marks, max marks, grading method or answer. (CT-2)
-  - II. Shared concept content MAY also hold pipeline bookkeeping that is not personal data:
-    a processing lease (owner and expiry), a retry-after time and the last error per item, and
-    each version's origin and attempt number. (CT-3)
-  - VIII. `@resvg/resvg-js` is added to the allowed runtime dependencies, server-side only, to
-    render generated illustrations for the reviewer. (CT-1)
-  - All other principles unchanged by 2.9.0. (2.8.0 replaced retests with weighted quizzes.)
+  - VI. The review bullet now says students see the previously approved version if there is
+    one, otherwise only the one-line description.
+  - All other principles unchanged by 2.9.1. (2.9.0 expanded I, II and VIII: resource ids on
+    non-answer routes, pipeline bookkeeping for concept content, and `@resvg/resvg-js`.)
 - Added sections: none
 - Removed sections: none
 - Quality Gates: unchanged.
@@ -22,12 +17,12 @@ Sync Impact Report
   - .specify/templates/spec-template.md ✅ no change needed
   - .specify/templates/tasks-template.md ✅ no change needed
   - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
-    ⚠ pending: not yet reviewed against 2.9.0 (additive rules only, no conflicts expected)
-  - specs/002-learn-from-mistakes/{spec,plan,tasks}.md ✅ updated for 2.9.0 (plan exceptions
-    CT-1 to CT-3 resolved)
-  - README.md ⚠ pending (task in tasks.md)
-  - .env.example ⚠ pending (task in tasks.md; also add ILLUSTRATION_MODEL, REVIEW_MODEL and the
-    concept cap)
+    ✅ reviewed against 2.9.1 and spec 002; no conflicts, wording updated where now inaccurate
+  - specs/002-learn-from-mistakes/{spec,plan,tasks}.md ✅ updated for 2.9.1 (plan exceptions
+    CT-1 to CT-3 resolved; H1 clarified)
+  - README.md ✅ updated (spec 002 section, routes, settings, authoring rules)
+  - .env.example ✅ updated (CONCEPT_MODEL, ILLUSTRATION_MODEL, REVIEW_MODEL, concept cap and
+    rate limit, ADMIN_EMAILS, OPENROUTER_BASE_URL)
 - Follow-up TODOs: TODO(ACCESSIBILITY_TARGET)
 Legend: rules marked [PRACTICE] describe what the repo already does today. Rules marked
 [DECISION] are team decisions that are not yet current practice.
@@ -202,8 +197,9 @@ mandatory here. Current units follow it, but the README does not yet say so.
 - Every concept summary and illustration MUST pass an independent reviewer LLM, using a different
   model from the generator, before students see it. The reviewer checks it against the concept
   description and the unit's model answers and rubrics. A failed item is regenerated once; if it
-  fails again it MUST be held back, students see only the one-line description, and it is flagged
-  for teacher review.
+  fails again it MUST be held back and flagged for teacher review. Students then see the
+  previously approved version if there is one, otherwise only the one-line description; a failed
+  item is never shown.
 - Weighting a quiz toward weak concepts needs the student's saved results. If the database cannot
   be read, the quiz MUST still start, drawn without weighting, as in the existing degraded mode.
 
@@ -334,4 +330,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.9.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
+**Version**: 2.9.1 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28

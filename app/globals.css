@@ -496,6 +496,29 @@ input {
   color: var(--rd-success-500);
 }
 
+/* Why a wrong multiple-choice option is wrong */
+
+.explanation {
+  background: var(--rd-surface-50);
+  border: 1px solid var(--rd-border-100);
+  border-left: 3px solid var(--rd-danger-500);
+  border-radius: var(--rd-r-md);
+  padding: 12px 14px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--rd-ink-700);
+  line-height: 1.5;
+}
+
+.explanation .label {
+  font-family: var(--rd-font-mono);
+  font-size: 9.5px;
+  color: var(--rd-mute-500);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
 /* LLM feedback on a short answer */
 
 .feedback {
@@ -910,6 +933,45 @@ input {
   font-size: 18px;
 }
 
+/* Unit page: "Things you need to know" ----------------------------------- */
+
+.concept-panel {
+  margin-bottom: 20px;
+}
+
+.concept-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.concept-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-md);
+  background: var(--rd-white);
+  color: var(--rd-ink-900);
+}
+
+.concept-desc {
+  flex: 1 1 200px;
+  font-size: var(--rd-fs-md);
+  font-weight: 500;
+}
+
+.concept-count {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-sm);
+  color: var(--rd-mute-600);
+}
+
 /* /progress and attempt detail ------------------------------------------ */
 
 .progress-card {
@@ -1026,4 +1088,124 @@ input {
   .user-menu-name {
     display: none;
   }
+}
+
+/* "Things you need to know": a concept with an approved summary opens to show it ------- */
+
+.concept-has-detail {
+  padding: 0;
+}
+
+.concept-details > summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.concept-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.concept-details > summary:focus-visible {
+  outline: 2px solid var(--rd-blue-500);
+  outline-offset: -2px;
+  border-radius: var(--rd-r-md);
+}
+
+.concept-details[open] > summary {
+  border-bottom: 1px solid var(--rd-border-100);
+}
+
+.concept-bullets {
+  margin: 0;
+  padding: 12px 14px 4px 32px;
+  display: grid;
+  gap: 6px;
+  font-size: var(--rd-fs-md);
+}
+
+.concept-illustration {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 8px auto 14px;
+  padding: 0 14px;
+  box-sizing: border-box;
+}
+
+/* Teacher review: /admin/concepts ----------------------------------------- */
+
+.admin-concept {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.admin-concept-title {
+  font-family: var(--rd-font-display);
+  font-weight: 600;
+  font-size: var(--rd-fs-md);
+}
+
+.admin-concept-id {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-sm);
+  color: var(--rd-mute-600);
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+
+.admin-item {
+  border-top: 1px solid var(--rd-border-100);
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.admin-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 6px;
+}
+
+.admin-version {
+  margin-top: 8px;
+}
+
+.admin-version ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.admin-none,
+.admin-meta {
+  color: var(--rd-mute-600);
+  font-size: var(--rd-fs-sm);
+  margin: 4px 0;
+}
+
+.admin-reason,
+.admin-error {
+  color: var(--rd-danger-500);
+  font-size: var(--rd-fs-base);
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.regen {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.regen-msg {
+  font-size: var(--rd-fs-sm);
+  color: var(--rd-mute-600);
 }

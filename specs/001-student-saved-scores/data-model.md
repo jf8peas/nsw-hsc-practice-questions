@@ -57,14 +57,15 @@ One row per graded answer (FR-006, FR-007).
 | feedback | text NULL | AI-graded only; as shown to the student |
 | rubric_hits | text[] NULL | AI-graded only |
 | rubric_misses | text[] NULL | AI-graded only |
-| created_at | timestamptz NOT NULL default `now()` | |
+| created_at | timestamptz NOT NULL default `now()` | when the student answered: the save time, except a result saved late from a receipt, which uses the receipt's issue time (spec 002) |
 
 Constraint: `UNIQUE (attempt_id, question_id)`, the idempotency key.
 Never stored: model answers, rubric text, marking notes, the LLM model name.
 
 Indexes: `(user_id, created_at DESC)` per-user history; `(unit_id, question_id)` class averages
 and wrong-option counts; `(attempt_id)` attempt detail; `(unit_id, created_at)` date-filtered unit
-ranking.
+ranking; `(user_id, unit_id, created_at, id)` a student's results in one unit in answer order
+(added by spec 002 for concept progress).
 
 ## daily_ai_usage
 

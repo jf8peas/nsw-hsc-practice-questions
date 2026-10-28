@@ -10,15 +10,17 @@ files (code), not in the database.
 | Item | Where | Shape |
 |---|---|---|
 | Concept | `content/units/<unit-id>/concepts.ts` | `{ id: "<unit-id>.c-<slug>", description: string }` (one line, at most 120 characters) |
-| Retired-question tombstones | same file | `retired: Record<questionId, conceptId>` |
+| Retired-question tombstones | same file | `retired: Record<questionId, conceptId \| null>` (`null` only in a unit not yet concept-ready) |
 | Concept tag | `questions.ts` | `concept?: conceptId` on each public question |
 | Readiness markers | `meta.ts` | `conceptsReady?: boolean`, `explanationsComplete?: boolean` |
+| Shipped-id snapshot | `content/shipped-ids.json` | `{ questions: string[], concepts: string[] }`: every question and concept id that has shipped; refreshed with `npm run validate:shipped`, which never removes an id |
 | Wrong-option explanations | `answers.ts` (server-only) | `wrongExplanations?: Record<optionText, string>` on MC answers |
 
 Rules (enforced by the validator, research R1): concept ids are unique and carry the unit prefix;
 ids are never renamed or reused once shipped; a ready unit has every question tagged; an
-explanations-complete unit has an explanation for every wrong option; markers are public metadata
-and hold no answers.
+explanations-complete unit has an explanation for every wrong option; a shipped question id may
+disappear only if the unit's `retired` map records it, and a shipped concept id may never
+disappear; markers are public metadata and hold no answers.
 
 ## Derived, never stored: concept progress
 
@@ -31,7 +33,7 @@ correct (marks = max): count = max(count - 1, 0)
 ```
 
 The concept of a result is the question's current `concept`, or the `retired` tombstone when the
-question no longer exists. Uncleared means `count > 0`. Sorted by `count` descending, then
+question no longer exists. A `null` tombstone means the result counts toward no concept. Uncleared means `count > 0`. Sorted by `count` descending, then
 `lastMissedAt` descending, then concept id. A concept never missed is never listed.
 
 ## Table: `concept_slots`

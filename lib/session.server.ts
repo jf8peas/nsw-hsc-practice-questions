@@ -15,6 +15,11 @@ export interface SessionUser {
   id: string;
   name: string;
   email: string;
+  /**
+   * The sign-in provider said this email is verified. Read only by the admin check
+   * (lib/admin.server.ts). Carried in the JWT, never stored.
+   */
+  ev?: boolean;
 }
 
 /**
@@ -34,17 +39,19 @@ export interface TokenClaims {
   uid: string;
   name: string;
   email: string;
+  ev?: boolean;
 }
 
 /** Read the identity out of JWT claims (null if the token has no usable uid). */
 export function identityFromClaims(
-  claims: { uid?: unknown; name?: unknown; email?: unknown } | null | undefined,
+  claims: { uid?: unknown; name?: unknown; email?: unknown; ev?: unknown } | null | undefined,
 ): SessionUser | null {
   if (!claims || typeof claims.uid !== "string" || !UUID.test(claims.uid)) return null;
   return {
     id: claims.uid,
     name: typeof claims.name === "string" ? claims.name : "",
     email: typeof claims.email === "string" ? claims.email : "",
+    ev: claims.ev === true,
   };
 }
 
@@ -89,12 +96,12 @@ export async function requirePageUserFrom(identity: SessionUser | null) {
 
 /** Sign-in: create/refresh the student row and return the claims to keep in the JWT. */
 export async function claimsOnSignIn(
-  profile: { sub: string; name?: string | null; email?: string | null },
+  profile: { sub: string; name?: string | null; email?: string | null; emailVerified?: boolean },
 ): Promise<TokenClaims> {
   const name = (profile.name ?? "").trim() || "Student";
   const email = (profile.email ?? "").trim();
   const uid = await dbCall((db) => upsertUserOnSignIn(db, { sub: profile.sub, name, email }));
-  return { uid, name, email };
+  return { uid, name, email, ev: profile.emailVerified === true };
 }
 
 /** Reduce an Auth.js token to the claims we keep (drops picture and anything else). */
@@ -102,5 +109,5 @@ export function applyClaims<T extends Record<string, unknown>>(
   token: T,
   claims: TokenClaims,
 ): T & TokenClaims {
-  return { ...token, uid: claims.uid, name: claims.name, email: claims.email, picture: undefined };
+  return { ...token, uid: claims.uid, name: claims.name, email: claims.email, ev: claims.ev === true, picture: undefined };
 }

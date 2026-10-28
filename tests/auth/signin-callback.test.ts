@@ -110,7 +110,7 @@ describe("the JWT keeps only uid, name and email", () => {
     expect(token.email).toBe("ann@x.test");
     expect(JSON.stringify(token)).not.toContain("SECRET");
     expect(Object.keys(token).filter((k) => token[k as keyof typeof token] !== undefined).sort()).toEqual(
-      ["email", "name", "sub", "uid"],
+      ["email", "ev", "name", "sub", "uid"], // ev: the verified-email flag, in the JWT only
     );
   });
 
@@ -127,6 +127,6 @@ describe("the JWT keeps only uid, name and email", () => {
       session: { user: {}, expires: "x" },
       token: { uid, name: "Ann", email: "ann@x.test" },
     });
-    expect(s.user).toEqual({ id: uid, name: "Ann", email: "ann@x.test" });
+    expect(s.user).toEqual({ id: uid, name: "Ann", email: "ann@x.test", ev: false });
   });
 });

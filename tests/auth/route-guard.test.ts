@@ -25,6 +25,13 @@ const DEGRADED_CAPABLE = new Set([
   "app/api/results/retry/route.ts",
 ]);
 
+/**
+ * What counts as a guard: `requireUser` / `requirePageUser`, `authenticate()` (lib/api-auth.server.ts,
+ * which wraps requireUser and maps 401/503 for API routes), and the teacher variants
+ * `authenticateAdmin()` / `requireAdminPage()` (lib/admin.server.ts), which sit on top of those.
+ */
+const GUARD = /\brequireUser\b|\brequirePageUser\b|\bauthenticate\(|\bauthenticateAdmin\(|\brequireAdminPage\(/;
+
 function walk(dir: string): string[] {
   const out: string[] = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -49,9 +56,9 @@ describe("every page and route requires a session (R2, FR-001)", () => {
     it(`${rel} is guarded or on the reviewed public allowlist`, () => {
       if (PUBLIC_ALLOWLIST.has(rel)) return;
       // `authenticate()` (lib/api-auth.server.ts) wraps requireUser and maps 401/503 for API routes
-      const guarded = /\brequireUser\b|\brequirePageUser\b|\bauthenticate\(/.test(src);
+      const guarded = GUARD.test(src);
       const degraded = DEGRADED_CAPABLE.has(rel) && /\bresolveSession\b/.test(src);
-      expect(guarded || degraded, `${rel} must call requireUser / requirePageUser / authenticate() (or resolveSession if degraded-capable)`).toBe(true);
+      expect(guarded || degraded, `${rel} must call requireUser / requirePageUser / authenticate() / authenticateAdmin() / requireAdminPage() (or resolveSession if degraded-capable)`).toBe(true);
     });
   }
 
@@ -62,5 +69,17 @@ describe("every page and route requires a session (R2, FR-001)", () => {
       if (p === "app/api/cron/retention/route.ts") continue;
       expect(rels.has(p), p).toBe(true);
     }
+  });
+});
+
+describe("the guard check itself", () => {
+  it("accepts a route that calls only authenticateAdmin(), and a page that calls only requireAdminPage()", () => {
+    expect(GUARD.test("const auth = await authenticateAdmin();")).toBe(true);
+    expect(GUARD.test("const user = await requireAdminPage();")).toBe(true);
+  });
+
+  it("rejects a route that calls nothing, or only has a guard-like name", () => {
+    expect(GUARD.test("export async function POST() { return Response.json({}); }")).toBe(false);
+    expect(GUARD.test("const authenticateAdminLater = 1;")).toBe(false);
   });
 });

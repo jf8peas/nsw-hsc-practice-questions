@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { configProblems } from "@/lib/config";
-import { getConfig } from "@/lib/config.server";
+import { getConceptModels, getConfig } from "@/lib/config.server";
 
 const FULL = {
   AUTH_SECRET: "s",
@@ -27,6 +27,23 @@ describe("configProblems", () => {
   });
 });
 
+describe("getConceptModels", () => {
+  it("defaults the generator and leaves the illustration and review models unset", () => {
+    expect(getConceptModels({})).toEqual({
+      generator: "deepseek/deepseek-chat",
+      illustration: null,
+      reviewer: null,
+    });
+  });
+
+  it("trims names and treats blank values as unset", () => {
+    expect(
+      getConceptModels({ CONCEPT_MODEL: " vendor/gen ", ILLUSTRATION_MODEL: "  ", REVIEW_MODEL: "vendor/rev" }),
+    ).toEqual({ generator: "vendor/gen", illustration: null, reviewer: "vendor/rev" });
+    expect(getConceptModels({ CONCEPT_MODEL: "   " }).generator).toBe("deepseek/deepseek-chat");
+  });
+});
+
 describe("getConfig", () => {
   it("uses defaults when nothing is set", () => {
     expect(getConfig({})).toEqual({
@@ -34,7 +51,22 @@ describe("getConfig", () => {
       gradeRateLimit: 20,
       gradeIpRateLimit: 150,
       attemptRateLimit: 20,
+      conceptDailyCap: 100,
+      conceptRateLimit: 10,
     });
+  });
+
+  it("reads CONCEPT_DAILY_CAP: default 100, 0 turns generation off, bad values fall back", () => {
+    expect(getConfig({ CONCEPT_DAILY_CAP: "0" }).conceptDailyCap).toBe(0);
+    expect(getConfig({ CONCEPT_DAILY_CAP: "250" }).conceptDailyCap).toBe(250);
+    expect(getConfig({ CONCEPT_DAILY_CAP: "abc" }).conceptDailyCap).toBe(100);
+    expect(getConfig({ CONCEPT_DAILY_CAP: "-1" }).conceptDailyCap).toBe(100);
+    expect(getConfig({ CONCEPT_DAILY_CAP: "2.5" }).conceptDailyCap).toBe(100);
+  });
+
+  it("requires CONCEPT_RATE_LIMIT to be at least 1", () => {
+    expect(getConfig({ CONCEPT_RATE_LIMIT: "0" }).conceptRateLimit).toBe(10);
+    expect(getConfig({ CONCEPT_RATE_LIMIT: "3" }).conceptRateLimit).toBe(3);
   });
 
   it("falls back for LLM_DAILY_CAP of abc and -5, accepts 0 and 12", () => {

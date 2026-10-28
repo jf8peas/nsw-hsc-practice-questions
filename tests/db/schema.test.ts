@@ -1,7 +1,15 @@
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { attempts, dailyAiUsage, results, users } from "@/lib/db/schema";
+import {
+  attempts,
+  conceptSlots,
+  conceptVersions,
+  dailyAiUsage,
+  dailyConceptUsage,
+  results,
+  users,
+} from "@/lib/db/schema";
 
 import { createTestDb, type TestDb } from "../helpers/db";
 import { seedAttempt, seedResult, seedUser } from "../helpers/fixtures";
@@ -139,5 +147,153 @@ describe("constraints", () => {
     const a = await seedAttempt(t.db, u.id);
     const r = await seedResult(t.db, { attemptId: a.id, userId: u.id }, { questionId: "removed.q1" });
     expect(r.questionId).toBe("removed.q1");
+  });
+});
+
+describe("concept tables (spec 002)", () => {
+  const base = {
+    conceptId: "unit-a.c-one",
+    unitId: "unit-a",
+    origin: "first",
+    attemptNo: 1,
+    generatorModel: "vendor/generator",
+    generatedAt: new Date("2026-10-28T00:00:00Z"),
+  };
+  const summary = (over: Record<string, unknown> = {}) => ({
+    ...base,
+    kind: "summary",
+    status: "pending_review",
+    summaryBullets: ["one", "two", "three"],
+    ...over,
+  });
+  const illustration = (over: Record<string, unknown> = {}) => ({
+    ...base,
+    kind: "illustration",
+    status: "pending_review",
+    illustrationSvg: "<svg/>",
+    illustrationBrief: "a brief",
+    illustrationAlt: "alt text",
+    ...over,
+  });
+  const insertVersion = (row: Record<string, unknown>) =>
+    t.db.insert(conceptVersions).values(row as typeof conceptVersions.$inferInsert).returning();
+
+  it("has exactly the columns in data-model.md, and none is a user column", async () => {
+    expect(await columns("concept_versions")).toEqual(
+      [
+        "id", "concept_id", "kind", "unit_id", "status", "origin", "attempt_no", "summary_bullets",
+        "illustration_brief", "illustration_alt", "illustration_svg", "generator_model",
+        "generated_at", "reviewer_model", "reviewer_reason", "reviewed_at", "approved_by", "created_at",
+      ].sort(),
+    );
+    expect(await columns("concept_slots")).toEqual(
+      [
+        "concept_id", "kind", "unit_id", "live_version_id", "replacement_version_id", "lease_owner",
+        "lease_until", "retry_after", "last_error", "last_error_at", "created_at", "updated_at",
+      ].sort(),
+    );
+    expect(await columns("daily_concept_usage")).toEqual(["sydney_date", "count"].sort());
+    const all = [
+      ...(await columns("concept_versions")),
+      ...(await columns("concept_slots")),
+      ...(await columns("daily_concept_usage")),
+    ];
+    for (const banned of ["user_id", "student_id", "name", "email", "answer", "attempt_id"]) {
+      expect(all.filter((c) => c === banned)).toEqual([]);
+    }
+  });
+
+  it("rejects a summary with an SVG, an illustration with bullets, and a bullet count outside 3 to 6", async () => {
+    await expect(insertVersion(summary({ illustrationSvg: "<svg/>" }))).rejects.toThrow();
+    await expect(insertVersion(illustration({ summaryBullets: ["a", "b", "c"] }))).rejects.toThrow();
+    await expect(insertVersion(summary({ summaryBullets: ["a", "b"] }))).rejects.toThrow();
+    await expect(insertVersion(summary({ summaryBullets: ["a", "b", "c", "d", "e", "f", "g"] }))).rejects.toThrow();
+    await expect(insertVersion(illustration({ illustrationAlt: null }))).rejects.toThrow();
+    await expect(insertVersion(summary())).resolves.toHaveLength(1);
+    await expect(insertVersion(illustration())).resolves.toHaveLength(1);
+  });
+
+  it("rejects an unknown kind, status, origin or attempt number", async () => {
+    await expect(insertVersion(summary({ kind: "poster" }))).rejects.toThrow();
+    await expect(insertVersion(summary({ status: "live" }))).rejects.toThrow();
+    await expect(insertVersion(summary({ origin: "robot" }))).rejects.toThrow();
+    await expect(insertVersion(summary({ attemptNo: 3 }))).rejects.toThrow();
+  });
+
+  it("approved needs who approved it and when; a reviewer approval needs a reviewer model", async () => {
+    await expect(insertVersion(summary({ status: "approved" }))).rejects.toThrow();
+    await expect(
+      insertVersion(summary({ status: "approved", approvedBy: "reviewer", reviewedAt: new Date() })),
+    ).rejects.toThrow();
+    await expect(
+      insertVersion(summary({ status: "approved", approvedBy: "robot", reviewedAt: new Date(), reviewerModel: "m" })),
+    ).rejects.toThrow();
+    await expect(
+      insertVersion(summary({ status: "approved", approvedBy: "reviewer", reviewedAt: new Date(), reviewerModel: "vendor/reviewer" })),
+    ).resolves.toHaveLength(1);
+    await expect(
+      insertVersion(summary({ status: "approved", approvedBy: "teacher", reviewedAt: new Date() })),
+    ).resolves.toHaveLength(1);
+  });
+
+  it("failed_review needs a reason and a review time", async () => {
+    await expect(insertVersion(summary({ status: "failed_review" }))).rejects.toThrow();
+    await expect(
+      insertVersion(summary({ status: "failed_review", reviewerReason: "not accurate" })),
+    ).rejects.toThrow();
+    await expect(
+      insertVersion(summary({ status: "failed_review", reviewerReason: "not accurate", reviewedAt: new Date() })),
+    ).resolves.toHaveLength(1);
+  });
+
+  it("a slot cannot point its live and replacement at the same version", async () => {
+    const [v] = await insertVersion(summary({ conceptId: "unit-a.c-slot" }));
+    await expect(
+      t.db.insert(conceptSlots).values({
+        conceptId: "unit-a.c-slot", kind: "summary", unitId: "unit-a",
+        liveVersionId: v.id, replacementVersionId: v.id,
+      }),
+    ).rejects.toThrow();
+    await expect(
+      t.db.insert(conceptSlots).values({
+        conceptId: "unit-a.c-slot", kind: "summary", unitId: "unit-a", replacementVersionId: v.id,
+      }),
+    ).resolves.toBeDefined();
+  });
+
+  it("a slot is unique per concept and kind", async () => {
+    await t.db.insert(conceptSlots).values({ conceptId: "unit-a.c-dup", kind: "summary", unitId: "unit-a" });
+    await expect(
+      t.db.insert(conceptSlots).values({ conceptId: "unit-a.c-dup", kind: "summary", unitId: "unit-a" }),
+    ).rejects.toThrow();
+    await expect(
+      t.db.insert(conceptSlots).values({ conceptId: "unit-a.c-dup", kind: "illustration", unitId: "unit-a" }),
+    ).resolves.toBeDefined();
+  });
+
+  it("rejects a negative daily concept count", async () => {
+    await expect(t.db.insert(dailyConceptUsage).values({ sydneyDate: "2026-01-01", count: -1 })).rejects.toThrow();
+  });
+
+  it("deleting a student changes nothing in the concept tables", async () => {
+    const u = await seedUser(t.db);
+    await insertVersion(summary({ conceptId: "unit-a.c-survives" }));
+    await t.db.insert(dailyConceptUsage).values({ sydneyDate: "2026-01-03", count: 5 });
+    const count = async () => [
+      (await t.db.select({ n: sql<number>`count(*)::int` }).from(conceptVersions))[0].n,
+      (await t.db.select({ n: sql<number>`count(*)::int` }).from(conceptSlots))[0].n,
+      (await t.db.select({ n: sql<number>`count(*)::int` }).from(dailyConceptUsage))[0].n,
+    ];
+    const before = await count();
+    await t.db.delete(users).where(eq(users.id, u.id));
+    expect(await count()).toEqual(before);
+  });
+
+  it("adds the index the concept-progress loader uses", async () => {
+    const res = await t.pg.query<{ indexdef: string }>(
+      "select indexdef from pg_indexes where indexname = 'results_user_unit_created_idx'",
+    );
+    expect(res.rows).toHaveLength(1);
+    expect(res.rows[0].indexdef).toMatch(/(user_id, unit_id, created_at, id)/);
   });
 });

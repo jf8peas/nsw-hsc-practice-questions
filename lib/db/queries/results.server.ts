@@ -1,7 +1,8 @@
 import "server-only";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 
+import type { ConceptResult } from "@/lib/concepts/progress";
 import type { Db } from "@/lib/db/index.server";
 import { results, users, type ResultRow } from "@/lib/db/schema";
 
@@ -17,6 +18,12 @@ export interface ResultInsert {
   feedback: string | null;
   rubricHits: string[] | null;
   rubricMisses: string[] | null;
+  /**
+   * When the answer was given. Left unset the column defaults to now(); only a late save
+   * (the retry route) sets it, from the receipt's issue time, so concept progress replays
+   * in answer order rather than save order (spec 002 research R2).
+   */
+  createdAt?: Date;
 }
 
 /**
@@ -71,6 +78,28 @@ export async function getAnsweredMarks(
     .from(results)
     .where(and(eq(results.userId, userId), eq(results.attemptId, attemptId)));
   return Object.fromEntries(rows.map((r) => [r.questionId, { marks: r.marks, max: r.max }]));
+}
+
+/**
+ * One student's results for one unit, in answer order, for concept progress. Always scoped to
+ * the session user's id (Principle IX); ties on time break on id so the replay is deterministic.
+ */
+export async function listUnitResultsForProgress(
+  db: Db,
+  userId: string,
+  unitId: string,
+): Promise<ConceptResult[]> {
+  return db
+    .select({
+      id: results.id,
+      questionId: results.questionId,
+      marks: results.marksAwarded,
+      max: results.maxMarks,
+      answeredAt: results.createdAt,
+    })
+    .from(results)
+    .where(and(eq(results.userId, userId), eq(results.unitId, unitId)))
+    .orderBy(asc(results.createdAt), asc(results.id));
 }
 
 /** last_answer_at only ever moves forward. */

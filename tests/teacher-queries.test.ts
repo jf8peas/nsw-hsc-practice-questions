@@ -5,6 +5,8 @@ import path from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { conceptSlots, conceptVersions, dailyConceptUsage } from "@/lib/db/schema";
+
 import { createTestDb, type TestDb } from "./helpers/db";
 import { seedAttempt, seedResult, seedUsage, seedUser } from "./helpers/fixtures";
 
@@ -92,18 +94,21 @@ const run = async (name: string, edit: (sql: string) => string = (s) => s) =>
 const setParam = (sql: string, from: string, to: string) => sql.replace(from, to);
 
 describe("the file", () => {
-  it("contains the six documented queries, each with an editable params block", () => {
+  it("contains the documented queries, each with an editable params block where it has anything to edit", () => {
     expect(Object.keys(QUERIES).sort()).toEqual(
       [
         "ai_answers_used_today",
         "common_wrong_mc_option",
+        "concept_generation_usage",
+        "flagged_concept_content",
         "questions_in_unit_by_average",
         "student_history",
         "students_last_active",
         "units_by_class_average",
       ].sort(),
     );
-    for (const sql of Object.values(QUERIES)) expect(sql).toMatch(/WITH params AS/);
+    // flagged_concept_content takes no parameters: it lists every flagged item
+    for (const [name, sql] of Object.entries(QUERIES)) if (name !== "flagged_concept_content") expect(sql, name).toMatch(/WITH params AS/);
   });
 
   it("every query is read-only", () => {
@@ -268,7 +273,7 @@ describe("ai_answers_used_today", () => {
 });
 
 describe("a deleted student is absent from every query (SC-008)", () => {
-  it("removes them from all six after deleting their row", async () => {
+  it("removes them from every query after deleting their row", async () => {
     await t.pg.query("delete from users where id = $1", [carol.id]);
     const last = await run("students_last_active");
     expect(last.some((r) => r.email === "carol@example.com")).toBe(false);
@@ -281,5 +286,78 @@ describe("a deleted student is absent from every query (SC-008)", () => {
     }
     const students = await run("units_by_class_average");
     expect(students.find((r) => r.unit_id === C)).toBeUndefined(); // bob was the only one on unit C
+  });
+});
+
+describe("flagged_concept_content", () => {
+  const NOW = new Date("2026-10-28T10:00:00Z");
+  const base = { unitId: "fx-ready", generatorModel: "vendor/gen", generatedAt: NOW, createdAt: NOW } as const;
+
+  async function seedSlot(conceptId: string, kind: "summary" | "illustration", replacementId: string | null) {
+    await t.db.insert(conceptSlots).values({ conceptId, kind, unitId: "fx-ready", replacementVersionId: replacementId });
+  }
+  const bullets = ["one", "two", "three"];
+
+  it("lists held-back items with the reason, models and times, and omits approved, pending and first-failure versions", async () => {
+    const [flagged] = await t.db
+      .insert(conceptVersions)
+      .values({
+        ...base, conceptId: "fx-ready.c-a", kind: "summary", status: "failed_review", origin: "auto_retry", attemptNo: 2,
+        summaryBullets: bullets, reviewerModel: "vendor/rev", reviewerReason: "Quotes the model answer.", reviewedAt: NOW,
+      })
+      .returning();
+    await seedSlot("fx-ready.c-a", "summary", flagged.id);
+
+    const [pending] = await t.db
+      .insert(conceptVersions)
+      .values({ ...base, conceptId: "fx-ready.c-b", kind: "summary", status: "pending_review", origin: "first", attemptNo: 1, summaryBullets: bullets })
+      .returning();
+    await seedSlot("fx-ready.c-b", "summary", pending.id);
+
+    const [approved] = await t.db
+      .insert(conceptVersions)
+      .values({
+        ...base, conceptId: "fx-ready.c-c", kind: "summary", status: "approved", origin: "first", attemptNo: 1,
+        summaryBullets: bullets, reviewerModel: "vendor/rev", reviewedAt: NOW, approvedBy: "reviewer",
+      })
+      .returning();
+    await t.db.insert(conceptSlots).values({ conceptId: "fx-ready.c-c", kind: "summary", unitId: "fx-ready", liveVersionId: approved.id });
+
+    const [firstFailure] = await t.db
+      .insert(conceptVersions)
+      .values({
+        ...base, conceptId: "fx-ready.c-d", kind: "summary", status: "failed_review", origin: "first", attemptNo: 1,
+        summaryBullets: bullets, reviewerModel: "vendor/rev", reviewerReason: "Retry pending.", reviewedAt: NOW,
+      })
+      .returning();
+    await seedSlot("fx-ready.c-d", "summary", firstFailure.id);
+
+    const rows = await run("flagged_concept_content");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      concept_id: "fx-ready.c-a",
+      unit_id: "fx-ready",
+      kind: "summary",
+      reason: "Quotes the model answer.",
+      generator_model: "vendor/gen",
+      reviewer_model: "vendor/rev",
+      version_id: flagged.id,
+    });
+    expect(rows[0]).toHaveProperty("generated_at_sydney");
+    expect(rows[0]).toHaveProperty("reviewed_at_sydney");
+  });
+});
+
+describe("concept_generation_usage", () => {
+  it("shows today's calls (0 when none were made) and can be pointed at a seeded day", async () => {
+    const today = await run("concept_generation_usage");
+    expect(today).toHaveLength(1);
+    expect(Number(today[0].concept_calls_used)).toBe(0);
+
+    await t.db.insert(dailyConceptUsage).values({ sydneyDate: "2020-01-01", count: 7 });
+    const seeded = await run("concept_generation_usage", (sql) =>
+      sql.replace("(now() AT TIME ZONE 'Australia/Sydney')::date AS day", "DATE '2020-01-01' AS day"),
+    );
+    expect(seeded.map((r) => [(r.sydney_date as Date).toISOString().slice(0, 10), Number(r.concept_calls_used)])).toEqual([["2020-01-01", 7]]);
   });
 });

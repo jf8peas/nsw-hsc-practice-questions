@@ -18,7 +18,7 @@ afterEach(async () => {
   env = undefined;
 });
 
-const BANNED_KEYS = ["correctText", "correctIndex", "modelAnswer", "rubric", "notes", "answers"];
+const BANNED_KEYS = ["correctText", "correctIndex", "modelAnswer", "rubric", "notes", "answers", "wrongExplanations"];
 
 describe("POST /api/attempts exposes no answer key, for every unit", () => {
   for (const unit of UNITS) {
@@ -39,6 +39,7 @@ describe("POST /api/attempts exposes no answer key, for every unit", () => {
         if (key.modelAnswer && key.modelAnswer.length > 20) expect(text).not.toContain(key.modelAnswer);
         for (const point of key.rubric) if (point.length > 20) expect(text).not.toContain(point);
         if (key.notes && key.notes.length > 20) expect(text).not.toContain(key.notes);
+        for (const explanation of Object.values(key.wrongExplanations ?? {})) expect(text).not.toContain(explanation);
       }
     });
   }
@@ -81,3 +82,26 @@ describe("the answer-key registry stays server-only", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe("no application code reads a unit's answers except through the key (spec 002 FR-043)", () => {
+  it("only lib/grading.server.ts imports content/answers or a unit's answers module", () => {
+    const root = path.resolve(__dirname, "..");
+    const allowed = new Set(["lib/grading.server.ts", "scripts/validate-content.ts"]); // the validator checks the key's shape
+    const offenders: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (/\.(ts|tsx)$/.test(entry.name)) {
+          const rel = path.relative(root, full).split(path.sep).join("/");
+          if (allowed.has(rel)) continue;
+          const src = fs.readFileSync(full, "utf8");
+          if (/from\s+["'](?:@\/|(?:\.\.?\/)+)content\/(?:answers|units\/[^"']+\/answers)/.test(src)) offenders.push(rel);
+        }
+      }
+    };
+    for (const dir of ["app", "components", "lib", "scripts"]) walk(path.join(root, dir));
+    expect(offenders).toEqual([]);
+  });
+});
+

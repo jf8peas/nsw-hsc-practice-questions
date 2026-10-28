@@ -21,6 +21,12 @@ export interface ResultFields {
   feedback: string | null;
   hits: string[] | null;
   misses: string[] | null;
+  /**
+   * When the answer was given. Only the retry route sets it (from the receipt's issue time);
+   * a normal save leaves it unset and the row is stamped at save time, within milliseconds of
+   * the answer. Never part of a receipt.
+   */
+  answeredAt?: Date;
 }
 
 export type SaveOutcome =
@@ -73,6 +79,7 @@ export async function saveResult(
         feedback: fields.feedback,
         rubricHits: fields.hits,
         rubricMisses: fields.misses,
+        createdAt: fields.answeredAt,
       });
       const stored = inserted ? null : await getResult(db, userId, attemptId, fields.questionId);
       if (inserted) await touchLastAnswer(db, userId);

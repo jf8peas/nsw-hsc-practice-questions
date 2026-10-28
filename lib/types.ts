@@ -4,6 +4,16 @@ export type Year = "Year 11" | "Year 12";
 
 export type UnitType = "Topic Quiz" | "Milestone Test" | "Essay Practice";
 
+/**
+ * An idea within a unit that a student needs to understand (spec 002). Ids are
+ * `<unit-id>.c-<slug>` and are never renamed or reused once shipped.
+ */
+export interface Concept {
+  id: string;
+  /** One line, shown to students next to the number of correct answers still needed. */
+  description: string;
+}
+
 /** Draw `n` questions whose `group` matches, per quiz attempt. */
 export interface QuizDraw {
   group: string;
@@ -51,6 +61,16 @@ export interface UnitMeta {
   order: number;
   /** If set, a quiz attempt draws a random subset of the question bank. */
   quiz?: QuizConfig;
+  /**
+   * Set only when every question in the unit carries a concept tag. Public metadata: it
+   * holds no answers. A unit without it has no "Things you need to know" and no weighting.
+   */
+  conceptsReady?: boolean;
+  /**
+   * Set only when every wrong option of every MC question has an explanation in the
+   * answer key. Public metadata: it holds no answers.
+   */
+  explanationsComplete?: boolean;
   /** Formulas tested by this unit, shown on the unit page below Start quiz. */
   formulas?: FormulaRef[];
   /** A structured "how to" panel shown on the unit page below Start quiz. */
@@ -74,6 +94,11 @@ interface BaseQuestion {
   prompt: string;
   /** Marks this question is worth. MC is normally 1. */
   maxMarks: number;
+  /**
+   * The concept this question tests (a `Concept.id` of its own unit). A tag is not an
+   * answer, so it lives in public content.
+   */
+  concept?: string;
 }
 
 export interface McQuestion extends BaseQuestion {
@@ -91,6 +116,14 @@ export type Question = McQuestion | ShortQuestion;
 /** A full unit as consumed by the UI: metadata + public questions. */
 export interface Unit extends UnitMeta {
   questions: Question[];
+  /** From `concepts.ts`, for units that have adopted concepts. */
+  concepts?: Concept[];
+  /**
+   * Questions removed from the unit, by id. The value is the concept the question belonged
+   * to, or `null` when it was removed before the unit was tagged (its results then count
+   * toward no concept). Lets a removed question keep counting without a tag per result.
+   */
+  retired?: Record<string, string | null>;
 }
 
 /**
@@ -112,6 +145,12 @@ export interface Answer {
   rubric: string[];
   /** Marking notes: accepted variations, common misconceptions. */
   notes?: string;
+  /**
+   * `mc` only: why each WRONG option is wrong, keyed by the option's text (options are
+   * shuffled per attempt, so an index would drift). Shown to the student only after they
+   * answer, and only for the option they chose.
+   */
+  wrongExplanations?: Record<string, string>;
 }
 
 /** Map of question id -> answer key, per unit. */

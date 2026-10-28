@@ -75,7 +75,7 @@ concept lists, explanations) is unit by unit and is content work, not a code tas
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Checked against constitution 2.9.0 (`.specify/memory/constitution.md`). ✅ meets it, ⚠ meets it
+Checked against constitution 2.9.1 (`.specify/memory/constitution.md`). ✅ meets it, ⚠ meets it
 only on a stated reading or with a justified exception (see Complexity Tracking), n/a not
 affected.
 
@@ -273,12 +273,13 @@ non-answer routes, CT-3 pipeline bookkeeping) were resolved by constitution 2.9.
 
 ## Open items
 
-Defaults are used in this plan; none blocks `/speckit-tasks`, but 1 to 3 change the design if you
-decide otherwise. Full reasoning is at the end of [research.md](research.md).
+Items 1 to 3 are settled. Items 4 to 7 use the defaults shown and can still change. Full reasoning
+is at the end of [research.md](research.md).
 
-1. **Retired questions and tags** (R3): tombstones in `concepts.ts` so FR-006 and FR-008 both hold.
+1. **Retired questions and tags** (R3): decided. Tombstones in `concepts.ts` (`null` before a unit is
+   tagged), recorded in FR-006 and FR-008.
 2. **Rasteriser dependency**: decided, `@resvg/resvg-js` (constitution 2.9.0).
-3. **Constitution wording**: decided, amended in constitution 2.9.0.
+3. **Constitution wording**: decided, amended in constitution 2.9.0 and 2.9.1.
 4. **Admin hardening** (R10): `email_verified` required; existing teachers sign in once more.
 5. **Draw preference order** (R4): mix before unseen.
 6. **Cap default** (R8): 100 model calls per day.

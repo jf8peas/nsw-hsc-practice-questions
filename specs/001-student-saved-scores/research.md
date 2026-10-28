@@ -127,7 +127,8 @@ reason. Versions were checked against the npm registry on 2026-10-26.
     retry can create a missing attempt row (R19).
   - **Self-mark token**: `{ v, uid, attemptId, questionId, answerHash, iat, exp }`, expiry 2 hours.
     Issued whenever grading returns `needsSelfMark`.
-- **Why stateless**: Principle II limits other server-side state to rate-limit and cap counters.
+- **Why stateless**: Principle II limits other server-side state to rate-limit and cap counters (and, as amended for spec 002,
+  shared concept content with its generation bookkeeping: nothing per student).
   A "pending self-mark" table would be new state. The token proves the grader asked for a
   self-mark without storing anything.
 - **Security properties**: the server never trusts a user id or marks from the client; a receipt

@@ -8,11 +8,13 @@ import { getQuestion, getUnit } from "@/content";
 import { requirePageUser } from "@/lib/auth.server";
 import { loadAttemptDetail } from "@/lib/db/queries/history.server";
 import { formatWhen } from "@/lib/format";
+import { getOptionExplanation } from "@/lib/grading.server";
 
 /**
  * One attempt in full: each question, the student's answer, the marks and the
- * feedback they were shown. Reads public content only (never content/answers),
- * and never shows model answers or rubrics. Someone else's attempt id renders
+ * feedback they were shown. Reads public content only, and the answer key only through
+ * `getOptionExplanation` (why a wrong multiple-choice option is wrong),
+ * never model answers or rubrics. Someone else's attempt id renders
  * not-found, identical to an unknown id.
  */
 export default async function AttemptDetailPage({
@@ -90,6 +92,19 @@ export default async function AttemptDetailPage({
                   {item.gradedBy === "llm" && " · AI-marked"}
                 </div>
                 {item.feedback && <p className="detail-feedback">{item.feedback}</p>}
+                {(() => {
+                  // shown as the key reads now: nothing is stored per result (spec 002 FR-041)
+                  const why =
+                    q?.type === "mc" && item.marks === 0 && item.gradedBy === "auto" && item.answer
+                      ? getOptionExplanation(item.questionId, item.answer)
+                      : undefined;
+                  return why ? (
+                    <div className="explanation">
+                      <div className="label">Why this is wrong</div>
+                      {why}
+                    </div>
+                  ) : null;
+                })()}
                 {item.hits && item.hits.length > 0 && (
                   <ul>
                     {item.hits.map((h, i) => (
