@@ -10,6 +10,8 @@ export const meta: UnitMeta = {
     "Module 5 of the HSC Physics course (2017 syllabus, examined in the 2027 HSC): projectile motion, circular motion (including banked tracks and torque) and motion in gravitational fields (orbits, Kepler's laws, gravitational potential energy and escape velocity). Every question comes word for word from a school trial or half-yearly paper, with its source shown; no HSC questions are used, so past HSC papers stay unseen for full practice. Each attempt draws 5 multiple-choice and 4 short-answer questions, weighted like the HSC: about half gravitation, a third projectiles and a fifth circular motion.",
   created: "2026-10-28",
   order: 1,
+  conceptsReady: true,
+  explanationsComplete: true,
   quiz: {
     short: 4,
     mc: 5,
