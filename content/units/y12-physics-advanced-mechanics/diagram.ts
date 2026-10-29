@@ -1812,3 +1812,1483 @@ export function carHillCliff(): string {
   parts.push(line(cliffX, sea + 14, cliffX + 70, sea + 14, { head: "both", width: 0.9 }), txt(cliffX + 35, sea + 28, "d", { size: 11, italic: true, anchor: "middle" }));
   return svg(330, sea + 34, parts.join(""));
 }
+
+// =====================================================================================
+// Projectile short-answer diagrams
+// =====================================================================================
+
+/** Scatter of positions on a grid with labelled axes (strobe photographs, position graphs). */
+export function pointsGraph(o: {
+  xMax: number;
+  yMax: number;
+  xStep: number;
+  yStep: number;
+  xLabel: string;
+  yLabel: string;
+  points: Array<[number, number]>;
+  marks?: Array<{ at: [number, number]; label: string }>;
+  minor?: number;
+  width?: number;
+  height?: number;
+  curve?: Array<[number, number]>;
+}): string {
+  const L = 52, T = 12, PW = o.width ?? 300, PH = o.height ?? 200;
+  const X = (x: number) => L + (x / o.xMax) * PW;
+  const Y = (y: number) => T + PH - (y / o.yMax) * PH;
+  const parts: string[] = [];
+  const minor = o.minor ?? 5;
+  for (let k = 0; k <= Math.round((o.xMax / o.xStep) * minor); k++) {
+    const x = (k * o.xStep) / minor;
+    parts.push(line(X(x), T, X(x), T + PH, { color: k % minor === 0 ? C.guide : C.grid, width: k % minor === 0 ? 0.8 : 0.5 }));
+  }
+  for (let k = 0; k <= Math.round((o.yMax / o.yStep) * minor); k++) {
+    const y = (k * o.yStep) / minor;
+    parts.push(line(L, Y(y), L + PW, Y(y), { color: k % minor === 0 ? C.guide : C.grid, width: k % minor === 0 ? 0.8 : 0.5 }));
+  }
+  const fmt = (v: number) => String(+v.toFixed(2));
+  for (let x = 0; x <= o.xMax + 1e-9; x += o.xStep) parts.push(txt(X(x), T + PH + 13, fmt(x), { anchor: "middle", size: 9.5 }));
+  for (let y = 0; y <= o.yMax + 1e-9; y += o.yStep) parts.push(txt(L - 5, Y(y) + 3.5, fmt(y), { anchor: "end", size: 9.5 }));
+  parts.push(txt(L + PW / 2, T + PH + 30, o.xLabel, { anchor: "middle", size: 10.5 }));
+  parts.push(
+    `<text x="14" y="${T + PH / 2}" fill="${C.text}" font-size="10.5" font-family="${FONT}" text-anchor="middle" transform="rotate(-90 14 ${T + PH / 2})">${esc(o.yLabel)}</text>`,
+  );
+  if (o.curve) parts.push(`<polyline points="${o.curve.map(([x, y]) => `${f(X(x))},${f(Y(y))}`).join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+  for (const [x, y] of o.points) parts.push(dot(X(x), Y(y), 3.5, C.ink));
+  for (const m of o.marks ?? []) parts.push(txt(X(m.at[0]) - 10, Y(m.at[1]) - 8, m.label, { size: 13, bold: true, anchor: "end" }));
+  return svg(L + PW + 14, T + PH + 38, parts.join(""));
+}
+
+/** A launch from the top of a cliff or tower: launcher, cliff height, optional angle, speed, path and range. */
+export function cliffLaunch(o: {
+  heightLabel: string;
+  speedLabel?: string;
+  angle?: number; // degrees above horizontal; 0 for a horizontal launch
+  rangeLabel?: string;
+  pathHeight?: number; // px the path rises above the launch point
+  launcherHeight?: string; // e.g. "1.5 m" for a cannon above the cliff top
+  ground?: "ground" | "sea";
+  target?: "ship";
+  note?: string;
+  angleLabel?: boolean; // default true
+  markTop?: string; // label at the highest point
+  markLevel?: string; // label where the path returns to launch level (draws a dashed level line)
+}): string {
+  const parts: string[] = [];
+  const cx = 120, top = 90, base = 230, land = 360;
+  const ang = o.angle ?? 0;
+  parts.push(`<rect x="${cx - 50}" y="${top}" width="50" height="${base - top}" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  const ly = o.launcherHeight ? top - 16 : top;
+  if (o.launcherHeight) {
+    parts.push(line(cx - 6, top, cx - 6, ly, { width: 2 }));
+    parts.push(line(cx + 12, ly, cx + 12, top, { head: "both", width: 0.9 }), txt(cx + 16, top - 4, o.launcherHeight, { size: 10 }));
+  }
+  parts.push(dot(cx - 4, ly, 4, C.ink));
+  if (o.ground === "sea") parts.push(`<path d="M ${cx} ${base} q 10 -4 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0" fill="none" stroke="${C.a}" stroke-width="1"/>`);
+  else parts.push(line(cx, base, 390, base, { width: 1.2 }));
+  if (o.heightLabel) {
+    parts.push(line(cx - 58, top + 2, cx - 58, base - 2, { head: "both", width: 1 }));
+    parts.push(txt(cx - 62, (top + base) / 2, o.heightLabel, { size: 11, anchor: "end" }));
+  }
+  // path: quadratic in t from launch point to landing point, rising pathHeight first
+  const rise = o.pathHeight ?? (ang > 0 ? 40 : 0);
+  const H = base - ly;
+  const pts: string[] = [];
+  const a = H + 2 * rise + 2 * Math.sqrt(rise * (rise + H)); // y(t) = ly - b t + a t² with y(1) = base
+  const b = a - H;
+  for (let k = 0; k <= 50; k++) {
+    const t = k / 50;
+    pts.push(`${f(cx - 4 + (land - cx + 4) * t)},${f(ly - b * t + a * t * t)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.1" stroke-dasharray="4 3"/>`);
+  const at = (t: number): [number, number] => [cx - 4 + (land - cx + 4) * t, ly - b * t + a * t * t];
+  if (o.markTop) {
+    const [x, y] = at(b / (2 * a));
+    parts.push(dot(x, y, 2.5, C.ink), txt(x, y - 7, o.markTop, { anchor: "middle", size: 11, bold: true }));
+  }
+  if (o.markLevel) {
+    const [x, y] = at(b / a);
+    parts.push(line(cx, ly, 400, ly, { dash: "3 3", width: 0.7, color: C.guide }));
+    parts.push(dot(x, y, 2.5, C.ink), txt(x + 6, y - 6, o.markLevel, { size: 11, bold: true }));
+  }
+  if (ang > 0) {
+    const vx = 36 * Math.cos(rad(ang)), vy = 36 * Math.sin(rad(ang));
+    parts.push(line(cx - 4, ly, cx - 4 + vx, ly - vy, { head: "end", width: 1.6, color: C.b }));
+    parts.push(line(cx - 4, ly, cx + 40, ly, { dash: "3 2", width: 0.8 }));
+    if (o.angleLabel !== false) parts.push(txt(cx + 36, ly - 4, `${ang}°`, { size: 10.5 }));
+  } else {
+    parts.push(line(cx, ly, cx + 36, ly, { head: "end", width: 1.6, color: C.b }));
+  }
+  if (o.speedLabel) parts.push(txt(cx - 4 + 30 * Math.cos(rad(ang)), ly - 30 * Math.sin(rad(ang)) - 10, o.speedLabel, { size: 10.5, anchor: "middle" }));
+  if (o.rangeLabel) {
+    parts.push(line(cx, base + 14, land, base + 14, { head: "both", width: 1 }));
+    parts.push(txt((cx + land) / 2, base + 28, o.rangeLabel, { anchor: "middle", size: 11 }));
+  }
+  if (o.target === "ship") {
+    parts.push(`<path d="M ${land + 6} ${base - 4} l 34 0 l -6 10 l -24 0 z" fill="${C.ink}"/>`, `<path d="M ${land + 22} ${base - 4} l 0 -34 l -14 30 z" fill="${C.ink}"/>`);
+  }
+  if (o.note) parts.push(txt(400, 30, o.note, { size: 10, anchor: "end" }));
+  return svg(410, base + 34, parts.join(""));
+}
+
+// ---- tennis ball leaving a racket (Abbotsleigh 2025 Q22) -------------------------------
+
+export function tennisImages(): string {
+  const parts: string[] = [];
+  const y = 50;
+  const xs = [30, 52, 76, 100];
+  ["A", "B", "C", "D"].forEach((l, i) => {
+    const x = xs[i];
+    parts.push(`<ellipse cx="${x}" cy="${y + 4}" rx="7" ry="20" fill="none" stroke="${C.ink}" stroke-width="2.2"/>`);
+    parts.push(line(x - 2, y + 24, x - 8, y + 64, { width: 3 }));
+    parts.push(`<circle cx="${x + 4}" cy="${y}" r="6" fill="#fff" stroke="${C.ink}" stroke-width="1"/>`);
+    parts.push(txt(x + 6, y + 18, l, { size: 9 }));
+  });
+  const bxs = [138, 176, 214, 252];
+  ["E", "F", "G", ""].forEach((l, i) => {
+    parts.push(`<circle cx="${bxs[i]}" cy="${y}" r="6" fill="#fff" stroke="${C.ink}" stroke-width="1"/>`);
+    if (l) parts.push(txt(bxs[i] + 6, y + 16, l, { size: 9 }));
+  });
+  parts.push(txt(30, 14, "racket", { size: 10 }), txt(176, 22, "ball", { size: 10, anchor: "middle" }));
+  parts.push(line(104, y + 30, 214, y + 30, { head: "both", width: 1 }), txt(159, y + 44, "0.68 m", { anchor: "middle", size: 10 }));
+  parts.push(line(104, y + 6, 104, y + 34, { dash: "2 2", width: 0.8 }), line(214, y + 6, 214, y + 34, { dash: "2 2", width: 0.8 }));
+  return svg(280, 130, parts.join(""));
+}
+
+// ---- object clearing a hill (Ascham 2024 Q21) ---------------------------------------
+
+export function hillClear(): string {
+  const parts: string[] = [];
+  const g = 150, x0 = 40;
+  parts.push(line(20, g, 380, g, { width: 1.2 }));
+  parts.push(parabola(x0, g, 320, 120, { dash: "4 3", width: 1 }));
+  parts.push(`<path d="M 140 ${g} L 175 ${g - 100} L 200 ${g - 70} L 215 ${g} Z" fill="#d6a77a" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(line(x0, g, x0 + 40 * Math.cos(rad(50)), g - 40 * Math.sin(rad(50)), { head: "end", width: 1.8, color: C.b }));
+  parts.push(txt(x0 + 34, g - 40, "80 m/s", { size: 10.5 }), txt(x0 + 22, g - 6, "50°", { size: 10 }));
+  parts.push(line(176, g - 100, 250, g - 100, { dash: "2 2", width: 0.8 }), line(244, g - 100, 244, g, { head: "both", width: 1 }), txt(250, g - 50, "h", { size: 11, italic: true }));
+  parts.push(line(x0, g + 12, 175, g + 12, { head: "both", width: 1 }), txt(108, g + 26, "d", { anchor: "middle", size: 11, italic: true }));
+  return svg(390, g + 32, parts.join(""));
+}
+
+// ---- toy cannon aimed at a target on a windowsill (Barker 2021 Q24) -----------------------
+
+export function sinkTarget(): string {
+  const parts: string[] = [];
+  const s = 160; // px per metre
+  const x0 = 30, g = 200;
+  const cab = x0 + 0.85 * s, tx = cab + 0.6 * s, bench = g - 0.9 * s, ty = bench - 0.06 * s;
+  parts.push(line(10, g, tx + 30, g, { width: 1.2 }));
+  parts.push(`<rect x="${cab}" y="${bench}" width="${tx - cab + 10}" height="${g - bench}" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(`<rect x="${tx + 2}" y="${ty - 90}" width="10" height="90" fill="#cbd5e1" stroke="${C.ink}" stroke-width="0.6"/>`);
+  parts.push(txt(tx + 20, ty - 50, "window", { size: 10 }));
+  parts.push(`<circle cx="${tx}" cy="${ty}" r="6" fill="#fff" stroke="${C.b}" stroke-width="2"/>`, txt(tx - 10, ty + 4, "TARGET", { size: 11, bold: true, color: C.b, anchor: "end" }));
+  parts.push(`<rect x="${x0 - 6}" y="${g - 14}" width="16" height="10" fill="${C.b}" transform="rotate(-65 ${x0} ${g - 8})"/>`);
+  parts.push(line(x0, g + 14, cab, g + 14, { head: "both", width: 1 }), txt((x0 + cab) / 2, g + 28, "0.85 m", { anchor: "middle", size: 10.5 }));
+  parts.push(line(cab, bench - 40, tx, bench - 40, { head: "both", width: 1 }), txt((cab + tx) / 2, bench - 46, "0.60 m", { anchor: "middle", size: 10.5 }));
+  parts.push(line(cab - 12, bench, cab - 12, g, { head: "both", width: 1 }), txt(cab - 16, (bench + g) / 2, "0.90 m", { anchor: "end", size: 10.5 }));
+  parts.push(line(tx + 40, ty, tx + 40, bench, { head: "both", width: 1 }), txt(tx + 46, ty + 8, "0.060 m", { size: 10.5 }));
+  parts.push(line(tx - 4, bench, tx + 30, bench, { dash: "2 2", width: 0.7 }), line(tx - 4, ty, tx + 44, ty, { dash: "2 2", width: 0.7 }));
+  parts.push(txt(60, 30, "NOT TO SCALE", { size: 11 }));
+  return svg(tx + 110, g + 34, parts.join(""));
+}
+
+// ---- spring launcher on a platform with a moving cup (Cherrybrook Tech 2025 Q31) -------
+
+export function launcherCup(): string {
+  const parts: string[] = [];
+  const g = 140, px = 50, top = 50;
+  parts.push(`<rect x="${px}" y="${top}" width="24" height="${g - top}" fill="#fff" stroke="${C.ink}" stroke-width="1"/>`);
+  for (let y = top + 12; y < g; y += 12) parts.push(line(px, y, px + 24, y, { width: 0.5 }));
+  parts.push(`<rect x="${px + 4}" y="${top - 18}" width="34" height="9" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1" transform="rotate(-35 ${px + 10} ${top - 10})"/>`);
+  parts.push(line(px + 20, top - 10, px + 70, top - 10, { dash: "2 2", width: 0.8 }), txt(px + 56, top - 16, "35°", { size: 10 }));
+  parts.push(line(px - 12, top - 8, px - 12, g, { head: "both", width: 1 }), txt(px - 16, (top + g) / 2, "2.6 m", { size: 10.5, anchor: "end" }));
+  parts.push(parabola(px + 30, top - 20, 220, 30, { dash: "4 3", width: 1, to: 250 }));
+  parts.push(line(20, g, 340, g, { width: 1.2 }));
+  parts.push(`<rect x="${px + 30}" y="${g - 14}" width="14" height="14" fill="#fff" stroke="${C.ink}"/>`, line(px + 48, g - 7, px + 70, g - 7, { head: "end", width: 1.2 }), txt(px + 60, g - 12, "v", { size: 10.5, italic: true }));
+  parts.push(`<rect x="${px + 270}" y="${g - 14}" width="14" height="14" fill="#fff" stroke="${C.ink}"/>`, txt(px + 266, g - 4, "cup", { size: 10.5, anchor: "end" }));
+  return svg(350, g + 10, parts.join(""));
+}
+
+// ---- catapult (Girraween 2020 Q22) ------------------------------------------------------
+
+export function catapult(): string {
+  const parts: string[] = [];
+  const g = 110;
+  parts.push(line(20, g, 360, g, { width: 1.2 }));
+  parts.push(`<rect x="40" y="${g - 10}" width="60" height="6" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(`<circle cx="48" cy="${g - 3}" r="4" fill="#fff" stroke="${C.ink}"/>`, `<circle cx="92" cy="${g - 3}" r="4" fill="#fff" stroke="${C.ink}"/>`);
+  parts.push(line(60, g - 10, 80, g - 40, { width: 2.5 }));
+  parts.push(dot(84, g - 46, 5, C.a));
+  parts.push(line(26, g - 46, 26, g, { head: "both", width: 1 }), txt(22, g - 20, "4 m", { size: 10.5, anchor: "end" }));
+  parts.push(dot(290, g - 4, 5, C.a));
+  return svg(370, g + 10, parts.join(""));
+}
+
+// ---- rugby posts and a kick that just clears the crossbar (Girraween 2023 Q21) -----------
+
+export function rugbyKick(): string {
+  const parts: string[] = [];
+  const g = 140, kx = 330, px = 70;
+  parts.push(line(20, g, 360, g, { width: 1.2 }), txt(200, g + 14, "horizontal ground", { anchor: "middle", size: 10 }));
+  parts.push(line(px, g, px, 20, { width: 3 }));
+  parts.push(line(px - 12, g - 40, px + 12, g - 40, { width: 3 }), txt(px + 16, g - 34, "crossbar", { size: 10 }));
+  parts.push(line(px - 26, g - 40, px - 26, g, { head: "both", width: 1 }), txt(px - 30, g - 18, "3.00 m", { size: 10, anchor: "end" }));
+  // path from kick point (right) leftwards, passing just over the crossbar on the way down
+  const pts: string[] = [];
+  for (let k = 0; k <= 50; k++) {
+    const t = k / 50;
+    const x = kx - (kx - px + 20) * t;
+    const y = g - 4 * 100 * t * (1 - t) * 1.05 + 0;
+    pts.push(`${f(x)},${f(y)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.3"/>`);
+  parts.push(line(kx, g, kx - 30, g - 36, { head: "end", width: 1.6, color: C.b }), txt(kx - 30, g - 42, "20 m s⁻¹", { size: 10 }));
+  parts.push(txt(kx - 40, g - 6, "40°", { size: 10 }));
+  return svg(370, g + 22, parts.join(""));
+}
+
+// ---- launch from a lookout and a moving helicopter (Girraween 2024 Q21) ----------------
+
+export function lookoutCliff(): string {
+  return cliffLaunch({ heightLabel: "", ground: "sea", note: "NOT TO SCALE", pathHeight: 0 });
+}
+
+// ---- rocket on a launch stand (Caringbah 2024 Q32) ------------------------------------
+
+export function rocketLaunch(): string {
+  const parts: string[] = [];
+  const g = 110, x0 = 60;
+  parts.push(line(20, g, 300, g, { width: 1.2 }));
+  parts.push(`<path d="M ${x0} ${g} l 60 0" stroke="${C.ink}" stroke-width="2"/>`);
+  const dx = Math.cos(rad(20)), dy = Math.sin(rad(20));
+  parts.push(line(x0 + 20, g - 2, x0 + 20 + 110 * dx, g - 2 - 110 * dy, { width: 6, color: C.guide }));
+  parts.push(line(x0 + 130 * dx, g - 130 * dy, x0 + 190 * dx, g - 190 * dy, { head: "end", width: 1.4, dash: "4 3" }));
+  parts.push(`<path d="M ${x0 + 60} ${g} A 40 40 0 0 0 ${f(x0 + 20 + 40 * dx)} ${f(g - 40 * dy)}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(txt(x0 + 64, g - 6, "20.0°", { size: 10 }));
+  return svg(310, g + 10, parts.join(""));
+}
+
+// ---- shared stick figure ---------------------------------------------------------------
+
+function person(x: number, g: number, h = 60, o: { armTo?: [number, number] } = {}): string {
+  const head = h * 0.12, neck = g - h + 2 * head, hip = g - h * 0.45;
+  const parts = [
+    `<circle cx="${f(x)}" cy="${f(g - h + head)}" r="${f(head)}" fill="#fff" stroke="${C.ink}" stroke-width="1.4"/>`,
+    line(x, neck, x, hip, { width: 1.6 }),
+    line(x, hip, x - h * 0.14, g, { width: 1.6 }),
+    line(x, hip, x + h * 0.14, g, { width: 1.6 }),
+    line(x, neck + h * 0.08, x - h * 0.16, neck + h * 0.3, { width: 1.4 }),
+  ];
+  const [ax, ay] = o.armTo ?? [x + h * 0.18, neck + h * 0.28];
+  parts.push(line(x, neck + h * 0.08, ax, ay, { width: 1.4 }));
+  return parts.join("");
+}
+
+// ---- Paul kicks, Quinn runs and catches (James Ruse 2020 Q22) ----------------------------
+
+export function kickAndCatch(): string {
+  const parts: string[] = [];
+  // perspective sketch: ground points P, Q, R
+  const P: [number, number] = [50, 120], Q: [number, number] = [120, 170], R: [number, number] = [240, 95];
+  parts.push(line(P[0], P[1], R[0], R[1], { dash: "4 3", width: 1 }), txt((P[0] + R[0]) / 2 - 8, (P[1] + R[1]) / 2 - 6, "s", { size: 11, italic: true }));
+  parts.push(line(Q[0], Q[1], R[0], R[1], { width: 1 }), line(Q[0], Q[1], P[0], P[1], { width: 0.8, color: C.guide }));
+  parts.push(line(Q[0] + 30, Q[1] + 4, Q[0] + 62, Q[1] - 16, { head: "end", width: 1.3, color: C.b }), txt(Q[0] + 66, Q[1] - 6, "Quinn runs", { size: 9.5 }));
+  parts.push(txt((Q[0] + R[0]) / 2 + 10, (Q[1] + R[1]) / 2 + 14, "d", { size: 11, italic: true }));
+  for (const [p, l, dx, dy] of [[P, "P", -12, 6], [Q, "Q", -4, 16], [R, "R", 6, 4]] as Array<[[number, number], string, number, number]>)
+    parts.push(dot(p[0], p[1], 3, C.ink), txt(p[0] + dx, p[1] + dy, l, { size: 11, bold: true }));
+  parts.push(txt(P[0] + 26, P[1] + 2, "θ", { size: 10.5, italic: true }));
+  // ball path above P→R
+  const pts: string[] = [];
+  for (let k = 0; k <= 40; k++) {
+    const t = k / 40;
+    pts.push(`${f(P[0] + (R[0] - P[0]) * t)},${f(P[1] - 6 + (R[1] - P[1] + 6) * t - 150 * t * (1 - t) * 0.95 - 8 * t)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="4 3"/>`);
+  parts.push(dot(P[0], P[1] - 6, 4, C.a));
+  parts.push(line(P[0], P[1] - 6, P[0], P[1] - 40, { head: "end", width: 1.3 }), txt(P[0] - 4, P[1] - 44, "uᵧ", { size: 10, anchor: "end" }));
+  parts.push(line(P[0], P[1] - 6, P[0] + 30, P[1] - 14, { head: "end", width: 1.3 }), txt(P[0] + 32, P[1] - 18, "uₓ", { size: 10 }));
+  parts.push(txt(10, 20, "Figure 1", { size: 10.5, bold: true }));
+  // side view for part (b)
+  const ox = 290, g = 170, sP = ox + 20, sR = ox + 200, k = 12; // px per metre vertically
+  parts.push(line(ox, g, ox + 230, g, { width: 1.2 }));
+  parts.push(dot(sP, g, 3, C.ink), txt(sP, g + 14, "P", { size: 11, bold: true, anchor: "middle" }));
+  parts.push(dot(sR, g, 3, C.ink), txt(sR, g + 14, "R", { size: 11, bold: true, anchor: "middle" }));
+  const y0 = g - 1 * k, y1 = g - 3 * k;
+  const sp: string[] = [];
+  for (let j = 0; j <= 40; j++) {
+    const t = j / 40, tt = 2.27 * t;
+    const y = 1 + 12 * tt - 4.9 * tt * tt;
+    sp.push(`${f(sP + (sR - sP) * t)},${f(g - y * k)}`);
+  }
+  parts.push(`<polyline points="${sp.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="4 3"/>`);
+  parts.push(dot(sP, y0, 3.5, C.a), dot(sR, y1, 3.5, C.a));
+  parts.push(txt(sP - 4, y0 - 4, "1.00 m", { size: 9.5, anchor: "end" }), txt(sR + 6, y1 + 4, "3.00 m", { size: 9.5 }));
+  parts.push(line(sP, y0, sP, g, { dash: "2 2", width: 0.7 }), line(sR, y1, sR, g, { dash: "2 2", width: 0.7 }));
+  parts.push(txt(ox, 20, "Part (b)", { size: 10.5, bold: true }));
+  return svg(540, 190, parts.join(""));
+}
+
+// ---- child throwing a fish from a coracle (James Ruse 2022 Q31) ---------------------------
+
+export function coracleThrow(): string {
+  const parts: string[] = [];
+  const ox = 120, oy = 90, s = 120; // origin at the hand, px per metre
+  parts.push(line(ox, 170, ox, 20, { head: "end", width: 1 }), txt(ox - 8, 22, "y", { size: 12, italic: true, anchor: "end" }));
+  parts.push(line(40, oy, ox + 1.35 * s, oy, { head: "end", width: 1 }), txt(ox + 1.35 * s + 4, oy + 4, "x", { size: 12, italic: true }));
+  // boat and child
+  parts.push(`<path d="M 40 112 L 112 112 Q 106 140 76 142 Q 48 140 40 112 Z" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(person(78, 112, 46, { armTo: [ox, oy] }));
+  // trajectory: x = 4.924 t, y = 0.868 t − 4.9 t²
+  const pts: string[] = [];
+  for (let k = 0; k <= 40; k++) {
+    const t = (k / 40) * 0.2437;
+    pts.push(`${f(ox + 4.924 * t * s)},${f(oy - (0.868 * t - 4.9 * t * t) * s)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(line(ox, oy, ox + 34 * Math.cos(rad(10)), oy - 34 * Math.sin(rad(10)), { head: "end", width: 1.5, color: C.b }));
+  parts.push(txt(ox + 30, oy + 14, "10°", { size: 10 }), txt(ox + 40, oy - 22, "trajectory of fish", { size: 10 }));
+  const xl = ox + 1.2 * s, yl = oy + 0.0794 * s;
+  parts.push(line(xl, oy - 4, xl, oy + 4, { width: 1 }), txt(xl + 4, oy - 6, "1.2 m", { size: 10 }));
+  parts.push(line(ox - 4, yl, ox + 4, yl, { width: 1 }), subTxt(ox + 7, yl + 4, "y", "f", { size: 11, italic: true }));
+  parts.push(`<path d="M ${ox + 40} ${yl + 14} Q ${ox + 90} ${yl - 4} ${ox + 170} ${yl + 2} L ${ox + 170} ${yl + 14}" fill="#d6c7a1" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(txt(ox + 120, yl + 28, "Riverbank", { size: 10, anchor: "middle" }));
+  parts.push(line(30, yl + 14, ox + 170, yl + 14, { width: 1, color: C.a }));
+  return svg(300, 200, parts.join(""));
+}
+
+// ---- person launching a ball from hand height (James Ruse 2024 Q27, Knox 2021 Q22) -------
+
+export function personLaunch(o: { height: string; speed: string; angle: number; dog?: boolean }): string {
+  const parts: string[] = [];
+  const g = 150, hx = 110, hy = 70;
+  parts.push(line(20, g, 340, g, { width: 1.2 }));
+  parts.push(person(80, g, 80, { armTo: [hx, hy] }));
+  parts.push(dot(hx, hy, 4, C.a));
+  const L = 50;
+  parts.push(line(hx, hy, hx + L * Math.cos(rad(o.angle)), hy - L * Math.sin(rad(o.angle)), { head: "end", width: 1.6, color: C.b }));
+  parts.push(line(hx, hy, hx + 70, hy, { dash: "3 2", width: 0.8 }));
+  parts.push(txt(hx + 56, hy - 4, `${o.angle}°`, { size: 10.5 }), txt(hx + L * Math.cos(rad(o.angle)) + 4, hy - L * Math.sin(rad(o.angle)) - 4, o.speed, { size: 10.5 }));
+  parts.push(line(hx + 84, hy, hx + 84, g, { head: "both", width: 1 }), txt(hx + 90, (hy + g) / 2 + 4, o.height, { size: 10.5 }));
+  if (o.dog) {
+    const dx = 130, dy = g - 16;
+    parts.push(`<rect x="${dx - 16}" y="${dy - 6}" width="30" height="12" rx="5" fill="${C.ink}"/>`);
+    parts.push(`<circle cx="${dx + 18}" cy="${dy - 10}" r="6" fill="${C.ink}"/>`);
+    for (const lx of [dx - 12, dx - 6, dx + 6, dx + 11]) parts.push(line(lx, dy + 4, lx, g, { width: 2 }));
+    parts.push(line(dx - 16, dy - 4, dx - 24, dy - 12, { width: 2 }));
+    parts.push(txt(dx, g + 14, "dog", { size: 10, anchor: "middle" }));
+  }
+  return svg(350, g + 20, parts.join(""));
+}
+
+// ---- ball that just touches a stadium roof (Knox 2025 Q37) -------------------------------
+
+export function stadiumRoof(): string {
+  const parts: string[] = [];
+  const g = 170, x0 = 60, top = 40, xt = 330;
+  parts.push(`<rect x="${x0 - 6}" y="${g}" width="300" height="6" fill="${C.ink}"/>`);
+  parts.push(line(x0 - 10, top, 380, top, { dash: "3 2", width: 1, color: C.guide }), txt(140, top - 6, "roof", { size: 10.5 }));
+  const pts: string[] = [];
+  for (let k = 0; k <= 50; k++) {
+    const t = (k / 50) * 1.06;
+    pts.push(`${f(x0 + (xt - x0) * t)},${f(g - (g - top) * (1 - (1 - t) * (1 - t)))}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.3"/>`);
+  parts.push(dot(xt, top, 3, C.ink));
+  parts.push(line(x0 - 20, top, x0 - 20, g, { head: "both", width: 1 }), txt(x0 - 24, (top + g) / 2, "40 m", { size: 10.5, anchor: "end" }));
+  return svg(390, g + 16, parts.join(""));
+}
+
+// ---- skateboarder leaving a ramp (Newington 2023 Q21) -----------------------------------
+
+export function skateRamp(): string {
+  const parts: string[] = [];
+  const g = 190, bx = 230, by = 150;
+  parts.push(line(20, g, 360, g, { width: 1.2 }));
+  parts.push(line(20, 30, 40, 30, { width: 1.2 }));
+  parts.push(`<path d="M 40 30 Q 50 150 ${bx} ${by}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+  parts.push(line(bx, by, bx, g, { width: 1.2 }));
+  parts.push(txt(36, 24, "A", { size: 11, bold: true }), txt(bx - 2, by - 6, "B", { size: 11, bold: true }), txt(340, g - 6, "C", { size: 11, bold: true }));
+  parts.push(line(bx + 10, by, bx + 10, g, { head: "both", width: 1 }), txt(bx + 14, (by + g) / 2 + 4, "1.0 m", { size: 10.5 }));
+  parts.push(dot(61, 91, 5, C.a), line(66, 88, 100, 70, { width: 0.7 }), txt(102, 68, "skateboarder", { size: 10.5 }));
+  return svg(370, g + 10, parts.join(""));
+}
+
+// ---- fireworks launched from a tower (North Sydney Boys 2019 Q22) ------------------------
+
+export function fireworksTower(): string {
+  const parts: string[] = [];
+  const g = 210, tx = 60, ty = 60, k = 150 / 305; // px per metre vertically
+  const ex = 330, ey = g - 280 * k;
+  parts.push(line(20, g, 380, g, { width: 1.2 }));
+  for (let x = 24; x < 380; x += 12) parts.push(line(x, g, x - 6, g + 6, { width: 0.6 }));
+  parts.push(`<path d="M ${tx - 6} ${g} L ${tx - 3} ${ty + 14} L ${tx + 3} ${ty + 14} L ${tx + 6} ${g} Z" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(`<rect x="${tx - 14}" y="${ty - 2}" width="28" height="16" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`, line(tx, ty - 2, tx, ty - 30, { width: 1.2 }));
+  const L = 40;
+  parts.push(line(tx + 14, ty, tx + 14 + L * Math.cos(rad(30)), ty - L * Math.sin(rad(30)), { head: "end", width: 1.6, color: C.b }), txt(tx + 18, ty - 24, "v", { size: 11, italic: true }));
+  parts.push(line(tx + 14, ty, tx + 70, ty, { width: 0.8 }), txt(tx + 52, ty - 4, "30°", { size: 10.5 }));
+  // path: x ∝ t, y = 305 + 25t − 4.9t², explode at t = 5.958 s
+  const pts: string[] = [];
+  for (let j = 0; j <= 50; j++) {
+    const t = (j / 50) * 5.958;
+    pts.push(`${f(tx + 14 + ((ex - tx - 14) * t) / 5.958)},${f(g - (305 + 25 * t - 4.9 * t * t) * k)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="2 2"/>`);
+  for (let a = 0; a < 360; a += 45) parts.push(line(ex + 4 * Math.cos(rad(a)), ey + 4 * Math.sin(rad(a)), ex + 10 * Math.cos(rad(a)), ey + 10 * Math.sin(rad(a)), { width: 1, color: C.b }));
+  parts.push(line(tx + 26, ty, tx + 26, g, { head: "both", width: 1 }), txt(tx + 30, (ty + g) / 2, "305 m", { size: 10.5 }));
+  parts.push(line(ex, ey + 12, ex, g, { head: "both", width: 1 }), txt(ex + 4, (ey + g) / 2, "280 m", { size: 10.5 }));
+  return svg(390, g + 14, parts.join(""));
+}
+
+// ---- golf shot out of a sandpit (North Sydney Girls 2022 Q32) -------------------------------
+
+export function sandpitShot(): string {
+  const parts: string[] = [];
+  const g = 140, x0 = 70, d = 70, px = 270;
+  parts.push(`<rect x="40" y="${g}" width="140" height="10" fill="#d6c7a1" stroke="${C.ink}" stroke-width="0.6"/>`, txt(110, g + 26, "sandpit", { size: 10.5, anchor: "middle", bold: true }));
+  parts.push(`<path d="M 180 ${g} L 220 ${g} Q 262 ${g} ${px} ${g - d} L 330 ${g - d}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(`<circle cx="${x0}" cy="${g - 5}" r="5" fill="#fff" stroke="${C.ink}"/>`, `<circle cx="${px}" cy="${g - d - 5}" r="5" fill="#fff" stroke="${C.ink}"/>`);
+  parts.push(txt(px + 8, g - d - 10, "P", { size: 11, bold: true }), txt(90, 50, "golf ball A", { size: 10.5, bold: true }), line(96, 54, x0 + 2, g - 12, { width: 0.7 }));
+  const pts: string[] = [];
+  for (let k = 0; k <= 40; k++) {
+    const t = k / 40;
+    pts.push(`${f(x0 + (px - x0) * t)},${f(g - 5 - d * (1 - (1 - t) * (1 - t)))}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.1" stroke-dasharray="4 3"/>`);
+  parts.push(line(x0, g - 5, x0 + 34 * Math.cos(rad(25)), g - 5 - 34 * Math.sin(rad(25)), { head: "end", width: 1.5, color: C.b }), txt(x0 + 26, g - 28, "u", { size: 11, italic: true, bold: true }));
+  parts.push(line(x0, g - 5, x0 + 40, g - 5, { dash: "2 2", width: 0.8 }), txt(x0 + 42, g - 2, "25°", { size: 10 }));
+  parts.push(line(40, g - d - 5, 40, g - 5, { head: "both", width: 1 }), txt(34, g - d / 2, "d", { size: 11, italic: true, bold: true, anchor: "end" }));
+  parts.push(txt(300, g - 40, "NOT TO", { size: 10, bold: true }), txt(300, g - 27, "SCALE", { size: 10, bold: true }));
+  return svg(350, g + 34, parts.join(""));
+}
+
+// ---- castle tower and a target moving in a circle (North Sydney Girls 2023 Q31) -------------
+
+export function castleTarget(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 230, rx = 130, ry = 32, top = 150;
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="${C.ink}" stroke-width="0.9" stroke-dasharray="3 3"/>`);
+  parts.push(`<rect x="${cx - 16}" y="${top}" width="32" height="${cy - top}" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1"/>`);
+  for (let x = cx - 16; x < cx + 16; x += 8) parts.push(`<rect x="${x}" y="${top - 6}" width="5" height="6" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(line(cx - 28, top, cx - 28, cy, { head: "both", width: 1 }), txt(cx - 32, (top + cy) / 2, "45.0 m", { size: 10.5, anchor: "end" }));
+  parts.push(line(cx, cy, cx + rx, cy, { dash: "2 2", width: 0.8 }), line(cx + 18, cy - 8, cx + rx, cy - 8, { head: "both", width: 0.9 }), txt(cx + 70, cy - 12, "180.0 m", { size: 10, anchor: "middle" }));
+  parts.push(txt(cx + rx + 10, cy + 4, "East", { size: 10.5 }), txt(cx, cy + ry + 16, "South", { size: 10.5, anchor: "middle" }));
+  parts.push(dot(cx, cy + ry, 4, C.b), txt(cx - 40, cy + ry + 12, "Target", { size: 10.5, anchor: "end" }), line(cx - 40, cy + ry + 6, cx - 6, cy + ry, { width: 0.7 }));
+  parts.push(line(cx + 60, cy + ry - 3, cx + 70, cy + ry - 6, { head: "end", width: 1.1 }));
+  // arrow path from the tower top landing at the East point (not to scale)
+  const y0 = top - 8, H = cy - y0, rise = 70;
+  const qa = H + 2 * rise + 2 * Math.sqrt(rise * (rise + H)), qb = qa - H;
+  const pts: string[] = [];
+  for (let k = 0; k <= 50; k++) {
+    const t = k / 50;
+    pts.push(`${f(cx + rx * t)},${f(y0 - qb * t + qa * t * t)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.1" stroke-dasharray="4 3"/>`);
+  const L = 36;
+  parts.push(line(cx, top - 8, cx + L * Math.cos(rad(72.3)), top - 8 - L * Math.sin(rad(72.3)), { head: "end", width: 1.6, color: C.b }));
+  parts.push(txt(cx - 6, top - 40, "53.0 m s⁻¹", { size: 10.5, anchor: "end" }));
+  parts.push(line(cx, top - 8, cx + 34, top - 8, { dash: "2 2", width: 0.8 }), txt(cx + 20, top - 16, "θ", { size: 11, italic: true }));
+  return svg(340, cy + ry + 26, parts.join(""));
+}
+
+// ---- tennis serve: ball toss and swing, then serve over the net (North Sydney Girls 2024 Q26)
+
+export function nadalServe(): string {
+  const parts: string[] = [];
+  const g = 210, k = 45; // px per metre
+  // panel (a)
+  const sx = 120, sy = g - 1.8 * k; // shoulder/centre of the arc, level with A
+  parts.push(line(20, g, 220, g, { width: 1.2 }));
+  parts.push(person(sx + 6, g, 1.8 * k + 20, { armTo: [sx - 40, sy] }));
+  const ax = sx + 30;
+  parts.push(dot(ax, sy, 3.5, C.ink), txt(ax + 4, sy - 6, "A", { size: 12, bold: true }));
+  parts.push(dot(ax, sy - 1.8 * k, 3.5, C.ink), txt(ax - 6, sy - 1.8 * k - 4, "B", { size: 12, bold: true, anchor: "end" }));
+  parts.push(line(ax + 14, sy - 1.8 * k, ax + 14, sy, { head: "both", width: 0.9 }), txt(ax + 18, sy - 0.9 * k, "1.8 m", { size: 11 }));
+  parts.push(line(ax + 14, sy, ax + 14, g, { head: "both", width: 0.9 }), txt(ax + 18, sy + 0.9 * k, "1.8 m", { size: 11 }));
+  const cxp = sx - 1.8 * k * 0.55;
+  parts.push(`<ellipse cx="${f(cxp)}" cy="${f(sy)}" rx="12" ry="8" fill="#fff" stroke="${C.ink}" stroke-width="1.4"/>`, txt(cxp - 16, sy + 4, "C", { size: 12, bold: true, anchor: "end" }));
+  parts.push(`<ellipse cx="${f(cxp + 14)}" cy="${f(sy + 52)}" rx="9" ry="12" fill="#fff" stroke="${C.ink}" stroke-width="1.2"/>`, txt(cxp + 8, sy + 78, "D", { size: 12, bold: true }));
+  parts.push(`<path d="M ${f(cxp + 10)} ${f(sy + 38)} Q ${f(cxp - 10)} ${f(sy + 20)} ${f(cxp - 6)} ${f(sy + 10)}" fill="none" stroke="${C.ink}" stroke-width="0.9" stroke-dasharray="3 2"/>`);
+  parts.push(line(cxp - 6, sy - 10, cxp + 4, sy - 40, { head: "end", width: 0.9, dash: "3 2" }));
+  parts.push(txt(20, 20, "(a)", { size: 12, bold: true }));
+  // panel (b)
+  const ox = 250, px = ox + 40, nx = ox + 260;
+  parts.push(line(ox, g, ox + 290, g, { width: 1.2 }));
+  parts.push(person(px, g, 1.8 * k + 20, { armTo: [px + 4, g - 3.4 * k] }));
+  parts.push(line(px + 4, g - 3.3 * k, px + 4, g - 3.6 * k + 8, { width: 1.4 }), `<ellipse cx="${f(px + 4)}" cy="${f(g - 3.6 * k)}" rx="7" ry="10" fill="#fff" stroke="${C.ink}" stroke-width="1.3"/>`);
+  parts.push(dot(px + 4, g - 3.6 * k, 3, C.a), line(px + 12, g - 3.6 * k, px + 50, g - 3.6 * k, { head: "end", width: 1.4, color: C.b }), txt(px + 54, g - 3.6 * k + 4, "initial speed of ball = 24 m s⁻¹", { size: 10.5 }));
+  parts.push(line(px - 30, g - 3.6 * k, px - 30, g - 1.8 * k, { head: "both", width: 0.9 }), txt(px - 34, g - 2.7 * k, "1.8 m", { size: 11, anchor: "end" }));
+  parts.push(line(px - 30, g - 1.8 * k, px - 30, g, { head: "both", width: 0.9 }), txt(px - 34, g - 0.9 * k, "1.8 m", { size: 11, anchor: "end" }));
+  parts.push(line(nx, g, nx, g - 0.9 * k, { width: 3 }), txt(nx, g - 0.9 * k - 6, "net", { size: 11, anchor: "middle" }));
+  parts.push(line(nx + 10, g - 0.9 * k, nx + 10, g, { head: "both", width: 0.9 }), txt(nx + 14, g - 0.45 * k + 4, "0.90 m", { size: 11 }));
+  parts.push(line(px, g + 12, nx, g + 12, { head: "both", width: 0.9 }), txt((px + nx) / 2, g + 26, "12 m", { size: 11, anchor: "middle" }));
+  parts.push(txt(ox, 20, "(b)", { size: 12, bold: true }));
+  return svg(ox + 330, g + 32, parts.join(""));
+}
+
+// ---- horizontal tennis serve just clearing the net (Cheltenham Girls 2010 HY Q17) ---------
+
+export function tennisServeNet(): string {
+  const parts: string[] = [];
+  const g = 150, x0 = 40, k = 40, s = 15; // px per metre vertical, horizontal
+  const nx = x0 + 15 * s, land = x0 + 18.8 * s;
+  parts.push(line(x0, g, land + 30, g, { width: 1.2 }), line(x0, g, x0, g - 2.5 * k, { width: 1.2 }));
+  parts.push(`<circle cx="${x0}" cy="${g - 2.5 * k}" r="5" fill="#fff" stroke="${C.ink}"/>`, line(x0 + 6, g - 2.5 * k, x0 + 36, g - 2.5 * k, { head: "end", width: 1.4 }), txt(x0 + 40, g - 2.5 * k - 4, "uₓ", { size: 10.5 }));
+  const pts: string[] = [];
+  for (let j = 0; j <= 40; j++) {
+    const x = (j / 40) * 18.8;
+    pts.push(`${f(x0 + x * s)},${f(g - (2.5 - 4.9 * (x / 26.3) ** 2) * k)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.1" stroke-dasharray="4 3"/>`);
+  parts.push(line(nx, g, nx, g - 0.9 * k, { width: 3 }), txt(nx - 6, g - 0.9 * k + 6, "Net 0.9 m high", { size: 10, anchor: "end" }));
+  parts.push(txt(x0 + 8, g - 1.1 * k, "2.5 m", { size: 10.5 }));
+  parts.push(line(x0, g + 14, nx, g + 14, { head: "both", width: 1 }), txt((x0 + nx) / 2, g + 28, "15 m", { size: 10.5, anchor: "middle" }));
+  parts.push(line(nx, g + 14, land, g + 14, { head: "both", width: 1 }), txt((nx + land) / 2, g + 28, "d", { size: 11, italic: true, anchor: "middle" }));
+  return svg(land + 50, g + 36, parts.join(""));
+}
+
+// ---- general x–y graph with negative ranges, dots and curves ---------------------------
+
+export function xyGraph(o: {
+  xMin?: number;
+  xMax: number;
+  yMin?: number;
+  yMax: number;
+  xStep: number;
+  yStep: number;
+  minor?: number;
+  xLabel: string;
+  yLabel: string;
+  points?: Array<[number, number]>;
+  curves?: Array<{ pts: Array<[number, number]>; label?: string; labelAt?: [number, number]; color?: string }>;
+  marks?: Array<{ at: [number, number]; label: string }>;
+  width?: number;
+  height?: number;
+}): string {
+  const x0 = o.xMin ?? 0, y0 = o.yMin ?? 0;
+  const L = 52, T = 20, PW = o.width ?? 300, PH = o.height ?? 200;
+  const X = (x: number) => L + ((x - x0) / (o.xMax - x0)) * PW;
+  const Y = (y: number) => T + PH - ((y - y0) / (o.yMax - y0)) * PH;
+  const parts: string[] = [];
+  const minor = o.minor ?? 5;
+  const nx = Math.round(((o.xMax - x0) / o.xStep) * minor), ny = Math.round(((o.yMax - y0) / o.yStep) * minor);
+  for (let k = 0; k <= nx; k++) {
+    const x = x0 + (k * o.xStep) / minor;
+    parts.push(line(X(x), T, X(x), T + PH, { color: k % minor === 0 ? C.guide : C.grid, width: k % minor === 0 ? 0.8 : 0.5 }));
+  }
+  for (let k = 0; k <= ny; k++) {
+    const y = y0 + (k * o.yStep) / minor;
+    parts.push(line(L, Y(y), L + PW, Y(y), { color: k % minor === 0 ? C.guide : C.grid, width: k % minor === 0 ? 0.8 : 0.5 }));
+  }
+  if (y0 < 0 && o.yMax > 0) parts.push(line(L, Y(0), L + PW, Y(0), { color: C.axis, width: 1.2 }));
+  if (x0 < 0 && o.xMax > 0) parts.push(line(X(0), T, X(0), T + PH, { color: C.axis, width: 1.2 }));
+  const fmt = (v: number) => String(+v.toFixed(2)).replace("-", "−");
+  for (let k = 0; k <= nx / minor + 1e-9; k++) parts.push(txt(X(x0 + k * o.xStep), T + PH + 13, fmt(x0 + k * o.xStep), { anchor: "middle", size: 9.5 }));
+  for (let k = 0; k <= ny / minor + 1e-9; k++) parts.push(txt(L - 5, Y(y0 + k * o.yStep) + 3.5, fmt(y0 + k * o.yStep), { anchor: "end", size: 9.5 }));
+  parts.push(txt(L + PW / 2, T + PH + 30, o.xLabel, { anchor: "middle", size: 10.5 }));
+  parts.push(
+    `<text x="14" y="${T + PH / 2}" fill="${C.text}" font-size="10.5" font-family="${FONT}" text-anchor="middle" transform="rotate(-90 14 ${T + PH / 2})">${esc(o.yLabel)}</text>`,
+  );
+  for (const c of o.curves ?? []) {
+    parts.push(`<polyline points="${c.pts.map(([x, y]) => `${f(X(x))},${f(Y(y))}`).join(" ")}" fill="none" stroke="${c.color ?? C.a}" stroke-width="1.6"/>`);
+    if (c.label && c.labelAt) parts.push(txt(X(c.labelAt[0]), Y(c.labelAt[1]), c.label, { size: 10.5 }));
+  }
+  for (const [x, y] of o.points ?? []) parts.push(dot(X(x), Y(y), 2.6, C.ink));
+  for (const m of o.marks ?? []) parts.push(dot(X(m.at[0]), Y(m.at[1]), 2.8, C.ink), txt(X(m.at[0]) + 4, Y(m.at[1]) - 7, m.label, { size: 12, bold: true }));
+  return svg(L + PW + 14, T + PH + 38, parts.join(""));
+}
+
+// ---- camera and ruler set-up and the strobe image (Shore 2020 Q28) -----------------------
+
+export function cameraSetup(): string {
+  const parts: string[] = [];
+  // a wall (in perspective) with the trajectory drawn on it
+  parts.push(`<path d="M 60 40 L 140 20 L 140 170 L 60 190 Z" fill="#f1f5f9" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(txt(78, 46, "Trajectory", { size: 10.5 }));
+  parts.push(`<path d="M 120 88 Q 96 30 74 150" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 3"/>`);
+  parts.push(`<circle cx="120" cy="88" r="6" fill="#cbd5e1" stroke="${C.ink}"/>`, txt(130, 92, "Starting point P", { size: 10.5 }));
+  // floor lines
+  for (const [x1, y1, x2, y2] of [[60, 190, 300, 190], [140, 170, 330, 170], [100, 180, 320, 180]]) parts.push(line(x1, y1, x2, y2, { width: 0.6, color: C.guide }));
+  // ruler on the floor, in front of the wall (closer to the camera)
+  parts.push(`<path d="M 110 168 L 190 150 L 196 156 L 116 174 Z" fill="#fde68a" stroke="${C.ink}" stroke-width="0.8"/>`, txt(200, 166, "Metre ruler", { size: 10.5 }));
+  // camera on a tripod, close and to one side of P
+  parts.push(`<rect x="232" y="78" width="22" height="14" fill="#fff" stroke="${C.ink}"/>`, `<circle cx="232" cy="85" r="4" fill="#fff" stroke="${C.ink}"/>`);
+  parts.push(line(243, 92, 236, 130, { width: 1 }), line(243, 92, 250, 130, { width: 1 }), line(243, 92, 243, 132, { width: 1 }));
+  parts.push(txt(260, 88, "Camera", { size: 10.5 }));
+  return svg(340, 200, parts.join(""));
+}
+
+export function shoreStrobe(): string {
+  const parts: string[] = [];
+  // P on the right; ball moves left at 1.6 m/s, up at 4.3 m/s, g = 9.6
+  const sx = 110, sy = 110, px = 260, py = 120; // px per metre
+  for (let k = 0; k <= 27; k++) {
+    const t = k / 30;
+    const x = -1.6 * t, y = 4.3 * t - 4.8 * t * t;
+    parts.push(`<circle cx="${f(px + x * sx)}" cy="${f(py - y * sy)}" r="2.6" fill="#fff" stroke="${C.ink}" stroke-width="0.9"/>`);
+  }
+  parts.push(txt(px + 8, py + 4, "Starting point P", { size: 10.5 }));
+  return svg(360, 170, parts.join(""));
+}
+
+// ---- ball launched horizontally into a vacuum chamber (Shore 2020 HY Q10) ----------------
+
+export function vacuumChamber(): string {
+  const parts: string[] = [];
+  const panel = (oy: number, deflect: boolean) => {
+    const x0 = 50, w = 230, top = oy, bot = oy + 70; // 150 cm ↔ 230 px, 50 cm ↔ 70 px? (not to scale)
+    const ly = top + 30;
+    parts.push(`<rect x="${x0}" y="${top}" width="${w}" height="${bot - top}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
+    parts.push(`<circle cx="${x0 - 14}" cy="${ly}" r="5" fill="#fff" stroke="${C.ink}"/>`, line(x0 - 8, ly, x0 + 6, ly, { head: "end", width: 1.1 }));
+    parts.push(line(x0 + 6, ly + 2, x0 + 6, bot, { head: "both", width: 0.9 }), txt(x0 + 10, (ly + bot) / 2 + 4, "50 cm", { size: 10, bold: true }));
+    if (deflect) {
+      parts.push(`<path d="M ${x0} ${ly} Q ${x0 + 70} ${ly} ${x0 + w * 0.62} ${bot}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 3"/>`);
+      parts.push(line(x0, bot + 12, x0 + w * 0.62, bot + 12, { head: "both", width: 0.9 }), txt(x0 + w * 0.31, bot + 25, "150 cm", { size: 10, bold: true, anchor: "middle" }));
+    } else {
+      parts.push(line(x0, ly, x0 + w, ly, { dash: "4 3", width: 1, head: "end" }));
+    }
+  };
+  panel(10, true);
+  panel(140, false);
+  return svg(300, 225, parts.join(""));
+}
+
+// ---- tennis serve leaving the racket at 8° (Shore 2021 Q25) -----------------------------
+
+export function serveAngle(): string {
+  const parts: string[] = [];
+  parts.push(line(30, 60, 200, 60, { width: 1.4, color: C.a }));
+  parts.push(line(30, 60, 30 + 150 * Math.cos(rad(8)), 60 - 150 * Math.sin(rad(8)), { head: "end", width: 1.6, color: C.a }));
+  parts.push(`<path d="M 130 60 A 100 100 0 0 0 ${f(30 + 100 * Math.cos(rad(8)))} ${f(60 - 100 * Math.sin(rad(8)))}" fill="none" stroke="${C.ink}" stroke-width="0.9"/>`);
+  parts.push(txt(136, 58, "8°", { size: 10.5 }));
+  return svg(220, 76, parts.join(""));
+}
+
+// ---- two arrows from a tower to the same target (Sydney Grammar 2018 HY Q17) --------------
+
+export function towerTwoArrows(): string {
+  const parts: string[] = [];
+  const g = 160, tx = 60, ty = 80, land = 330;
+  parts.push(line(20, g, 380, g, { width: 1.2 }));
+  parts.push(`<path d="M ${tx - 22} ${g} L ${tx - 6} ${ty} L ${tx + 6} ${ty} L ${tx + 22} ${g}" fill="none" stroke="${C.ink}" stroke-width="2"/>`);
+  for (let k = 1; k < 5; k++) {
+    const y = ty + (k * (g - ty)) / 5, hw = 6 + (16 * k) / 5;
+    parts.push(line(tx - hw, y, tx + hw, y, { width: 1 }));
+  }
+  parts.push(person(tx, ty, 28), txt(tx - 18, ty - 10, "archer", { size: 10, anchor: "end" }));
+  const sy = ty - 14;
+  // arrow A: horizontal launch; arrow B: up then down, twice the time
+  const ptsA: string[] = [], ptsB: string[] = [];
+  for (let k = 0; k <= 40; k++) {
+    const t = k / 40;
+    ptsA.push(`${f(tx + 6 + (land - tx - 6) * t)},${f(sy + (g - sy) * t * t)}`);
+    // B: y = sy - b t + a t², y(1) = g, rise 40 px
+    const H = g - sy, rise = 40, a = H + 2 * rise + 2 * Math.sqrt(rise * (rise + H)), b = a - H;
+    ptsB.push(`${f(tx + 6 + (land - tx - 6) * t)},${f(sy - b * t + a * t * t)}`);
+  }
+  parts.push(`<polyline points="${ptsA.join(" ")}" fill="none" stroke="${C.a}" stroke-width="1.5"/>`, txt(170, sy + 34, "Arrow A", { size: 10.5 }));
+  parts.push(`<polyline points="${ptsB.join(" ")}" fill="none" stroke="${C.b}" stroke-width="1.5" stroke-dasharray="5 3"/>`, txt(292, sy - 8, "Arrow B", { size: 10.5 }));
+  parts.push(line(tx + 6, sy, 360, sy, { dash: "2 2", width: 0.8 }));
+  parts.push(line(355, sy, 355, g, { head: "both", width: 0.9 }), txt(359, (sy + g) / 2, "40 m", { size: 10.5 }));
+  parts.push(txt(land + 4, g - 4, "target", { size: 10 }));
+  parts.push(line(tx, g + 14, land, g + 14, { head: "both", width: 0.9, dash: "3 2" }), txt((tx + land) / 2, g + 28, "50 m", { size: 10.5, anchor: "middle" }));
+  parts.push(txt(370, 20, "NOT TO SCALE", { size: 10, anchor: "end" }));
+  return svg(390, g + 34, parts.join(""));
+}
+
+// ---- helicopter dropping a rescue pack (Sydney Grammar 2020 Q21) --------------------------
+
+export function helicopterDrop(): string {
+  const parts: string[] = [];
+  const g = 150, hx = 70, hy = 40;
+  parts.push(line(20, g, 380, g, { width: 1.2 }));
+  parts.push(`<ellipse cx="${hx}" cy="${hy}" rx="22" ry="10" fill="#e2e8f0" stroke="${C.ink}"/>`, line(hx - 22, hy - 2, hx - 50, hy - 6, { width: 2 }), line(hx - 30, hy - 14, hx + 30, hy - 14, { width: 1.5 }), line(hx, hy - 14, hx, hy - 10, { width: 1.5 }));
+  parts.push(line(hx - 12, hy + 14, hx + 12, hy + 14, { width: 1.2 }));
+  parts.push(line(hx + 30, hy + 2, hx + 80, hy + 2, { head: "end", width: 1.5 }), txt(hx + 34, hy - 4, "52.5 m s⁻¹", { size: 10.5 }));
+  parts.push(line(hx, hy + 16, hx, g, { dash: "2 3", width: 0.9 }), txt(hx - 6, (hy + g) / 2, "250 m", { size: 10.5, anchor: "end" }));
+  parts.push(person(320, g, 40), person(340, g, 44));
+  parts.push(line(hx, g - 6, 315, g - 6, { head: "both", width: 0.9, dash: "3 2" }), txt(190, g - 10, "d", { size: 11, italic: true, bold: true, anchor: "middle" }));
+  parts.push(txt(370, 20, "not to scale", { size: 10, anchor: "end" }));
+  return svg(390, g + 10, parts.join(""));
+}
+
+// ---- golf shot over a tree onto an elevated green (Sydney Grammar 2022 Q36) ---------------
+
+export function treeAndGreen(): string {
+  const parts: string[] = [];
+  const g = 170, k = 20, sx = 14; // px per metre (vertical, horizontal)
+  const x0 = 40, tx = x0 + 8.6 * sx, gx = tx + 6.09 * sx, slopeStart = tx + 1.5 * sx, slopeEnd = tx + 4.5 * sx;
+  parts.push(`<path d="M 20 ${g} L ${slopeStart} ${g} Q ${(slopeStart + slopeEnd) / 2} ${g} ${slopeEnd} ${g - 3 * k} L ${gx + 80} ${g - 3 * k}" fill="none" stroke="${C.c}" stroke-width="2"/>`);
+  parts.push(line(tx, g, tx, g - 3 * k, { width: 4, color: "#92400e" }), `<circle cx="${tx}" cy="${g - 3 * k - 10}" r="16" fill="#86efac" stroke="${C.c}"/>`);
+  const pts: string[] = [];
+  for (let j = 0; j <= 50; j++) {
+    const t = (j / 50) * (1.106 + 0.782);
+    pts.push(`${f(x0 + 7.78 * t * sx)},${f(g - (10.84 * t - 4.9 * t * t) * k)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.a}" stroke-width="1.5"/>`);
+  parts.push(line(tx + 6, g - 6 * k, tx + 6, g - 3 * k, { head: "both", width: 0.9 }), txt(tx + 10, g - 4.5 * k, "h", { size: 11, italic: true, bold: true }));
+  parts.push(line(tx - 6, g - 3 * k, tx - 6, g, { head: "both", width: 0.9 }), txt(tx - 10, g - 1.5 * k, "h", { size: 11, italic: true, bold: true, anchor: "end" }));
+  parts.push(line(tx, g - 3 * k, gx, g - 3 * k, { dash: "4 3", width: 0.8 }), line(gx, g - 3 * k, gx, g, { dash: "2 2", width: 0.7 }));
+  parts.push(line(x0, g + 12, tx, g + 12, { head: "both", width: 0.9 }), txt((x0 + tx) / 2, g + 26, "x", { size: 11, italic: true, bold: true, anchor: "middle" }));
+  parts.push(line(tx, g + 12, gx, g + 12, { head: "both", width: 0.9 }), txt((tx + gx) / 2, g + 26, "d", { size: 11, italic: true, bold: true, anchor: "middle" }));
+  parts.push(line(gx + 60, g - 3 * k, gx + 60, g - 3 * k - 40, { width: 1.2 }), `<path d="M ${gx + 60} ${g - 3 * k - 40} l 12 4 l -12 4 z" fill="${C.b}"/>`);
+  parts.push(person(x0 - 8, g, 34));
+  return svg(gx + 100, g + 34, parts.join(""));
+}
+
+// ---- golf shot onto a cliff top: launch X, top Y, landing Z (Sydney Grammar 2005 HY Q18) --
+
+export function golfCliffXYZ(): string {
+  const parts: string[] = [];
+  const g = 170, k = 3, sx = 4; // px per metre vertical/horizontal (not to scale)
+  const x0 = 60, yx = x0 + 30 * sx * 1.2, zx = yx + 20 * sx;
+  parts.push(line(20, g, zx + 4, g, { width: 1.2 }));
+  parts.push(`<path d="M ${zx} ${g} L ${zx} ${g - 39.2 * k} L ${zx + 30} ${g - 39.2 * k} q 20 -6 40 4" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`);
+  // not to scale: x is mapped linearly in time separately before and after the top
+  const pts2: string[] = [];
+  for (let j = 0; j <= 50; j++) {
+    const t = (j / 50) * 4.0;
+    const x = t <= 3 ? x0 + (t / 3) * (yx - x0) : yx + (t - 3) * (zx - yx);
+    pts2.push(`${f(x)},${f(g - (29.4 * t - 4.9 * t * t) * k)}`);
+  }
+  parts.push(`<polyline points="${pts2.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 3"/>`);
+  parts.push(dot(x0, g, 3, C.ink), txt(x0, g + 14, "X", { size: 11, bold: true, anchor: "middle" }));
+  parts.push(line(x0, g, x0 + 34 * Math.cos(rad(55)), g - 34 * Math.sin(rad(55)), { head: "end", width: 1.5, color: C.b }), txt(x0 + 8, g - 30, "u", { size: 11, italic: true }));
+  parts.push(line(x0, g, x0 + 40, g, { dash: "2 2", width: 0.7 }), txt(x0 + 24, g - 6, "θ", { size: 11, italic: true }));
+  parts.push(line(yx, g - 44.1 * k, yx, g, { width: 0.9 }), txt(yx - 4, g - 44.1 * k - 6, "Y", { size: 11, bold: true, anchor: "middle" }), txt(yx - 4, g - 20 * k, "44.1 m", { size: 10.5, anchor: "end" }));
+  parts.push(txt(zx + 2, g - 39.2 * k - 18, "Z", { size: 11, bold: true }), txt(zx + 6, g - 20 * k, "39.2 m", { size: 10.5 }));
+  parts.push(line(yx, g - 44.1 * k - 20, zx, g - 44.1 * k - 20, { head: "both", width: 0.9 }), txt((yx + zx) / 2, g - 44.1 * k - 26, "20 m", { size: 10.5, anchor: "middle" }));
+  return svg(zx + 80, g + 22, parts.join(""));
+}
+
+// ======================= circular motion =======================
+
+/** Arrow of length L from (x, y) at angle a (degrees, 0 = right, 90 = up). */
+function arrowAt(x: number, y: number, a: number, L: number, o: { color?: string; width?: number; dash?: string } = {}): string {
+  return line(x, y, x + L * Math.cos(rad(a)), y - L * Math.sin(rad(a)), { head: "end", width: o.width ?? 1.6, color: o.color, dash: o.dash });
+}
+
+// ---- tether ball on a pole (Barker 2020 Q20) ---------------------------------------------
+
+export function tetherBall(): string {
+  const parts: string[] = [];
+  const px = 180, top = 20, bx = 120, by = 140;
+  parts.push(`<rect x="${px - 4}" y="${top}" width="8" height="190" fill="#cbd5e1" stroke="${C.ink}" stroke-width="0.6"/>`);
+  parts.push(`<ellipse cx="${px}" cy="${by}" rx="${px - bx}" ry="12" fill="none" stroke="${C.ink}" stroke-width="0.9" stroke-dasharray="2 2"/>`);
+  parts.push(`<path d="M ${px + 30} ${by + 9} l -6 -4 l 0 8 z" fill="${C.ink}"/>`);
+  parts.push(line(px, top, bx, by, { width: 1.2 }));
+  parts.push(line(px, top, px, top + 50, { dash: "2 2", width: 0.7 }), txt(px - 14, top + 40, "θ", { size: 11, italic: true, anchor: "end" }));
+  const ang = (Math.atan2(by - top, px - bx) * 180) / Math.PI; // angle of string from horizontal
+  parts.push(arrowAt(bx, by, ang, 56, { color: C.a }), subTxt(bx + 8, by - 40, "F", "T", { size: 11, italic: true }));
+  parts.push(arrowAt(bx, by, -90, 50, { color: C.b }), subTxt(bx - 18, by + 40, "F", "g", { size: 11, italic: true }));
+  parts.push(`<circle cx="${bx}" cy="${by}" r="7" fill="#fde047" stroke="${C.ink}"/>`);
+  return svg(280, 220, parts.join(""));
+}
+
+// ---- ball on a string from the ceiling, conical pendulum (Cherrybrook Tech 2025 Q13) ------
+
+export function conicalPendulum(): string {
+  const parts: string[] = [];
+  const cx = 170, top = 20, r = 110, by = 170;
+  parts.push(`<rect x="${cx - 110}" y="${top - 8}" width="220" height="8" fill="#cbd5e1" stroke="${C.ink}" stroke-width="0.6"/>`);
+  parts.push(line(cx, top, cx, by, { dash: "3 3", width: 0.8 }));
+  parts.push(`<ellipse cx="${cx}" cy="${by}" rx="${r}" ry="16" fill="none" stroke="${C.ink}" stroke-width="0.8" stroke-dasharray="4 3"/>`);
+  parts.push(line(cx, by, cx + r, by, { dash: "3 3", width: 0.8 }), txt(cx + r / 2, by - 4, "r", { size: 11, italic: true, anchor: "middle" }));
+  parts.push(line(cx, top, cx - r, by, { width: 1.2 }));
+  parts.push(`<circle cx="${cx - r}" cy="${by}" r="8" fill="#cbd5e1" stroke="${C.ink}"/>`);
+  parts.push(`<path d="M ${cx} ${top + 30} A 30 30 0 0 1 ${f(cx - 30 * Math.sin(Math.atan(r / (by - top))))} ${f(top + 30 * Math.cos(Math.atan(r / (by - top))))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(txt(cx - 8, top + 46, "θ", { size: 11, italic: true, anchor: "end" }));
+  parts.push(`<path d="M ${cx + 10} ${by + 16} l 8 -4 l 0 8 z" fill="${C.ink}"/>`);
+  return svg(340, 200, parts.join(""));
+}
+
+// ---- mass on a turntable (Hornsby Girls 2021 Q3) -----------------------------------------
+
+export function turntable(): string {
+  const parts: string[] = [];
+  const cx = 160, cy = 40, rx = 130, ry = 18;
+  parts.push(`<path d="M ${cx - rx} ${cy} L ${cx - rx} ${cy + 34} A ${rx} ${ry} 0 0 0 ${cx + rx} ${cy + 34} L ${cx + rx} ${cy}" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#f1f5f9" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(`<rect x="${cx + 26}" y="${cy - 14}" width="22" height="14" fill="${C.a}" stroke="${C.ink}" stroke-width="0.6"/>`, `<ellipse cx="${cx + 37}" cy="${cy - 14}" rx="11" ry="3" fill="#60a5fa" stroke="${C.ink}" stroke-width="0.6"/>`);
+  parts.push(`<ellipse cx="${cx - 20}" cy="${cy - 2}" rx="5" ry="3" fill="${C.a}"/>`);
+  parts.push(line(cx - 20, cy + 6, cx + 37, cy + 6, { head: "both", width: 1, color: C.a }), txt(cx + 8, cy + 20, "15.0 cm", { size: 10.5, anchor: "middle" }));
+  return svg(320, 100, parts.join(""));
+}
+
+// ---- centripetal force and velocity of a satellite: four options (Hornsby Girls 2021 Q4) ---
+
+export function satelliteForceVelocity(): string {
+  const parts: string[] = [];
+  const panel = (ox: number, oy: number, label: string, forceUp: boolean, velTilt: number) => {
+    const cx = ox + 80, cy = oy + 100, R = 50;
+    parts.push(txt(ox + 4, oy + 14, `(${label})`, { size: 11, bold: true }));
+    parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.a}" stroke-width="0.9"/>`, planet(cx, cy, 26));
+    const sx = cx, sy = cy - R;
+    parts.push(arrowAt(sx, sy, forceUp ? 90 : -90, 44), txt(forceUp ? sx + 6 : sx - 6, forceUp ? sy - 30 : sy + 30, "centripetal force", { size: 9, italic: true, anchor: forceUp ? "start" : "end" }));
+    parts.push(arrowAt(sx, sy, -velTilt, 50), txt(sx + 54, sy + (velTilt ? 14 : -4), "instantaneous velocity", { size: 9, italic: true }));
+    parts.push(dot(sx, sy, 5, C.a));
+  };
+  panel(0, 0, "A", true, 0);
+  panel(220, 0, "B", true, 15);
+  panel(0, 170, "C", false, 15);
+  panel(220, 170, "D", false, 0);
+  return svg(460, 340, parts.join(""));
+}
+
+// ---- car on a frictionless banked track with four arrows (Hornsby Girls 2021 Q9) ----------
+
+export function bankedArrows(): string {
+  const parts: string[] = [];
+  const th = 25, x0 = 40, y0 = 70, len = 300;
+  const x1 = x0 + len * Math.cos(rad(th)), y1 = y0 + len * Math.sin(rad(th));
+  parts.push(line(x0, y0, x1, y1, { width: 1.4 }), line(x0 + 80, y1, x1 + 10, y1, { width: 1 }));
+  parts.push(`<path d="M ${f(x1 - 40)} ${f(y1)} A 40 40 0 0 1 ${f(x1 - 40 * Math.cos(rad(th)))} ${f(y1 - 40 * Math.sin(rad(th)))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, txt(x1 - 52, y1 - 4, "θ", { size: 11, italic: true }));
+  // car (box) on the slope
+  const cx = x0 + 110 * Math.cos(rad(th)), cy = y0 + 110 * Math.sin(rad(th));
+  parts.push(`<rect x="${f(cx - 26)}" y="${f(cy - 30)}" width="52" height="30" rx="5" fill="#cbd5e1" stroke="${C.ink}" transform="rotate(${th} ${f(cx)} ${f(cy)})"/>`);
+  const ox = cx + 2, oy = cy - 18;
+  parts.push(arrowAt(ox, oy, 90 - th, 80, { color: C.c }), txt(ox + 80 * Math.sin(rad(th)) + 4, oy - 80 * Math.cos(rad(th)) - 4, "A", { size: 13, bold: true }));
+  parts.push(arrowAt(ox, oy, 0, 80, { color: C.c }), txt(ox + 88, oy + 4, "B", { size: 13, bold: true }));
+  parts.push(arrowAt(ox, oy, -th, 80, { color: C.c }), txt(ox + 80 * Math.cos(rad(th)) + 6, oy + 80 * Math.sin(rad(th)) + 10, "C", { size: 13, bold: true }));
+  parts.push(arrowAt(ox, oy, -90, 90, { color: C.c }), txt(ox - 10, oy + 90, "D", { size: 13, bold: true, anchor: "end" }));
+  return svg(400, 240, parts.join(""));
+}
+
+// ---- force diagrams: a dot with arrows (James Ruse 2021 Q10) ------------------------------
+
+export function forceDotPanels(panels: Array<{ label: string; arrows: Array<"up" | "down" | "left" | "right"> }>): string {
+  const parts: string[] = [];
+  const ang = { up: 90, down: -90, left: 180, right: 0 } as const;
+  panels.forEach((p, i) => {
+    const ox = (i % 2) * 170, oy = Math.floor(i / 2) * 150;
+    const cx = ox + 90, cy = oy + 80;
+    parts.push(txt(ox + 10, oy + 18, `${p.label}.`, { size: 12, bold: true }));
+    for (const a of p.arrows) parts.push(arrowAt(cx, cy, ang[a], 52, { width: 1.4 }));
+    parts.push(dot(cx, cy, 3.5, C.ink));
+  });
+  return svg(340, Math.ceil(panels.length / 2) * 150, parts.join(""));
+}
+
+export function rotorRide(): string {
+  const parts: string[] = [];
+  const cx = 130, top = 40, bot = 150, rx = 90, ry = 20;
+  parts.push(`<path d="M ${cx - rx} ${top} L ${cx - rx} ${bot} A ${rx} ${ry} 0 0 0 ${cx + rx} ${bot} L ${cx + rx} ${top}" fill="#e2e8f0" stroke="${C.ink}"/>`);
+  parts.push(`<ellipse cx="${cx}" cy="${top}" rx="${rx}" ry="${ry}" fill="#f1f5f9" stroke="${C.ink}"/>`);
+  parts.push(`<ellipse cx="${cx}" cy="${bot}" rx="${rx}" ry="${ry}" fill="none" stroke="${C.ink}" stroke-dasharray="3 3" stroke-width="0.8"/>`);
+  parts.push(line(cx, 10, cx, bot + 30, { dash: "4 3", width: 0.8 }));
+  parts.push(`<path d="M ${cx - 20} 16 A 20 6 0 1 0 ${cx + 20} 16" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`, `<path d="M ${cx + 20} 16 l -6 -5 l 0 9 z" fill="${C.ink}"/>`);
+  parts.push(person(cx + rx - 12, bot - 30, 50));
+  parts.push(line(cx, bot, cx - rx, bot, { head: "end", width: 0.9 }), txt(cx - rx / 2, bot - 4, "R", { size: 11, italic: true, anchor: "middle" }));
+  return svg(260, bot + 36, parts.join(""));
+}
+
+// ---- car on a banked road (James Ruse 2021 Q12, Kotara 2020 Q7) -----------------------------
+
+export function bankedRoad(o: { label?: string; rider?: boolean; angle?: number; angleLabel?: string } = {}): string {
+  const parts: string[] = [];
+  const th = o.angle ?? 18, x0 = 20, len = 260, y0 = Math.max(110, 40 + len * Math.sin(rad(th)));
+  const x1 = x0 + len * Math.cos(rad(th)), y1 = y0 - len * Math.sin(rad(th));
+  parts.push(line(x0, y0, x1 + 20, y0, { width: 1.2 }), line(x0, y0, x1, y1, { width: 1.4 }));
+  parts.push(`<path d="M ${x0 + 70} ${y0} A 70 70 0 0 0 ${f(x0 + 70 * Math.cos(rad(th)))} ${f(y0 - 70 * Math.sin(rad(th)))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, txt(x0 + 76, y0 - 6, o.angleLabel ?? "θ", { size: 11, italic: o.angleLabel === undefined }));
+  const cx = x0 + 130 * Math.cos(rad(th)), cy = y0 - 130 * Math.sin(rad(th));
+  if (o.rider) {
+    parts.push(`<g transform="rotate(${-th} ${f(cx)} ${f(cy)})"><circle cx="${f(cx - 14)}" cy="${f(cy - 9)}" r="9" fill="none" stroke="${C.ink}" stroke-width="2"/><circle cx="${f(cx + 14)}" cy="${f(cy - 9)}" r="9" fill="none" stroke="${C.ink}" stroke-width="2"/><line x1="${f(cx - 14)}" y1="${f(cy - 9)}" x2="${f(cx + 14)}" y2="${f(cy - 9)}" stroke="${C.ink}" stroke-width="3"/><circle cx="${f(cx)}" cy="${f(cy - 38)}" r="6" fill="${C.ink}"/><line x1="${f(cx)}" y1="${f(cy - 32)}" x2="${f(cx)}" y2="${f(cy - 14)}" stroke="${C.ink}" stroke-width="3"/></g>`);
+  } else {
+    parts.push(`<rect x="${f(cx - 24)}" y="${f(cy - 28)}" width="48" height="28" rx="6" fill="#cbd5e1" stroke="${C.ink}" transform="rotate(${-th} ${f(cx)} ${f(cy)})"/>`);
+  }
+  if (o.label) parts.push(arrowAt(cx + 40, cy - 50, 0, 50, { width: 1.1 }), txt(cx + 40, cy - 56, o.label, { size: 10 }));
+  return svg(320, y0 + 14, parts.join(""));
+}
+
+// ---- rope pulling on a flagpole (James Ruse 2022 Q8) ---------------------------------------
+
+export function flagpoleRope(): string {
+  const parts: string[] = [];
+  const px = 80, top = 30, g = 230, k = 40; // 5.0 m pole → 200 px
+  const ex = px + 7.2 * k * Math.sin(rad(51)), ey = top + 7.2 * k * Math.cos(rad(51));
+  parts.push(line(20, g, 340, g, { width: 1 }));
+  parts.push(line(px, top, px, g, { width: 4, color: C.guide }));
+  parts.push(line(px, top, ex, ey, { width: 1.2 }));
+  parts.push(line(px, top, px + 60, top, { dash: "2 2", width: 0.7 }), txt(px + 34, top + 12, "39°", { size: 10.5 }), txt(px + 6, top + 34, "51°", { size: 10.5 }));
+  parts.push(txt(px - 8, (top + g) / 2, "5.0 m", { size: 10.5, anchor: "end" }), txt((px + ex) / 2 + 10, (top + ey) / 2 - 6, "7.2 m", { size: 10.5 }));
+  parts.push(person(ex + 10, Math.min(g, ey + 54), 56, { armTo: [ex, ey] }));
+  return svg(360, g + 10, parts.join(""));
+}
+
+// ---- velocity and acceleration at P on a circle (James Ruse 2024 Q4) ------------------------
+
+export function circlePointP(): string {
+  const parts: string[] = [];
+  const cx = 110, cy = 70, R = 55;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`, dot(cx, cy, 3, C.ink));
+  parts.push(`<path d="M ${cx - 4} ${cy - R} l 10 -6 l 0 12 z" fill="${C.ink}" transform="rotate(0)"/>`);
+  parts.push(dot(cx - R, cy, 3.5, C.ink), txt(cx - R - 8, cy + 4, "P", { size: 12, anchor: "end" }));
+  return svg(220, 140, parts.join(""));
+}
+
+export function vectorPairPanels(panels: Array<{ label: string; v: number; a: number; sideBySide?: boolean }>): string {
+  const parts: string[] = [];
+  panels.forEach((p, i) => {
+    const ox = (i % 2) * 170, oy = Math.floor(i / 2) * 100;
+    parts.push(txt(ox + 8, oy + 20, `${p.label}.`, { size: 12, bold: true }));
+    const vx = ox + 60, ax = ox + 100, y = oy + 50;
+    const draw = (x: number, a: number, name: string) => {
+      const L = 54;
+      const sx = x - (L / 2) * Math.cos(rad(a)), sy = y + (L / 2) * Math.sin(rad(a));
+      parts.push(arrowAt(sx, sy, a, L, { width: 1.6 }));
+      parts.push(txt(x - 12, y - 18, name, { size: 12, italic: true, bold: true, anchor: "middle" }));
+    };
+    draw(vx, p.v, "v");
+    draw(ax + (p.a === 0 || p.a === 180 ? 20 : 0), p.a, "a");
+  });
+  return svg(340, Math.ceil(panels.length / 2) * 100, parts.join(""));
+}
+
+// ---- metre ruler balanced on a pivot (Knox 2020 Q13) ---------------------------------------
+
+export function torqueRuler(): string {
+  const parts: string[] = [];
+  const s = 4.2, pv = 250, y = 70; // px per cm, pivot x
+  parts.push(`<rect x="${pv - 49 * s - 20}" y="${y}" width="${49 * s + 20 + 45 * s}" height="6" fill="#f1f5f9" stroke="${C.ink}"/>`, txt(pv + 45 * s + 4, y + 6, "ruler", { size: 10.5 }));
+  parts.push(`<path d="M ${pv} ${y + 6} L ${pv - 18} ${y + 70} L ${pv + 18} ${y + 70} Z" fill="#94a3b8"/>`, txt(pv, y + 86, "pivot", { size: 10.5, anchor: "middle" }));
+  const hang = (x: number, lab: string, box = false) => {
+    parts.push(line(x, y + 6, x, y + 40, { width: 0.9 }));
+    parts.push(box ? `<rect x="${x - 8}" y="${y + 40}" width="16" height="16" fill="#cbd5e1" stroke="${C.ink}"/>` : `<rect x="${x - 7}" y="${y + 40}" width="14" height="22" rx="3" fill="#cbd5e1" stroke="${C.ink}"/>`);
+    parts.push(subTxt(x, y + 80, "m", lab, { size: 10.5, italic: true, anchor: "middle" }));
+  };
+  hang(pv - 49 * s, "1");
+  hang(pv - 30 * s, "2", true);
+  hang(pv + 39 * s, "3");
+  parts.push(txt(pv - 49 * s, y + 96, "= 150 g", { size: 10, anchor: "middle" }), txt(pv - 30 * s + 6, y + 96, "(varied)", { size: 10, anchor: "middle" }), txt(pv + 39 * s, y + 96, "(unknown, constant mass)", { size: 10, anchor: "middle" }));
+  parts.push(line(pv - 49 * s, y - 26, pv, y - 26, { head: "both", width: 0.9 }), txt(pv - 24.5 * s, y - 30, "r₁ = 49.0 cm", { size: 10.5, anchor: "middle" }));
+  parts.push(line(pv - 30 * s, y - 10, pv, y - 10, { head: "both", width: 0.9 }), txt(pv - 15 * s, y - 14, "r₂ = 30.0 cm", { size: 10.5, anchor: "middle" }));
+  parts.push(line(pv, y - 26, pv + 39 * s, y - 26, { head: "both", width: 0.9 }), txt(pv + 19.5 * s, y - 30, "r₃", { size: 10.5, anchor: "middle" }));
+  return svg(pv + 45 * s + 40, y + 104, parts.join(""));
+}
+
+// ---- whirling stopper apparatus (Knox 2022 Q16) ---------------------------------------------
+
+export function whirlingStopper(): string {
+  const parts: string[] = [];
+  const tx = 110, ty = 40;
+  parts.push(`<ellipse cx="${tx}" cy="${ty}" rx="100" ry="14" fill="none" stroke="${C.ink}" stroke-width="0.8" stroke-dasharray="4 3"/>`);
+  parts.push(`<rect x="${tx - 4}" y="${ty}" width="8" height="60" fill="#e2e8f0" stroke="${C.ink}"/>`, txt(tx - 10, ty + 40, "glass tube", { size: 10, anchor: "end" }));
+  parts.push(line(tx, ty, tx + 100, ty, { width: 1 }), `<rect x="${tx + 100}" y="${ty - 7}" width="18" height="14" rx="3" fill="#cbd5e1" stroke="${C.ink}"/>`, txt(tx + 124, ty + 4, "rubber stopper, mass m", { size: 10 }));
+  parts.push(line(tx, ty + 60, tx, ty + 120, { width: 1 }), `<rect x="${tx + 10}" y="${ty + 74}" width="10" height="6" fill="#fff" stroke="${C.ink}"/>`, txt(tx + 24, ty + 80, "position marker", { size: 10 }));
+  for (let k = 0; k < 4; k++) parts.push(`<rect x="${tx - 14}" y="${ty + 120 + k * 6}" width="28" height="5" fill="#94a3b8" stroke="${C.ink}" stroke-width="0.5"/>`);
+  parts.push(txt(tx + 20, ty + 134, "metal washers", { size: 10 }));
+  parts.push(`<path d="M ${tx - 20} ${ty - 14} l -8 -3 l 8 -3 z" fill="${C.ink}"/>`);
+  return svg(360, ty + 150, parts.join(""));
+}
+
+// ---- fan blade with three points (Knox 2023 Q8) ------------------------------------------------
+
+export function fanPoints(): string {
+  const parts: string[] = [];
+  const cx = 110, cy = 120;
+  parts.push(`<rect x="${cx - 10}" y="${cy - 100}" width="20" height="94" rx="6" fill="#fff" stroke="${C.ink}" stroke-width="1.6"/>`);
+  for (const a of [210, 330]) {
+    const x2 = cx + 90 * Math.cos(rad(a)), y2 = cy - 90 * Math.sin(rad(a));
+    parts.push(line(cx, cy, x2, y2, { width: 18, color: "#e2e8f0" }), line(cx, cy, x2, y2, { width: 0.8 }));
+  }
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="12" fill="#fff" stroke="${C.ink}" stroke-width="1.6"/>`, `<circle cx="${cx}" cy="${cy}" r="5" fill="none" stroke="${C.ink}"/>`);
+  [["X", 30], ["Y", 58], ["Z", 86]].forEach(([l, d]) => {
+    parts.push(dot(cx, cy - (d as number), 4.5, C.ink), txt(cx + 14, cy - (d as number) + 4, l as string, { size: 11 }));
+  });
+  return svg(220, 180, parts.join(""));
+}
+
+// ---- four beams with forces and axes (Newington 2019 Q6) ---------------------------------
+
+export function beamTorquePanels(): string {
+  const parts: string[] = [];
+  const k = 70; // px per metre
+  const beam = (x1: number, y1: number, x2: number, y2: number) =>
+    parts.push(line(x1, y1, x2, y2, { width: 7, color: "#fcd9b6" }), line(x1, y1, x2, y2, { width: 0.6, color: C.ink }));
+  const axis = (x: number, y: number, lx: number, ly: number) => parts.push(dot(x, y, 3.5, C.a), txt(lx, ly, "Axis", { size: 10 }), line(x, y, lx + 2, ly - 8, { width: 0.7, color: C.a }));
+  const force = (x: number, y: number, lab: string) => parts.push(line(x, y, x, y + 42, { head: "end", width: 1.4, color: C.b }), txt(x + 4, y + 52, lab, { size: 10.5 }));
+  // (A)
+  {
+    const ox = 30, oy = 90, a = 15;
+    const ex = ox + 2 * k * Math.cos(rad(a)), ey = oy - 2 * k * Math.sin(rad(a));
+    const fx = ox + 1.3 * k * Math.cos(rad(a)), fy = oy - 1.3 * k * Math.sin(rad(a));
+    parts.push(txt(6, 20, "(A)", { size: 11, bold: true }));
+    beam(ox, oy, ex, ey);
+    parts.push(line(ox, oy, ox + 60, oy, { dash: "2 2", width: 0.7 }), txt(ox + 42, oy - 4, "15°", { size: 10 }));
+    parts.push(txt((ox + ex) / 2 - 10, (oy + ey) / 2 - 12, "2.0 m", { size: 10 }), txt((fx + ex) / 2 + 2, (fy + ey) / 2 + 16, "0.7 m", { size: 10 }));
+    force(fx, fy, "2.9 N");
+    axis(ox, oy, ox + 2, oy + 24);
+  }
+  // (B)
+  {
+    const ox = 220, oy = 50;
+    parts.push(txt(196, 20, "(B)", { size: 11, bold: true }));
+    beam(ox, oy, ox + 2 * k, oy);
+    parts.push(line(ox, oy - 14, ox + 2 * k, oy - 14, { head: "both", width: 0.8 }), txt(ox + k, oy - 18, "2.0 m", { size: 10, anchor: "middle" }));
+    parts.push(line(ox, oy + 12, ox + 1.4 * k, oy + 12, { head: "both", width: 0.8 }), txt(ox + 0.7 * k, oy + 24, "1.4 m", { size: 10, anchor: "middle" }));
+    force(ox + 2 * k, oy, "5.3 N");
+    axis(ox + 1.4 * k, oy, ox + 1.4 * k - 6, oy + 40);
+  }
+  // (C)
+  {
+    const ox = 60, oy = 300, a = 30; // beam 30° from the vertical
+    const ex = ox + 2 * k * Math.sin(rad(a)), ey = oy - 2 * k * Math.cos(rad(a));
+    parts.push(txt(6, 150, "(C)", { size: 11, bold: true }));
+    beam(ox, oy, ex, ey);
+    parts.push(txt((ox + ex) / 2 - 30, (oy + ey) / 2, "2.0 m", { size: 10 }), txt(ex - 18, ey + 30, "30°", { size: 10 }));
+    force(ex, ey, "3.4 N");
+    axis(ox, oy, ox + 14, oy - 4);
+  }
+  // (D)
+  {
+    const cx = 290, cy = 230, a = 45; // axis at the middle of a 2.0 m beam
+    const tx = cx - 1 * k * Math.sin(rad(a)), ty = cy - 1 * k * Math.cos(rad(a));
+    const bx = cx + 1 * k * Math.sin(rad(a)), by = cy + 1 * k * Math.cos(rad(a));
+    parts.push(txt(196, 150, "(D)", { size: 11, bold: true }));
+    beam(tx, ty, bx, by);
+    parts.push(txt(tx + 2, ty + 34, "45°", { size: 10 }), txt(cx + 12, cy - 6, "2.0 m (whole beam)", { size: 10 }), txt((cx + bx) / 2 + 8, (cy + by) / 2 + 4, "1.0 m", { size: 10 }));
+    parts.push(line(tx, ty, tx, ty + 42, { head: "end", width: 1.4, color: C.b }), txt(tx - 4, ty + 40, "4.2 N", { size: 10.5, anchor: "end" }));
+    axis(cx, cy, cx - 10, cy + 40);
+  }
+  return svg(400, 320, parts.join(""));
+}
+
+// ---- spanner on a nut (Newington 2023 Q3) -------------------------------------------------
+
+export function spannerNut(): string {
+  const parts: string[] = [];
+  const y = 50;
+  parts.push(`<path d="M 30 ${y - 10} L 200 ${y - 10} Q 214 ${y - 26} 236 ${y - 20} L 226 ${y - 6} L 226 ${y + 6} L 236 ${y + 20} Q 214 ${y + 26} 200 ${y + 10} L 30 ${y + 10} Z" fill="#fff" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(`<path d="M 238 ${y} l 7 -12 l 14 0 l 7 12 l -7 12 l -14 0 z" fill="#fff" stroke="${C.ink}"/>`, `<circle cx="252" cy="${y}" r="5" fill="none" stroke="${C.ink}"/>`, txt(272, y + 4, "nut", { size: 11 }));
+  parts.push(txt(120, y - 30, "spanner", { size: 11, anchor: "middle" }), line(120, y - 26, 120, y - 10, { width: 0.7 }));
+  parts.push(line(36, y, 100, y, { dash: "4 3", width: 0.8 }));
+  const fx = 40;
+  parts.push(arrowAt(fx, y, -70, 70, { color: C.b }), txt(fx + 30, y + 80, "70.0 N", { size: 11 }), txt(fx + 14, y + 22, "70°", { size: 10.5 }));
+  return svg(300, 140, parts.join(""));
+}
+
+// ---- conical pendulum with labels (Newington 2024 Q13) --------------------------------------
+
+export function conicalPendulumMass(): string {
+  const parts: string[] = [];
+  const cx = 150, top = 20, by = 160, r = 70;
+  parts.push(`<rect x="${cx - 110}" y="${top - 8}" width="220" height="8" fill="#94a3b8"/>`);
+  parts.push(line(cx, top, cx, by, { dash: "3 3", width: 0.8 }));
+  parts.push(`<ellipse cx="${cx}" cy="${by}" rx="${r + 30}" ry="14" fill="none" stroke="${C.ink}" stroke-width="0.8" stroke-dasharray="4 3"/>`);
+  parts.push(line(cx, top, cx + r, by, { width: 1.2 }), `<rect x="${cx + r - 7}" y="${by - 7}" width="14" height="14" fill="#64748b"/>`);
+  parts.push(line(cx + 2, by, cx + r - 9, by, { head: "both", width: 0.9 }), txt(cx + r / 2, by - 6, "0.25 m", { size: 10.5, anchor: "middle" }));
+  parts.push(txt(cx + r, by + 30, "0.800 kg mass", { size: 10.5, anchor: "middle" }), txt(cx - 20, by - 16, "T = 2.0 s", { size: 10.5, bold: true, anchor: "end" }));
+  return svg(320, 200, parts.join(""));
+}
+
+// ---- car rounding a corner, compass at the car (Normanhurst Boys 2020 Q3) -------------------
+
+export function carOnCorner(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 110, R = 95;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(line(cx, cy, cx + R * Math.cos(rad(40)), cy - R * Math.sin(rad(40)), { width: 1 }), txt(cx + 48, cy - 50, "r", { size: 11, italic: true }));
+  const x = cx - R, y = cy;
+  parts.push(`<rect x="${x - 5}" y="${y - 10}" width="10" height="20" fill="#fed7aa" stroke="${C.ink}"/>`);
+  parts.push(txt(x, y - 14, "N", { size: 9, anchor: "middle" }), txt(x, y + 22, "S", { size: 9, anchor: "middle" }), txt(x - 9, y + 3, "W", { size: 9, anchor: "end" }), txt(x + 9, y + 3, "E", { size: 9 }));
+  return svg(260, 220, parts.join(""));
+}
+
+// ---- block on a banked track with N and mg (North Sydney Boys 2019 Q14) ---------------------
+
+export function bankBlockForces(): string {
+  const parts: string[] = [];
+  const th = 32, x0 = 40, y0 = 150, len = 220;
+  const x1 = x0 + len * Math.cos(rad(th)), y1 = y0 - len * Math.sin(rad(th));
+  parts.push(line(x0, y0, x1, y1, { width: 1.4 }), line(x0, y0, x1, y0, { width: 1 }), line(x1, y1, x1, y0, { width: 1 }));
+  parts.push(`<path d="M ${x0 + 36} ${y0} A 36 36 0 0 0 ${f(x0 + 36 * Math.cos(rad(th)))} ${f(y0 - 36 * Math.sin(rad(th)))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, txt(x0 + 42, y0 - 6, "θ", { size: 11, italic: true }));
+  const bx = x0 + 110 * Math.cos(rad(th)), by = y0 - 110 * Math.sin(rad(th));
+  parts.push(`<rect x="${f(bx - 16)}" y="${f(by - 26)}" width="32" height="26" fill="#fff" stroke="${C.ink}" transform="rotate(${-th} ${f(bx)} ${f(by)})"/>`);
+  const mx = bx - 13 * Math.sin(rad(th)), my = by - 13 * Math.cos(rad(th));
+  parts.push(txt(mx, my + 4, "m", { size: 12, italic: true, anchor: "middle" }));
+  parts.push(arrowAt(mx, my, 90 + th, 50, { color: C.b }), txt(mx - 40, my - 44, "N", { size: 11, italic: true }));
+  parts.push(arrowAt(mx, my, -90, 50, { color: C.b }), txt(mx + 6, my + 50, "mg", { size: 11, italic: true }));
+  return svg(320, 170, parts.join(""));
+}
+
+// ---- loop-the-loop track (North Sydney Girls 2023 Q17) --------------------------------------
+
+export function loopTrack(): string {
+  const parts: string[] = [];
+  const g = 140, R = 45, cx = 220;
+  parts.push(`<rect x="20" y="${g}" width="320" height="10" fill="#e2e8f0"/>`, line(20, g, 340, g, { width: 1.4 }));
+  parts.push(`<circle cx="${cx}" cy="${g - R}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="2"/>`);
+  parts.push(line(70, g - 110, cx - 5, g, { width: 2 }), dot(70, g - 110, 4, C.ink), txt(76, g - 116, "P", { size: 12, italic: true }));
+  parts.push(line(50, g - 110, 50, g, { head: "both", width: 1 }), txt(44, g - 55, "h", { size: 12, italic: true, anchor: "end" }));
+  parts.push(line(cx, g - R, cx + R, g - R, { head: "end", width: 1 }), txt(cx + R / 2, g - R - 4, "r", { size: 11, italic: true, anchor: "middle" }));
+  return svg(350, g + 14, parts.join(""));
+}
+
+// ---- mass whirled in a vertical circle (North Sydney Girls 2024 Q7) --------------------------
+
+export function verticalCircleMass(): string {
+  const parts: string[] = [];
+  const cx = 110, cy = 100, R = 60;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(line(cx, cy, cx, cy - R, { width: 1 }), txt(cx + 4, cy - 26, "string", { size: 10 }));
+  parts.push(line(cx, cy, cx - R * Math.cos(rad(40)), cy + R * Math.sin(rad(40)), { head: "end", width: 1 }), txt(cx - 14, cy + 50, "0.90 m", { size: 10, anchor: "middle" }));
+  parts.push(dot(cx, cy - R, 4, C.ink), arrowAt(cx - 10, cy - R - 14, 0, 26, { width: 1 }), txt(cx + 22, cy - R - 10, "0.20 kg mass", { size: 10 }));
+  return svg(240, 180, parts.join(""));
+}
+
+// ---- velodrome: plan of the bend and front view of the bank (North Sydney Girls 2024 Q8) ---
+
+export function velodrome(): string {
+  const parts: string[] = [];
+  // Diagram A: plan of a semicircular bend
+  const cx = 70, cy = 80;
+  for (const r of [40, 55]) parts.push(`<path d="M 20 ${cy - r} L ${cx} ${cy - r} A ${r} ${r} 0 0 1 ${cx} ${cy + r} L 20 ${cy + r}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(line(cx, cy, cx + 48, cy, { dash: "3 3", width: 0.8, head: "end" }), txt(cx + 14, cy - 4, "25 m", { size: 10 }));
+  parts.push(dot(40, cy - 48, 4, C.ink), arrowAt(46, cy - 48, 0, 20, { width: 1 }));
+  parts.push(txt(70, 160, "Diagram A", { size: 10.5, bold: true, anchor: "middle" }));
+  // Diagram B: front view of the bank
+  const x0 = 170, y0 = 130, th = 26;
+  parts.push(line(x0, y0, 330, y0, { width: 1 }), line(x0, y0, 330, y0 - 160 * Math.tan(rad(th)), { width: 1.2 }), line(330, y0, 330, y0 - 160 * Math.tan(rad(th)), { width: 1 }));
+  parts.push(txt(x0 + 34, y0 - 4, "θ", { size: 11, italic: true }), txt(330, y0 + 14, "angle of banked bend: θ", { size: 9.5, anchor: "end" }));
+  parts.push(person(280, y0 - 120 * Math.tan(rad(th)), 30));
+  parts.push(txt(250, 160, "Diagram B", { size: 10.5, bold: true, anchor: "middle" }));
+  return svg(340, 170, parts.join(""));
+}
+
+// ---- stopper, tube and hanging mass (Pymble 2022 Q10, Sydney Boys 2019 Q4) ------------------
+
+export function tubeApparatus(o: { tube: string; mass: string; stopper: string; showR?: boolean; rLabel?: string }): string {
+  const parts: string[] = [];
+  const tx = 70, ty = 40;
+  parts.push(`<rect x="${tx - 8}" y="${ty}" width="16" height="70" rx="3" fill="#f1f5f9" stroke="${C.ink}"/>`, txt(tx + 14, ty + 40, o.tube, { size: 10.5 }));
+  parts.push(line(tx, ty, tx + 150, ty, { width: 1 }), `<rect x="${tx + 150}" y="${ty - 10}" width="14" height="20" fill="#cbd5e1" stroke="${C.ink}"/>`, txt(tx + 168, ty + 4, o.stopper, { size: 10.5 }));
+  parts.push(line(tx, ty + 70, tx, ty + 110, { width: 1 }), `<rect x="${tx - 10}" y="${ty + 110}" width="20" height="26" rx="3" fill="#94a3b8" stroke="${C.ink}"/>`, txt(tx + 16, ty + 128, o.mass, { size: 10.5 }));
+  if (o.showR) parts.push(line(tx, ty - 14, tx + 150, ty - 14, { head: "both", width: 0.8 }), txt(tx + 75, ty - 18, o.rLabel ?? "r", { size: 11, italic: !o.rLabel, anchor: "middle" }));
+  else parts.push(txt(tx + 75, ty - 6, "string", { size: 10.5, anchor: "middle" }));
+  return svg(320, ty + 146, parts.join(""));
+}
+
+export function curveSketch(): string {
+  const parts: string[] = [];
+  parts.push(line(30, 130, 30, 10, { head: "end", width: 1.2 }), line(30, 130, 180, 130, { head: "end", width: 1.2 }));
+  parts.push(`<path d="M 30 130 Q 120 125 150 20" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+  return svg(200, 140, parts.join(""));
+}
+
+// ---- train on a curved track (Shore 2021 Q3) ------------------------------------------------
+
+export function trainCurve(): string {
+  const parts: string[] = [];
+  for (const r of [150, 165]) parts.push(`<path d="M 20 ${30} A ${r} ${r} 0 0 1 ${20 + r * 0.8} ${30 + r * 0.6}" fill="none" stroke="${C.ink}" stroke-width="1" transform="translate(${(165 - r) * 0.3} ${(r - 150) * 0.3})"/>`);
+  const px = 100, py = 60;
+  parts.push(`<rect x="${px - 30}" y="${py - 7}" width="60" height="14" fill="#cbd5e1" transform="rotate(40 ${px} ${py})"/>`, dot(px, py, 5, C.ink), txt(px + 10, py - 8, "P", { size: 12 }));
+  parts.push(arrowAt(px, py, -40, 34, { width: 1.2 }));
+  return svg(220, 130, parts.join(""));
+}
+
+// ---- rollercoaster dip (Sydney Boys 2019 Q6) -------------------------------------------------
+
+export function coasterDip(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 80, R = 70;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.b}" stroke-width="0.8" stroke-dasharray="3 3"/>`);
+  parts.push(`<path d="M ${cx - 120} ${cy - 10} Q ${cx - 70} ${cy + R + 6} ${cx} ${cy + R} Q ${cx + 70} ${cy + R + 6} ${cx + 120} ${cy - 10}" fill="none" stroke="${C.ink}" stroke-width="4"/>`);
+  parts.push(`<rect x="${cx - 22}" y="${cy + R - 18}" width="44" height="14" rx="5" fill="${C.ink}"/>`, `<circle cx="${cx - 8}" cy="${cy + R - 22}" r="4" fill="#64748b"/>`, `<circle cx="${cx + 4}" cy="${cy + R - 22}" r="4" fill="#64748b"/>`);
+  return svg(300, cy + R + 16, parts.join(""));
+}
+
+// ---- ball swung around the body on a string (Sydney Boys 2022 Q5) ----------------------------
+
+export function swingAroundBody(): string {
+  const parts: string[] = [];
+  const hx = 100, hy = 40, L = 150;
+  const bx = hx + L * Math.cos(rad(30)), by = hy + L * Math.sin(rad(30));
+  parts.push(`<ellipse cx="${hx}" cy="${by}" rx="${bx - hx}" ry="12" fill="none" stroke="${C.ink}" stroke-width="0.8" stroke-dasharray="3 3"/>`);
+  parts.push(`<circle cx="${hx}" cy="${hy + 24}" r="12" fill="#64748b"/>`, `<rect x="${hx - 16}" y="${hy + 38}" width="32" height="70" rx="8" fill="#64748b"/>`, `<rect x="${hx - 14}" y="${hy + 104}" width="28" height="60" fill="#64748b"/>`);
+  parts.push(line(hx - 12, hy + 44, hx, hy, { width: 6, color: "#64748b" }));
+  parts.push(line(hx, hy, bx, by, { width: 1.2 }), line(hx, hy, hx + 60, hy, { dash: "2 2", width: 0.8 }), txt(hx + 36, hy + 14, "30°", { size: 10.5 }));
+  parts.push(`<circle cx="${bx}" cy="${by}" r="5" fill="#fff" stroke="${C.ink}"/>`, txt(bx + 8, by + 4, "20 g", { size: 10.5 }));
+  parts.push(line(hx + 10, hy - 14, bx + 10, by - 14, { head: "both", width: 0.8 }), txt((hx + bx) / 2 + 18, (hy + by) / 2 - 18, "1.10 m", { size: 10.5 }));
+  return svg(280, 210, parts.join(""));
+}
+
+// ---- vertical circle with the ball at top and bottom (Abbotsleigh 2023 Q21) -----------------
+
+export function verticalCircleTopBottom(): string {
+  const parts: string[] = [];
+  const cx = 110, cy = 100, R = 70;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.guide}" stroke-width="1" stroke-dasharray="2 2"/>`);
+  parts.push(line(cx, cy - R, cx, cy + R, { width: 1.2 }), dot(cx, cy, 3.5, C.ink));
+  parts.push(`<circle cx="${cx}" cy="${cy - R}" r="8" fill="#7c3aed" stroke="${C.ink}"/>`, `<circle cx="${cx}" cy="${cy + R}" r="8" fill="#22d3ee" stroke="${C.ink}"/>`);
+  parts.push(`<path d="M ${cx + 14} ${cy - R - 6} Q ${cx + 44} ${cy - R - 8} ${cx + 58} ${cy - R + 6}" fill="none" stroke="${C.ink}" stroke-width="1.2" marker-end="url(#ah)"/>`);
+  parts.push(`<path d="M ${cx - 14} ${cy + R + 6} Q ${cx - 44} ${cy + R + 8} ${cx - 58} ${cy + R - 6}" fill="none" stroke="${C.ink}" stroke-width="1.2" marker-end="url(#ah)"/>`);
+  return svg(220, 200, parts.join(""));
+}
+
+// ---- a slope (banked track cross-section) with a car or block -------------------------------
+
+export function bankSlope(o: { angleLabel?: string; trackLabel?: string; mass?: boolean; width?: number; title?: string } = {}): string {
+  const parts: string[] = [];
+  if (o.title) parts.push(txt(10, 16, o.title, { size: 11 }));
+  const th = 28, x0 = 30, y0 = 140, W = o.width ?? 240;
+  const x1 = x0 + W, y1 = y0 - W * Math.tan(rad(th));
+  parts.push(`<path d="M ${x0} ${y0} L ${x1} ${y0} L ${x1} ${f(y1)} Z" fill="#f8fafc" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(`<path d="M ${x0 + 44} ${y0} A 44 44 0 0 0 ${f(x0 + 44 * Math.cos(rad(th)))} ${f(y0 - 44 * Math.sin(rad(th)))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(txt(x0 + 50, y0 - 8, o.angleLabel ?? "θ", { size: 11, italic: !o.angleLabel }));
+  const bx = x0 + 0.5 * W, by = y0 - 0.5 * W * Math.tan(rad(th));
+  parts.push(`<rect x="${f(bx - 22)}" y="${f(by - 30)}" width="44" height="30" rx="${o.mass ? 0 : 6}" fill="${o.mass ? "#fff" : "#cbd5e1"}" stroke="${C.ink}" transform="rotate(${-th} ${f(bx)} ${f(by)})"/>`);
+  if (o.mass) parts.push(txt(bx + 7 * Math.sin(rad(th)), by - 14 * Math.cos(rad(th)) + 4, "m", { size: 12, italic: true, anchor: "middle" }));
+  if (o.trackLabel) parts.push(txt(x1 - 70, y1 + 2, o.trackLabel, { size: 10.5, anchor: "end" }));
+  return svg(x1 + 20, y0 + 10, parts.join(""));
+}
+
+// ---- flat and banked bends, rear views (Baulkham Hills 2023 Q23) -----------------------------
+
+export function flatAndBankedCar(): string {
+  const parts: string[] = [];
+  const car = (x: number, y: number, rot: number) =>
+    parts.push(`<g transform="rotate(${rot} ${x} ${y})"><rect x="${x - 34}" y="${y - 36}" width="68" height="30" rx="8" fill="#e2e8f0" stroke="${C.ink}"/><rect x="${x - 26}" y="${y - 52}" width="52" height="18" rx="6" fill="#f8fafc" stroke="${C.ink}"/><rect x="${x - 32}" y="${y - 8}" width="12" height="8" fill="${C.ink}"/><rect x="${x + 20}" y="${y - 8}" width="12" height="8" fill="${C.ink}"/></g>`);
+  // flat
+  parts.push(line(20, 150, 170, 150, { width: 1.4 }));
+  car(95, 150, 0);
+  parts.push(`<path d="M 100 80 Q 100 50 70 44" fill="none" stroke="${C.ink}" stroke-width="1.2" marker-end="url(#ah)"/>`, txt(40, 40, "Road", { size: 10.5 }));
+  // banked (low side on the left, towards the centre of the curve)
+  const th = 25, x0 = 200, y0 = 150;
+  parts.push(line(x0, y0, 370, y0, { width: 1 }), line(x0, y0, 370, y0 - 170 * Math.tan(rad(th)), { width: 1.4 }));
+  parts.push(`<path d="M ${x0 + 40} ${y0} A 40 40 0 0 0 ${f(x0 + 40 * Math.cos(rad(th)))} ${f(y0 - 40 * Math.sin(rad(th)))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, txt(x0 + 46, y0 - 4, "θ", { size: 11, italic: true }));
+  car(290, y0 - 90 * Math.tan(rad(th)), -th);
+  parts.push(`<path d="M 345 60 Q 345 30 315 24" fill="none" stroke="${C.ink}" stroke-width="1.2" marker-end="url(#ah)"/>`, txt(295, 18, "Road", { size: 10.5 }));
+  return svg(380, 162, parts.join(""));
+}
+
+// ---- carousel with a hanging mass (James Ruse 2022 Q35) --------------------------------------
+
+export function carouselMass(): string {
+  const parts: string[] = [];
+  const cx = 130, top = 40, bot = 180, R = 110;
+  parts.push(`<ellipse cx="${cx}" cy="${top}" rx="${R + 10}" ry="16" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, `<ellipse cx="${cx}" cy="${bot}" rx="${R + 10}" ry="16" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(`<rect x="${cx - 26}" y="${top}" width="52" height="${bot - top}" fill="#94a3b8"/>`, `<ellipse cx="${cx}" cy="${top}" rx="30" ry="5" fill="#475569"/>`, `<ellipse cx="${cx}" cy="${bot}" rx="30" ry="5" fill="#475569"/>`);
+  parts.push(line(cx + R, top, cx + R, bot, { width: 3, color: "#475569" }));
+  parts.push(line(cx, top - 26, cx + R, top - 26, { head: "both", width: 0.9 }), txt(cx + R / 2, top - 30, "R", { size: 11, italic: true, anchor: "middle" }));
+  parts.push(line(cx + R, top + 10, cx + R + 22, top + 120, { width: 1 }), dot(cx + R + 22, top + 120, 4, C.ink), txt(cx + R + 28, top + 128, "m", { size: 11, italic: true }));
+  parts.push(line(cx + R, top + 10, cx + R, top + 60, { dash: "2 2", width: 0.7 }), txt(cx + R + 14, top + 40, "θ", { size: 11, italic: true }));
+  return svg(290, bot + 22, parts.join(""));
+}
+
+// ---- object on a rope: horizontal and vertical circles (Knox 2020 Q26) -----------------------
+
+export function horizontalVerticalCircles(): string {
+  const parts: string[] = [];
+  parts.push(txt(110, 40, "Horizontal", { size: 11, anchor: "middle" }));
+  parts.push(`<ellipse cx="110" cy="100" rx="90" ry="7" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`, dot(20, 100, 4.5, C.ink), dot(200, 100, 4.5, C.ink));
+  parts.push(txt(16, 90, "M", { size: 11, anchor: "end" }), txt(204, 90, "N", { size: 11 }));
+  parts.push(txt(345, 110, "Vertical", { size: 11 }));
+  parts.push(`<ellipse cx="300" cy="110" rx="32" ry="90" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`, dot(300, 20, 4.5, C.ink), dot(300, 200, 4.5, C.ink));
+  parts.push(txt(290, 16, "X", { size: 11, anchor: "end" }), txt(310, 214, "Y", { size: 11 }));
+  return svg(400, 222, parts.join(""));
+}
+
+// ---- flat curve (plan view) and banked curve (cross-section) (Knox 2023 CT1 Q4) -------------
+
+export function flatAndBankedCurve(): string {
+  const parts: string[] = [];
+  parts.push(txt(120, 16, "FLAT NON-BANKED CURVE", { size: 10, anchor: "middle" }));
+  parts.push(`<path d="M 40 170 Q 50 60 160 30" fill="none" stroke="${C.ink}" stroke-width="2"/>`);
+  parts.push(`<rect x="52" y="86" width="14" height="30" fill="#cbd5e1" stroke="${C.ink}" transform="rotate(25 59 101)"/>`);
+  parts.push(txt(120, 200, "BANKED CURVE", { size: 10, anchor: "middle" }));
+  const x0 = 30, y0 = 320, W = 240, th = 12;
+  parts.push(`<path d="M ${x0} ${y0} L ${x0 + W} ${y0} L ${x0} ${f(y0 - W * Math.tan(rad(th)) - 20)} Z" fill="#cbd5e1" stroke="${C.ink}"/>`);
+  const bx = x0 + 120, by = y0 - (W - 120) * ((W * Math.tan(rad(th)) + 20) / W);
+  const slope = (Math.atan((W * Math.tan(rad(th)) + 20) / W) * 180) / Math.PI;
+  parts.push(`<rect x="${f(bx - 24)}" y="${f(by - 32)}" width="48" height="32" fill="#e2e8f0" stroke="${C.ink}" transform="rotate(${f(slope)} ${f(bx)} ${f(by)})"/>`);
+  return svg(300, 330, parts.join(""));
+}
+
+// ---- conical pendulum with labelled angle and radius (Newington 2019 Q22) -------------------
+
+export function pendulumCone(o: { angle: string; radius: string; stringLabel?: string; ballLabel?: string; ceilingLabel?: string }): string {
+  const parts: string[] = [];
+  const cx = 160, top = 20, by = 150, r = 80;
+  parts.push(`<rect x="${cx - 18}" y="${top - 6}" width="36" height="6" fill="${C.ink}"/>`);
+  parts.push(line(cx, top, cx, by, { dash: "3 3", width: 0.8 }), txt(cx + 6, 80, "vertical", { size: 10 }));
+  parts.push(`<ellipse cx="${cx}" cy="${by}" rx="${r}" ry="8" fill="none" stroke="${C.ink}" stroke-width="0.8" stroke-dasharray="4 3"/>`);
+  parts.push(line(cx, top, cx - r, by, { width: 1.2 }), dot(cx - r, by, 5, C.ink));
+  parts.push(`<path d="M ${cx} ${top + 26} A 26 26 0 0 1 ${f(cx - 26 * Math.sin(Math.atan(r / (by - top))))} ${f(top + 26 * Math.cos(Math.atan(r / (by - top))))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, txt(cx + 6, top + 34, o.angle, { size: 10 }));
+  parts.push(line(cx, by, cx + r, by, { dash: "3 3", width: 0.8 }), txt(cx + r / 2, by + 20, o.radius, { size: 10.5, anchor: "middle" }));
+  if (o.ceilingLabel) parts.push(txt(cx + 24, top - 10, o.ceilingLabel, { size: 10 }));
+  if (o.stringLabel) parts.push(txt(cx - r / 2 - 14, (top + by) / 2, o.stringLabel, { size: 10, anchor: "end" }));
+  if (o.ballLabel) parts.push(txt(cx - r - 10, by + 4, o.ballLabel, { size: 10, anchor: "end" }));
+  return svg(300, by + 28, parts.join(""));
+}
+
+// ---- marble track ending in a vertical loop (North Sydney Boys 2022 Q20) --------------------
+
+export function marbleLoop(): string {
+  const parts: string[] = [];
+  const g = 190, k = 150; // px per metre
+  const ax = 70, ay = g - 0.80 * k, bx = 300, R = (0.35 * k) / 2;
+  parts.push(line(20, g, 400, g, { width: 1.4 }), txt(150, g + 16, "ground", { size: 10.5, anchor: "middle" }));
+  parts.push(line(ax, ay, bx, g, { width: 1.3 }));
+  parts.push(txt(ax - 4, ay - 8, "A", { size: 11, bold: true, anchor: "middle" }));
+  parts.push(line(ax, ay, ax, g, { head: "both", width: 0.9 }), txt(ax - 6, (ay + g) / 2, "0.80 m", { size: 10.5, anchor: "end" }));
+  parts.push(dot(ax + 46, ay + 0.8 * 46 / 2.9 + 10, 4.5, C.ink), txt(ax + 56, ay + 24, "marble", { size: 10.5 }));
+  parts.push(`<circle cx="${bx}" cy="${g - R}" r="${f(R)}" fill="none" stroke="${C.ink}" stroke-width="1.3"/>`);
+  parts.push(`<circle cx="${bx}" cy="${g - 2 * R + 5}" r="5" fill="none" stroke="${C.ink}"/>`);
+  parts.push(txt(bx - 6, g - 2 * R - 6, "C", { size: 11, bold: true, anchor: "end" }), txt(bx, g + 16, "B", { size: 11, bold: true, anchor: "middle" }));
+  parts.push(line(bx + R + 16, g - 2 * R, bx + R + 16, g, { head: "both", width: 0.9 }), txt(bx + R + 22, g - R, "0.35 m", { size: 10.5 }));
+  return svg(410, g + 24, parts.join(""));
+}
+
+// ---- plane banking, lift and weight (North Sydney Girls 2022 Q27) ---------------------------
+
+export function planeBank(): string {
+  const parts: string[] = [];
+  const cx = 180, cy = 130, th = 26;
+  parts.push(line(cx, 20, cx, cy + 10, { dash: "4 3", width: 0.8 }));
+  // wings, tilted
+  parts.push(`<g transform="rotate(${-th} ${cx} ${cy})"><line x1="${cx - 95}" y1="${cy}" x2="${cx + 95}" y2="${cy}" stroke="${C.ink}" stroke-width="2"/><ellipse cx="${cx}" cy="${cy}" rx="26" ry="9" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1"/><line x1="${cx - 70}" y1="${cy}" x2="${cx - 56}" y2="${cy - 14}" stroke="${C.ink}" stroke-width="1.4"/></g>`);
+  parts.push(arrowAt(cx, cy, 90 - th, 92, { color: C.b, width: 1.8 }));
+  parts.push(subTxt(cx + 92 * Math.sin(rad(th)) + 8, cy - 92 * Math.cos(rad(th)) + 10, "F", "L", { size: 12, italic: true }));
+  parts.push(arrowAt(cx, cy, -90, 92, { color: C.b, width: 1.8 }));
+  parts.push(subTxt(cx + 8, cy + 100, "F", "g", { size: 12, italic: true }));
+  parts.push(`<path d="M ${cx} ${cy - 46} A 46 46 0 0 1 ${f(cx + 46 * Math.sin(rad(th)))} ${f(cy - 46 * Math.cos(rad(th)))}" fill="none" stroke="${C.ink}" stroke-width="0.9"/>`, txt(cx + 8, cy - 48, "θ", { size: 11, italic: true }));
+  parts.push(dot(cx, cy, 4, C.ink));
+  return svg(360, 250, parts.join(""));
+}
+
+// ---- coin on a rotating disc (North Sydney Girls 2023 Q27) ----------------------------------
+
+export function rotatingDisc(): string {
+  const parts: string[] = [];
+  const cx = 160, cy = 130, R = 85;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+  parts.push(`<path d="M ${cx - 50} ${cy - R - 14} A 60 60 0 0 1 ${cx + 56} ${cy - R - 10}" fill="none" stroke="${C.ink}" stroke-width="1" marker-end="url(#ah)"/>`);
+  parts.push(dot(cx, cy, 3, C.ink), txt(cx - 8, cy + 4, "O", { size: 11, italic: true, anchor: "end" }));
+  parts.push(line(cx + 4, cy - 8, cx + 62, cy - 8, { head: "both", width: 0.9 }), txt(cx + 34, cy - 14, "1.35 m", { size: 10.5, anchor: "middle" }));
+  parts.push(`<circle cx="${cx + 62}" cy="${cy}" r="7" fill="#94a3b8" stroke="${C.ink}"/>`);
+  parts.push(txt(cx + R + 18, cy + 34, "Coin A", { size: 10.5 }), line(cx + R + 16, cy + 30, cx + 70, cy + 6, { width: 0.7 }));
+  parts.push(txt(30, cy + 20, "Rotating", { size: 10.5 }), txt(30, cy + 33, "disc", { size: 10.5 }), line(70, cy + 16, cx - R + 12, cy + 34, { width: 0.7 }));
+  return svg(360, 250, parts.join(""));
+}
+
+// ---- Ferris wheel with capsules at A (side) and B (top) (North Sydney Girls 2024 Q23) -------
+
+export function ferrisWheel(): string {
+  const parts: string[] = [];
+  const cx = 150, cy = 130, R = 95;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
+  for (let a = 0; a < 360; a += 15) {
+    const x = cx + R * Math.cos(rad(a)), y = cy - R * Math.sin(rad(a));
+    parts.push(line(cx, cy, x, y, { width: 0.4, color: C.guide }), dot(x, y, 3.5, C.ink));
+  }
+  parts.push(dot(cx, cy, 7, C.ink), txt(cx - R - 10, cy - 6, "Hub", { size: 10, anchor: "end" }), line(cx - R - 8, cy - 8, cx - 8, cy - 2, { width: 0.6 }));
+  parts.push(`<rect x="${cx - 40}" y="${cy + R + 4}" width="80" height="8" fill="#94a3b8"/>`, txt(cx + 46, cy + R + 12, "Ground", { size: 10 }));
+  parts.push(dot(cx + R, cy, 5, C.b), txt(cx + R + 8, cy + 4, "A", { size: 12, bold: true }));
+  parts.push(dot(cx, cy - R, 5, C.b), txt(cx - 4, cy - R - 8, "B", { size: 12, bold: true, anchor: "end" }));
+  parts.push(line(cx + 6, cy - R - 6, cx + 44, cy - R - 2, { head: "end", width: 1.1 }), txt(cx + 48, cy - R - 2, "0.26 m s⁻¹", { size: 10 }));
+  parts.push(txt(20, 20, "Not to scale", { size: 10 }));
+  return svg(330, cy + R + 26, parts.join(""));
+}
+
+// ---- wheel nut and spanner with a force at the end (Shore 2020 Q22) --------------------------
+
+export function wheelSpanner(): string {
+  const parts: string[] = [];
+  const nx = 220, ny = 90;
+  parts.push(`<circle cx="${nx}" cy="${ny}" r="62" fill="none" stroke="${C.guide}" stroke-width="10"/>`);
+  parts.push(`<circle cx="${nx}" cy="${ny}" r="30" fill="#e2e8f0" stroke="${C.ink}"/>`);
+  for (let a = 0; a < 360; a += 72) parts.push(`<circle cx="${f(nx + 18 * Math.cos(rad(a)))}" cy="${f(ny - 18 * Math.sin(rad(a)))}" r="3.5" fill="#fff" stroke="${C.ink}" stroke-width="0.7"/>`);
+  parts.push(`<path d="M ${nx} ${ny} l 8 -12 l 14 0 l 8 12 l -8 12 l -14 0 z" fill="#cbd5e1" stroke="${C.ink}" stroke-width="0.8" transform="translate(-15 0)"/>`);
+  parts.push(`<rect x="${nx - 130}" y="${ny - 5}" width="118" height="10" rx="3" fill="#fff" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(arrowAt(nx - 124, ny - 50, -90, 42, { width: 2.4 }), txt(nx - 132, ny - 46, "F", { size: 13, bold: true, anchor: "end" }));
+  parts.push(line(nx - 126, ny + 16, nx - 20, ny + 16, { head: "both", width: 0.9 }), txt(nx - 72, ny + 30, "20 cm", { size: 10.5, anchor: "middle" }));
+  return svg(300, 180, parts.join(""));
+}
+
+// ---- coin on a turntable: side and overhead views (Sydney Girls 2020 Q30) --------------------
+
+export function coinTurntable(): string {
+  const parts: string[] = [];
+  // side view
+  parts.push(line(20, 110, 180, 110, { width: 3 }));
+  parts.push(`<rect x="146" y="104" width="14" height="6" rx="2" fill="#f59e0b" stroke="${C.ink}" stroke-width="0.6"/>`);
+  parts.push(line(100, 40, 100, 130, { dash: "4 3", width: 0.8 }));
+  parts.push(txt(100, 150, "side view", { size: 10.5, anchor: "middle" }));
+  // overhead view
+  const cx = 300, cy = 95, R = 70;
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#ede9fe" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(line(cx - 9, cy, cx + 9, cy, { width: 1 }), line(cx, cy - 9, cx, cy + 9, { width: 1 }));
+  parts.push(`<circle cx="${cx + 48}" cy="${cy}" r="8" fill="#f59e0b" stroke="${C.ink}" stroke-width="0.6"/>`);
+  parts.push(line(cx + 4, cy - 12, cx + 44, cy - 12, { head: "both", width: 0.9 }), txt(cx + 24, cy - 18, "15 cm", { size: 10, anchor: "middle" }));
+  parts.push(`<path d="M ${cx + 40} ${cy - R - 12} A 56 56 0 0 0 ${cx - 40} ${cy - R - 12}" fill="none" stroke="${C.ink}" stroke-width="1" marker-end="url(#ah)"/>`);
+  parts.push(txt(cx, 150, "overhead view", { size: 10.5, anchor: "middle" }));
+  parts.push(txt(100, 20, "a coin on a turntable", { size: 10.5, anchor: "middle" }));
+  return svg(390, 160, parts.join(""));
+}
+
+// ---- two spheres on strings from the same point (Sydney Grammar 2022 Q34) -------------------
+
+export function twoSpheresStrings(): string {
+  const parts: string[] = [];
+  const cx = 150, top = 20, by = 150, s = 230; // px per metre
+  parts.push(line(cx, top, cx, by, { width: 2 }), txt(cx - 4, top - 6, "X", { size: 11, anchor: "end" }));
+  parts.push(`<ellipse cx="${cx}" cy="${by}" rx="${0.2 * s}" ry="14" fill="none" stroke="${C.guide}" stroke-width="0.9" stroke-dasharray="4 3"/>`);
+  parts.push(`<ellipse cx="${cx}" cy="${by}" rx="${0.3 * s}" ry="22" fill="none" stroke="${C.guide}" stroke-width="0.9" stroke-dasharray="4 3"/>`);
+  for (const [r, lab] of [[0.2, "A"], [0.3, "B"]] as Array<[number, string]>) {
+    const x = cx + r * s;
+    parts.push(line(cx, top, x, by, { width: 1.2, color: C.a }), dot(x, by, 5, C.a), txt(x, by + 16, lab, { size: 11, anchor: "middle" }));
+  }
+  parts.push(line(cx - 0.2 * s, by - 4, cx - 2, by - 4, { head: "both", width: 0.9, color: C.b }), txt(cx - 0.1 * s, by - 10, "0.20 m", { size: 10, anchor: "middle", color: C.b }));
+  parts.push(line(cx - 0.3 * s, by + 36, cx - 2, by + 36, { head: "both", width: 0.9, color: C.b }), txt(cx - 0.15 * s, by + 48, "0.30 m", { size: 10, anchor: "middle", color: C.b }));
+  return svg(330, by + 58, parts.join(""));
+}
+
+// ---- car on a curved (bowl) banked track (Sydney Grammar 2022 Q35) ---------------------------
+
+export function bowlTrack(): string {
+  const parts: string[] = [];
+  const g = 170, x0 = 60, k = 1.6;
+  parts.push(`<path d="M ${x0} ${g} Q ${x0 + 130} ${g} ${x0 + 230} ${g - 120}" fill="none" stroke="${C.ink}" stroke-width="1.6"/>`);
+  parts.push(`<path d="M ${x0} ${g} Q ${x0 + 60} ${g - 120} ${x0 + 160} ${g - 150}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 3"/>`);
+  parts.push(line(x0 + 230, g - 120, x0 + 230, g, { width: 1 }));
+  const bx = x0 + 128, by = g - 36, th = 30;
+  parts.push(`<rect x="${f(bx - 24)}" y="${f(by - 20)}" width="48" height="20" rx="5" fill="#cbd5e1" stroke="${C.ink}" transform="rotate(${-th} ${f(bx)} ${f(by)})"/>`, txt(bx - 6, by - 26, "m", { size: 11, italic: true }));
+  parts.push(`<path d="M ${x0 + 50} ${g} A 50 50 0 0 0 ${f(x0 + 50 * Math.cos(rad(th)))} ${f(g - 50 * Math.sin(rad(th)))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, txt(x0 + 44, g - 6, "θ", { size: 11, italic: true, anchor: "end" }));
+  parts.push(line(bx + 36, by - 6, bx + 36, g, { head: "both", width: 0.9 }), txt(bx + 42, by + 14, "h", { size: 11, italic: true }));
+  parts.push(line(20, g + 16, x0 + 230, g + 16, { head: "both", width: 0.9, dash: "3 2" }), txt((20 + x0 + 230) / 2, g + 30, "r", { size: 11, italic: true, anchor: "middle" }));
+  void k;
+  return svg(x0 + 260, g + 38, parts.join(""));
+}
+
+// ---- torque: a rod with a force at its end (Sydney Grammar 2024 Q21) ------------------------
+
+export function torqueVector(): string {
+  const parts: string[] = [];
+  const ox = 40, oy = 140, a = 26, L = 170;
+  const ex = ox + L * Math.cos(rad(a)), ey = oy - L * Math.sin(rad(a));
+  parts.push(line(ox, oy, ex, ey, { width: 5, color: "#334155" }));
+  parts.push(`<circle cx="${ox}" cy="${oy}" r="6" fill="#cbd5e1" stroke="${C.ink}"/>`, txt(ox - 10, oy + 4, "O", { size: 11, italic: true, anchor: "end" }));
+  parts.push(line(ex, ey, ex + 54 * Math.cos(rad(a)), ey - 54 * Math.sin(rad(a)), { dash: "4 3", width: 0.8 }));
+  parts.push(arrowAt(ex, ey, a - 40, 80, { width: 1.8 }));
+  parts.push(`<path d="M ${f(ex + 44 * Math.cos(rad(a)))} ${f(ey - 44 * Math.sin(rad(a)))} A 44 44 0 0 1 ${f(ex + 44 * Math.cos(rad(a - 40)))} ${f(ey - 44 * Math.sin(rad(a - 40)))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(txt((ox + ex) / 2 - 16, (oy + ey) / 2 - 12, "r = 1.2 m", { size: 11.5, italic: true, anchor: "middle" }));
+  parts.push(txt(ex + 54, ey - 26, "θ = 40°", { size: 11.5, italic: true }));
+  parts.push(txt(ex + 86 * Math.cos(rad(a - 40)) + 4, ey - 86 * Math.sin(rad(a - 40)) + 12, "F = 6.4 N", { size: 11.5, italic: true }));
+  return svg(360, 200, parts.join(""));
+}
+
+// ---- conical pendulum with the forces marked (Sydney Grammar 2024 Q37) -----------------------
+
+export function conicalPendulumForces(): string {
+  const parts: string[] = [];
+  const cx = 180, top = 25, by = 165, r = 90;
+  parts.push(`<rect x="${cx - 90}" y="${top - 6}" width="180" height="5" fill="${C.ink}"/>`);
+  parts.push(line(cx, top, cx, by, { dash: "3 3", width: 0.8 }), txt(cx + 6, (top + by) / 2, "h", { size: 11, italic: true }));
+  parts.push(`<ellipse cx="${cx}" cy="${by}" rx="${r}" ry="16" fill="none" stroke="${C.ink}" stroke-width="0.9"/>`);
+  parts.push(line(cx, top, cx - r, by, { width: 1.2 }), txt(cx - r / 2 - 10, (top + by) / 2 - 4, "L", { size: 11, italic: true, anchor: "end" }));
+  parts.push(`<circle cx="${cx - r}" cy="${by}" r="7" fill="${C.ink}"/>`, txt(cx - r - 12, by + 4, "m", { size: 11, italic: true, anchor: "end" }));
+  parts.push(`<path d="M ${cx} ${top + 30} A 30 30 0 0 0 ${f(cx - 30 * Math.sin(Math.atan(r / (by - top))))} ${f(top + 30 * Math.cos(Math.atan(r / (by - top))))}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`, txt(cx + 6, top + 26, "θ", { size: 11, italic: true }));
+  parts.push(arrowAt(cx - r, by, 90 - (Math.atan(r / (by - top)) * 180) / Math.PI, 56, { color: C.b, width: 1.5 }), txt(cx - r + 6, by - 42, "T", { size: 11, italic: true }));
+  parts.push(arrowAt(cx - r, by, -90, 44, { color: C.b, width: 1.5 }), txt(cx - r - 6, by + 44, "mg", { size: 11, italic: true, anchor: "end" }));
+  parts.push(line(cx - r + 10, by + 16, cx - r + 60, by + 16, { head: "end", width: 1.2 }), txt(cx - r + 64, by + 20, "velocity", { size: 10 }));
+  parts.push(line(cx - r + 8, by - 2, cx - 6, by - 2, { head: "both", width: 0.8 }), txt(cx - r / 2, by - 8, "r", { size: 11, italic: true, anchor: "middle" }));
+  return svg(360, by + 66, parts.join(""));
+}
