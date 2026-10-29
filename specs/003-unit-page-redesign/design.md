@@ -72,8 +72,9 @@ containing, top to bottom:
 2. **Title**: page `h1`, 28 px (24 px on phones), 14 px above, 8 px below.
 3. **Description**: 14.5 px (14 px on phones), mute-600, line-height 1.6, max about 70 characters
    wide, 20 px below.
-   - On screens ≤ 600 px it is cut to **4 lines** with an ellipsis and a **"Show more"** text
-     button (blue-500, 13.5 px, weight 500) underneath. Pressed, it shows the full text and
+   - On screens ≤ 600 px, if it is longer than **4 lines**, it is cut to 4 lines with an ellipsis
+     and a **"Show more"** text button (blue-500, 13.5 px, weight 500) underneath. A description
+     that fits in 4 lines shows in full with no button (re-checked on resize and rotation). Pressed, it shows the full text and
      becomes **"Show less"**. The button carries `aria-expanded`.
    - On wider screens the full text shows and the button is hidden.
    - The full text is always in the HTML (it is only hidden visually).

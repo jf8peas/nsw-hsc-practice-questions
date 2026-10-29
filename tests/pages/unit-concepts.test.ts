@@ -150,6 +150,43 @@ describe("Concepts to review", () => {
   });
 });
 
+describe("heading, pill and progress pips (spec 003)", () => {
+  it("shows the pill count, the explanation, pips filled 3 - count, 'to go' and the hidden sentence", async () => {
+    const { me, attempt } = await setup();
+    const base = { attemptId: attempt.id, userId: me.id };
+    await seedResultAt(env.db, base, READY, `${READY}.m01`, 0, 1, at(1)); // concept a: 3
+    await seedResultAt(env.db, base, READY, `${READY}.m02`, 0, 1, at(2)); // concept b: 3
+    await seedResultAt(env.db, base, READY, `${READY}.m08`, 1, 1, at(3)); // ... then 2
+    const { html } = await render(READY);
+    // the pill reads "{n} to review", n = concepts listed
+    expect(html).toContain('class="rd-pill review"');
+    expect(html).toContain("2 to review");
+    // the one-sentence explanation
+    expect(html).toContain(
+      "Ideas you have missed in this quiz. Answer each one correctly 3 times in a row to clear it; your next attempts include extra questions on them.",
+    );
+    // per concept: "to go" matches the count and the pips fill 3 - count (0 for a, 1 for b)
+    expect(html).toContain("3 to go");
+    expect(html).toContain("2 to go");
+    expect((html.match(/class="pip on"/g) ?? []).length).toBe(1);
+    // the pips and "to go" are decorative; screen readers get the sentence instead
+    expect(html).toContain('class="concept-pips" aria-hidden="true"');
+    expect(html).toContain("3 more correct answers needed");
+    expect(html).toContain("2 more correct answers needed");
+  });
+
+  it("omits the pill and explanation, and shows the All clear box, when nothing is weak", async () => {
+    await setup();
+    const { html } = await render(READY);
+    expect(html).toContain("Concepts to review");
+    expect(html).not.toMatch(/\d+ to review/);
+    expect(html).not.toContain("next attempts include extra questions");
+    expect(html).toContain(
+      "All clear — nothing to review right now. Any concept you miss in a quiz will show up here.",
+    );
+  });
+});
+
 describe("approved explanations and pictures (spec 002 User Story 2)", () => {
   const NOW = new Date("2026-10-28T10:00:00Z");
 

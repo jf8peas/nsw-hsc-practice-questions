@@ -1291,3 +1291,524 @@ export function sameEnergyOrbits(): string {
   parts.push(txt(cx + 120, cy + 30, "Elliptical orbit", { size: 10 }), txt(cx - 20, cy + r + 18, "Circular orbit", { size: 10 }));
   return svg(360, 270, parts.join(""));
 }
+
+// =====================================================================================
+// Projectile motion diagrams
+// =====================================================================================
+
+/** Parabolic path y(x) sampled as an SVG polyline (screen coordinates, y down). */
+function parabola(x0: number, y0: number, range: number, height: number, o: { dash?: string; color?: string; width?: number; to?: number } = {}): string {
+  const pts: string[] = [];
+  const end = o.to ?? range;
+  for (let k = 0; k <= 60; k++) {
+    const x = (k / 60) * end;
+    const y = (4 * height * x * (range - x)) / (range * range);
+    pts.push(`${f(x0 + x)},${f(y0 - y)}`);
+  }
+  const d = o.dash ? ` stroke-dasharray="${o.dash}"` : "";
+  return `<polyline points="${pts.join(" ")}" fill="none" stroke="${o.color ?? C.ink}" stroke-width="${o.width ?? 1.4}"${d}/>`;
+}
+
+// ---- vector-component table for two golf balls (Ascham 2024 Q4) ---------------------
+
+export function golfVectorTable(rows: Array<{ label: string; sam: [number, number]; kim: [number, number] }>): string {
+  const parts: string[] = [];
+  const L = 34, cw = 80, hh = 46, rh = 64;
+  const W = L + cw * 4;
+  parts.push(txt(L + cw, 16, "SAM’S BALL", { anchor: "middle", size: 11 }), txt(L + 3 * cw, 16, "KIM’S BALL", { anchor: "middle", size: 11 }));
+  ["Vertical", "Horizontal", "Vertical", "Horizontal"].forEach((h, i) => parts.push(txt(L + cw * i + cw / 2, 38, h, { anchor: "middle", size: 10.5, italic: true })));
+  parts.push(`<rect x="${L}" y="2" width="${cw * 4}" height="${hh + rh * rows.length - 2}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(line(L, 24, L + cw * 4, 24, { width: 0.6 }));
+  for (let c = 1; c < 4; c++) parts.push(line(L + cw * c, c === 2 ? 2 : 24, L + cw * c, hh + rh * rows.length, { width: c === 2 ? 1 : 0.6 }));
+  rows.forEach((r, i) => {
+    const y0 = hh + rh * i;
+    parts.push(line(L, y0, L + cw * 4, y0, { width: 0.6 }));
+    parts.push(txt(12, y0 + 18, r.label, { size: 11 }));
+    const cells: Array<[number, "v" | "h"]> = [[r.sam[0], "v"], [r.sam[1], "h"], [r.kim[0], "v"], [r.kim[1], "h"]];
+    cells.forEach(([len, k], c) => {
+      const cx = L + cw * c + cw / 2;
+      if (k === "v") parts.push(line(cx, y0 + rh - 8, cx, y0 + rh - 8 - len, { head: "end", width: 1.3 }));
+      else parts.push(line(cx - len / 2, y0 + rh / 2, cx + len / 2, y0 + rh / 2, { head: "end", width: 1.3 }));
+    });
+  });
+  return svg(W + 4, hh + rh * rows.length + 4, parts.join(""));
+}
+
+// ---- trajectories on a height–distance graph (Girraween 2024 Q6) --------------------
+
+export function trajectoryChoices(): string {
+  const parts: string[] = [];
+  const x0 = 50, y0 = 170;
+  parts.push(line(x0, y0, x0, 14, { head: "end", width: 1.2 }), line(x0, y0, 380, y0, { head: "end", width: 1.2 }));
+  parts.push(txt(x0 - 4, 26, "height", { size: 11, anchor: "end" }), txt(370, y0 + 18, "distance", { size: 11, anchor: "end" }));
+  parts.push(parabola(x0, y0, 240, 100, { width: 2 }));
+  parts.push(parabola(x0, y0, 180, 130, { dash: "5 4" }));
+  parts.push(parabola(x0, y0, 290, 88, { dash: "5 4" }));
+  parts.push(parabola(x0, y0, 190, 58, { dash: "5 4" }));
+  parts.push(parabola(x0, y0, 310, 128, { dash: "5 4" }));
+  parts.push(txt(x0 + 62, 50, "A", { size: 11 }), txt(x0 + 232, 100, "B", { size: 11 }), txt(x0 + 134, 128, "C", { size: 11 }), txt(x0 + 252, 74, "D", { size: 11 }));
+  parts.push(txt(x0 + 186, 136, "X", { size: 12, bold: true }));
+  return svg(390, 190, parts.join(""));
+}
+
+// ---- projectile path with top point Y (Gosford 2022 Q1) -----------------------------
+
+export function projectileTopY(showY = true): string {
+  const parts: string[] = [];
+  const x0 = 40, y0 = 150;
+  parts.push(line(20, y0, 260, y0, { width: 1.2 }));
+  parts.push(txt(200, y0 - 4, "Ground", { size: 10.5 }));
+  parts.push(parabola(x0, y0, 160, 120));
+  parts.push(line(x0 + 4, y0 - 12, x0 + 6, y0 - 20, { head: "end", width: 1.2 }));
+  if (showY) parts.push(dot(x0 + 80, y0 - 120, 3.5, C.ink), txt(x0 + 80, y0 - 128, "Y", { size: 11, italic: true, anchor: "middle" }));
+  return svg(280, 165, parts.join(""));
+}
+
+// ---- ball rolling off a table (James Ruse 2019 Half-yearly Q3) -----------------------
+
+export function ballOffTable(): string {
+  const parts: string[] = [];
+  const g = 120;
+  parts.push(`<rect x="10" y="34" width="90" height="12" fill="#cbd5e1" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(`<path d="M 90 46 L 100 46 L 100 ${g} L 92 ${g} L 92 64 Z" fill="#cbd5e1" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(txt(24, 44, "table", { size: 10 }));
+  parts.push(`<circle cx="90" cy="22" r="12" fill="#fff" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(line(104, 22, 134, 22, { head: "end", width: 1.2 }), txt(138, 26, "v", { size: 11, italic: true }));
+  parts.push(line(10, g, 330, g, { width: 1 }));
+  parts.push(`<circle cx="300" cy="${g - 12}" r="12" fill="#fff" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(line(102, g + 12, 298, g + 12, { head: "both", width: 1 }));
+  parts.push(txt(200, g + 26, "D", { size: 11, italic: true, anchor: "middle" }));
+  return svg(340, g + 32, parts.join(""));
+}
+
+// ---- two rollercoaster designs (James Ruse 2021 Q19) ---------------------------------
+
+export function rollercoasters(): string {
+  const parts: string[] = [];
+  const track = (oy: number, hill: boolean, title: string) => {
+    const base = oy + 110, H = 80;
+    const pts: string[] = [];
+    for (let x = 0; x <= 300; x += 3) {
+      // tops (height H) at x = 0, 150, 300; valleys at x = 75 (x₁) and 225 (x₂)
+      const h = (H / 2) * (1 + Math.cos((x / 75) * Math.PI));
+      if (!hill && x > 90 && x < 210) continue;
+      pts.push(`${f(30 + x)},${f(base - h)}`);
+    }
+    if (hill) parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.6"/>`);
+    else {
+      const a = pts.filter((p) => Number(p.split(",")[0]) <= 120);
+      const b = pts.filter((p) => Number(p.split(",")[0]) >= 240);
+      parts.push(`<polyline points="${a.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.6"/>`);
+      parts.push(`<polyline points="${b.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.6"/>`);
+    }
+    parts.push(line(20, base, 340, base, { width: 0.9 }));
+    parts.push(`<rect x="24" y="${base - H - 14}" width="12" height="9" fill="${C.ink}" transform="rotate(30 30 ${base - H - 10})"/>`);
+    parts.push(line(18, base - H, 18, base, { head: "both", width: 1 }), txt(10, base - H / 2 + 4, "H", { size: 11, anchor: "end" }));
+    if (hill) parts.push(line(180, base - H, 180, base, { head: "both", width: 1 }), txt(186, base - H / 2, "H", { size: 11 }));
+    for (const [x, l] of [[105, "1"], [255, "2"]] as const) { // x₁, x₂ under the valleys
+      parts.push(line(x, base - 4, x, base + 4, { width: 1 }));
+      parts.push(subTxt(x - 4, base + 18, "x", l, { italic: true }));
+    }
+    parts.push(txt(180, base + 36, title, { anchor: "middle", size: 11 }));
+  };
+  track(0, true, "Figure 1: Rollercoaster A");
+  track(160, false, "Figure 2: Rollercoaster B");
+  return svg(350, 312, parts.join(""));
+}
+
+// ---- two cricket shots with the same maximum height (James Ruse 2024 Half-yearly Q1) ----
+
+export function cricketShots(): string {
+  const parts: string[] = [];
+  const x0 = 50, y0 = 150;
+  parts.push(line(20, y0, 400, y0, { width: 1 }));
+  parts.push(`<rect x="${x0 - 14}" y="${y0 - 34}" width="10" height="34" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(txt(x0 - 10, y0 - 40, "batsman", { size: 9.5, anchor: "middle" }));
+  parts.push(parabola(x0, y0, 160, 120, { dash: "4 3" }), parabola(x0, y0, 320, 120, { dash: "4 3" }));
+  parts.push(dot(x0 + 80, y0 - 120, 2.5, C.ink), dot(x0 + 160, y0 - 120, 2.5, C.ink));
+  parts.push(`<circle cx="${x0 + 160}" cy="${y0 + 8}" r="4" fill="#fff" stroke="${C.ink}"/>`, txt(x0 + 160, y0 + 26, "P", { anchor: "middle", size: 11, italic: true }));
+  parts.push(`<circle cx="${x0 + 320}" cy="${y0 + 8}" r="4" fill="#fff" stroke="${C.ink}"/>`, txt(x0 + 320, y0 + 26, "Q", { anchor: "middle", size: 11, italic: true }));
+  parts.push(txt(340, 30, "Neglect", { size: 10 }), txt(340, 43, "air resistance", { size: 10 }));
+  return svg(420, y0 + 34, parts.join(""));
+}
+
+// ---- velocity component vectors with a compass (Cheltenham Girls 2010 Half-yearly Q1) ----
+
+export function velocityComponents(): string {
+  const parts: string[] = [];
+  const ox = 150, oy = 110;
+  parts.push(line(ox, oy, ox, oy - 75, { head: "end", width: 1.5 }));
+  parts.push(line(ox, oy, ox + 140, oy, { head: "end", width: 1.5 }));
+  parts.push(txt(ox - 8, oy - 50, "Vertical velocity", { size: 11, anchor: "end" }), txt(ox - 8, oy - 36, "= 6.0 m s⁻¹ north", { size: 11, anchor: "end" }));
+  parts.push(txt(ox + 60, oy + 18, "Horizontal velocity", { size: 11 }), txt(ox + 60, oy + 32, "= 8 m s⁻¹ east", { size: 11 }));
+  const cx = 330, cy = 26;
+  parts.push(line(cx, cy + 10, cx, cy - 10, { head: "end", width: 1 }), line(cx - 8, cy, cx + 8, cy, { width: 1 }));
+  parts.push(txt(cx, cy - 14, "N", { anchor: "middle", size: 10 }), txt(cx, cy + 22, "S", { anchor: "middle", size: 10 }), txt(cx - 12, cy + 4, "W", { anchor: "end", size: 10 }), txt(cx + 12, cy + 4, "E", { size: 10 }));
+  return svg(360, 150, parts.join(""));
+}
+
+// ---- ball X dropped, ball Y projected horizontally (Cheltenham Girls 2011 Q2) --------
+
+export function dropAndThrow(): string {
+  const parts: string[] = [];
+  const top = 30, g = 150, x = 60;
+  parts.push(dot(x, top, 6, C.ink), dot(x + 24, top, 6, C.ink));
+  parts.push(txt(x, top - 12, "X", { anchor: "middle", size: 11, bold: true }), txt(x + 24, top - 12, "Y", { anchor: "middle", size: 11, bold: true }));
+  parts.push(line(x, top + 8, x, g - 2, { head: "end", width: 1.2 }));
+  const pts: string[] = [];
+  for (let k = 0; k <= 40; k++) {
+    const t = k / 40;
+    pts.push(`${f(x + 30 + 160 * t)},${f(top + (g - top) * t * t)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.2" marker-end="url(#ah)"/>`);
+  parts.push(line(30, g, 260, g, { width: 1.2 }));
+  parts.push(txt(150, g + 16, "ground", { anchor: "middle", size: 10.5 }));
+  return svg(270, g + 22, parts.join(""));
+}
+
+// ---- horizontal and vertical velocity component rows (Knox 2020 Q1) ------------------
+
+export function componentArrowRows(rows: Array<{ label: string; h: number[]; v: number[] }>): string {
+  const parts: string[] = [];
+  const L = 30, cw = 170, rh = 46;
+  parts.push(txt(L + cw / 2, 16, "Horizontal", { anchor: "middle", size: 11, italic: true }), txt(L + cw + cw / 2, 16, "Vertical", { anchor: "middle", size: 11, italic: true }));
+  rows.forEach((r, i) => {
+    const y0 = 28 + i * rh;
+    parts.push(`<rect x="${L}" y="${y0}" width="${cw * 2}" height="${rh - 8}" fill="none" stroke="${C.ink}" stroke-width="0.8"/>`);
+    parts.push(line(L + cw, y0, L + cw, y0 + rh - 8, { width: 0.8 }));
+    parts.push(txt(10, y0 + 22, r.label, { size: 11 }));
+    r.h.forEach((len, k) => {
+      const cx = L + 22 + k * 40;
+      parts.push(line(cx, y0 + 19, cx + len, y0 + 19, { head: "end", width: 1.1 }));
+    });
+    r.v.forEach((len, k) => {
+      // positive = upward arrow, negative = downward; length in px
+      const cx = L + cw + 22 + k * 40;
+      const mid = y0 + 19;
+      const h = Math.abs(len) / 2;
+      parts.push(len > 0 ? line(cx, mid + h, cx, mid - h, { head: "end", width: 1.1 }) : line(cx, mid - h, cx, mid + h, { head: "end", width: 1.1 }));
+    });
+  });
+  return svg(L + cw * 2 + 6, 28 + rows.length * rh, parts.join(""));
+}
+
+// ---- launch at an angle θ (Knox 2023 Q1) -----------------------------------------------
+
+export function launchAngle(): string {
+  const parts: string[] = [];
+  parts.push(line(20, 90, 200, 90, { width: 1.4 }));
+  parts.push(line(60, 90, 60 + 70 * Math.cos(rad(62)), 90 - 70 * Math.sin(rad(62)), { head: "end", width: 1.6 }));
+  parts.push(`<path d="M 85 90 A 25 25 0 0 0 ${f(60 + 25 * Math.cos(rad(62)))} ${f(90 - 25 * Math.sin(rad(62)))}" fill="none" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(txt(90, 80, "θ", { size: 12 }));
+  return svg(220, 100, parts.join(""));
+}
+
+// ---- cannon on level ground (Newington 2022 Q5) ---------------------------------------
+
+export function cannon(): string {
+  const parts: string[] = [];
+  parts.push(line(20, 70, 240, 70, { width: 1.2 }));
+  parts.push(`<rect x="70" y="50" width="70" height="12" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1" transform="rotate(-20 70 62)"/>`);
+  parts.push(`<circle cx="92" cy="62" r="8" fill="#fff" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(dot(150, 30, 3.5, C.ink));
+  return svg(260, 80, parts.join(""));
+}
+
+// ---- several trajectories from one launch point (Newington 2022 Q13) ------------------
+
+export function fourTrajectories(): string {
+  const parts: string[] = [];
+  const x0 = 40, y0 = 190;
+  parts.push(line(x0, y0, x0, 14, { width: 1.4 }), line(x0, y0, 380, y0, { width: 1.4 }));
+  parts.push(txt(x0 + 6, 20, "Height (y)", { size: 10 }), txt(370, y0 + 16, "Range (x)", { size: 10, anchor: "end" }));
+  parts.push(parabola(x0, y0, 115, 170), parabola(x0, y0, 200, 145), parabola(x0, y0, 320, 90), parabola(x0, y0, 200, 40));
+  parts.push(txt(x0 + 58, 14, "A", { size: 12 }), txt(x0 + 108, 40, "B", { size: 12 }), txt(x0 + 196, 92, "C", { size: 12 }), txt(x0 + 130, 146, "D", { size: 12 }));
+  return svg(390, 210, parts.join(""));
+}
+
+// ---- ball thrown from S with points X, Y, Z (Normanhurst Boys 2020 Q1) ----------------
+
+export function pathSXYZ(): string {
+  const parts: string[] = [];
+  const x0 = 30, y0 = 160;
+  parts.push(line(20, y0, 340, y0, { width: 1 }));
+  parts.push(parabola(x0, y0, 300, 140));
+  const pt = (x: number, l: string, dx: number) => {
+    const y = (4 * 140 * x * (300 - x)) / 90000;
+    parts.push(dot(x0 + x, y0 - y, 3, C.ink), txt(x0 + x + dx, y0 - y - 6, l, { size: 12, italic: l === "X" }));
+  };
+  pt(55, "X", -14);
+  pt(150, "Y", -3);
+  pt(245, "Z", 6);
+  parts.push(txt(x0 - 12, y0 - 2, "S", { size: 12 }));
+  return svg(350, 175, parts.join(""));
+}
+
+// ---- golf hole map (North Sydney Boys 2020 Q2) ------------------------------------------
+
+export function golfHoleMap(): string {
+  const parts: string[] = [];
+  const Y = (m: number) => 20 + (280 - m) * 5; // 280 m at the top, 220 m at the bottom
+  for (let m = 220; m <= 280; m += 10) {
+    parts.push(line(250, Y(m), 266, Y(m), { width: 1.2 }));
+    parts.push(txt(272, Y(m) + 4, `${m} m`, { size: 11 }));
+  }
+  parts.push(`<rect x="80" y="${Y(278)}" width="150" height="${Y(266) - Y(278)}" rx="18" fill="#bfdbfe" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(txt(70, Y(271), "lake", { size: 11, anchor: "end" }));
+  parts.push(`<circle cx="140" cy="${Y(250)}" r="${(Y(240) - Y(260)) / 2}" fill="#bbf7d0" stroke="${C.ink}" stroke-width="1.6"/>`);
+  parts.push(txt(70, Y(249), "green", { size: 11, anchor: "end" }));
+  parts.push(dot(160, Y(250), 3, C.ink), line(160, Y(250), 250, Y(250), { width: 1 }), txt(196, Y(250) - 4, "hole", { size: 10.5 }));
+  parts.push(`<rect x="90" y="${Y(236)}" width="150" height="${Y(228) - Y(236)}" rx="12" fill="#fde68a" stroke="${C.ink}" stroke-width="1.2"/>`);
+  parts.push(txt(80, Y(232), "sand", { size: 11, anchor: "end" }));
+  parts.push(line(160, Y(250), 160, Y(221), { head: "end", width: 1.4 }));
+  parts.push(txt(160, Y(220) + 12, "tee", { anchor: "middle", size: 11 }));
+  parts.push(txt(150, 14, "Hole 12", { anchor: "middle", size: 13 }));
+  return svg(330, Y(220) + 22, parts.join(""));
+}
+
+// ---- stone thrown from a cliff (North Sydney Boys 2022 Q1) -----------------------------
+
+export function cliffThrow(): string {
+  const parts: string[] = [];
+  const cx = 80, top = 90, sea = 250;
+  parts.push(line(cx, top, cx, sea, { width: 1.4 }), line(20, top, cx, top, { width: 1.4 }));
+  parts.push(`<rect x="20" y="${top}" width="${cx - 20}" height="${sea - top}" fill="#e2e8f0"/>`);
+  parts.push(txt(40, 170, "cliff", { size: 11 }));
+  parts.push(`<path d="M ${cx} ${sea} Q 120 ${sea - 5} 160 ${sea} T 240 ${sea} T 320 ${sea}" fill="none" stroke="${C.a}" stroke-width="1"/>`);
+  parts.push(txt(326, sea + 4, "sea", { size: 11 }));
+  const pts: string[] = [];
+  for (let k = 0; k <= 60; k++) {
+    const t = k / 60;
+    const x = cx + 220 * t;
+    const y = top - 2 + (-200 * t + 362 * t * t);
+    pts.push(`${f(x)},${f(y)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.3" marker-end="url(#ah)"/>`);
+  parts.push(`<circle cx="${cx}" cy="${top - 2}" r="3" fill="#fff" stroke="${C.ink}"/>`, txt(cx + 8, top - 14, "v", { size: 11, italic: true }));
+  const peakX = cx + 220 * (200 / 724), peakY = top - 2 - (200 * 200) / (4 * 362);
+  parts.push(line(peakX, peakY, peakX, top - 4, { head: "both", width: 1 }), txt(peakX + 6, (peakY + top) / 2, "h", { size: 11, italic: true }));
+  parts.push(line(cx, top, peakX + 20, top, { dash: "3 3", width: 0.8 }));
+  parts.push(line(peakX, top + 4, peakX, sea - 2, { head: "both", width: 1 }), txt(peakX + 6, 180, "H", { size: 11, italic: true }));
+  return svg(350, sea + 14, parts.join(""));
+}
+
+// ---- the effect of air resistance on a path (North Sydney Boys 2023 Q9) ---------------
+
+export function airResistancePanels(): string {
+  const parts: string[] = [];
+  const panel = (ox: number, oy: number, label: string, solid: "shortLow" | "short" | "low" | "lowSame" | "ref") => {
+    const x0 = ox + 34, y0 = oy + 92;
+    parts.push(line(x0, y0, x0, oy + 10, { head: "end", width: 1 }), line(x0, y0, x0 + 150, y0, { head: "end", width: 1 }));
+    if (label) parts.push(txt(ox + 6, oy + 18, label, { size: 11 }));
+    if (solid === "ref") {
+      parts.push(parabola(x0, y0, 120, 62, { width: 1.5 }));
+      return;
+    }
+    parts.push(parabola(x0, y0, 120, 62, { dash: "4 3", width: 1 }));
+    if (solid === "shortLow") {
+      // lower and shorter, with a steeper descent
+      const pts: string[] = [];
+      for (let k = 0; k <= 50; k++) {
+        const t = k / 50;
+        pts.push(`${f(x0 + 92 * t - 10 * t * t * t)},${f(y0 - 4 * 46 * t * (1 - t) * (1 + 0.25 * t))}`);
+      }
+      parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.5"/>`);
+    }
+    if (solid === "short") parts.push(parabola(x0, y0, 90, 62, { width: 1.5, to: 90 }));
+    if (solid === "low") parts.push(parabola(x0, y0, 120, 38, { width: 1.5 }));
+    if (solid === "lowSame") parts.push(parabola(x0, y0, 110, 38, { width: 1.5 }));
+  };
+  panel(80, 0, "", "ref");
+  parts.push(txt(80 + 34 + 75, 112, "Path with no air resistance", { anchor: "middle", size: 10 }));
+  panel(0, 130, "A", "shortLow");
+  panel(200, 130, "B", "short");
+  panel(0, 240, "C", "low");
+  panel(200, 240, "D", "lowSame");
+  return svg(400, 340, parts.join(""));
+}
+
+// ---- archer and target (North Sydney Girls 2020 Q14) -----------------------------------
+
+export function archerTarget(): string {
+  const parts: string[] = [];
+  const g = 80;
+  parts.push(line(20, g, 360, g, { width: 1 }));
+  parts.push(line(44, g, 44, g - 40, { width: 2 }), `<circle cx="44" cy="${g - 46}" r="6" fill="#fff" stroke="${C.ink}"/>`);
+  parts.push(line(48, g - 30, 80, g - 30, { head: "end", width: 1.2 }));
+  for (const r of [16, 11, 6]) parts.push(`<circle cx="330" cy="${g - 30}" r="${r}" fill="${r === 6 ? C.b : "#fff"}" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(line(320, g - 14, 312, g, { width: 1.2 }), line(340, g - 14, 348, g, { width: 1.2 }));
+  parts.push(line(44, g + 18, 330, g + 18, { head: "both", width: 1 }), txt(187, g + 14, "70.0 m", { anchor: "middle", size: 11 }));
+  return svg(370, g + 26, parts.join(""));
+}
+
+// ---- three golf balls hit off a cliff (North Sydney Girls 2020 Q19) --------------------
+
+export function cliffThreeBalls(): string {
+  const parts: string[] = [];
+  const cx = 60, top = 60, g = 170, land = 300;
+  parts.push(`<rect x="20" y="${top}" width="${cx - 20}" height="${g - top}" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(line(20, g, 330, g, { width: 1 }), txt(30, 120, "cliff", { size: 10 }), txt(200, g + 14, "ground", { size: 10 }));
+  const path = (peak: number) => {
+    const pts: string[] = [];
+    // vertical: from top, rising by `peak` then falling to the ground; horizontal: linear to `land`
+    const H = g - top;
+    const T = (Math.sqrt(peak) + Math.sqrt(peak + H)) || 1;
+    for (let k = 0; k <= 60; k++) {
+      const s = (k / 60) * T;
+      const y = top - (2 * Math.sqrt(peak) * s - s * s);
+      pts.push(`${f(cx + ((land - cx) * s) / T)},${f(y)}`);
+    }
+    return `<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`;
+  };
+  parts.push(path(0), path(30), path(55));
+  return svg(340, g + 20, parts.join(""));
+}
+
+// ---- water leaving a pipe on a platform (North Sydney Girls 2022 Q4) -------------------
+
+export function waterPipe(): string {
+  const parts: string[] = [];
+  const x = 120, top = 60, g = 150;
+  parts.push(`<rect x="70" y="${top}" width="${x - 70}" height="${g - top}" fill="#fff" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(txt(95, 110, "platform", { anchor: "middle", size: 10.5 }));
+  parts.push(`<rect x="60" y="${top - 12}" width="${x - 58}" height="9" fill="#e2e8f0" stroke="${C.ink}" stroke-width="0.8"/>`);
+  parts.push(txt(90, top - 18, "water pipe", { anchor: "middle", size: 10.5 }));
+  parts.push(line(x + 4, top - 8, x + 50, top - 8, { head: "end", width: 1.2 }), txt(x + 26, top - 14, "4.5 m s⁻¹", { size: 10.5 }));
+  const pts: string[] = [];
+  for (let k = 0; k <= 40; k++) {
+    const t = k / 40;
+    pts.push(`${f(x + 120 * t)},${f(top - 8 + (g - top + 8) * t * t)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 3"/>`);
+  parts.push(line(60, g, 300, g, { width: 1.2 }), txt(180, g + 14, "ground", { anchor: "middle", size: 10.5 }));
+  parts.push(line(56, top, 56, g, { head: "both", width: 1 }), txt(50, 108, "9.5 m", { anchor: "end", size: 10.5 }));
+  parts.push(txt(260, 96, "NOT TO", { size: 10 }), txt(260, 109, "SCALE", { size: 10 }));
+  return svg(310, g + 20, parts.join(""));
+}
+
+// ---- stroboscope positions on a grid (North Sydney Girls 2023 Q12) -------------------
+
+export function stroboscopeGraph(points: Array<[number, number]>): string {
+  const L = 52, T = 14, P = 240;
+  const X = (x: number) => L + (x / 100) * P;
+  const Y = (y: number) => T + P - (y / 100) * P;
+  const parts: string[] = [];
+  for (let k = 0; k <= 25; k++) {
+    const v = k * 4;
+    parts.push(line(X(v), T, X(v), T + P, { color: k % 5 === 0 ? C.guide : C.grid, width: k % 5 === 0 ? 0.8 : 0.5 }));
+    parts.push(line(L, Y(v), L + P, Y(v), { color: k % 5 === 0 ? C.guide : C.grid, width: k % 5 === 0 ? 0.8 : 0.5 }));
+  }
+  for (let v = 0; v <= 100; v += 20) {
+    parts.push(txt(X(v), T + P + 14, String(v), { anchor: "middle", size: 10 }));
+    if (v) parts.push(txt(L - 6, Y(v) + 3.5, String(v), { anchor: "end", size: 10 }));
+  }
+  parts.push(txt(L + P / 2, T + P + 32, "Horizontal displacement (m)", { anchor: "middle", size: 10.5 }));
+  parts.push(`<text x="16" y="${T + P / 2}" fill="${C.text}" font-size="10.5" font-family="${FONT}" text-anchor="middle" transform="rotate(-90 16 ${T + P / 2})">Vertical displacement (m)</text>`);
+  for (const [x, y] of points) parts.push(dot(X(x), Y(y), 4, C.ink));
+  return svg(L + P + 12, T + P + 40, parts.join(""));
+}
+
+// ---- small mass–table (Pymble 2022 Q3) uses dataTable; graphs of U against t (Shore 2020 Q2) ----
+
+export function energyTimeGraphs(): string {
+  const parts: string[] = [];
+  const panel = (ox: number, oy: number, label: string, hump: boolean, downAxis: boolean) => {
+    const x0 = ox + 40, top = oy + 10, bot = oy + 100;
+    parts.push(txt(ox + 6, oy + 18, label, { size: 11 }));
+    if (!downAxis) {
+      parts.push(line(x0, bot, x0, top, { head: "end", width: 1.2 }), line(x0, bot, x0 + 120, bot, { head: "end", width: 1.2 }));
+      parts.push(txt(x0 - 10, top + 14, "U", { size: 11, anchor: "end" }), txt(x0 + 112, bot + 16, "t", { size: 11, italic: true }));
+    } else {
+      parts.push(line(x0, top, x0, bot, { head: "end", width: 1.2 }), line(x0, top, x0 + 120, top, { head: "end", width: 1.2 }));
+      parts.push(txt(x0 - 10, bot, "U", { size: 11, anchor: "end" }), txt(x0 + 112, top - 6, "t", { size: 11, italic: true }));
+    }
+    const pts: string[] = [];
+    for (let k = 0; k <= 30; k++) {
+      const t = k / 30;
+      const shape = 4 * t * (1 - t);
+      const yy = downAxis ? (hump ? top + 60 - 45 * shape : top + 15 + 45 * shape) : hump ? bot - 15 - 45 * shape : bot - 60 + 45 * shape;
+      pts.push(`${f(x0 + 6 + 100 * t)},${f(yy)}`);
+    }
+    parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.a}" stroke-width="1.5"/>`);
+  };
+  panel(0, 0, "A", true, false);
+  panel(190, 0, "B", false, false);
+  panel(0, 120, "C", true, true);
+  panel(190, 120, "D", false, true);
+  return svg(390, 240, parts.join(""));
+}
+
+// ---- speed against time graphs (Shore 2021 Q4) -------------------------------------------
+
+export function speedTimeGraphs(): string {
+  const parts: string[] = [];
+  const panel = (ox: number, oy: number, label: string, kind: "vZero" | "vMin" | "curveMin" | "curveZero") => {
+    const x0 = ox + 34, top = oy + 14, bot = oy + 110, w = 140;
+    parts.push(txt(ox + 4, oy + 16, label, { size: 11 }));
+    parts.push(line(x0, bot, x0, top, { head: "end", width: 1.2 }), line(x0, bot, x0 + w, bot, { head: "end", width: 1.2 }));
+    parts.push(txt(x0 - 8, top + 22, "v", { size: 11, italic: true, anchor: "end" }), txt(x0 - 8, bot + 4, "0", { size: 10, anchor: "end" }), txt(x0 + w + 4, bot + 4, "t", { size: 11, italic: true }));
+    const vy = top + 18;
+    const pts: string[] = [];
+    for (let k = 0; k <= 40; k++) {
+      const t = k / 40;
+      let y: number;
+      if (kind === "vZero") y = vy + (bot - vy) * (1 - Math.abs(2 * t - 1));
+      else if (kind === "vMin") y = vy + 40 * (1 - Math.abs(2 * t - 1));
+      else if (kind === "curveMin") y = bot - Math.sqrt(0.35 ** 2 + (1 - 2 * t) ** 2 * (1 - 0.35 ** 2)) * (bot - vy);
+      else y = bot - Math.abs(1 - 2 * t) ** 1.6 * (bot - vy);
+      pts.push(`${f(x0 + 4 + (w - 16) * t)},${f(y)}`);
+    }
+    parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="2"/>`);
+  };
+  panel(0, 0, "A", "vZero");
+  panel(200, 0, "B", "vMin");
+  panel(0, 125, "C", "curveMin");
+  panel(200, 125, "D", "curveZero");
+  return svg(390, 250, parts.join(""));
+}
+
+// ---- horizontal and vertical velocity–time graph pairs (Sydney Girls 2020 Q4) -----------
+
+export function velocityTimePairs(): string {
+  const parts: string[] = [];
+  const graph = (ox: number, oy: number, label: string, kind: "const" | "rise" | "fall") => {
+    const x0 = ox + 60, top = oy + 6, bot = oy + 66, w = 70;
+    parts.push(txt(ox + 52, oy + 24, label, { size: 10, anchor: "end" }), txt(ox + 52, oy + 37, "velocity", { size: 10, anchor: "end" }));
+    parts.push(line(x0, bot, x0, top, { head: "end", width: 1.1 }), line(x0, bot, x0 + w + 8, bot, { head: "end", width: 1.1 }));
+    parts.push(txt(x0 + w - 6, bot + 14, "time", { size: 10 }));
+    if (kind === "const") parts.push(`<polyline points="${x0},${top + 16} ${x0 + w},${top + 16} ${x0 + w},${bot}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+    if (kind === "rise") parts.push(`<polyline points="${x0},${bot} ${x0 + w},${top + 14} ${x0 + w},${bot}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+    if (kind === "fall") parts.push(`<polyline points="${x0},${top + 14} ${x0 + w},${bot}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+  };
+  const rows: Array<[string, "const" | "rise" | "fall", "const" | "rise" | "fall"]> = [["A", "const", "rise"], ["B", "fall", "rise"], ["C", "rise", "const"], ["D", "fall", "fall"]];
+  rows.forEach(([l, h, v], i) => {
+    const oy = i * 84;
+    parts.push(txt(4, oy + 40, l, { size: 11 }));
+    graph(20, oy, "horizontal", h);
+    graph(190, oy, "vertical", v);
+  });
+  return svg(340, 4 * 84, parts.join(""));
+}
+
+// ---- car rolling down a hill and off a cliff (Sydney Grammar 2020 Q4–5) ------------------
+
+export function carHillCliff(): string {
+  const parts: string[] = [];
+  const xX = 60, yX = 40, yY = 120, cliffX = 220, sea = 200;
+  parts.push(`<path d="M 30 ${yX} L ${xX} ${yX} C 110 ${yX}, 120 ${yY}, 160 ${yY} L ${cliffX} ${yY} L ${cliffX} ${sea} L 30 ${sea} Z" fill="#e2e8f0" stroke="${C.ink}" stroke-width="1"/>`);
+  parts.push(`<rect x="${xX - 14}" y="${yX - 12}" width="22" height="10" rx="3" fill="${C.ink}"/>`);
+  parts.push(txt(xX + 12, yX + 12, "X", { size: 10 }), txt(cliffX - 4, yY - 6, "Y", { size: 10 }));
+  parts.push(line(xX, yX + 2, xX, yY - 2, { head: "both", width: 0.9 })); // h: from X down to the level of Y
+  parts.push(txt(xX - 6, (yX + yY) / 2, "h", { size: 11, italic: true, anchor: "end" }));
+  parts.push(line(cliffX - 10, yY + 2, cliffX - 10, sea - 2, { head: "both", width: 0.9 }), txt(cliffX - 16, 165, "H", { size: 11, italic: true, anchor: "end" }));
+  const pts: string[] = [];
+  for (let k = 0; k <= 30; k++) {
+    const t = k / 30;
+    pts.push(`${f(cliffX + 70 * t)},${f(yY + (sea - yY) * t * t)}`);
+  }
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 2"/>`);
+  parts.push(`<path d="M ${cliffX} ${sea} q 10 -5 20 0 t 20 0 t 20 0 t 20 0 t 20 0" fill="none" stroke="${C.a}" stroke-width="1"/>`);
+  parts.push(txt(cliffX + 74, sea - 4, "Z", { size: 10 }));
+  parts.push(line(cliffX, sea + 14, cliffX + 70, sea + 14, { head: "both", width: 0.9 }), txt(cliffX + 35, sea + 28, "d", { size: 11, italic: true, anchor: "middle" }));
+  return svg(330, sea + 34, parts.join(""));
+}

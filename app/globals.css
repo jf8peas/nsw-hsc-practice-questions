@@ -1390,6 +1390,13 @@ input {
   .clamped-toggle {
     display: inline-block;
   }
+  /* ClampedText measured the paragraph: it fits in 4 lines, so show it in full with no button. */
+  .clamped.fits .unit-intro-desc {
+    display: block;
+  }
+  .clamped.fits .clamped-toggle {
+    display: none;
+  }
 }
 
 .unit-section {

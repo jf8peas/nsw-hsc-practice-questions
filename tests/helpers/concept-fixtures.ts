@@ -101,6 +101,13 @@ export const readyUnit: Unit = {
   },
   conceptsReady: true,
   explanationsComplete: true,
+  // Formulas and a guide let the full-page tests exercise the shared heading on
+  // "Formulas in this test" and the guide's title (no shipped unit declares formulas today).
+  formulas: [{ formula: "v = u + at", formulaTex: "v = u + at", name: "Constant acceleration" }],
+  guide: {
+    title: "Fixture guide",
+    items: [{ label: "Steps", text: "One, two, three." }],
+  },
   questions: ready.questions,
   concepts: readyConcepts,
   retired: {},
