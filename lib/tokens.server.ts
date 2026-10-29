@@ -12,11 +12,12 @@ import { createHash, createHmac, hkdfSync, timingSafeEqual } from "node:crypto";
  * This is the only module that touches the key.
  */
 
-type Kind = "receipt" | "selfmark" | "attempt";
+type Kind = "receipt" | "selfmark" | "attempt" | "transcription";
 
 export const RECEIPT_TTL_SECONDS = 7 * 24 * 60 * 60;
 export const SELF_MARK_TTL_SECONDS = 2 * 60 * 60;
 export const ATTEMPT_TTL_SECONDS = 24 * 60 * 60;
+export const TRANSCRIPTION_TTL_SECONDS = 2 * 60 * 60;
 
 export type GradedBy = "auto" | "llm" | "self";
 
@@ -63,6 +64,18 @@ export interface SelfMarkPayload {
   attemptId: string;
   questionId: string;
   answerHash: string;
+  iat: number;
+  exp: number;
+}
+
+export interface TranscriptionTokenPayload {
+  v: 1;
+  uid: string;
+  attemptId: string;
+  questionId: string;
+  transcriptionHash: string;
+  readCount: number;  // 1-3
+  reservedSlot: { userId: string; sydneyDate: string } | null;
   iat: number;
   exp: number;
 }
@@ -187,6 +200,45 @@ export function verifySelfMarkToken(
     r.payload.questionId !== bind.questionId ||
     r.payload.answerHash !== hashAnswer(bind.answer)
   ) {
+    return { ok: false, reason: "mismatch" };
+  }
+  return r;
+}
+
+// ---- transcription token --------------------------------------------------
+
+export interface TranscriptionTokenInput {
+  uid: string;
+  attemptId: string;
+  questionId: string;
+  transcriptionHash: string;
+  readCount: number;
+  reservedSlot: { userId: string; sydneyDate: string } | null;
+}
+
+export function signTranscriptionToken(
+  input: TranscriptionTokenInput,
+  nowMs: number = Date.now(),
+): string {
+  const iat = seconds(nowMs);
+  const payload: TranscriptionTokenPayload = {
+    v: 1,
+    ...input,
+    iat,
+    exp: iat + TRANSCRIPTION_TTL_SECONDS,
+  };
+  return sign("transcription", payload);
+}
+
+export function verifyTranscriptionToken(
+  token: unknown,
+  bind: { uid: string; attemptId: string; questionId: string },
+  nowMs: number = Date.now(),
+): Verified<TranscriptionTokenPayload> {
+  const r = open<TranscriptionTokenPayload>("transcription", token, nowMs);
+  if (!r.ok) return r;
+  if (r.payload.uid !== bind.uid) return { ok: false, reason: "wrong_user" };
+  if (r.payload.attemptId !== bind.attemptId || r.payload.questionId !== bind.questionId) {
     return { ok: false, reason: "mismatch" };
   }
   return r;

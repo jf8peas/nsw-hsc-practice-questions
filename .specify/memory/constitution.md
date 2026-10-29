@@ -1,33 +1,26 @@
 <!--
 Sync Impact Report
-- Version change: 2.9.1 → 2.10.0 (MINOR: materially expanded guidance in Principle V; the
-  "questions MUST be original" rule becomes a conditional permission with hard limits).
-- Reason (amendment log): the teacher wants to use questions from school trial and half-yearly
-  papers, word for word, while the app is non-commercial. Real HSC questions stay out so past HSC
-  papers remain unseen for full practice exams, and diagrams are always redrawn in code.
+- Version change: 2.10.0 → 2.11.0 (MINOR: materially expanded guidance in Principles I, II, V, VI, VII, VIII to allow photo answers).
+- Reason (amendment log): students need to answer short-answer questions by writing on paper and submitting 1-3 photos, which are transcribed to text and then AI-marked. Typing maths working on a phone is slow, so students skip steps or whole questions, and the grader never sees the working that HSC marking rewards.
 - Modified principles:
-  - V. Syllabus Fidelity and Original Content: now allows verbatim school trial / half-yearly
-    questions that show their source (school, year, paper type, question number), only while the
-    app is non-commercial (they MUST be rewritten as original before it goes commercial); forbids
-    real HSC questions absolutely; requires every diagram to be redrawn in code, never scanned.
-  - All other principles unchanged by 2.10.0.
+  - I. The Answer Key Never Reaches the Browser: transcribe route may accept 1-3 images and an optional note; `/api/grade` may accept the signed transcription token. Vision prompt gets no model answer or rubric.
+  - II. Signed-In Students, Minimal Personal Data: photos are never stored or logged; only the transcription (the "answer submitted"). Consent wording: answer photos are sent to an AI provider that may use them for training; students must keep personal or sensitive information out of photos. FR-026 metrics (hashed userId, questionId, outcome, duration_ms, model) are allowed in logs.
+  - V. Syllabus Fidelity and Original Content: "No photographed images" covers question content, not student answers.
+  - VI. Grading Is Fair, Explainable and Degrades Gracefully: illegible / not-an-answer → retake, never 0; refund rules for AI slot; 3-read limit per question.
+  - VII. Cost and Abuse Controls on Paid Paths: `VISION_MODEL` is server-only like `OPENROUTER_API_KEY`; photo reads count against `LLM_DAILY_CAP` (one slot per question, no separate cap).
+  - VIII. Simplicity: no new dependency: native file input, canvas, `FormData`, existing fetch wrapper.
 - Added sections: none
 - Removed sections: none
-- Quality Gates: added a constitution-check item for question sources, HSC exclusion and diagrams.
+- Quality Gates: updated to include photo answer checks (no image data in database or logs, 3-read limit enforced, refund rules).
 - Templates requiring updates:
-  - .specify/templates/plan-template.md ✅ updated (Principle V row)
+  - .specify/templates/plan-template.md ✅ updated (Principle VIII row already present)
   - .specify/templates/spec-template.md ✅ no change needed
   - .specify/templates/tasks-template.md ✅ no change needed
-  - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks}
-    ✅ reviewed against 2.9.1 and spec 002; no conflicts, wording updated where now inaccurate
-  - specs/002-learn-from-mistakes/{spec,plan,tasks}.md ✅ unaffected (no question-sourcing rules)
-  - README.md ⚠ pending: units table / authoring notes do not yet describe the school-paper source
-    rule (add when the first such unit is created)
-  - .env.example ✅ no change needed
-- Follow-up TODOs: TODO(ACCESSIBILITY_TARGET); TODO(SCHOOL_PAPER_SOURCE_FIELD): no unit uses
-  verbatim school-paper questions yet, so the question type has no `source` field and
-  `scripts/validate-content.ts` does not yet enforce it. Add both (and show the source with the
-  question) in the spec that first adds such a unit.
+  - specs/001-student-saved-scores/{spec,plan,research,data-model,contracts,quickstart,tasks} ✅ unaffected
+  - specs/002-learn-from-mistakes/{spec,plan,tasks}.md ✅ unaffected
+  - README.md ⚠ pending: document `VISION_MODEL` env var (add when feature is implemented)
+  - .env.example ⚠ pending: add `VISION_MODEL=deepseek/deepseek-v4.1-flash` (add when feature is implemented)
+- Follow-up TODOs: TODO(ACCESSIBILITY_TARGET); TODO(VISION_MODEL_ENV): add to `.env.example` and README during implementation.
 Legend: rules marked [PRACTICE] describe what the repo already does today. Rules marked
 [DECISION] are team decisions that are not yet current practice.
 -->
@@ -52,7 +45,8 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   `questionId`, `answer`, an opaque `attemptId` together with the
   server-issued signed attempt token; for a self-mark, a binary `correct` flag together with the
   server-issued signed self-mark token; and, for a save retry, the server-issued signed result
-  receipt.
+  receipt. The transcribe route (`POST /api/transcribe`) MAY accept 1-3 images and an optional note;
+  `/api/grade` MAY accept the signed transcription token. The vision prompt gets no model answer or rubric.
 - The client MUST NOT send a user id, marks, max marks or grading method. The only exception is
   the binary self-mark flag, which the server accepts only with a valid token.
 - Other routes MAY take from the client only resource identifiers that the server re-checks: a
@@ -99,7 +93,11 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     shown to the student. Model answers and rubric text MUST NOT be stored per result
     (Principle I).
   It MUST NOT store profile photos, Google tokens beyond what the session needs, or any other
-  personal data without amending this constitution.
+  personal data without amending this constitution. Photos for transcription are never stored or logged;
+  only the transcription (the "answer submitted") is stored. Answer photos are sent to an AI provider
+  that may use them for training; school consent must state this and tell students to keep personal or
+  sensitive information out of photos. Minimal observability metrics (hashed userId, questionId, outcome,
+  duration_ms, model) are allowed in logs (FR-026).
 - Student data MUST be stored in an Australian region (Neon Postgres, AWS ap-southeast-2 Sydney).
 - Retention: a student and all their data MUST be deleted automatically 2 years after their last
   activity (a scheduled job). Last activity is the later of last answer and last sign-in, or the
@@ -180,7 +178,8 @@ Automated checks do not drift.
 - Real HSC questions (from NESA past papers or exams) MUST NEVER be included, whether copied,
   lightly reworded or recreated, so that past HSC papers stay unseen for full practice exams.
 - Every diagram MUST be redrawn in code (for example a per-unit `diagram.ts`). Scanned,
-  photographed or otherwise copied images MUST NOT be committed or served.
+  photographed or otherwise copied images MUST NOT be committed or served. This rule covers question
+  content, not student answers (photo answers are permitted).
 - Other copyrighted past papers and source material stay in `/resources/` (gitignored) and MUST
   NOT be committed or reproduced, apart from the school-paper exception above.
 
@@ -199,6 +198,10 @@ but the README does not yet say so.
 - The grader MUST return `marksAwarded`, `feedback`, `rubricHits` and `rubricMisses`.
 - Any LLM failure (no key, bad key, timeout, unparseable output after one retry) MUST fall back
   to student self-marking (`needsSelfMark`). It MUST NOT show an error or award a wrong mark.
+  For photo answers: an unreadable photo or one that does not answer the question prompts a retake
+  and is never given 0 marks. A question may be read at most 3 times; after that the student types
+  the answer or self-marks. The AI slot is refunded on illegible, not-an-answer, or model failure;
+  it is not refunded when the student reads and then leaves without marking.
 - [DECISION] When a student is over the LLM daily cap, short answers fall back to self-marking
   (`needsSelfMark`), exactly like an LLM failure.
 - [DECISION] MC grading MUST be instant and server-side. It requires sign-in like everything
@@ -250,6 +253,8 @@ block practice.
   `OPENROUTER_API_KEY`.
 - `REVIEW_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. Reviewer calls count
   toward the concept-generation cap.
+- `VISION_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. Photo reads count
+  against `LLM_DAILY_CAP` (one slot per question, no separate cap).
 - In production, missing auth or database config MUST fail closed (refuse to serve), never fall
   back to open access. In local development only, a documented dev-login MAY stand in for Google,
   and results MAY be stored in a local or branch database. Without `OPENROUTER_API_KEY`, short
@@ -268,7 +273,8 @@ exposing student data.
   now justified for cross-device scores and teacher visibility. `@resvg/resvg-js` is also allowed,
   server-side only, to render generated illustrations for the reviewer (spec 002). Any further
   database, ORM or auth addition, or any state library, requires a written justification in the
-  plan.
+  plan. No new dependency is needed for photo answers: native file input, canvas, `FormData`, and
+  the existing fetch wrapper are used.
 - [DECISION] Mobile-first: students mostly use phones, so key actions (e.g. "Start quiz") MUST
   be reachable without scrolling past reference material (the unit page already places
   `meta.formulas` below Start quiz).
@@ -351,4 +357,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.10.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-28
+**Version**: 2.11.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-29

@@ -211,6 +211,12 @@ unreachable in turn, submit a photo answer and confirm each ends in self-marking
 - **FR-025**: The school consent wording MUST state that answer photos are sent to an AI provider
   that may use them for training, and that photos must not contain personal or sensitive information.
 
+**Observability**
+
+- **FR-026**: The transcribe route MUST log only minimal structured metrics: timestamp, hashed userId,
+  questionId, outcome (success/legible-fail/answersQuestion-fail/network-fail), duration_ms, and model
+  used. No image data and no transcription text MAY be logged.
+
 ### Key Entities
 
 - **Photo answer (transient)**: 1-3 images and an optional note for one question in one attempt.
@@ -235,6 +241,12 @@ unreachable in turn, submit a photo answer and confirm each ends in self-marking
 - **SC-005**: Zero photos are retained after reading: none in the database, files or logs.
 - **SC-006**: Every failure path (reading fails, allowance used up, database down) ends in
   self-marking with no error shown (100% of tested cases).
+
+## Clarifications
+
+### Session 2026-10-29
+
+- Q: What observability/metrics should be collected for photo reads (e.g., success/failure counts, model used, timing), given that photos themselves must never be logged? → A: Minimal structured metrics only: Log timestamp, userId (hashed), questionId, outcome (success/legible-fail/answersQuestion-fail/network-fail), duration_ms, model used. No image data, no transcription text.
 
 ## Assumptions
 
