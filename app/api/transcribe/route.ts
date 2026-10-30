@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 
 import { getQuestion } from "@/content";
 import { resolveSession } from "@/lib/auth.server";
+import { getSelfMarkMaterial } from "@/lib/grading.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { getResult } from "@/lib/db/queries/results.server";
 import { getConfig } from "@/lib/config.server";
 import { checkIpRateLimit, checkUserRateLimit } from "@/lib/ratelimit.server";
-import { verifyAttemptToken, attemptFieldsOf, signTranscriptionToken, TRANSCRIPTION_TTL_SECONDS } from "@/lib/tokens.server";
+import {
+  attemptFieldsOf,
+  signSelfMarkToken,
+  signTranscriptionToken,
+  verifyAttemptToken,
+} from "@/lib/tokens.server";
+import { nextSydneyMidnight, toSydneyIso } from "@/lib/sydney";
 import { reserveAiSlot, refundAiSlot, type AiSlot } from "@/lib/usage.server";
 import { withSingleFlight } from "@/lib/singleFlight";
 import { buildVisionPrompt, validateImage, logTranscribeOutcome, formatAnswer } from "@/lib/transcribe.server";
@@ -33,6 +40,30 @@ interface TranscribeSuccess {
   };
 }
 
+/** The stored answer when a photo read fails and the student self-marks (FR-019). */
+const PHOTO_SELF_MARK_ANSWER = "[photo answer, not transcribed]";
+
+/**
+ * What the client needs to self-mark when a read fails: a self-mark token bound
+ * to the stored placeholder answer, plus the model answer material to show
+ * beside the photo thumbnails (the same material the grade route returns for
+ * self-marking today).
+ */
+function selfMarkPayload(userId: string, attemptId: string, questionId: string) {
+  const material = getSelfMarkMaterial(questionId);
+  return {
+    selfMarkToken: signSelfMarkToken({
+      uid: userId,
+      attemptId,
+      questionId,
+      answer: PHOTO_SELF_MARK_ANSWER,
+    }),
+    modelAnswer: material.modelAnswer,
+    rubric: material.rubric,
+    maxMarks: material.maxMarks,
+  };
+}
+
 /**
  * POST /api/transcribe
  *
@@ -48,7 +79,13 @@ export async function POST(req: Request) {
   const userId = user.id;
 
   const startTime = Date.now();
-  const model = process.env.VISION_MODEL || "deepseek/deepseek-v4.1-flash";
+  // Fails closed: without a configured vision model no photo is ever read
+  // (constitution Principle VII). The client falls back to self-marking.
+  const model = process.env.VISION_MODEL;
+  if (!model) {
+    logTranscribeOutcome({ userId, questionId: "", outcome: "model-fail", durationMs: 0, model: "unset" });
+    return json({ error: "model_unavailable" }, 503);
+  }
 
   // Parse multipart form data
   let formData: FormData;
@@ -81,6 +118,20 @@ export async function POST(req: Request) {
   if (imageFiles.length > 3) {
     logTranscribeOutcome({ userId, questionId, outcome: "invalid-upload", durationMs: Date.now() - startTime, model });
     return bad("invalid_request");
+  }
+
+  // 3-read limit per question (FR-012): the client sends the readCount carried
+  // by the last transcription token (0 for the first read). The count travels
+  // only inside the signed token, never in client-trusted state.
+  const readCountRaw = formData.get("readCount");
+  const readsUsed = readCountRaw === null ? 0 : Number(readCountRaw);
+  if (!Number.isInteger(readsUsed) || readsUsed < 0) {
+    logTranscribeOutcome({ userId, questionId, outcome: "invalid-upload", durationMs: Date.now() - startTime, model });
+    return bad("invalid_request");
+  }
+  if (readsUsed >= 3) {
+    logTranscribeOutcome({ userId, questionId, outcome: "read-limit", durationMs: Date.now() - startTime, model });
+    return json({ error: "over_read_limit", ...selfMarkPayload(userId, attemptId, questionId) }, 429);
   }
 
   // Verify attempt token
@@ -159,22 +210,33 @@ export async function POST(req: Request) {
     imageUrls.push(`data:${mimeType};base64,${base64}`);
   }
 
-  // Reserve AI slot
+  // Reserve ONE AI slot per question, on its first read only (FR-020): retakes
+  // ride on the slot already reserved, so a question never uses more than one
+  // allowance from its first read through marking.
   let slot: AiSlot | null = null;
   const config = getConfig();
-  try {
-    slot = await dbCall((db) => reserveAiSlot(db, userId, config.llmDailyCap));
-    if (!slot) {
-      logTranscribeOutcome({ userId, questionId, outcome: "over-cap", durationMs: Date.now() - startTime, model });
-      return json({ error: "over_daily_cap" }, 429);
-    }
-  } catch (error) {
-    if (error instanceof DbUnavailableError) {
-      // In degraded mode, proceed without slot reservation
-      console.warn("DB unavailable: proceeding without slot reservation");
-    } else {
-      logTranscribeOutcome({ userId, questionId, outcome: "db-unavailable", durationMs: Date.now() - startTime, model });
-      return json({ error: "db_unavailable" }, 503);
+  if (readsUsed === 0) {
+    try {
+      slot = await dbCall((db) => reserveAiSlot(db, userId, config.llmDailyCap));
+      if (!slot) {
+        logTranscribeOutcome({ userId, questionId, outcome: "over-cap", durationMs: Date.now() - startTime, model });
+        return json(
+          {
+            error: "over_daily_cap",
+            resetsAt: toSydneyIso(nextSydneyMidnight(new Date())),
+            ...selfMarkPayload(userId, attemptId, questionId),
+          },
+          429,
+        );
+      }
+    } catch (error) {
+      if (error instanceof DbUnavailableError) {
+        // In degraded mode, proceed without slot reservation
+        console.warn("DB unavailable: proceeding without slot reservation");
+      } else {
+        logTranscribeOutcome({ userId, questionId, outcome: "db-unavailable", durationMs: Date.now() - startTime, model });
+        return json({ error: "db_unavailable", ...selfMarkPayload(userId, attemptId, questionId) }, 503);
+      }
     }
   }
 
@@ -239,30 +301,30 @@ export async function POST(req: Request) {
 
       throw lastError || new Error("Vision call failed after retries");
     });
-  } catch (error) {
+  } catch {
     // Refund slot on failure
     if (slot) {
       await dbCall((db) => refundAiSlot(db, slot));
     }
     logTranscribeOutcome({ userId, questionId, outcome: "model-fail", durationMs: Date.now() - startTime, model });
-    return json({ error: "model_fail" }, 500);
+    return json({ error: "model_fail", ...selfMarkPayload(userId, attemptId, questionId) }, 500);
   }
 
   // Check if transcription is legible and answers the question
   if (!transcriptionResult.legible) {
     if (slot) await dbCall((db) => refundAiSlot(db, slot));
     logTranscribeOutcome({ userId, questionId, outcome: "illegible", durationMs: Date.now() - startTime, model });
-    return json({ error: "illegible" }, 400);
+    return json({ error: "illegible", ...selfMarkPayload(userId, attemptId, questionId) }, 400);
   }
 
   if (!transcriptionResult.answersQuestion) {
     if (slot) await dbCall((db) => refundAiSlot(db, slot));
     logTranscribeOutcome({ userId, questionId, outcome: "not-answer", durationMs: Date.now() - startTime, model });
-    return json({ error: "not_answer" }, 400);
+    return json({ error: "not_answer", ...selfMarkPayload(userId, attemptId, questionId) }, 400);
   }
 
-  // Calculate read count (this is the first read)
-  const readCount = 1;
+  // This read is one more than the reads already used (carried in the request).
+  const readCount = readsUsed + 1;
 
   // Create transcription hash for token
   const transcriptionHash = createHash("sha256")

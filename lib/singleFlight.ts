@@ -41,6 +41,10 @@ export async function withSingleFlight<T>(key: string, fn: () => Promise<T>): Pr
     resolve = res as (value: unknown) => void;
     reject = rej;
   });
+  // The stored promise is only awaited by concurrent callers. When the first
+  // (only) caller's fn rejects, nobody awaits it, so mark it handled to avoid
+  // an unhandled rejection; concurrent callers still receive the rejection.
+  promise.catch(() => {});
 
   memory.set(key, { promise, resolve, reject });
 

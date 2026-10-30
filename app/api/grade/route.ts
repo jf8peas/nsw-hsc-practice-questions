@@ -12,7 +12,14 @@ import { llmGradingConfigured } from "@/lib/openrouter.server";
 import { checkIpRateLimit, checkUserRateLimit } from "@/lib/ratelimit.server";
 import { buildReceipt, saveResult, type ResultFields } from "@/lib/results/save.server";
 import { nextSydneyMidnight, toSydneyIso } from "@/lib/sydney";
-import { attemptFieldsOf, signSelfMarkToken, verifyAttemptToken } from "@/lib/tokens.server";
+import {
+  attemptFieldsOf,
+  hashAnswer,
+  signSelfMarkToken,
+  verifyAttemptToken,
+  verifyTranscriptionToken,
+} from "@/lib/tokens.server";
+import { extractTranscription, TRANSCRIPTION_MARKER } from "@/lib/transcribe.server";
 import { refundAiSlot, reserveAiSlot, type AiSlot } from "@/lib/usage.server";
 
 export const runtime = "nodejs";
@@ -83,6 +90,8 @@ export async function POST(req: Request) {
   const attemptId = typeof body.attemptId === "string" ? body.attemptId : "";
   const questionId = typeof body.questionId === "string" ? body.questionId : "";
   const answer = typeof body.answer === "string" ? body.answer.slice(0, MAX_ANSWER_LEN) : "";
+  const transcriptionToken =
+    typeof body.transcriptionToken === "string" ? body.transcriptionToken : undefined;
   if (!attemptId || !questionId || typeof body.attemptToken !== "string") {
     return bad("invalid_request");
   }
@@ -103,6 +112,30 @@ export async function POST(req: Request) {
     if (index < 0 || index >= question.options.length) return bad("invalid_request");
   }
 
+  // Photo answer: verify the transcription token (signature, expiry, binding to
+  // this student, attempt and question). The slot was already reserved by
+  // /api/transcribe, so no second slot is reserved here. When the answer still
+  // starts with <<<TRANSCRIPTION>>> the transcription portion must hash to the
+  // token's transcriptionHash; when the student switched to Type after a read
+  // the answer is graded as typed text and the carried slot is simply spent.
+  let handwritten = false;
+  if (transcriptionToken) {
+    const verifiedTx = verifyTranscriptionToken(transcriptionToken, {
+      uid: user.id,
+      attemptId,
+      questionId,
+    });
+    if (!verifiedTx.ok) return bad("invalid_request");
+    if (answer.startsWith(TRANSCRIPTION_MARKER)) {
+      const transcription = extractTranscription(answer);
+      if (transcription === null) return bad("invalid_request");
+      if (hashAnswer(transcription) !== verifiedTx.payload.transcriptionHash) {
+        return bad("invalid_request");
+      }
+      handwritten = true;
+    }
+  }
+
   // Already answered? (skipped when the database cannot be read: duplicates are
   // then prevented at save time by UNIQUE(attempt_id, question_id).)
   if (!degraded) {
@@ -121,7 +154,9 @@ export async function POST(req: Request) {
   let aiLimit: GradeResponse["aiLimit"];
   let slot: AiSlot | null = null;
   const cap = getConfig().llmDailyCap;
-  if (question.type === "short" && answer.trim() !== "" && !degraded) {
+  // A photo answer carries its reserved slot in the transcription token: never
+  // reserve a second one here (FR-020).
+  if (question.type === "short" && answer.trim() !== "" && !degraded && !transcriptionToken) {
     if (!llmGradingConfigured() || cap === 0) {
       skipLlm = true; // AI marking is off: the student self-marks, nothing to count
     } else {
@@ -155,6 +190,7 @@ export async function POST(req: Request) {
     graded = await gradeAnswer(questionId, answer, {
       optionOrder: token.mcOptionOrder[questionId],
       skipLlm,
+      handwritten,
     });
   } catch (error) {
     if (slot) await giveBack(slot); // never keep a slot for an answer that was not marked

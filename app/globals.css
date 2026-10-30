@@ -1579,3 +1579,55 @@ input {
     flex-basis: 56px;
   }
 }
+
+/* ---- Photo answers (specs/004-photo-answers) ------------------------------ */
+
+.answer-modes {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.answer-modes button {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: var(--rd-r-md);
+  border: 1.5px solid var(--rd-border-100);
+  background: var(--rd-white);
+  color: var(--rd-ink-700);
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.answer-modes button.on {
+  border-color: var(--rd-primary-500, #2563eb);
+  color: var(--rd-primary-500, #2563eb);
+  background: var(--rd-primary-50, #eff6ff);
+}
+
+.answer-modes button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.photo-thumb img {
+  border: 1px solid var(--rd-border-100);
+}
+
+.readback-text {
+  background: var(--rd-surface-50);
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-md);
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--rd-ink-700);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.readback-text del {
+  color: var(--rd-mute-500);
+  text-decoration: line-through;
+}

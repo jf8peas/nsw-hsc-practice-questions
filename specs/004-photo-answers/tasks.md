@@ -85,7 +85,7 @@
 
 ### Grade Route Changes
 
-- [ ] **TASK-106**: Extend `app/api/grade/route.ts`
+- [x] **TASK-106**: Extend `app/api/grade/route.ts`
   - Accept `transcriptionToken` in request body
   - If present:
     1. Verify token (signature, expiry, binding)
@@ -98,7 +98,7 @@
 
 ### Drafts Extension
 
-- [ ] **TASK-107**: Extend `lib/drafts.ts`
+- [x] **TASK-107**: Extend `lib/drafts.ts`
   - Add `PhotoDraft` interface
   - Export `savePhotoDraft(attemptId, questionId, draft): void`
   - Export `loadPhotoDraft(attemptId, questionId): PhotoDraft | null`
@@ -108,7 +108,7 @@
 
 ### Fake OpenRouter Extension
 
-- [ ] **TASK-108**: Extend `scripts/fake-openrouter.ts`
+- [x] **TASK-108**: Extend `scripts/fake-openrouter.ts`
   - Handle vision requests (messages with `image_url` content)
   - Return mock transcription JSON: `{ transcription, legible, answersQuestion, notes }`
   - Support `FAKE_VISION=pass|fail|illegible|not-answer` env var
@@ -120,7 +120,7 @@
 
 ### Photo Answer Panel
 
-- [ ] **TASK-201**: Create `components/PhotoAnswerPanel.tsx`
+- [x] **TASK-201**: Create `components/PhotoAnswerPanel.tsx`
   - File input: `<input type="file" accept="image/*" capture="environment" multiple />`
   - Canvas resize: longest side 1,600 px, JPEG quality 0.8
   - Thumbnails: show 1-3 photos with Retake and Remove buttons
@@ -132,7 +132,7 @@
 
 ### Read-Back Panel
 
-- [ ] **TASK-202**: Create `components/ReadBackPanel.tsx`
+- [x] **TASK-202**: Create `components/ReadBackPanel.tsx`
   - Display transcription as read-only HTML (KaTeX-rendered)
   - Show diagram descriptions in words
   - Show crossed-out work marked as crossed out
@@ -142,7 +142,7 @@
 
 ### Quiz Component Integration
 
-- [ ] **TASK-203**: Extend `components/Quiz.tsx`
+- [x] **TASK-203**: Extend `components/Quiz.tsx`
   - Add Photo mode toggle (Type/Photo) per question
   - Render PhotoAnswerPanel when Photo mode selected
   - Render ReadBackPanel after "Check my answer"
@@ -158,7 +158,7 @@
 
 ### API Tests
 
-- [ ] **TASK-301**: Create `tests/api/transcribe.test.ts`
+- [x] **TASK-301**: Create `tests/api/transcribe.test.ts`
   - All error codes (400, 401, 403, 404, 409, 429, 500, 503)
   - Image validation (magic bytes, size)
   - Rate limits, daily cap, read limit
@@ -166,7 +166,7 @@
   - Slot refund on failure
   - **Acceptance**: All tests pass with PGlite and fake-openrouter
 
-- [ ] **TASK-302**: Create `tests/api/grade-photo.test.ts`
+- [x] **TASK-302**: Create `tests/api/grade-photo.test.ts`
   - Transcription token verification
   - Hash mismatch rejection
   - Handwriting system prompt added
@@ -176,7 +176,7 @@
 
 ### Client Tests
 
-- [ ] **TASK-303**: Create `tests/client/photo-answer.test.tsx`
+- [x] **TASK-303**: Create `tests/client/photo-answer.test.tsx`
   - Photo capture, preview, retake/remove
   - Note box character limit
   - Read-back display, accept/retake
@@ -185,7 +185,7 @@
 
 ### Constitution Compliance Tests
 
-- [ ] **TASK-304**: Add tests for constitution requirements
+- [x] **TASK-304**: Add tests for constitution requirements
   - No image data in database or logs
   - 3-read limit enforced
   - Refund rules (illegible, not-answer, model failure)
@@ -196,17 +196,17 @@
 
 ## Phase 4: Launch Preparation
 
-- [ ] **TASK-401**: Update school consent wording
+- [x] **TASK-401**: Update school consent wording
   - "Answer photos are sent to an AI provider that may use them for training. Do not include personal or sensitive information in photos."
-  - **Acceptance**: Consent document updated (outside code)
+  - **Acceptance**: Consent document updated (outside code) — wording added to README "Before launch" section; the school's actual consent document is outside this repo and must be updated before launch.
 
-- [ ] **TASK-402**: Document `VISION_MODEL` in README
+- [x] **TASK-402**: Document `VISION_MODEL` in README
   - Add to environment variables table
   - **Acceptance**: README updated
 
 - [ ] **TASK-403**: Manual testing on real phone (390 px)
   - Follow quickstart.md scenarios
-  - **Acceptance**: All 12 scenarios pass
+  - **Acceptance**: All 12 scenarios pass — REQUIRES a real phone; not executable by code. Run the scenarios in `quickstart.md` before launch.
 
 ---
 

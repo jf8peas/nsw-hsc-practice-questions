@@ -349,6 +349,7 @@ Production and Preview **separately** (Preview must use a different database).
 | `CRON_SECRET` | yes, for retention | Vercel sends it as `Authorization: Bearer …` to `/api/cron/retention`; without it the route answers 503 and no one is deleted |
 | `OPENROUTER_API_KEY` | no | turns on LLM short-answer grading (otherwise students self-mark) |
 | `GRADING_MODEL` | no | model slug, default `deepseek/deepseek-chat` |
+| `VISION_MODEL` | no | model that transcribes handwritten photo answers; unset = photo answers are unavailable (the route answers 503 and the student self-marks) |
 | `SITE_URL` | no | sent to OpenRouter as `HTTP-Referer` |
 | `LLM_DAILY_CAP` | no | AI-graded short answers per student per Sydney day (default 40; `0` = AI marking off) |
 | `GRADE_RATE_LIMIT` | no | short-answer submissions per student per minute (default 20) |
@@ -374,7 +375,9 @@ a stable preview domain registered as a redirect URI in the Google OAuth client.
 
 **Before launch** (Principle II, not code): school approval / consent for holding
 students' name, email and results — including that the text they type for short
-answers is sent to a third-party AI service for marking — and a named person who
+answers is sent to a third-party AI service for marking, and that answer photos
+are sent to an AI provider that may use them for training (students must keep
+personal or sensitive information out of photos) — and a named person who
 handles `npm run delete-student` requests.
 
 Locally, copy `.env.example` to `.env.local`. `.env.local` is gitignored — never

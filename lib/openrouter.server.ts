@@ -120,6 +120,8 @@ interface GradeParams {
   answer: string;
   /** Extra marking guidance for the grader (from the answer key's `notes`). */
   markingGuidance?: string;
+  /** The answer was handwritten and transcribed from photos: credit working and method, ignore crossed-out work. */
+  handwritten?: boolean;
 }
 
 function clampMarks(v: unknown, max: number): number {
@@ -160,6 +162,9 @@ function buildMessages(p: GradeParams): ChatMessage[] {
     `Mark on the substance of the reasoning, not on matching the model answer's wording — accept equivalent phrasing, alternative valid arguments, correct diagrams described in words, and accurate recent real-world data. ` +
     `Accept equivalent notation and units (e.g. "m/s^2", "m s^-2" and "metres per second squared" are all the same). ` +
     `Do not award marks for correct material the question did not ask for. ` +
+    (p.handwritten
+      ? `This answer was handwritten and transcribed; award marks for correct working and method shown, as in HSC marking, and ignore crossed-out work. `
+      : "") +
     `Respond with JSON only, no prose outside it.`;
 
   const user =

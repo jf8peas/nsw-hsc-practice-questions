@@ -124,6 +124,52 @@ export function clearGraded(
   remove(store, gradedKey(attemptId, questionId));
 }
 
+// ---- the photo read-back (survives a reload so a read is not paid for twice) --
+
+/**
+ * The accepted read-back of a photo answer, kept in sessionStorage so a page
+ * reload does not trigger another paid read (FR-024). Photos that have not yet
+ * been read are never stored: a reload before "Check my answer" loses them.
+ */
+export interface PhotoDraft {
+  attemptId: string;
+  questionId: string;
+  transcription: string; // raw text from the vision model (with LaTeX)
+  transcriptionHtml: string; // KaTeX-rendered HTML for display
+  transcriptionToken: string; // signed token for /api/grade
+  note?: string; // optional typed note (≤500 chars)
+  reservedSlot?: { userId: string; sydneyDate: string };
+  readCount: number; // how many reads this question has used (1-3)
+}
+
+export const photoDraftKey = (attemptId: string, questionId: string) =>
+  `photo-${attemptId}-${questionId}`;
+
+export function savePhotoDraft(
+  attemptId: string,
+  questionId: string,
+  draft: PhotoDraft,
+  store: StorageLike | null = tabStorage(),
+) {
+  write(store, photoDraftKey(attemptId, questionId), draft);
+}
+
+export function loadPhotoDraft(
+  attemptId: string,
+  questionId: string,
+  store: StorageLike | null = tabStorage(),
+): PhotoDraft | null {
+  return read<PhotoDraft>(store, photoDraftKey(attemptId, questionId));
+}
+
+export function clearPhotoDraft(
+  attemptId: string,
+  questionId: string,
+  store: StorageLike | null = tabStorage(),
+) {
+  remove(store, photoDraftKey(attemptId, questionId));
+}
+
 // ---- the attempt itself (lets a quiz run when the database is down) -----
 
 export interface AttemptPayload {

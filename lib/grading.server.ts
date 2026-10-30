@@ -11,6 +11,8 @@ export interface GradeOptions {
   optionOrder?: number[];
   /** Do not call the LLM (the database is unavailable, so the daily cap cannot be reserved). */
   skipLlm?: boolean;
+  /** The answer was handwritten and transcribed from photos: credit working and method, ignore crossed-out work. */
+  handwritten?: boolean;
 }
 
 /**
@@ -41,6 +43,27 @@ export function getReviewMaterial(unitId: string, conceptId: string): ReviewMate
           correctText,
         };
       }),
+  };
+}
+
+/**
+ * Answer-key material for the self-mark screen when a photo read fails (spec 004 FR-019):
+ * the model answer, rubric and max marks, so the student can mark their photo answer
+ * themselves. This is the same material the grade route returns for self-marking today.
+ * Lives here (not in the transcribe route) so the answer key is only ever read through
+ * this module (spec 002 FR-043).
+ */
+export function getSelfMarkMaterial(questionId: string): {
+  modelAnswer?: string;
+  rubric: string[];
+  maxMarks?: number;
+} {
+  const found = getQuestion(questionId);
+  const key = getAnswer(questionId);
+  return {
+    modelAnswer: key?.modelAnswer,
+    rubric: key?.rubric ?? [],
+    maxMarks: found?.question.maxMarks,
   };
 }
 
@@ -160,6 +183,7 @@ export async function gradeAnswer(
     maxMarks: question.maxMarks,
     answer,
     markingGuidance: key.notes,
+    handwritten: options.handwritten,
   });
 
   if (llm) {

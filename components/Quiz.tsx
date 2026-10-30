@@ -5,27 +5,44 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Formula } from "@/components/Formula";
+import { PhotoAnswerPanel, type PhotoFile } from "@/components/PhotoAnswerPanel";
+import { ReadBackPanel } from "@/components/ReadBackPanel";
 import {
   clearDraft,
   clearGraded,
+  clearPhotoDraft,
   loadAttemptPayload,
   loadDraft,
   loadGraded,
+  loadPhotoDraft,
   saveAttemptPayload,
   saveDraft,
   saveGraded,
+  savePhotoDraft,
   type AttemptPayload,
   type GradedState,
+  type PhotoDraft,
 } from "@/lib/drafts";
 import type { AlreadyAnswered, GradeResponse, GradeResult } from "@/lib/grading";
 import { reloadPage } from "@/lib/navigation";
 import { enqueueReceipt, flushOutbox, pendingCount, sendReceipt } from "@/lib/outbox";
 import { startAttempt } from "@/lib/startAttempt";
 import { formatResetMessage } from "@/lib/sydney";
+import { formatAnswer } from "@/lib/transcribe-format";
 
 type Answered = Record<string, { marks: number; max: number }>;
 
+/** A photo read that could not be completed: the student self-marks (FR-018/FR-019). */
+interface PhotoFail {
+  message: string;
+  selfMarkToken?: string;
+  modelAnswer?: string;
+  rubric?: string[];
+  maxMarks?: number;
+}
+
 const FLUSH_INTERVAL_MS = 10_000;
+const PHOTO_SELF_MARK_ANSWER = "[photo answer, not transcribed]";
 
 export function Quiz({
   uid,
@@ -63,6 +80,13 @@ export function Quiz({
   const [sessionEnded, setSessionEnded] = useState(false);
   const [pending, setPending] = useState(0);
   const [lost, setLost] = useState(0);
+
+  // ---- photo answer state (specs/004-photo-answers) ------------------------
+  const [mode, setMode] = useState<"type" | "photo">("type");
+  const [photoDraft, setPhotoDraft] = useState<PhotoDraft | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoFail, setPhotoFail] = useState<PhotoFail | null>(null);
 
   const current = questions[i];
   const maxTotal = questions.reduce((s, q) => s + q.maxMarks, 0);
@@ -104,13 +128,20 @@ export function Quiz({
     saveAttemptPayload(attemptId, { ...payload, answered });
   }, [attemptId, payload, answered]);
 
-  // restore the typed answer and any pending grade/self-mark step for this question
+  // restore the typed answer, any pending grade/self-mark step, and the photo
+  // read-back (which survives a reload so a read is not paid for twice) for this question
   useEffect(() => {
     if (!loaded || !current) return;
     const g = loadGraded(attemptId, current.id);
     setGraded(g);
     setDraft(g ? g.answer : loadDraft(attemptId, current.id));
     setError(null);
+    const pd = loadPhotoDraft(attemptId, current.id);
+    setPhotoDraft(pd);
+    setMode(pd ? "photo" : "type");
+    setPhotoBusy(false);
+    setPhotoError(null);
+    setPhotoFail(null);
   }, [loaded, attemptId, current]);
 
   // ---- retry outbox: unsaved results are re-sent in the background -----------
@@ -149,7 +180,7 @@ export function Quiz({
     if (current) saveGraded(attemptId, current.id, next);
   }
 
-  async function grade(answer: string, displayIndex?: number) {
+  async function grade(answer: string, displayIndex?: number, transcriptionToken?: string) {
     if (!current) return;
     setBusy(true);
     setError(null);
@@ -157,7 +188,13 @@ export function Quiz({
       const res = await fetch("/api/grade", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ attemptId, attemptToken, questionId: current.id, answer }),
+        body: JSON.stringify({
+          attemptId,
+          attemptToken,
+          questionId: current.id,
+          answer,
+          ...(transcriptionToken ? { transcriptionToken } : {}),
+        }),
       });
 
       if (res.status === 401) {
@@ -177,6 +214,7 @@ export function Quiz({
         const result = body.result as GradeResult;
         recordMarks(current.id, result.marksAwarded ?? 0, result.maxMarks);
         clearDraft(attemptId, current.id);
+        clearPhotoDraft(attemptId, current.id);
         updateGraded({ answer, result, marks: result.marksAwarded ?? 0, pickedDisplay: displayIndex });
         return;
       }
@@ -193,6 +231,7 @@ export function Quiz({
       const data: GradeResponse = await res.json();
       queueReceipt(data.receipt);
       clearDraft(attemptId, current.id);
+      clearPhotoDraft(attemptId, current.id);
       const marks = data.result.needsSelfMark ? null : data.result.marksAwarded;
       if (marks !== null) recordMarks(current.id, marks, data.result.maxMarks);
       updateGraded({
@@ -276,6 +315,219 @@ export function Quiz({
     if (current) saveDraft(attemptId, current.id, text);
   }
 
+  // ---- photo answer flow (specs/004-photo-answers) -------------------------
+
+  function switchToType() {
+    clearPhotoDraft(attemptId, current?.id ?? "");
+    setPhotoDraft(null);
+    setPhotoFail(null);
+    setPhotoError(null);
+    setMode("type");
+  }
+
+  function switchToPhoto() {
+    setMode("photo");
+    setError(null);
+  }
+
+  function retakePhoto() {
+    clearPhotoDraft(attemptId, current?.id ?? "");
+    setPhotoDraft(null);
+    setPhotoFail(null);
+    setPhotoError(null);
+  }
+
+  /** Turn a JPEG data URL back into a Blob for the multipart upload. */
+  function dataUrlToBlob(dataUrl: string): Blob {
+    const [meta, b64] = dataUrl.split(",");
+    const mime = /data:(.*?);/.exec(meta)?.[1] ?? "image/jpeg";
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  function handleTranscribeError(body: Record<string, unknown>, status: number) {
+    const sm = body.selfMarkToken;
+    const selfMark = typeof sm === "string" ? sm : undefined;
+    const modelAnswer = typeof body.modelAnswer === "string" ? body.modelAnswer : undefined;
+    const rubric = Array.isArray(body.rubric) ? body.rubric.filter((x): x is string => typeof x === "string") : undefined;
+    const maxMarks = typeof body.maxMarks === "number" ? body.maxMarks : undefined;
+    switch (body.error) {
+      case "illegible":
+        setPhotoError("We couldn't read this clearly. Please retake the photo.");
+        break;
+      case "not_answer":
+        setPhotoError("That doesn't look like an answer to this question. Please retake.");
+        break;
+      case "over_read_limit":
+        setPhotoError(
+          "You have used all photo reads for this question. Type your answer or mark it yourself.",
+        );
+        break;
+      case "over_daily_cap":
+        setPhotoFail({
+          message: formatResetMessage(new Date()),
+          selfMarkToken: selfMark,
+          modelAnswer,
+          rubric,
+          maxMarks,
+        });
+        break;
+      case "model_fail":
+      case "model_unavailable":
+      case "db_unavailable":
+        setPhotoFail({
+          message: "AI marking is unavailable right now. Mark this one yourself.",
+          selfMarkToken: selfMark,
+          modelAnswer,
+          rubric,
+          maxMarks,
+        });
+        break;
+      case "rate_limited":
+        setPhotoError("You're submitting answers too fast. Try again in a moment.");
+        break;
+      default:
+        setPhotoError(`Could not read your photos (${status}). Please try again.`);
+    }
+  }
+
+  async function checkPhoto(photos: PhotoFile[], note: string) {
+    if (!current || photoBusy) return;
+    setPhotoBusy(true);
+    setPhotoError(null);
+    setPhotoFail(null);
+    try {
+      const form = new FormData();
+      form.append("attemptId", attemptId);
+      form.append("attemptToken", attemptToken);
+      form.append("questionId", current.id);
+      // The reads already used for this question, carried by the last token
+      // (0 for the first read): the server enforces the 3-read limit (FR-012).
+      form.append("readCount", String(photoDraft?.readCount ?? 0));
+      for (const p of photos) {
+        form.append("images", dataUrlToBlob(p.dataUrl), p.name || "photo.jpg");
+      }
+      if (note) form.append("note", note);
+
+      const res = await fetch("/api/transcribe", { method: "POST", body: form });
+      if (res.status === 401) {
+        setSessionEnded(true);
+        return;
+      }
+      if (res.status === 409) {
+        // Already answered elsewhere: show the stored mark and carry on.
+        const body = (await res.json().catch(() => ({}))) as { result?: GradeResult };
+        const result = body.result as GradeResult;
+        recordMarks(current.id, result.marksAwarded ?? 0, result.maxMarks);
+        clearPhotoDraft(attemptId, current.id);
+        updateGraded({ answer: "", result, marks: result.marksAwarded ?? 0 });
+        return;
+      }
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+        handleTranscribeError(body, res.status);
+        return;
+      }
+
+      const data = (await res.json()) as {
+        transcription: string;
+        transcriptionHtml: string;
+        transcriptionToken: string;
+        note?: string;
+        readCount: number;
+        reservedSlot?: { userId: string; sydneyDate: string };
+      };
+      const draft: PhotoDraft = {
+        attemptId,
+        questionId: current.id,
+        transcription: data.transcription,
+        transcriptionHtml: data.transcriptionHtml,
+        transcriptionToken: data.transcriptionToken,
+        note: data.note,
+        reservedSlot: data.reservedSlot,
+        readCount: data.readCount,
+      };
+      savePhotoDraft(attemptId, current.id, draft);
+      setPhotoDraft(draft);
+    } catch (e) {
+      setPhotoError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  async function acceptPhoto() {
+    if (!current || !photoDraft || busy) return;
+    const answer = formatAnswer(photoDraft.transcription, photoDraft.note);
+    await grade(answer, undefined, photoDraft.transcriptionToken);
+  }
+
+  async function photoSelfMark(correct: boolean) {
+    if (!current || !photoFail?.selfMarkToken || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const answer = PHOTO_SELF_MARK_ANSWER;
+      const res = await fetch("/api/results/self-mark", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          attemptId,
+          attemptToken,
+          questionId: current.id,
+          answer,
+          correct,
+          token: photoFail.selfMarkToken,
+        }),
+      });
+      if (res.status === 401) {
+        setSessionEnded(true);
+        return;
+      }
+      if (res.status === 409) {
+        const body = (await res.json().catch(() => ({}))) as { result?: { marksAwarded?: number } };
+        const marks = typeof body.result?.marksAwarded === "number" ? body.result.marksAwarded : 0;
+        recordMarks(current.id, marks, current.maxMarks);
+        updateGraded({
+          answer,
+          result: {
+            questionId: current.id,
+            type: "short",
+            maxMarks: current.maxMarks,
+            marksAwarded: marks,
+            needsSelfMark: false,
+          },
+          marks,
+        });
+        return;
+      }
+      if (!res.ok) throw new Error(`Could not save your mark (${res.status})`);
+      const body: { receipt?: string } = await res.json();
+      queueReceipt(body.receipt);
+      const marks = correct ? current.maxMarks : 0;
+      recordMarks(current.id, marks, current.maxMarks);
+      updateGraded({
+        answer,
+        result: {
+          questionId: current.id,
+          type: "short",
+          maxMarks: current.maxMarks,
+          marksAwarded: marks,
+          needsSelfMark: false,
+          modelAnswer: photoFail.modelAnswer,
+          rubric: photoFail.rubric,
+        },
+        marks,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function next() {
     if (!current) return;
     clearGraded(attemptId, current.id);
@@ -287,6 +539,10 @@ export function Quiz({
     setGraded(null);
     setDraft("");
     setError(null);
+    setPhotoDraft(null);
+    setPhotoFail(null);
+    setPhotoError(null);
+    setPhotoBusy(false);
   }
 
   async function retry() {
@@ -453,24 +709,107 @@ export function Quiz({
 
         {isShort ? (
           <>
-            <textarea
-              className={`q-textarea${q.maxMarks >= 5 ? " tall" : ""}`}
-              value={draft}
-              onChange={(e) => onDraftChange(e.target.value)}
-              placeholder="Type your answer here..."
-              disabled={result !== null}
-            />
-
-            {result === null ? (
+            <div className="answer-modes" role="tablist" aria-label="Answer mode">
               <button
-                className="rd-btn"
-                style={{ width: "100%", justifyContent: "center" }}
-                onClick={submitShort}
-                disabled={busy || !draft.trim()}
+                type="button"
+                role="tab"
+                aria-selected={mode === "type"}
+                className={mode === "type" ? "on" : ""}
+                onClick={switchToType}
+                disabled={result !== null}
               >
-                {busy ? "Marking…" : "Submit answer"}
+                Type
               </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "photo"}
+                className={mode === "photo" ? "on" : ""}
+                onClick={switchToPhoto}
+                disabled={result !== null}
+              >
+                Photo
+              </button>
+            </div>
+
+            {mode === "type" ? (
+              <>
+                <textarea
+                  className={`q-textarea${q.maxMarks >= 5 ? " tall" : ""}`}
+                  value={draft}
+                  onChange={(e) => onDraftChange(e.target.value)}
+                  placeholder="Type your answer here..."
+                  disabled={result !== null}
+                />
+                {result === null && (
+                  <button
+                    className="rd-btn"
+                    style={{ width: "100%", justifyContent: "center" }}
+                    onClick={submitShort}
+                    disabled={busy || !draft.trim()}
+                  >
+                    {busy ? "Marking…" : "Submit answer"}
+                  </button>
+                )}
+              </>
             ) : (
+              <>
+                {photoDraft ? (
+                  <ReadBackPanel
+                    transcriptionHtml={photoDraft.transcriptionHtml}
+                    note={photoDraft.note}
+                    onAccept={() => void acceptPhoto()}
+                    onRetake={retakePhoto}
+                    busy={busy}
+                  />
+                ) : (
+                  <PhotoAnswerPanel
+                    onCheck={(photos, note) => void checkPhoto(photos, note)}
+                    busy={photoBusy}
+                    disabled={result !== null}
+                  />
+                )}
+
+                {photoError && (
+                  <div className="notice warn" role="status" style={{ marginTop: 8 }}>
+                    {photoError}
+                  </div>
+                )}
+
+                {photoFail && (
+                  <div className="photo-fail" style={{ marginTop: 12 }}>
+                    <div className="notice" role="status">
+                      {photoFail.message}
+                    </div>
+                    {photoFail.modelAnswer && (
+                      <div className="model-answer">
+                        <div className="label">Model answer</div>
+                        {photoFail.modelAnswer}
+                        {photoFail.rubric && photoFail.rubric.length > 0 && (
+                          <ul>
+                            {photoFail.rubric.map((r, idx) => (
+                              <li key={idx}>{r}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                    {photoFail.selfMarkToken && (
+                      <div className="self-mark">
+                        <button className="wrong" onClick={() => void photoSelfMark(false)} disabled={busy}>
+                          I got it wrong
+                        </button>
+                        <button className="right" onClick={() => void photoSelfMark(true)} disabled={busy}>
+                          I got it right
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {result !== null && (
               <>
                 {result.feedback && marks !== null && (
                   <div className="feedback">

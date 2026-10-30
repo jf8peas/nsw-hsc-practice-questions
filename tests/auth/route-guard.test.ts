@@ -23,6 +23,7 @@ const DEGRADED_CAPABLE = new Set([
   "app/api/grade/route.ts",
   "app/api/results/self-mark/route.ts",
   "app/api/results/retry/route.ts",
+  "app/api/transcribe/route.ts",
 ]);
 
 /**

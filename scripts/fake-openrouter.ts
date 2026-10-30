@@ -3,6 +3,7 @@
  * real model (specs/002-learn-from-mistakes/quickstart.md).
  *
  *   FAKE_REVIEW=pass|fail|fail-once|down npx tsx scripts/fake-openrouter.ts
+ *   FAKE_VISION=pass|fail|illegible|not-answer npx tsx scripts/fake-openrouter.ts
  *
  * then in .env.local:
  *   OPENROUTER_API_KEY=local-test
@@ -13,6 +14,12 @@
  *   fail-once  the first review of each concept fails, later ones pass (fail, regenerate, pass)
  *   down       every review request answers HTTP 503 (the reviewer is unavailable)
  *
+ *   FAKE_VISION:
+ *   pass       vision requests transcribe successfully (legible, answers the question)
+ *   fail       every vision request answers HTTP 500 (the model is unavailable)
+ *   illegible  the transcription is unreadable (legible: false)
+ *   not-answer the photo is not an answer to the question (answersQuestion: false)
+ *
  * Generators always answer. Each request is logged with its purpose and model. Development
  * tool only: it is never imported by the app.
  */
@@ -22,6 +29,11 @@ const PORT = Number(process.env.FAKE_PORT ?? 4010);
 const MODE = (process.env.FAKE_REVIEW ?? "pass") as "pass" | "fail" | "fail-once" | "down";
 if (!["pass", "fail", "fail-once", "down"].includes(MODE)) {
   console.error(`FAKE_REVIEW must be pass, fail, fail-once or down (got "${MODE}")`);
+  process.exit(1);
+}
+const VISION_MODE = (process.env.FAKE_VISION ?? "pass") as "pass" | "fail" | "illegible" | "not-answer";
+if (!["pass", "fail", "illegible", "not-answer"].includes(VISION_MODE)) {
+  console.error(`FAKE_VISION must be pass, fail, illegible or not-answer (got "${VISION_MODE}")`);
   process.exit(1);
 }
 
@@ -51,6 +63,26 @@ function handle(body: { model?: string; messages?: Array<{ role: string; content
   const task = /\[task: ([\w-]+)\]/.exec(system)?.[1] ?? "grading";
   const concept = lineOf(String(typeof userRaw === "string" ? userRaw : ""), "Concept:") || "(unknown)";
   console.log(`[fake] ${task} model=${body.model ?? "?"} concept="${concept}"`);
+
+  // Vision (photo transcription): the user message carries image_url parts.
+  const isVision =
+    Array.isArray(userRaw) && userRaw.some((c) => c && typeof c === "object" && "image_url" in c);
+  if (isVision) {
+    if (VISION_MODE === "fail") return reply("", 500);
+    if (VISION_MODE === "illegible") {
+      return reply(
+        JSON.stringify({ transcription: "", legible: false, answersQuestion: true, notes: "too blurry to read" }),
+      );
+    }
+    if (VISION_MODE === "not-answer") {
+      return reply(
+        JSON.stringify({ transcription: "", legible: true, answersQuestion: false, notes: "not an answer to the question" }),
+      );
+    }
+    return reply(
+      JSON.stringify({ transcription: "F = ma", legible: true, answersQuestion: true, notes: "" }),
+    );
+  }
 
   if (task === "concept-summary") {
     const wantsPicture = /diagram|graph|curve|model/i.test(concept);
