@@ -87,6 +87,10 @@ export function Quiz({
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoFail, setPhotoFail] = useState<PhotoFail | null>(null);
+  // The hidden file input lives in PhotoAnswerPanel; the mode toggle is the only
+  // entry point, so it opens the camera / file picker straight away.
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [openPhotoPicker, setOpenPhotoPicker] = useState(false);
 
   const current = questions[i];
   const maxTotal = questions.reduce((s, q) => s + q.maxMarks, 0);
@@ -328,7 +332,17 @@ export function Quiz({
   function switchToPhoto() {
     setMode("photo");
     setError(null);
+    setOpenPhotoPicker(true);
   }
+
+  // Open the camera / file picker as soon as the photo panel (and its hidden
+  // input) is mounted — there is no separate "Take photo" button.
+  useEffect(() => {
+    if (mode === "photo" && openPhotoPicker) {
+      setOpenPhotoPicker(false);
+      photoInputRef.current?.click();
+    }
+  }, [mode, openPhotoPicker]);
 
   function retakePhoto() {
     clearPhotoDraft(attemptId, current?.id ?? "");
@@ -746,6 +760,24 @@ export function Quiz({
                 disabled={result !== null}
               >
                 <svg
+                  className="photo-icon-desktop"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="12" cy="9.5" r="2.2" />
+                  <path d="M5 13.5 L19 13.5 L19 19 L5 19 Z" />
+                </svg>
+                <span className="photo-label-desktop">Upload photo</span>
+                <svg
+                  className="photo-icon-mobile"
                   viewBox="0 0 24 24"
                   width="14"
                   height="14"
@@ -760,7 +792,7 @@ export function Quiz({
                   <circle cx="17" cy="9.5" r="2.8" />
                   <path d="M3 16 L21 16 L21 20 L3 20 Z" />
                 </svg>
-                Upload photo
+                <span className="photo-label-mobile">Take photo</span>
               </button>
             </div>
 
@@ -817,6 +849,7 @@ export function Quiz({
                     onCheck={(photos, note) => void checkPhoto(photos, note)}
                     busy={photoBusy}
                     disabled={result !== null}
+                    inputRef={photoInputRef}
                   />
                 )}
 

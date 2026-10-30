@@ -1619,6 +1619,13 @@ input {
   cursor: default;
 }
 
+/* The photo tab reads "Upload photo" (image icon) on desktop and "Take photo"
+   (camera icon) on phones; the hidden variant is swapped in by the media query. */
+.answer-modes .photo-icon-mobile,
+.answer-modes .photo-label-mobile {
+  display: none;
+}
+
 /* Compact bottom action bar under the typed answer box */
 .answer-bar {
   display: flex;
@@ -1649,6 +1656,16 @@ input {
   .answer-submit {
     width: 100%;
     justify-content: center;
+  }
+
+  .answer-modes .photo-icon-desktop,
+  .answer-modes .photo-label-desktop {
+    display: none;
+  }
+
+  .answer-modes .photo-icon-mobile,
+  .answer-modes .photo-label-mobile {
+    display: inline;
   }
 }
 

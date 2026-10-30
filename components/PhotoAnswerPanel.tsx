@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 /**
  * Photo answer capture (specs/004-photo-answers).
@@ -53,15 +53,17 @@ export function PhotoAnswerPanel({
   onCheck,
   busy,
   disabled,
+  inputRef,
 }: {
   onCheck: (photos: PhotoFile[], note: string) => void;
   busy: boolean;
   disabled: boolean;
+  /** Hidden file input owned by the quiz so the mode toggle can open it directly. */
+  inputRef: { current: HTMLInputElement | null };
 }) {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [note, setNote] = useState("");
   const [decodeError, setDecodeError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFiles(files: FileList | null) {
     if (!files || busy || disabled) return;
@@ -104,18 +106,6 @@ export function PhotoAnswerPanel({
         onChange={(e) => void handleFiles(e.target.files)}
         data-testid="photo-input"
       />
-
-      {photos.length === 0 && (
-        <button
-          type="button"
-          className="rd-btn"
-          style={{ width: "100%", justifyContent: "center" }}
-          onClick={() => inputRef.current?.click()}
-          disabled={!canAdd}
-        >
-          Take photo
-        </button>
-      )}
 
       {photos.length > 0 && (
         <div className="photo-thumbs" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
