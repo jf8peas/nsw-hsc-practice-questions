@@ -99,8 +99,8 @@ const pickPhoto = async () => {
 describe("photo answer flow", () => {
   it("offers Type and Photo modes on a short-answer question", () => {
     mount();
-    expect(screen.getByRole("tab", { name: "Type" })).toBeTruthy();
-    expect(screen.getByRole("tab", { name: "Photo" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Type answer" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Upload photo" })).toBeTruthy();
     expect(screen.getByPlaceholderText("Type your answer here...")).toBeTruthy();
   });
 
@@ -118,7 +118,7 @@ describe("photo answer flow", () => {
       return json({});
     };
     mount();
-    fireEvent.click(screen.getByRole("tab", { name: "Photo" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Upload photo" }));
     await pickPhoto();
 
     await waitFor(() => expect(screen.getByText(/Add another photo/)).toBeTruthy());
@@ -158,7 +158,7 @@ describe("photo answer flow", () => {
       return json({});
     };
     mount();
-    fireEvent.click(screen.getByRole("tab", { name: "Photo" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Upload photo" }));
     await pickPhoto();
     fireEvent.click(screen.getByTestId("check-answer"));
     await waitFor(() => expect(screen.getByTestId("accept-readback")).toBeTruthy());
@@ -185,7 +185,7 @@ describe("photo answer flow", () => {
       return json({});
     };
     mount();
-    fireEvent.click(screen.getByRole("tab", { name: "Photo" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Upload photo" }));
     await pickPhoto();
     fireEvent.click(screen.getByTestId("check-answer"));
     await waitFor(() => expect(screen.getByTestId("retake-readback")).toBeTruthy());
@@ -217,7 +217,7 @@ describe("photo answer flow", () => {
       return json({});
     };
     mount();
-    fireEvent.click(screen.getByRole("tab", { name: "Photo" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Upload photo" }));
     await pickPhoto();
     fireEvent.click(screen.getByTestId("check-answer"));
     await waitFor(() =>

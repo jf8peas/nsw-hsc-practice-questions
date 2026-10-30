@@ -665,6 +665,7 @@ export function Quiz({
     : graded?.aiLimit
       ? formatResetMessage(new Date()) // "AI marking is paused until midnight Sydney time (Tue 27 Oct). Mark this one yourself."
       : null;
+  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
 
   return (
     <>
@@ -718,7 +719,23 @@ export function Quiz({
                 onClick={switchToType}
                 disabled={result !== null}
               >
-                Type
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="2.5" y="4" width="19" height="15" rx="2.5" />
+                  <line x1="5" y1="8" x2="19" y2="8" />
+                  <line x1="5" y1="11.5" x2="19" y2="11.5" />
+                  <line x1="5" y1="15" x2="19" y2="15" />
+                </svg>
+                Type answer
               </button>
               <button
                 type="button"
@@ -728,7 +745,22 @@ export function Quiz({
                 onClick={switchToPhoto}
                 disabled={result !== null}
               >
-                Photo
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="13" rx="2" />
+                  <circle cx="17" cy="9.5" r="2.8" />
+                  <path d="M3 16 L21 16 L21 20 L3 20 Z" />
+                </svg>
+                Upload photo
               </button>
             </div>
 
@@ -742,14 +774,32 @@ export function Quiz({
                   disabled={result !== null}
                 />
                 {result === null && (
-                  <button
-                    className="rd-btn"
-                    style={{ width: "100%", justifyContent: "center" }}
-                    onClick={submitShort}
-                    disabled={busy || !draft.trim()}
-                  >
-                    {busy ? "Marking…" : "Submit answer"}
-                  </button>
+                  <div className="answer-bar">
+                    <span className="answer-meta">
+                      {wordCount} {wordCount === 1 ? "word" : "words"} · Draft saved
+                    </span>
+                    <button
+                      type="button"
+                      className="rd-btn primary answer-submit"
+                      onClick={submitShort}
+                      disabled={busy || !draft.trim()}
+                    >
+                      {busy ? "Marking…" : "Submit answer"}
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="14"
+                        height="14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M5 5 L19 12 L5 19" />
+                      </svg>
+                    </button>
+                  </div>
                 )}
               </>
             ) : (
