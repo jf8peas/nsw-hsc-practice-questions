@@ -19,6 +19,10 @@ import {
   concepts as y12PhysAdvMechConcepts,
   retired as y12PhysAdvMechRetired,
 } from "./units/y12-physics-advanced-mechanics/concepts";
+import { meta as y12PhysCircPracMeta } from "./units/y12-physics-circular-motion-practical/meta";
+import { questions as y12PhysCircPracQuestions } from "./units/y12-physics-circular-motion-practical/questions";
+import { concepts as y12PhysCircPracConcepts, retired as y12PhysCircPracRetired } from "./units/y12-physics-circular-motion-practical/concepts";
+import { conceptOfQuestionId as y12PhysCircPracTags } from "./units/y12-physics-circular-motion-practical/concept-tags";
 import { meta as y11EconEssayMeta } from "./units/y11-economics-essay-scaffold/meta";
 import { questions as y11EconEssayQuestions } from "./units/y11-economics-essay-scaffold/questions";
 import { concepts as y11EconEssayConcepts, retired as y11EconEssayRetired } from "./units/y11-economics-essay-scaffold/concepts";
@@ -32,6 +36,12 @@ import { conceptOfQuestionId as y11EconEssayTags } from "./units/y11-economics-e
  * PUBLIC — safe to import from client components. No answer keys.
  */
 export const UNITS: Unit[] = [
+  {
+    ...y12PhysCircPracMeta,
+    questions: tagQuestions(y12PhysCircPracQuestions, y12PhysCircPracTags),
+    concepts: y12PhysCircPracConcepts,
+    retired: y12PhysCircPracRetired,
+  },
   {
     ...y12PhysAdvMechMeta,
     questions: y12PhysAdvMechQuestions,

@@ -6,6 +6,7 @@ import { answers as y11EconSupplyDemandAnswers } from "../units/y11-economics-su
 import { answers as y11EconPreliminaryAnswers } from "../units/y11-economics-preliminary/answers";
 import { answers as y11PhysPreliminaryAnswers } from "../units/y11-physics-preliminary/answers";
 import { answers as y12PhysAdvMechAnswers } from "../units/y12-physics-advanced-mechanics/answers";
+import { answers as y12PhysCircPracAnswers } from "../units/y12-physics-circular-motion-practical/answers";
 import { answers as y11EconEssayAnswers } from "../units/y11-economics-essay-scaffold/answers";
 
 /**
@@ -20,6 +21,7 @@ const ALL_ANSWERS: AnswerSet = {
   ...y11PhysPreliminaryAnswers,
   ...y11EconEssayAnswers,
   ...y12PhysAdvMechAnswers,
+  ...y12PhysCircPracAnswers,
 };
 
 export function getAnswer(questionId: string): Answer | undefined {
