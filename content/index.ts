@@ -27,6 +27,10 @@ import { meta as y11EconEssayMeta } from "./units/y11-economics-essay-scaffold/m
 import { questions as y11EconEssayQuestions } from "./units/y11-economics-essay-scaffold/questions";
 import { concepts as y11EconEssayConcepts, retired as y11EconEssayRetired } from "./units/y11-economics-essay-scaffold/concepts";
 import { conceptOfQuestionId as y11EconEssayTags } from "./units/y11-economics-essay-scaffold/concept-tags";
+import { meta as y12EconGlobalMeta } from "./units/y12-economics-global-economy/meta";
+import { questions as y12EconGlobalQuestions } from "./units/y12-economics-global-economy/questions";
+import { concepts as y12EconGlobalConcepts, retired as y12EconGlobalRetired } from "./units/y12-economics-global-economy/concepts";
+import { conceptOfQuestionId as y12EconGlobalTags } from "./units/y12-economics-global-economy/concept-tags";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -71,6 +75,12 @@ export const UNITS: Unit[] = [
     questions: tagQuestions(y11EconEssayQuestions, y11EconEssayTags),
     concepts: y11EconEssayConcepts,
     retired: y11EconEssayRetired,
+  },
+  {
+    ...y12EconGlobalMeta,
+    questions: y12EconGlobalQuestions,
+    concepts: y12EconGlobalConcepts,
+    retired: y12EconGlobalRetired,
   },
 ];
 

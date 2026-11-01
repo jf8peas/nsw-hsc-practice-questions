@@ -41,7 +41,12 @@ function readShipped(): ShippedIds {
   }
 }
 
-const SOURCE_RE = /^[A-Z][A-Za-z'’ .-]+ (19|20)\d{2} (Trial|Half-yearly|Common Test 1|Interim), Q\d{1,2}$/;
+// A short-answer part may name its part, e.g. "Q24(a)" or "Q22(a)(i)".
+const SOURCE_RE = /^[A-Z][A-Za-z'’ .-]+ (19|20)\d{2} (Trial|Half-yearly|Common Test 1|Interim), Q\d{1,2}(\([a-z]\))?(\((i|ii|iii|iv|v|vi)\))?$/;
+
+// In a unit whose other questions are copied from school papers, a question written new for the
+// unit says so, so that every question in the unit shows where it came from.
+const ORIGINAL_SOURCE = "Original question";
 
 async function main() {
   const seenQuestionIds = new Set<string>();
@@ -92,8 +97,8 @@ async function main() {
 
       // Principle V: a verbatim school-paper question names its source, and never an HSC paper
       if (q.source !== undefined) {
-        if (!SOURCE_RE.test(q.source)) {
-          err(`${q.id}: source "${q.source}" must look like "<School> <Year> <Trial|Half-yearly|Common Test 1>, Q<n>"`);
+        if (q.source !== ORIGINAL_SOURCE && !SOURCE_RE.test(q.source)) {
+          err(`${q.id}: source "${q.source}" must look like "<School> <Year> <Trial|Half-yearly|Common Test 1>, Q<n>", optionally with a part such as Q<n>(a) or Q<n>(a)(i)`);
         }
         if (/\b(HSC|NESA)\b/i.test(q.source)) err(`${q.id}: source "${q.source}" names an HSC/NESA paper; HSC questions are not allowed`);
       }
