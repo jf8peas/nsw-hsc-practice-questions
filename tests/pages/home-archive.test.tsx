@@ -102,7 +102,9 @@ async function setup(units: Unit[]) {
 
 async function renderPage(searchParams?: Record<string, string>) {
   const Page = (await import("@/app/page")).default;
-  return Page(searchParams ? { searchParams: Promise.resolve(searchParams) } : {});
+  return Page({
+    searchParams: Promise.resolve(searchParams ?? {}),
+  });
 }
 
 /** The home page tree with every UnitCard rendered to real markup. */

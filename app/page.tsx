@@ -6,9 +6,11 @@ import { loadArchivedUnitIds } from "@/lib/db/queries/unitArchives.server";
 import { unitsByYear } from "@/content";
 import { homeUnitsView } from "@/lib/home-units";
 
-export default async function HomePage(
-  { searchParams }: { searchParams?: Promise<{ all?: string }> } = {},
-) {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ all?: string }>;
+}) {
   const { user, degraded } = await requirePageUser();
   const groups = unitsByYear();
   const params = (await searchParams) ?? {};

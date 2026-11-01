@@ -60,7 +60,7 @@ async function setup() {
 async function renderHomeCards() {
   const Page = (await import("@/app/page")).default;
   const { UnitCard } = await import("@/components/UnitCard");
-  const tree = await Page();
+  const tree = await Page({ searchParams: Promise.resolve({}) });
   return findAll(tree, named("UnitCard")).map((el) =>
     renderToStaticMarkup(createElement(UnitCard, el.props as never)),
   );
