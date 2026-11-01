@@ -119,12 +119,12 @@ const answerList: Array<[string, Answer]> = [
     "Accept “rubbing” or “resistance” for friction. For mark 3, accept “not random” or “affects the results the same way” if systematic is implied. Do not require a direction (friction can make the tension at the stopper bigger or smaller than Mg). Do not accept “human error” as the classification."),
 
   sa(13,
-    "One student whirls the stopper, keeping the rotation steady with the paperclip hovering just below the tube. The other operates the stopwatch and counts exactly 20 revolutions. They can swap roles halfway so both get practice at keeping the clip steady.",
+    "One student whirls the stopper, keeping the rotation steady with the paperclip hovering just below the tube. The other operates the stopwatch, starting and stopping it as the 20 revolutions are counted. They can swap roles halfway so both get practice at keeping the clip steady.",
     [
       "Identifies the whirler: swings the stopper and keeps the rotation (paperclip) steady.",
-      "Identifies the timer: uses the stopwatch and counts the 20 revolutions.",
+      "Identifies the timer: uses the stopwatch to time the 20 revolutions.",
     ],
-    "Accept “spinner” for whirler and “timekeeper” or “counter” for timer. Do not accept vague roles such as “one holds the tube, one writes” without the rotation and the timing."),
+    "Either student may count the revolutions: accept the timer counting, or the whirler counting aloud while the other student starts and stops the stopwatch on the count. Do not deduct a mark for who does the counting. Accept “spinner” for whirler and “timekeeper” for timer. Do not accept vague roles such as “one holds the tube, one writes” without the rotation and the timing."),
 
   sa(14,
     "The hanging mass must be stationary (in equilibrium, not accelerating up or down). If it is not, the tension does not equal Mg: if the mass accelerates upward the tension is greater than Mg, and if it accelerates downward the tension is less than Mg.",

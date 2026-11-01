@@ -121,6 +121,23 @@ export const dailyAiUsage = pgTable(
   ],
 );
 
+/**
+ * One row per student per unit they have archived off the home page. Unit ids are plain
+ * text (not foreign keys), like results.unit_id: content lives in code, and archiving a
+ * unit must never touch attempts, results or concept progress (Principle III).
+ */
+export const unitArchives = pgTable(
+  "unit_archives",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    unitId: text("unit_id").notNull(),
+    archivedAt: ts("archived_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.unitId] })],
+);
+
 // ---- Learn From Mistakes (spec 002) ---------------------------------------
 // Shared concept content. None of these tables holds a student id, name, email or answer
 // (Principle II): they are not student data. See specs/002-learn-from-mistakes/data-model.md.

@@ -1,5 +1,7 @@
 import type { Concept, Unit, UnitMeta, Year } from "@/lib/types";
 
+import { sydneyDate } from "@/lib/sydney";
+
 import { tagQuestions } from "./concept-helpers";
 
 import { meta as y11EconSupplyDemandMeta } from "./units/y11-economics-supply-demand/meta";
@@ -146,6 +148,22 @@ export function unitIsNew(unit: Unit, days = 3, now: Date = new Date()): boolean
   const created = new Date(unit.created + "T00:00:00").getTime();
   const today = new Date(now.toISOString().slice(0, 10) + "T00:00:00").getTime();
   return Math.round((today - created) / 86_400_000) < days;
+}
+
+/** The calendar day of an ISO `YYYY-MM-DD` date as a UTC-midnight timestamp. */
+const dayMs = (isoDate: string): number => {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  return Date.UTC(y, m - 1, d);
+};
+
+/**
+ * True if the unit is old enough to archive: `days` (default 14) or more Sydney
+ * calendar days since `unit.created`. Like `unitIsNew` it counts calendar-date
+ * boundaries, but against the Sydney calendar (lib/sydney.ts) rather than UTC,
+ * so a unit archived just before Australian midnight stays archived all evening.
+ */
+export function unitCanArchive(unit: Unit, now: Date = new Date(), days = 14): boolean {
+  return Math.round((dayMs(sydneyDate(now)) - dayMs(unit.created)) / 86_400_000) >= days;
 }
 
 export type { Unit, UnitMeta };

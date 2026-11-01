@@ -198,13 +198,60 @@ input {
   border-radius: var(--rd-r-lg);
   box-shadow: var(--rd-shadow-1);
   padding: 16px;
-  cursor: pointer;
   margin-bottom: 10px;
   color: inherit;
 }
 
 .unit-card:hover {
   background: var(--rd-surface-50);
+}
+
+/* The link covers the main card area; the archive button sits beside it, before the chevron. */
+.unit-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Archived units stay reachable (via Show all) but are visually muted. */
+.unit-card.archived {
+  opacity: 0.62;
+}
+
+.unit-card.archived .unit-title {
+  color: var(--rd-mute-600);
+}
+
+.unit-archive-btn {
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: var(--rd-r-pill);
+  border: 1px solid var(--rd-border-100);
+  background: var(--rd-white);
+  color: var(--rd-mute-600);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.unit-archive-btn:hover {
+  background: var(--rd-surface-100);
+  border-color: var(--rd-border-200);
+  color: var(--rd-ink-900);
+}
+
+.unit-archive-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .unit-badges {
@@ -260,6 +307,65 @@ input {
   border: 1px dashed var(--rd-border-200);
   border-radius: var(--rd-r-lg);
   padding: 20px;
+  color: var(--rd-mute-500);
+  font-size: 13.5px;
+  text-align: center;
+}
+
+/* "Units" heading row with the per-student "Show all" switch. */
+.units-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.show-all-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px 0 7px;
+  margin-top: 6px;
+  flex: 0 0 auto;
+  border-radius: var(--rd-r-pill);
+  border: 1px solid var(--rd-border-100);
+  background: var(--rd-white);
+  color: var(--rd-mute-600);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.show-all-switch:hover {
+  background: var(--rd-surface-50);
+  color: var(--rd-ink-900);
+}
+
+.show-all-knob {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--rd-mute-400);
+  transition: background 0.12s;
+}
+
+.show-all-switch.on {
+  color: var(--rd-blue-700);
+  border-color: var(--rd-blue-300);
+}
+
+.show-all-switch.on .show-all-knob {
+  background: var(--rd-blue-500);
+}
+
+.units-archived-note {
+  border: 1px dashed var(--rd-border-200);
+  border-radius: var(--rd-r-lg);
+  padding: 18px;
+  margin-bottom: 10px;
   color: var(--rd-mute-500);
   font-size: 13.5px;
   text-align: center;

@@ -8,6 +8,7 @@ import {
   dailyAiUsage,
   dailyConceptUsage,
   results,
+  unitArchives,
   users,
 } from "@/lib/db/schema";
 
@@ -74,6 +75,7 @@ describe("migrations and column sets (Principle II)", () => {
       ].sort(),
     );
     expect(await columns("daily_ai_usage")).toEqual(["user_id", "sydney_date", "count"].sort());
+    expect(await columns("unit_archives")).toEqual(["user_id", "unit_id", "archived_at"].sort());
   });
 
   it("has no column that could hold a profile photo, token, model answer or rubric text", async () => {
@@ -81,6 +83,7 @@ describe("migrations and column sets (Principle II)", () => {
       ...(await columns("users")),
       ...(await columns("attempts")),
       ...(await columns("results")),
+      ...(await columns("unit_archives")),
     ];
     for (const banned of ["image", "picture", "photo", "token", "model_answer", "rubric", "notes"]) {
       expect(all.filter((c) => c === banned)).toEqual([]);
@@ -128,18 +131,33 @@ describe("constraints", () => {
     ).rejects.toThrow();
   });
 
-  it("deleting a user cascades to attempts, results and usage rows", async () => {
+  it("deleting a user cascades to attempts, results, usage and archive rows", async () => {
     const u = await seedUser(t.db);
     const a = await seedAttempt(t.db, u.id);
     await seedResult(t.db, { attemptId: a.id, userId: u.id });
     await t.db.insert(dailyAiUsage).values({ userId: u.id, sydneyDate: "2026-01-02", count: 3 });
+    await t.db.insert(unitArchives).values({ userId: u.id, unitId: "archived.unit" });
 
     await t.db.delete(users).where(eq(users.id, u.id));
 
     const left = await t.db.select({ n: sql<number>`count(*)::int` }).from(results).where(eq(results.userId, u.id));
     const att = await t.db.select({ n: sql<number>`count(*)::int` }).from(attempts).where(eq(attempts.userId, u.id));
     const use = await t.db.select({ n: sql<number>`count(*)::int` }).from(dailyAiUsage).where(eq(dailyAiUsage.userId, u.id));
-    expect([left[0].n, att[0].n, use[0].n]).toEqual([0, 0, 0]);
+    const arch = await t.db.select({ n: sql<number>`count(*)::int` }).from(unitArchives).where(eq(unitArchives.userId, u.id));
+    expect([left[0].n, att[0].n, use[0].n, arch[0].n]).toEqual([0, 0, 0, 0]);
+  });
+
+  it("rejects a duplicate (user_id, unit_id) in unit_archives", async () => {
+    const u = await seedUser(t.db);
+    await t.db.insert(unitArchives).values({ userId: u.id, unitId: "u.one" });
+    await expect(
+      t.db.insert(unitArchives).values({ userId: u.id, unitId: "u.one" }),
+    ).rejects.toThrow();
+    // the same unit may be archived by a different student
+    const other = await seedUser(t.db);
+    await expect(
+      t.db.insert(unitArchives).values({ userId: other.id, unitId: "u.one" }),
+    ).resolves.toBeDefined();
   });
 
   it("keeps results when a question disappears from content (no FK to content)", async () => {

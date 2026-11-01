@@ -7,13 +7,21 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { asSessionUser, setupTestEnv, type TestEnv } from "../helpers/env";
 
-// UnitCard renders next/link; a plain anchor keeps renderToStaticMarkup self-contained.
+// UnitCard renders next/link; a plain anchor keeps renderToStaticMarkup self-contained. The
+// card's ArchiveButton reads next/navigation, so mock useRouter for the markup render.
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
     <a href={href} {...rest}>
       {children}
     </a>
   ),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+  redirect: () => {
+    throw new Error("redirect called");
+  },
 }));
 
 import { seedAttempt, seedUser } from "../helpers/fixtures";

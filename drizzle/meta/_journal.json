@@ -15,6 +15,13 @@
       "when": 1793154479441,
       "tag": "0001_smart_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793526455583,
+      "tag": "0002_yummy_iron_monger",
+      "breakpoints": true
     }
   ]
 }
