@@ -365,14 +365,21 @@ export function rewriteResumeState(
     status: "phase1" | "phase2" | "final";
     phase1Answer: string;
     phase1Marks: number;
+    phase1Feedback: string | null;
     phase1TermOutcomes: Array<{ conceptId: string; correct: boolean }> | null;
     phase2Answer: string | null;
+    phase2Marks: number | null;
+    phase2Feedback: string | null;
     recordedMark: number | null;
   },
 ): {
   phase: "phase1" | "phase2" | "final";
   phase1Answer: string;
+  phase1Marks?: number;
+  phase1Feedback?: string;
   phase2Answer?: string;
+  phase2Marks?: number;
+  phase2Feedback?: string;
   marks?: number;
   hint?: RewriteHint;
   discussion?: RewriteDiscussion;
@@ -381,7 +388,11 @@ export function rewriteResumeState(
   const state: ReturnType<typeof rewriteResumeState> = {
     phase: phaseRow.status,
     phase1Answer: phaseRow.phase1Answer,
+    phase1Marks: phaseRow.phase1Marks,
+    ...(phaseRow.phase1Feedback ? { phase1Feedback: phaseRow.phase1Feedback } : {}),
     ...(phaseRow.phase2Answer ? { phase2Answer: phaseRow.phase2Answer } : {}),
+    ...(phaseRow.phase2Marks !== null && phaseRow.phase2Marks !== undefined ? { phase2Marks: phaseRow.phase2Marks } : {}),
+    ...(phaseRow.phase2Feedback ? { phase2Feedback: phaseRow.phase2Feedback } : {}),
     ...(phaseRow.recordedMark !== null ? { marks: phaseRow.recordedMark } : { marks: phaseRow.phase1Marks }),
   };
   if (phaseRow.status === "phase1" && phaseRow.phase1Marks < 3 && key?.targetTerms) {

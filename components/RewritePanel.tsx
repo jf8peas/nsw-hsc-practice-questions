@@ -7,69 +7,110 @@ import { countWords } from "@/lib/wordcount";
 
 const WORD_LIMIT = 25;
 
+/** "17/25 words", with the over-limit note when the sentence is over the limit. */
+function countLabel(words: number, over: boolean): string {
+  return `${words}/${WORD_LIMIT} word${words === 1 ? "" : "s"}${
+    over ? " · over the limit — you lose the conciseness mark" : ""
+  }`;
+}
+
 /**
- * The sentence-writing question flow (spec 005): phase 1 text box with a live word counter
- * (over 25 shown, submit still allowed), the phase 2 hint panel (missed/misused terms with
- * definitions, or the lost criterion), and the discussion (model sentence(s), every term with
- * its definition and why it fits, the student's sentences, the feedback). No Photo mode for
- * this question type (FR-009).
+ * The sentence-writing question flow (spec 005), phase by phase, one block under the other
+ * like a short answer: the phase 1 text box (editable with a live counter, then the SAME box
+ * stays in place disabled with a static count), phase 1's marking box, the phase 2 hint, the
+ * retry box (same treatment), phase 2's marking box, and the discussion (or the self-mark
+ * screen on the degrade path). Nothing that was shown is replaced. No Photo mode for this
+ * question type (FR-009).
  */
 export function RewritePanel({
   phase1Answer,
+  phase1Result,
   phase2Answer,
-  result,
+  phase2Result,
   onGrade,
   onSelfMark,
   busy,
 }: {
-  /** The phase 1 sentence the student submitted (for the discussion). */
+  /** The phase 1 sentence the student submitted. */
   phase1Answer: string;
+  /** The phase 1 grade result; null before the first submit. */
+  phase1Result: RewriteGradeResult | null;
   /** The phase 2 sentence, once submitted. */
   phase2Answer?: string;
-  /** The last rewrite result; null before the first submit. */
-  result: RewriteGradeResult | null;
+  /** The phase 2 grade result, once phase 2 is submitted. */
+  phase2Result?: RewriteGradeResult;
   onGrade: (phase: 1 | 2, answer: string) => void;
   /** The per-criterion self-mark for the degrade path (FR-030, FR-046). */
   onSelfMark: (ticks: { criterionA: boolean; termTicks: Record<string, boolean>; criterionC: boolean }) => void;
   busy: boolean;
 }) {
-  const [text, setText] = useState("");
+  const [text1, setText1] = useState("");
+  const [text2, setText2] = useState("");
   const [ticks, setTicks] = useState<{ criterionA: boolean; termTicks: Record<string, boolean>; criterionC: boolean }>({
     criterionA: true,
     termTicks: {},
     criterionC: true,
   });
-  const words = countWords(text);
-  const over = words > WORD_LIMIT;
+  const words1 = countWords(text1);
+  const over1 = words1 > WORD_LIMIT;
+  const words2 = countWords(text2);
+  const over2 = words2 > WORD_LIMIT;
 
-  const needsSelfMark = result?.needsSelfMark === true && result?.marksAwarded === null;
-  const discussion = result?.discussion;
-  const hint = result?.hint;
-  // At the retry: a phase 2 result, or a phase 1 result that came back with a hint.
-  const atPhase2 = result?.phase === 2 || (result?.phase === 1 && !!hint && !discussion);
-  // The student may type while: nothing has been submitted yet, or phase 1 scored under 3 with
-  // no discussion yet (the hinted retry).
-  const canType = result === null || (result.phase === 1 && !discussion) || (atPhase2 && !discussion);
+  const phase1Submitted = phase1Result !== null;
+  const phase2Submitted = phase2Result !== undefined;
+  const phase1Words = countWords(phase1Answer);
+  const phase2Words = phase2Answer ? countWords(phase2Answer) : 0;
+
+  // The discussion: phase 1 at 3/3, phase 2, or the self-mark screen.
+  const discussion = phase2Result?.discussion ?? phase1Result?.discussion;
+  const hint = phase1Result?.hint;
+  const needsSelfMark = phase2Result?.needsSelfMark === true || phase1Result?.needsSelfMark === true;
+  // At the retry: phase 1 under 3 (hint, no discussion) and phase 2 not yet submitted.
+  const atRetry = phase1Submitted && !phase2Submitted && !!hint && !discussion && !needsSelfMark;
+  // The retry box exists once phase 1 is under 3, and stays in place disabled after phase 2
+  // is submitted (or falls back to self-marking).
+  const showPhase2 = atRetry || phase2Submitted;
 
   return (
     <>
-      {/* the student's own phase 1 sentence at the retry (FR-042): above the feedback and the
-          hint, so the student can see what the feedback is about */}
-      {atPhase2 && !discussion && !needsSelfMark && phase1Answer && (
-        <div style={{ marginTop: 12 }}>
-          <div className="label">Your sentence</div>
-          <p className="rewrite-own-sentence" style={{ margin: "4px 0 0" }}>
-            {phase1Answer}
-          </p>
-        </div>
-      )}
+      {/* the phase 1 text box: editable with the live counter, then the same box stays in
+          place, disabled, holding the sentence, with a static count under it */}
+      <div className="rewrite-phase">
+        {showPhase2 && <div className="label">First try</div>}
+        <textarea
+          className="q-textarea rewrite-textarea"
+          value={phase1Submitted ? phase1Answer : text1}
+          onChange={(e) => setText1(e.target.value)}
+          placeholder="Rewrite the sentence in economics language, using the target terms..."
+          disabled={phase1Submitted}
+        />
+        {phase1Submitted ? (
+          <div className="rewrite-count-static">{countLabel(phase1Words, phase1Words > WORD_LIMIT)}</div>
+        ) : (
+          <div className="answer-bar">
+            <span className={`rewrite-count${over1 ? " over" : ""}`}>{countLabel(words1, over1)}</span>
+            <button
+              type="button"
+              className="rd-btn primary answer-submit"
+              onClick={() => {
+                onGrade(1, text1.trim());
+                setText1("");
+              }}
+              disabled={busy || !text1.trim()}
+            >
+              {busy ? "Marking…" : "Submit answer"}
+            </button>
+          </div>
+        )}
+      </div>
 
-      {result !== null && !needsSelfMark && result.feedback && (
+      {/* phase 1's marking box, directly under the phase 1 box */}
+      {phase1Submitted && !needsSelfMark && phase1Result.feedback && (
         <div className="feedback">
           <div className="feedback-score">
-            {result.marksAwarded} / {result.maxMarks} marks
+            {phase1Result.marksAwarded} / {phase1Result.maxMarks} marks
           </div>
-          <p style={{ margin: "6px 0 0" }}>{result.feedback}</p>
+          <p style={{ margin: "6px 0 0" }}>{phase1Result.feedback}</p>
         </div>
       )}
 
@@ -91,55 +132,69 @@ export function RewritePanel({
         </div>
       )}
 
-      {canType && !needsSelfMark && (
-        <>
+      {/* the retry text box: same treatment as phase 1 */}
+      {showPhase2 && (
+        <div className="rewrite-phase">
+          <div className="label">Retry</div>
           <textarea
             className="q-textarea rewrite-textarea"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            value={phase2Submitted ? (phase2Answer ?? "") : text2}
+            onChange={(e) => setText2(e.target.value)}
             placeholder="Rewrite the sentence in economics language, using the target terms..."
+            disabled={phase2Submitted}
           />
-          <div className="answer-bar">
-            <span className={`rewrite-count${over ? " over" : ""}`}>
-              {words}/{WORD_LIMIT} word{words === 1 ? "" : "s"}
-              {over && " · over the limit — you lose the conciseness mark"}
-            </span>
-            <button
-              type="button"
-              className="rd-btn primary answer-submit"
-              onClick={() => {
-                onGrade(atPhase2 ? 2 : 1, text.trim());
-                setText("");
-              }}
-              disabled={busy || !text.trim()}
-            >
-              {busy ? "Marking…" : atPhase2 ? "Submit retry" : "Submit answer"}
-            </button>
+          {phase2Submitted ? (
+            <div className="rewrite-count-static">{countLabel(phase2Words, phase2Words > WORD_LIMIT)}</div>
+          ) : (
+            <div className="answer-bar">
+              <span className={`rewrite-count${over2 ? " over" : ""}`}>{countLabel(words2, over2)}</span>
+              <button
+                type="button"
+                className="rd-btn primary answer-submit"
+                onClick={() => {
+                  onGrade(2, text2.trim());
+                  setText2("");
+                }}
+                disabled={busy || !text2.trim()}
+              >
+                {busy ? "Marking…" : "Submit retry"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* phase 2's marking box: the retry's mark (capped at 2), with the best-of line when
+          phase 1 was better (FR-019) */}
+      {phase2Submitted && !needsSelfMark && phase2Result.feedback && (
+        <div className="feedback">
+          <div className="feedback-score">
+            {phase2Result.marksAwarded} / {phase2Result.maxMarks} marks
           </div>
-        </>
+          <p style={{ margin: "6px 0 0" }}>{phase2Result.feedback}</p>
+          {phase1Result?.marksAwarded !== null &&
+            phase1Result?.marksAwarded !== undefined &&
+            phase2Result.marksAwarded !== null &&
+            phase1Result.marksAwarded > phase2Result.marksAwarded && (
+              <p style={{ margin: "6px 0 0" }}>
+                Your recorded mark is {phase1Result.marksAwarded} / 3 (your better try).
+              </p>
+            )}
+        </div>
       )}
 
       {/* the degrade path (FR-030, FR-046): the model sentence and every term are shown, and the
-          student marks each criterion with one tick per target term */}
-      {needsSelfMark && result?.discussion && (
+          student marks each criterion with one tick per target term. The sentence being marked
+          is the disabled box above. */}
+      {needsSelfMark && discussion && (
         <div className="rewrite-selfmark" style={{ marginTop: 12 }}>
-          {/* the sentence being marked (phase 1, or phase 2 when it fell back to self-marking),
-              above the model sentence so the student can compare the two before ticking */}
-          {(phase2Answer || phase1Answer) && (
-            <>
-              <div className="label">Your sentence</div>
-              <p className="rewrite-own-sentence" style={{ margin: "4px 0 0" }}>
-                {phase2Answer || phase1Answer}
-              </p>
-            </>
-          )}
-          {result.discussion.modelSentences.map((s, i) => (
+          {discussion.modelSentences.map((s, i) => (
             <p key={i} className="model-sentence" style={{ margin: "4px 0" }}>
               {s}
             </p>
           ))}
           <ul>
-            {result.discussion.terms.map((t) => (
+            {discussion.terms.map((t) => (
               <li key={t.term}>
                 <label>
                   <input
@@ -187,8 +242,9 @@ export function RewritePanel({
         </div>
       )}
 
-      {/* the discussion (FR-018): model sentence, terms with why it fits, the student's sentences */}
-      {discussion && (
+      {/* the discussion (FR-018): model sentence and every term with why it fits. The student's
+          sentences are not repeated here: the disabled boxes above already show them. */}
+      {discussion && !needsSelfMark && (
         <div className="rewrite-discussion" style={{ marginTop: 12 }}>
           <div className="label">
             Model sentence{discussion.modelSentences.length > 1 ? "s" : ""}
@@ -208,23 +264,6 @@ export function RewritePanel({
               </li>
             ))}
           </ul>
-          {(phase1Answer || phase2Answer) && (
-            <>
-              <div className="label" style={{ marginTop: 10 }}>
-                Your sentences
-              </div>
-              {phase1Answer && (
-                <p className="detail-answer" style={{ margin: "4px 0" }}>
-                  {phase2Answer ? "Phase 1:" : "Your sentence:"} {phase1Answer}
-                </p>
-              )}
-              {phase2Answer && (
-                <p className="detail-answer" style={{ margin: "4px 0" }}>
-                  Phase 2: {phase2Answer}
-                </p>
-              )}
-            </>
-          )}
         </div>
       )}
     </>

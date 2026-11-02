@@ -2,9 +2,11 @@
 //
 // The browser side of a sentence-rewrite question (spec 005): the rewrite panel renders (not the
 // multiple-choice layout), the live word counter, a 3/3 answer going straight to the discussion,
-// the hinted retry sending phase 2, the FR-045 hint with no terms, the phase 1 sentence shown
-// under "Your sentence" at the retry and on the self-mark screen, resuming at the retry, and the
-// compulsory retry (no Skip button, FR-042).
+// the hinted retry sending phase 2, the FR-045 hint with no terms, the phase-by-phase layout
+// (the phase 1 box stays in place disabled with its marking box under it, then the hint, then the
+// retry box with its own marking box), resuming at the retry and at a final question, the
+// recorded-mark line when phase 1 was better, the self-mark screen, and the compulsory retry
+// (no Skip button, FR-042).
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -98,8 +100,9 @@ const mount = (initial: AttemptPayload = payload()) =>
   render(<Quiz uid={UID} attemptId={ATTEMPT} unitId={UNIT} initial={initial} />);
 
 const gradeCalls = () => calls.filter((c) => c.url === "/api/grade");
-const textbox = () => screen.getByPlaceholderText(/Rewrite the sentence in economics language/);
-const type = (text: string) => fireEvent.change(textbox(), { target: { value: text } });
+const textboxes = () => screen.getAllByPlaceholderText(/Rewrite the sentence in economics language/);
+const textbox = (index = 0) => textboxes()[index] as HTMLTextAreaElement;
+const type = (text: string, index = 0) => fireEvent.change(textbox(index), { target: { value: text } });
 
 describe("rendering a rewrite question", () => {
   it("shows the rewrite panel with a text box and word counter, not the multiple-choice layout", () => {
@@ -107,7 +110,7 @@ describe("rendering a rewrite question", () => {
     expect(screen.getByText(REWRITE.prompt)).toBeTruthy();
     expect(screen.getByText(/Sentence rewrite/)).toBeTruthy();
     expect(screen.queryByText(/Multiple choice/)).toBeNull();
-    expect(textbox()).toBeTruthy();
+    expect(textbox(0)).toBeTruthy();
     expect(screen.getByText(/0\/25 words/)).toBeTruthy();
     // no Photo mode for this question type (FR-009)
     expect(screen.queryByRole("tablist", { name: "Answer mode" })).toBeNull();
@@ -141,10 +144,16 @@ describe("phase 1", () => {
       answer: "A tariff raises import prices, so consumers buy from domestic producers.",
       phase: 1,
     });
+    // the phase 1 box stays in place, disabled, holding the sentence, with its marking box
+    expect(textbox(0).disabled).toBe(true);
+    expect(textbox(0).value).toBe("A tariff raises import prices, so consumers buy from domestic producers.");
+    expect(screen.getByText("3 / 3 marks")).toBeTruthy();
+    expect(screen.getByText("Good.")).toBeTruthy();
+    // then the discussion, and no second box
     expect(screen.getByText(DISCUSSION.modelSentences[0])).toBeTruthy();
-    expect(screen.queryByPlaceholderText(/Rewrite the sentence/)).toBeNull();
+    expect(textboxes()).toHaveLength(1);
     expect(screen.queryByText(/Terms to use in your retry/)).toBeNull();
-    // no separate "Your sentence" block outside the discussion (the discussion shows "Your sentences")
+    // no separate "Your sentence" block anywhere
     expect(screen.queryByText("Your sentence")).toBeNull();
   });
 });
@@ -158,22 +167,25 @@ describe("the hinted retry", () => {
     fireEvent.click(screen.getByText("Submit answer"));
     await waitFor(() => expect(screen.getByText(/Terms to use in your retry/)).toBeTruthy());
 
-    // the phase 1 sentence is shown under "Your sentence", above the feedback and the hint
-    expect(screen.getByText("Your sentence")).toBeTruthy();
-    expect(screen.getByText("The government taxed imports so people bought local stuff.")).toBeTruthy();
-    const yourSentence = screen.getByText("Your sentence");
-    const hint = screen.getByText(/Terms to use in your retry/);
-    expect(yourSentence.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    // the retry text box starts empty
-    expect((textbox() as HTMLTextAreaElement).value).toBe("");
-
-    // the hint: the missed term with its definition, a fresh text box, no Next yet
+    // the phase 1 box stays in place, disabled, holding the sentence; its marking box is
+    // directly under it; then the hint; then a second, empty, enabled box with Submit retry
+    expect(textbox(0).disabled).toBe(true);
+    expect(textbox(0).value).toBe("The government taxed imports so people bought local stuff.");
+    expect(screen.getByText("1 / 3 marks")).toBeTruthy();
+    expect(screen.getByText("Name the tax.")).toBeTruthy();
+    expect(screen.getByText(/Terms to use in your retry/)).toBeTruthy();
+    expect(textbox(1).disabled).toBe(false);
+    expect(textbox(1).value).toBe("");
+    expect(screen.getByText("Submit retry")).toBeTruthy();
+    // the two boxes are labelled "First try" and "Retry"
+    expect(screen.getByText("First try")).toBeTruthy();
+    expect(screen.getByText("Retry")).toBeTruthy();
+    // the hint: the missed term with its definition, no Next yet
     expect(screen.getByText("tariff")).toBeTruthy();
     expect(screen.queryByText("domestic producers")).toBeNull();
-    expect(screen.getByText("Name the tax.")).toBeTruthy();
-    expect(textbox()).toBeTruthy();
-    expect(screen.getByText("Submit retry")).toBeTruthy();
     expect(screen.queryByText("Next question")).toBeNull();
+    // no separate "Your sentence" block
+    expect(screen.queryByText("Your sentence")).toBeNull();
 
     responder = () =>
       json({
@@ -181,7 +193,7 @@ describe("the hinted retry", () => {
         saved: true,
         attemptCompleted: false,
       });
-    type("A tariff raised import prices, so people bought local goods.");
+    type("A tariff raised import prices, so people bought local goods.", 1);
     fireEvent.click(screen.getByText("Submit retry"));
     await waitFor(() => expect(screen.getByText("Next question")).toBeTruthy());
 
@@ -191,10 +203,41 @@ describe("the hinted retry", () => {
       answer: "A tariff raised import prices, so people bought local goods.",
       phase: 2,
     });
+    // both boxes stay, disabled, with their sentences; both marking boxes are shown and
+    // phase 1's feedback is still present
+    expect(textbox(0).disabled).toBe(true);
+    expect(textbox(0).value).toBe("The government taxed imports so people bought local stuff.");
+    expect(textbox(1).disabled).toBe(true);
+    expect(textbox(1).value).toBe("A tariff raised import prices, so people bought local goods.");
+    expect(screen.getByText("1 / 3 marks")).toBeTruthy();
+    expect(screen.getByText("Name the tax.")).toBeTruthy();
+    expect(screen.getByText("2 / 3 marks")).toBeTruthy();
+    expect(screen.getByText("Better.")).toBeTruthy();
     expect(screen.getByText(DISCUSSION.modelSentences[0])).toBeTruthy();
-    expect(screen.getByText(/Phase 1:/)).toBeTruthy();
-    expect(screen.getByText(/Phase 2:/)).toBeTruthy();
-    expect(screen.queryByPlaceholderText(/Rewrite the sentence/)).toBeNull();
+    // phase 2 (2) was not worse than phase 1 (1): no recorded-mark line
+    expect(screen.queryByText(/Your recorded mark is/)).toBeNull();
+  });
+
+  it("adds the recorded-mark line only when phase 1 was better (FR-019)", async () => {
+    mount();
+    responder = () =>
+      json({ result: rewriteResult({ marksAwarded: 2, feedback: "Name the tax.", hint: HINT }), saved: false, phaseSaved: true, attemptCompleted: false });
+    type("The government taxed imports so people bought local stuff.");
+    fireEvent.click(screen.getByText("Submit answer"));
+    await waitFor(() => expect(screen.getByText(/Terms to use in your retry/)).toBeTruthy());
+
+    responder = () =>
+      json({
+        result: rewriteResult({ phase: 2, marksAwarded: 1, feedback: "Worse.", discussion: DISCUSSION }),
+        saved: true,
+        attemptCompleted: false,
+      });
+    type("A tariff raised import prices.", 1);
+    fireEvent.click(screen.getByText("Submit retry"));
+    await waitFor(() => expect(screen.getByText("Next question")).toBeTruthy());
+
+    // phase 1 (2) was better than the capped phase 2 (1): the recorded mark is phase 1's
+    expect(screen.getByText("Your recorded mark is 2 / 3 (your better try).")).toBeTruthy();
   });
 
   it("names the lost criterion when every term was used (FR-045)", async () => {
@@ -216,11 +259,18 @@ describe("the hinted retry", () => {
     expect(screen.getByText("Submit retry")).toBeTruthy();
   });
 
-  it("resumes at the retry with the hint showing and the phase 1 sentence intact (FR-021)", () => {
+  it("resumes at the retry with the hint showing, the phase 1 box disabled and its marks and feedback (FR-021)", () => {
     mount(
       payload({
         rewriteState: {
-          [REWRITE.id]: { phase: "phase1", phase1Answer: "The government taxed imports.", marks: 1, hint: HINT },
+          [REWRITE.id]: {
+            phase: "phase1",
+            phase1Answer: "The government taxed imports.",
+            phase1Marks: 1,
+            phase1Feedback: "Name the tax.",
+            marks: 1,
+            hint: HINT,
+          },
         },
       }),
     );
@@ -228,16 +278,60 @@ describe("the hinted retry", () => {
     expect(screen.getByText("tariff")).toBeTruthy();
     expect(screen.getByText("Submit retry")).toBeTruthy();
     expect(screen.queryByText("Next question")).toBeNull();
-    // the phase 1 sentence is shown under "Your sentence"
-    expect(screen.getByText("Your sentence")).toBeTruthy();
-    expect(screen.getByText("The government taxed imports.")).toBeTruthy();
+    // the disabled phase 1 box with the sentence, phase 1's marks and feedback, the hint and
+    // an empty retry box
+    expect(textbox(0).disabled).toBe(true);
+    expect(textbox(0).value).toBe("The government taxed imports.");
+    expect(screen.getByText("1 / 3 marks")).toBeTruthy();
+    expect(screen.getByText("Name the tax.")).toBeTruthy();
+    expect(textbox(1).disabled).toBe(false);
+    expect(textbox(1).value).toBe("");
+    expect(screen.queryByText("Your sentence")).toBeNull();
+  });
+
+  it("resumes a final question with both boxes and both marking boxes", async () => {
+    mount(
+      payload({
+        rewriteState: {
+          [REWRITE.id]: {
+            phase: "final",
+            phase1Answer: "The government taxed imports.",
+            phase1Marks: 1,
+            phase1Feedback: "Name the tax.",
+            phase2Answer: "A tariff raised import prices.",
+            phase2Marks: 2,
+            phase2Feedback: "Better.",
+            marks: 2,
+            discussion: DISCUSSION,
+          },
+        },
+      }),
+    );
+    expect(textbox(0).disabled).toBe(true);
+    expect(textbox(0).value).toBe("The government taxed imports.");
+    expect(textbox(1).disabled).toBe(true);
+    expect(textbox(1).value).toBe("A tariff raised import prices.");
+    expect(screen.getByText("1 / 3 marks")).toBeTruthy();
+    expect(screen.getByText("Name the tax.")).toBeTruthy();
+    expect(screen.getByText("2 / 3 marks")).toBeTruthy();
+    expect(screen.getByText("Better.")).toBeTruthy();
+    expect(screen.getByText(DISCUSSION.modelSentences[0])).toBeTruthy();
+    // final: the question is marked, so Next shows
+    await waitFor(() => expect(screen.getByText("Next question")).toBeTruthy());
   });
 
   it("has no Skip button at the retry, and Next question stays hidden until phase 2 is submitted (FR-042)", async () => {
     mount(
       payload({
         rewriteState: {
-          [REWRITE.id]: { phase: "phase1", phase1Answer: "The government taxed imports.", marks: 1, hint: HINT },
+          [REWRITE.id]: {
+            phase: "phase1",
+            phase1Answer: "The government taxed imports.",
+            phase1Marks: 1,
+            phase1Feedback: "Name the tax.",
+            marks: 1,
+            hint: HINT,
+          },
         },
       }),
     );
@@ -251,14 +345,14 @@ describe("the hinted retry", () => {
         saved: true,
         attemptCompleted: false,
       });
-    type("A tariff raised import prices, so people bought local goods.");
+    type("A tariff raised import prices, so people bought local goods.", 1);
     fireEvent.click(screen.getByText("Submit retry"));
     await waitFor(() => expect(screen.getByText("Next question")).toBeTruthy());
     expect(gradeCalls()).toHaveLength(1);
     expect(gradeCalls()[0].body).toMatchObject({ questionId: REWRITE.id, phase: 2 });
   });
 
-  it("shows the phase 1 sentence on the self-mark screen after a phase 1 model failure (FR-030)", async () => {
+  it("shows the disabled box with the sentence being marked on the self-mark screen after a phase 1 model failure (FR-030)", async () => {
     mount();
     responder = () =>
       json({
@@ -271,12 +365,10 @@ describe("the hinted retry", () => {
     fireEvent.click(screen.getByText("Submit answer"));
     await waitFor(() => expect(screen.getByText("Save my mark")).toBeTruthy());
 
-    // the sentence being marked is shown under "Your sentence", above the model sentence
-    // (the model sentence also appears in the discussion block below, so take the first)
-    expect(screen.getByText("Your sentence")).toBeTruthy();
-    expect(screen.getByText("The government taxed imports so people bought local stuff.")).toBeTruthy();
-    const yourSentence = screen.getByText("Your sentence");
-    const model = screen.getAllByText(DISCUSSION.modelSentences[0])[0];
-    expect(yourSentence.compareDocumentPosition(model) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // the disabled box with the sentence being marked, then the self-mark ticks
+    expect(textbox(0).disabled).toBe(true);
+    expect(textbox(0).value).toBe("The government taxed imports so people bought local stuff.");
+    expect(screen.getByText("Save my mark")).toBeTruthy();
+    expect(screen.queryByText("Your sentence")).toBeNull();
   });
 });

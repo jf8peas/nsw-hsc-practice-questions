@@ -50,8 +50,11 @@ export default async function QuizPage({
           status: ph.status as "phase1" | "phase2" | "final",
           phase1Answer: ph.phase1Answer,
           phase1Marks: ph.phase1Marks,
+          phase1Feedback: ph.phase1Feedback,
           phase1TermOutcomes: ph.phase1TermOutcomes ?? null,
           phase2Answer: ph.phase2Answer,
+          phase2Marks: ph.phase2Marks,
+          phase2Feedback: ph.phase2Feedback,
           recordedMark: ph.recordedMark,
         });
       }

@@ -1796,14 +1796,19 @@ input {
   text-decoration: line-through;
 }
 
-/* The student's own sentence at the retry and on the self-mark screen (spec 005): plain
-   text that wraps at 390 px with no sideways scrolling. */
-.rewrite-own-sentence {
+/* The rewrite text boxes (spec 005) stay in place after submitting, disabled, still holding
+   the sentence. The disabled style must stay readable: the sentence is the student's own
+   work, not greyed-out placeholder text. */
+.rewrite-textarea:disabled {
   background: var(--rd-surface-50);
-  border-radius: var(--rd-r-sm);
-  padding: 8px 10px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-width: 390px;
-  font-size: var(--rd-fs-base);
+  color: var(--rd-ink-900);
+  cursor: default;
+  opacity: 1;
+}
+
+/* The static word count under a submitted rewrite box (conciseness is a marking criterion). */
+.rewrite-count-static {
+  font-size: 12px;
+  color: var(--rd-mute-500);
+  margin-bottom: 14px;
 }

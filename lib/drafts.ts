@@ -208,14 +208,20 @@ export interface AttemptPayload {
   /**
    * spec 005: per-question rewrite phase state for resume, built server-side from the phase
    * row. Exactly what the stage allows: nothing from the key before a phase 1 grade, the hint
-   * at phase 1 under 3, the discussion once final (FR-023).
+   * at phase 1 under 3, the discussion once final (FR-023). The phase marks and the marker's
+   * feedback are carried so the disabled boxes and marking boxes look the same after a reload
+   * (the feedback is not answer-key material).
    */
   rewriteState?: Record<
     string,
     {
       phase: "phase1" | "phase2" | "final";
       phase1Answer: string;
+      phase1Marks?: number;
+      phase1Feedback?: string;
       phase2Answer?: string;
+      phase2Marks?: number;
+      phase2Feedback?: string;
       marks?: number;
       hint?: RewriteHint;
       discussion?: RewriteDiscussion;

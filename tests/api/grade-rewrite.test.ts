@@ -663,13 +663,21 @@ describe("resume and leaks", () => {
       status: phaseRow.status as "phase1" | "phase2" | "final",
       phase1Answer: phaseRow.phase1Answer,
       phase1Marks: phaseRow.phase1Marks,
+      phase1Feedback: phaseRow.phase1Feedback,
       phase1TermOutcomes: phaseRow.phase1TermOutcomes ?? null,
       phase2Answer: phaseRow.phase2Answer,
+      phase2Marks: phaseRow.phase2Marks,
+      phase2Feedback: phaseRow.phase2Feedback,
       recordedMark: phaseRow.recordedMark,
     });
     expect(hinted.phase).toBe("phase1");
     expect(hinted.hint).toEqual({ terms: [{ term: t1.term, definition: t1.definition }] });
     expect(hinted.discussion).toBeUndefined();
+    // the phase 1 mark and the marker's feedback are carried (not answer-key material)
+    expect(hinted.phase1Marks).toBe(phaseRow.phase1Marks);
+    expect(hinted.phase1Feedback).toBe(phaseRow.phase1Feedback);
+    expect(hinted.phase2Marks).toBeUndefined();
+    expect(hinted.phase2Feedback).toBeUndefined();
     const hintedKeys = allKeys(hinted);
     for (const banned of ["modelSentences", "discussion", "markingNotes", "notes"]) {
       expect(hintedKeys.has(banned), banned).toBe(false);
@@ -683,14 +691,61 @@ describe("resume and leaks", () => {
       status: finalRow.status as "phase1" | "phase2" | "final",
       phase1Answer: finalRow.phase1Answer,
       phase1Marks: finalRow.phase1Marks,
+      phase1Feedback: finalRow.phase1Feedback,
       phase1TermOutcomes: finalRow.phase1TermOutcomes ?? null,
       phase2Answer: finalRow.phase2Answer,
+      phase2Marks: finalRow.phase2Marks,
+      phase2Feedback: finalRow.phase2Feedback,
       recordedMark: finalRow.recordedMark,
     });
     expect(final.phase).toBe("final");
     expect(final.discussion).toBeDefined();
     expect(final.discussion!.modelSentences.length).toBeGreaterThan(0);
     expect(final.discussion!.terms).toHaveLength(key.targetTerms!.length);
+    // both phases' marks and the marker's feedback are carried for the disabled boxes
+    expect(final.phase1Marks).toBe(finalRow.phase1Marks);
+    expect(final.phase1Feedback).toBe(finalRow.phase1Feedback);
+    expect(final.phase2Marks).toBe(finalRow.phase2Marks);
+    expect(final.phase2Feedback).toBe(finalRow.phase2Feedback);
+  });
+
+  it("the resume state carries the phase marks and feedback but no answer-key fields before the stage allows them", async () => {
+    env = await setupRewriteEnv();
+    const user = await signedInStudent(env);
+    const started = await startAttempt(REWRITE_UNIT);
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    const [t1] = key.targetTerms!;
+
+    // phase 1 under 3: the state carries the phase 1 mark and feedback and the hint, but
+    // nothing from the answer key (no model sentence, no full term set, no marking notes)
+    env.rewrite.mockResolvedValueOnce(
+      rewriteGradeFor(q, { terms: { [t1.term]: "missing" }, feedback: "Name the tax." }),
+    );
+    await grade(started, q.id, "Phase one under three.");
+    const phaseRow = await phaseRowFor(q.id);
+    const { rewriteResumeState } = await import("@/lib/grading.server");
+    const hinted = rewriteResumeState(q.id, {
+      status: phaseRow.status as "phase1" | "phase2" | "final",
+      phase1Answer: phaseRow.phase1Answer,
+      phase1Marks: phaseRow.phase1Marks,
+      phase1Feedback: phaseRow.phase1Feedback,
+      phase1TermOutcomes: phaseRow.phase1TermOutcomes ?? null,
+      phase2Answer: phaseRow.phase2Answer,
+      phase2Marks: phaseRow.phase2Marks,
+      phase2Feedback: phaseRow.phase2Feedback,
+      recordedMark: phaseRow.recordedMark,
+    });
+    expect(hinted.phase1Marks).toBe(phaseRow.phase1Marks);
+    expect(hinted.phase1Feedback).toBe("Name the tax.");
+    expect(hinted.phase2Marks).toBeUndefined();
+    expect(hinted.phase2Feedback).toBeUndefined();
+    expect(hinted.hint).toEqual({ terms: [{ term: t1.term, definition: t1.definition }] });
+    expect(hinted.discussion).toBeUndefined();
+    const hintedKeys = allKeys(hinted);
+    for (const banned of ["modelSentences", "discussion", "markingNotes", "notes"]) {
+      expect(hintedKeys.has(banned), banned).toBe(false);
+    }
   });
 
   it("no answer text, model sentence, definition or marking note reaches console output on any of the paths above", async () => {

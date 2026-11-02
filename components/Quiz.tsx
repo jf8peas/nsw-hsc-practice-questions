@@ -80,14 +80,15 @@ export function Quiz({
       : "quiz",
   );
   const [draft, setDraft] = useState("");
-  // the sentence-writing question flow (spec 005): phase, the student's sentences, the hint
-  // and the discussion, one question at a time; null until a rewrite question is current
+  // the sentence-writing question flow (spec 005): the student's sentences and each phase's
+  // result kept separately, so phase 1's sentence, mark and feedback stay on screen after
+  // phase 2 is marked; one question at a time; null until a rewrite question is current
   const [rewrite, setRewrite] = useState<{
-    phase: 1 | 2;
     phase1Answer: string;
+    phase1Result: RewriteGradeResult | null;
     phase2Answer?: string;
-    result: RewriteGradeResult | null;
-  }>({ phase: 1, phase1Answer: "", result: null });
+    phase2Result?: RewriteGradeResult;
+  }>({ phase1Answer: "", phase1Result: null });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [graded, setGraded] = useState<GradedState | null>(null);
@@ -154,33 +155,48 @@ export function Quiz({
     setGraded(g);
     setDraft(g ? g.answer : loadDraft(attemptId, current.id));
     // spec 005: resume a rewrite question from the phase row the server rebuilt (FR-021,
-    // FR-023): a phase 1 under 3 shows the hint, a final question the discussion.
+    // FR-023): a phase 1 under 3 shows the hint, a final question the discussion. The phase
+    // marks and the marker's feedback are carried so the disabled boxes and marking boxes
+    // look the same after a reload.
     const rs = (initial?.rewriteState ?? {})[current.id];
     if (rs) {
-      const rr: RewriteGradeResult = {
+      const phase1Result: RewriteGradeResult = {
         questionId: current.id,
         type: "rewrite",
         maxMarks: 3,
-        phase: rs.phase === "phase2" ? 2 : 1,
-        marksAwarded: rs.marks ?? null,
-        feedback: "",
+        phase: 1,
+        marksAwarded: rs.phase1Marks ?? rs.marks ?? null,
+        feedback: rs.phase1Feedback ?? "",
         termOutcomes: [],
         hint: rs.hint,
-        discussion: rs.discussion,
+        discussion: rs.phase === "final" && !rs.phase2Answer ? rs.discussion : undefined,
         needsSelfMark: false,
       };
+      const phase2Result: RewriteGradeResult | undefined = rs.phase2Answer
+        ? {
+            questionId: current.id,
+            type: "rewrite",
+            maxMarks: 3,
+            phase: 2,
+            marksAwarded: rs.phase2Marks ?? null,
+            feedback: rs.phase2Feedback ?? "",
+            termOutcomes: [],
+            discussion: rs.discussion,
+            needsSelfMark: false,
+          }
+        : undefined;
       setRewrite({
-        phase: rs.phase === "phase2" ? 2 : 1,
         phase1Answer: rs.phase1Answer,
+        phase1Result,
         phase2Answer: rs.phase2Answer,
-        result: rr,
+        phase2Result,
       });
       if (rs.phase === "final" && rs.marks !== undefined) {
         recordMarks(current.id, rs.marks, 3);
-        updateGraded({ answer: rs.phase2Answer ?? rs.phase1Answer, result: rr, marks: rs.marks });
+        updateGraded({ answer: rs.phase2Answer ?? rs.phase1Answer, result: phase2Result ?? phase1Result, marks: rs.marks });
       }
     } else {
-      setRewrite({ phase: 1, phase1Answer: "", result: null });
+      setRewrite({ phase1Answer: "", phase1Result: null });
     }
     setError(null);
     const pd = loadPhotoDraft(attemptId, current.id);
@@ -272,7 +288,12 @@ export function Quiz({
         clearPhotoDraft(attemptId, current.id);
         if (isRewrite) {
           const rr = result as RewriteGradeResult;
-          setRewrite((prev) => ({ phase: rr.phase ?? prev.phase, phase1Answer: prev.phase1Answer || answer, phase2Answer: rr.phase === 2 ? prev.phase2Answer ?? answer : prev.phase2Answer, result: rr }));
+          setRewrite((prev) => ({
+            phase1Answer: prev.phase1Answer || answer,
+            phase1Result: rr.phase === 1 ? rr : prev.phase1Result,
+            phase2Answer: rr.phase === 2 ? (prev.phase2Answer ?? answer) : prev.phase2Answer,
+            phase2Result: rr.phase === 2 ? rr : prev.phase2Result,
+          }));
         }
         updateGraded({ answer, result, marks: result.marksAwarded ?? 0, pickedDisplay: displayIndex });
         return;
@@ -295,19 +316,20 @@ export function Quiz({
       // marks or a graded state, so phase 2 can still be submitted and Next stays hidden.
       if (data.result.type === "rewrite" && isPendingRewrite(data.result as RewriteGradeResult)) {
         const rr = data.result as RewriteGradeResult;
-        setRewrite({ phase: 2, phase1Answer: answer, result: rr });
+        setRewrite({ phase1Answer: answer, phase1Result: rr });
         return;
       }
       const marks = data.result.needsSelfMark ? null : data.result.marksAwarded;
       if (marks !== null) recordMarks(current.id, marks, data.result.maxMarks);
-      // rewrite: remember the phase, the student's sentences and the hint/discussion
+      // rewrite: remember each phase's sentence and result separately, so phase 1's sentence,
+      // mark and feedback stay on screen after phase 2 is marked
       if (data.result.type === "rewrite") {
         const rr = data.result as RewriteGradeResult;
         setRewrite((prev) => ({
-          phase: rr.phase ?? prev.phase,
           phase1Answer: rr.phase === 1 ? answer : prev.phase1Answer || answer,
+          phase1Result: rr.phase === 1 ? rr : prev.phase1Result,
           phase2Answer: rr.phase === 2 ? (prev.phase2Answer ?? answer) : prev.phase2Answer,
-          result: rr,
+          phase2Result: rr.phase === 2 ? rr : prev.phase2Result,
         }));
       }
       updateGraded({
@@ -395,6 +417,8 @@ export function Quiz({
   /** The rewrite degrade path (FR-030, FR-046): per-criterion ticks with one tick per term. */
   async function rewriteSelfMark(ticks: { criterionA: boolean; termTicks: Record<string, boolean>; criterionC: boolean }) {
     if (!current || !graded?.selfMarkToken || busy) return;
+    // the phase being self-marked: phase 2 when a phase 2 result is on screen, else phase 1
+    const phase: 1 | 2 = rewrite.phase2Result ? 2 : 1;
     setBusy(true);
     setError(null);
     try {
@@ -406,7 +430,7 @@ export function Quiz({
           attemptToken,
           questionId: current.id,
           answer: graded.answer,
-          phase: rewrite.phase,
+          phase,
           criterionA: ticks.criterionA,
           termTicks: ticks.termTicks,
           criterionC: ticks.criterionC,
@@ -417,16 +441,16 @@ export function Quiz({
         setSessionEnded(true);
         return;
       }
-      const terms = rewrite.result?.discussion?.terms ?? [];
+      const terms = (rewrite.phase2Result ?? rewrite.phase1Result)?.discussion?.terms ?? [];
       const criterionB = terms.length > 0 ? terms.every((t) => ticks.termTicks[t.term] === true) : false;
       const raw = (ticks.criterionA ? 1 : 0) + (criterionB ? 1 : 0) + (ticks.criterionC ? 1 : 0);
-      const marks = rewrite.phase === 2 ? Math.min(raw, 2) : raw;
+      const marks = phase === 2 ? Math.min(raw, 2) : raw;
       if (res.status === 409) {
         const body = (await res.json().catch(() => ({}))) as { result?: { marksAwarded?: number } };
         const stored = typeof body.result?.marksAwarded === "number" ? body.result.marksAwarded : marks;
         recordMarks(current.id, stored, current.maxMarks);
-        const rr: RewriteGradeResult = { questionId: current.id, type: "rewrite", maxMarks: 3, phase: rewrite.phase, marksAwarded: stored, feedback: "", termOutcomes: [], needsSelfMark: false };
-        setRewrite((prev) => ({ ...prev, result: rr }));
+        const rr: RewriteGradeResult = { questionId: current.id, type: "rewrite", maxMarks: 3, phase, marksAwarded: stored, feedback: "", termOutcomes: [], needsSelfMark: false };
+        setRewrite((prev) => (phase === 2 ? { ...prev, phase2Result: rr } : { ...prev, phase1Result: rr }));
         updateGraded({ ...graded, result: rr, marks: stored });
         return;
       }
@@ -434,8 +458,8 @@ export function Quiz({
       const body: { receipt?: string } = await res.json();
       queueReceipt(body.receipt);
       recordMarks(current.id, marks, current.maxMarks);
-      const rr: RewriteGradeResult = { questionId: current.id, type: "rewrite", maxMarks: 3, phase: rewrite.phase, marksAwarded: marks, feedback: "", termOutcomes: [], needsSelfMark: false };
-      setRewrite((prev) => ({ ...prev, result: rr }));
+      const rr: RewriteGradeResult = { questionId: current.id, type: "rewrite", maxMarks: 3, phase, marksAwarded: marks, feedback: "", termOutcomes: [], needsSelfMark: false };
+      setRewrite((prev) => (phase === 2 ? { ...prev, phase2Result: rr } : { ...prev, phase1Result: rr }));
       updateGraded({ ...graded, result: rr, marks });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
@@ -857,8 +881,9 @@ export function Quiz({
           <>
             <RewritePanel
               phase1Answer={rewrite.phase1Answer}
+              phase1Result={rewrite.phase1Result}
               phase2Answer={rewrite.phase2Answer}
-              result={rewrite.result}
+              phase2Result={rewrite.phase2Result}
               onGrade={(p, a) => handleRewriteGrade(p, a)}
               onSelfMark={(t) => void rewriteSelfMark(t)}
               busy={busy}
