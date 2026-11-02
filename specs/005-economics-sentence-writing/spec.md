@@ -209,7 +209,8 @@ confirm it clears.
 - Phase 2 scores lower than phase 1: the recorded mark is the phase 1 mark (FR-019).
 - The student submits an empty or whitespace-only rewrite in phase 1 or phase 2: submission is
   blocked until they type a rewrite.
-- The student skips phase 2 without rewriting: the recorded mark is the phase 1 mark, not 0.
+- The student wants to skip phase 2: there is no skip. Once phase 1 scores under 3, the retry
+  must be submitted (FR-042); a student who leaves leaves the question unanswered, like any other.
 - Hyphenated words and numbers count as one word each in the 25-word limit, and the live counter
   and the marker use the same rule.
 
@@ -325,8 +326,10 @@ confirm it clears.
 
 - **FR-041**: Empty or whitespace-only submissions MUST be blocked in both phases; the student MUST
   type a rewrite before submitting.
-- **FR-042**: If the student skips phase 2 without submitting a rewrite, the recorded mark MUST be
-  the phase 1 mark, not 0.
+- **FR-042**: Phase 2 MUST NOT be skippable. When phase 1 scores under 3, the question is final
+  only after a phase 2 rewrite is submitted (or the degrade path ends it); the server MUST refuse a
+  skip request. Until then the question counts as unanswered, like any other unanswered question.
+  (Changed 2026-11-02: replaces the earlier rule that a skipped phase 2 keeps the phase 1 mark.)
 - **FR-043**: The 25-word limit MUST count whitespace-separated tokens, with hyphenated words and
   numbers counting as one word each; the live word counter and the marker MUST use the same rule.
 - **FR-044**: The grading calls MUST log only minimal structured metrics: timestamp, hashed user id,
@@ -353,7 +356,7 @@ confirm it clears.
 - **Attempt**: 5 questions drawn at random, weighted towards terms under review. Per-question phase
   state (phase 1 sentence and mark, phase 2 sentence and mark if any). Resumable mid-question.
 - **Result**: Per question, the recorded mark (the higher of the phase 1 mark and the capped phase
-  2 mark; if phase 2 is skipped, the phase 1 mark), both sentences, both marks, the marker's
+  2 mark), both sentences, both marks, the marker's
   feedback, and a correct/wrong outcome per target term from phase 1.
 - **Concept result**: Derived from phase 1 only. A term missed or misused in phase 1 counts as
   wrong; a term used correctly in phase 1 counts as correct; clears after 3 correct uses.
@@ -376,8 +379,8 @@ confirm it clears.
   in phase 2 (100% of tested cases).
 - **SC-008**: A student can resume an attempt mid-question at phase 2 with the hint showing (100% of
   tested cases).
-- **SC-009**: An empty submission is never recorded, and a skipped phase 2 keeps the phase 1 mark
-  (100% of tested cases).
+- **SC-009**: An empty submission is never recorded, and phase 2 can never be skipped: a skip
+  request is refused (100% of tested cases).
 - **SC-010**: Grading calls log only minimal metrics (hashed user, question, outcome, duration,
   model) and never answer text or model sentences (100% of tested cases).
 
@@ -386,7 +389,8 @@ confirm it clears.
 ### Session 2026-11-02
 
 - Q: If a student submits an empty rewrite, or skips phase 2 without rewriting, what should the app
-  do? → A: Block empty submissions in both phases; a skipped phase 2 keeps the phase 1 mark as the
+  do? → A: Block empty submissions in both phases. (Superseded 2026-11-02 for the skip: phase 2 can
+  no longer be skipped, see FR-042.) Originally: a skipped phase 2 keeps the phase 1 mark as the
   recorded mark.
 - Q: How should the 25-word limit count words in the live word counter and in marking? → A: Count
   whitespace-separated tokens; hyphenated words and numbers count as one word each, and the counter
