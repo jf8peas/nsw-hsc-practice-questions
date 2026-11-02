@@ -224,3 +224,139 @@ export async function gradeShortAnswer(p: GradeParams): Promise<ShortGrade | nul
   console.info(`[grade] ${model} → ${out.marksAwarded}/${p.maxMarks}`);
   return { ...out, gradedBy: model };
 }
+
+// ---- rewrite grading (spec 005) ----------------------------------------------
+
+export interface RewriteTermStatus {
+  term: string;
+  status: "used" | "missing" | "misused";
+}
+
+export interface RewriteGrade {
+  criterionA: boolean;
+  padding: boolean;
+  terms: RewriteTermStatus[];
+  feedback: string;
+  gradedBy: string;
+}
+
+interface RewriteGradeParams {
+  /** The plain-English sentence. */
+  prompt: string;
+  targetTerms: Array<{
+    term: string;
+    definition: string;
+    equivalents: string[];
+    misuses: string[];
+  }>;
+  answer: string;
+}
+
+function asBoolean(v: unknown): boolean {
+  return v === true || v === "true";
+}
+
+/** Pull the first {...} block out of a model response and parse it. */
+function parseRewriteJson(content: string): Omit<RewriteGrade, "gradedBy"> | null {
+  const start = content.indexOf("{");
+  const end = content.lastIndexOf("}");
+  if (start === -1 || end <= start) return null;
+  let obj: Record<string, unknown>;
+  try {
+    obj = JSON.parse(content.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+  const feedback = typeof obj.feedback === "string" ? obj.feedback.trim() : "";
+  if (!feedback) return null;
+  const terms = Array.isArray(obj.terms)
+    ? obj.terms.filter(
+        (t): t is { term: string; status: string } =>
+          !!t &&
+          typeof t === "object" &&
+          typeof (t as { term?: unknown }).term === "string" &&
+          typeof (t as { status?: unknown }).status === "string",
+      )
+    : [];
+  return {
+    criterionA: asBoolean(obj.criterionA),
+    padding: asBoolean(obj.padding),
+    terms: terms.map((t) => ({
+      term: t.term,
+      status: t.status === "used" || t.status === "misused" ? t.status : "missing",
+    })),
+    feedback,
+  };
+}
+
+function buildRewriteMessages(p: RewriteGradeParams): ChatMessage[] {
+  const system =
+    `You are marking a NSW HSC Year 12 Economics sentence-writing exercise. The student rewrote a ` +
+    `plain-English sentence as ONE concise sentence using the correct economics terms. ` +
+    `Judge the meaning, not exact word matches. ` +
+    `For each target term decide its status: "used" (the term, or an accepted equivalent, is used correctly), ` +
+    `"missing" (the term or an accepted equivalent is absent), or "misused" (the term or an equivalent is used ` +
+    `incorrectly, or a listed misuse is used). ` +
+    `Any grammatical form of a term counts ("specialise" for specialisation, "protected" for protection). ` +
+    `An equivalent counts ONLY if it is listed for that term. Everyday synonyms do NOT count unless listed. ` +
+    `Listed misuses NEVER count. ` +
+    `"criterionA" is true when the meaning and the cause and effect of the original sentence are kept and correct. ` +
+    `"padding" is true when the sentence is padded with words that add nothing (the word limit itself is checked separately). ` +
+    `Respond with JSON only, no prose outside it.`;
+
+  const user =
+    `Plain-English sentence: ${p.prompt}\n\n` +
+    `Target terms:\n` +
+    p.targetTerms
+      .map(
+        (t, i) =>
+          `${i + 1}. ${t.term} — ${t.definition}` +
+          (t.equivalents.length ? ` (accepted equivalents: ${t.equivalents.join(", ")})` : "") +
+          (t.misuses.length ? ` (never counts: ${t.misuses.join(", ")})` : ""),
+      )
+      .join("\n") +
+    `\n\nStudent's sentence:\n"""\n${p.answer}\n"""\n\n` +
+    `Reply with exactly this shape:\n` +
+    `{"criterionA": true|false, "padding": true|false, ` +
+    `"terms": [{"term": "<exact term text>", "status": "used"|"missing"|"misused"}], ` +
+    `"feedback": "<1-2 sentences to the student>"}`;
+
+  return [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
+}
+
+export async function gradeRewrite(p: RewriteGradeParams): Promise<RewriteGrade | null> {
+  if (!process.env.OPENROUTER_API_KEY) {
+    console.warn("[rewrite] OPENROUTER_API_KEY not set — rewrite falls back to self-marking");
+    return null;
+  }
+  const model = process.env.GRADING_MODEL || DEFAULT_MODEL;
+  const messages = buildRewriteMessages(p);
+
+  async function attempt(): Promise<Omit<RewriteGrade, "gradedBy"> | null> {
+    const res = await chatCompletion({
+      model,
+      messages,
+      temperature: 0,
+      maxTokens: 500,
+      timeoutMs: TIMEOUT_MS,
+      json: true,
+    });
+    if (!res.ok) {
+      console.error(`[rewrite] OpenRouter call failed: ${res.reason} ${res.detail ?? ""}`);
+      return null;
+    }
+    const parsed = parseRewriteJson(res.content);
+    if (!parsed) console.error(`[rewrite] could not parse grader JSON: ${res.content.slice(0, 300)}`);
+    return parsed;
+  }
+
+  let out = await attempt();
+  if (!out) out = await attempt();
+  if (!out) return null;
+
+  console.info(`[rewrite] ${model} → A=${out.criterionA} padding=${out.padding} terms=${out.terms.length}`);
+  return { ...out, gradedBy: model };
+}

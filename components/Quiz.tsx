@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Formula } from "@/components/Formula";
 import { PhotoAnswerPanel, type PhotoFile } from "@/components/PhotoAnswerPanel";
 import { ReadBackPanel } from "@/components/ReadBackPanel";
+import { RewritePanel } from "@/components/RewritePanel";
 import {
   clearDraft,
   clearGraded,
@@ -23,7 +24,7 @@ import {
   type GradedState,
   type PhotoDraft,
 } from "@/lib/drafts";
-import type { AlreadyAnswered, GradeResponse, GradeResult } from "@/lib/grading";
+import type { AlreadyAnswered, GradeResponse, GradeResult, RewriteGradeResult } from "@/lib/grading";
 import { reloadPage } from "@/lib/navigation";
 import { enqueueReceipt, flushOutbox, pendingCount, sendReceipt } from "@/lib/outbox";
 import { startAttempt } from "@/lib/startAttempt";
@@ -74,6 +75,14 @@ export function Quiz({
       : "quiz",
   );
   const [draft, setDraft] = useState("");
+  // the sentence-writing question flow (spec 005): phase, the student's sentences, the hint
+  // and the discussion, one question at a time; null until a rewrite question is current
+  const [rewrite, setRewrite] = useState<{
+    phase: 1 | 2;
+    phase1Answer: string;
+    phase2Answer?: string;
+    result: RewriteGradeResult | null;
+  }>({ phase: 1, phase1Answer: "", result: null });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [graded, setGraded] = useState<GradedState | null>(null);
@@ -139,6 +148,35 @@ export function Quiz({
     const g = loadGraded(attemptId, current.id);
     setGraded(g);
     setDraft(g ? g.answer : loadDraft(attemptId, current.id));
+    // spec 005: resume a rewrite question from the phase row the server rebuilt (FR-021,
+    // FR-023): a phase 1 under 3 shows the hint, a final question the discussion.
+    const rs = (initial?.rewriteState ?? {})[current.id];
+    if (rs) {
+      const rr: RewriteGradeResult = {
+        questionId: current.id,
+        type: "rewrite",
+        maxMarks: 3,
+        phase: rs.phase === "phase2" ? 2 : 1,
+        marksAwarded: rs.marks ?? null,
+        feedback: "",
+        termOutcomes: [],
+        hint: rs.hint,
+        discussion: rs.discussion,
+        needsSelfMark: false,
+      };
+      setRewrite({
+        phase: rs.phase === "phase2" ? 2 : 1,
+        phase1Answer: rs.phase1Answer,
+        phase2Answer: rs.phase2Answer,
+        result: rr,
+      });
+      if (rs.phase === "final" && rs.marks !== undefined) {
+        recordMarks(current.id, rs.marks, 3);
+        updateGraded({ answer: rs.phase2Answer ?? rs.phase1Answer, result: rr, marks: rs.marks });
+      }
+    } else {
+      setRewrite({ phase: 1, phase1Answer: "", result: null });
+    }
     setError(null);
     const pd = loadPhotoDraft(attemptId, current.id);
     setPhotoDraft(pd);
@@ -184,10 +222,11 @@ export function Quiz({
     if (current) saveGraded(attemptId, current.id, next);
   }
 
-  async function grade(answer: string, displayIndex?: number, transcriptionToken?: string) {
+  async function grade(answer: string, displayIndex?: number, transcriptionToken?: string, phase?: 1 | 2) {
     if (!current) return;
     setBusy(true);
     setError(null);
+    const isRewrite = current.type === "rewrite";
     try {
       const res = await fetch("/api/grade", {
         method: "POST",
@@ -198,6 +237,7 @@ export function Quiz({
           questionId: current.id,
           answer,
           ...(transcriptionToken ? { transcriptionToken } : {}),
+          ...(isRewrite && phase ? { phase } : {}),
         }),
       });
 
@@ -219,6 +259,10 @@ export function Quiz({
         recordMarks(current.id, result.marksAwarded ?? 0, result.maxMarks);
         clearDraft(attemptId, current.id);
         clearPhotoDraft(attemptId, current.id);
+        if (isRewrite) {
+          const rr = result as RewriteGradeResult;
+          setRewrite((prev) => ({ phase: rr.phase ?? prev.phase, phase1Answer: prev.phase1Answer || answer, phase2Answer: rr.phase === 2 ? prev.phase2Answer ?? answer : prev.phase2Answer, result: rr }));
+        }
         updateGraded({ answer, result, marks: result.marksAwarded ?? 0, pickedDisplay: displayIndex });
         return;
       }
@@ -238,6 +282,16 @@ export function Quiz({
       clearPhotoDraft(attemptId, current.id);
       const marks = data.result.needsSelfMark ? null : data.result.marksAwarded;
       if (marks !== null) recordMarks(current.id, marks, data.result.maxMarks);
+      // rewrite: remember the phase, the student's sentences and the hint/discussion
+      if (data.result.type === "rewrite") {
+        const rr = data.result as RewriteGradeResult;
+        setRewrite((prev) => ({
+          phase: rr.phase ?? prev.phase,
+          phase1Answer: rr.phase === 1 ? answer : prev.phase1Answer || answer,
+          phase2Answer: rr.phase === 2 ? (prev.phase2Answer ?? answer) : prev.phase2Answer,
+          result: rr,
+        }));
+      }
       updateGraded({
         answer,
         result: data.result,
@@ -312,6 +366,102 @@ export function Quiz({
   function submitShort() {
     if (graded || busy || !draft.trim()) return;
     void grade(draft.trim());
+  }
+
+  /** A rewrite phase submission (spec 005): phase 1, or the phase 2 retry. */
+  function handleRewriteGrade(phase: 1 | 2, answer: string) {
+    if (graded || busy || !answer.trim()) return;
+    void grade(answer, undefined, undefined, phase);
+  }
+
+  /** The rewrite degrade path (FR-030, FR-046): per-criterion ticks with one tick per term. */
+  async function rewriteSelfMark(ticks: { criterionA: boolean; termTicks: Record<string, boolean>; criterionC: boolean }) {
+    if (!current || !graded?.selfMarkToken || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/results/self-mark", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          attemptId,
+          attemptToken,
+          questionId: current.id,
+          answer: graded.answer,
+          phase: rewrite.phase,
+          criterionA: ticks.criterionA,
+          termTicks: ticks.termTicks,
+          criterionC: ticks.criterionC,
+          token: graded.selfMarkToken,
+        }),
+      });
+      if (res.status === 401) {
+        setSessionEnded(true);
+        return;
+      }
+      const terms = rewrite.result?.discussion?.terms ?? [];
+      const criterionB = terms.length > 0 ? terms.every((t) => ticks.termTicks[t.term] === true) : false;
+      const raw = (ticks.criterionA ? 1 : 0) + (criterionB ? 1 : 0) + (ticks.criterionC ? 1 : 0);
+      const marks = rewrite.phase === 2 ? Math.min(raw, 2) : raw;
+      if (res.status === 409) {
+        const body = (await res.json().catch(() => ({}))) as { result?: { marksAwarded?: number } };
+        const stored = typeof body.result?.marksAwarded === "number" ? body.result.marksAwarded : marks;
+        recordMarks(current.id, stored, current.maxMarks);
+        const rr: RewriteGradeResult = { questionId: current.id, type: "rewrite", maxMarks: 3, phase: rewrite.phase, marksAwarded: stored, feedback: "", termOutcomes: [], needsSelfMark: false };
+        setRewrite((prev) => ({ ...prev, result: rr }));
+        updateGraded({ ...graded, result: rr, marks: stored });
+        return;
+      }
+      if (!res.ok) throw new Error(`Could not save your mark (${res.status})`);
+      const body: { receipt?: string } = await res.json();
+      queueReceipt(body.receipt);
+      recordMarks(current.id, marks, current.maxMarks);
+      const rr: RewriteGradeResult = { questionId: current.id, type: "rewrite", maxMarks: 3, phase: rewrite.phase, marksAwarded: marks, feedback: "", termOutcomes: [], needsSelfMark: false };
+      setRewrite((prev) => ({ ...prev, result: rr }));
+      updateGraded({ ...graded, result: rr, marks });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** The student chose not to retry phase 2: keep the phase 1 mark (FR-042). */
+  async function skipRewrite() {
+    if (!current || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/grade", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ attemptId, attemptToken, questionId: current.id, answer: "", phase: 2, skip: true }),
+      });
+      if (res.status === 401) {
+        setSessionEnded(true);
+        return;
+      }
+      if (res.status === 409) {
+        const body = (await res.json().catch(() => ({}))) as { result?: RewriteGradeResult };
+        const marks = body.result?.marksAwarded ?? 0;
+        recordMarks(current.id, marks, current.maxMarks);
+        if (body.result) setRewrite((prev) => ({ ...prev, result: body.result! }));
+        updateGraded({ answer: "", result: body.result as GradeResult, marks });
+        return;
+      }
+      if (!res.ok) throw new Error(`Could not save your mark (${res.status})`);
+      const data: GradeResponse = await res.json();
+      queueReceipt(data.receipt);
+      const rr = data.result as RewriteGradeResult;
+      const marks = rr.marksAwarded ?? 0;
+      recordMarks(current.id, marks, rr.maxMarks);
+      setRewrite((prev) => ({ ...prev, result: rr }));
+      updateGraded({ answer: "", result: rr, marks });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
   }
 
   function onDraftChange(text: string) {
@@ -671,6 +821,7 @@ export function Quiz({
   if (!current) return null;
   const q = current;
   const isShort = q.type === "short";
+  const isRewrite = q.type === "rewrite";
   const result = graded?.result ?? null;
   const marks = graded?.marks ?? null;
   const canNext = result !== null && marks !== null;
@@ -722,7 +873,19 @@ export function Quiz({
           />
         )}
 
-        {isShort ? (
+        {isShort && isRewrite ? (
+          <>
+            <RewritePanel
+              phase1Answer={rewrite.phase1Answer}
+              phase2Answer={rewrite.phase2Answer}
+              result={rewrite.result}
+              onGrade={(p, a) => handleRewriteGrade(p, a)}
+              onSkip={() => void skipRewrite()}
+              onSelfMark={(t) => void rewriteSelfMark(t)}
+              busy={busy}
+            />
+          </>
+        ) : isShort ? (
           <>
             <div className="answer-modes" role="tablist" aria-label="Answer mode">
               <button
@@ -892,7 +1055,7 @@ export function Quiz({
               </>
             )}
 
-            {result !== null && (
+            {result !== null && result.type !== "rewrite" && (
               <>
                 {result.feedback && marks !== null && (
                   <div className="feedback">
@@ -928,7 +1091,7 @@ export function Quiz({
               </>
             )}
 
-            {result !== null && marks === null && (
+            {result !== null && marks === null && result.type !== "rewrite" && (
               <>
                 {aiNote && (
                   <div className="notice" role="status">
@@ -946,7 +1109,7 @@ export function Quiz({
               </>
             )}
           </>
-        ) : (
+        ) : q.type === "mc" ? (
           <div className="mc-list">
             {q.options.map((label, displayIndex) => {
               let cls = "mc-option";
@@ -970,7 +1133,7 @@ export function Quiz({
               );
             })}
           </div>
-        )}
+        ) : null}
 
         <div aria-live="polite">
           {result?.type === "mc" && result.optionExplanation && (

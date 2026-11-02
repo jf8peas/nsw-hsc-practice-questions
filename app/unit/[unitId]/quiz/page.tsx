@@ -6,8 +6,10 @@ import { getUnit } from "@/content";
 import { requirePageUser } from "@/lib/auth.server";
 import { DEFAULT_PASS_MARK, toPublicQuestions } from "@/lib/attempts/draw.server";
 import { finalizeIfComplete } from "@/lib/attempts/complete.server";
+import { rewriteResumeState } from "@/lib/grading.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { getAttemptForUser } from "@/lib/db/queries/attempts.server";
+import { getRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
 import { getAnsweredMarks } from "@/lib/db/queries/results.server";
 import type { AttemptPayload } from "@/lib/drafts";
 import { signAttemptToken } from "@/lib/tokens.server";
@@ -38,6 +40,21 @@ export default async function QuizPage({
     } else {
       const answered = await dbCall((db) => getAnsweredMarks(db, user.id, row.id));
       await dbCall((db) => finalizeIfComplete(db, row));
+      // spec 005: rebuild the rewrite phase state (hint/discussion per FR-023) for resume;
+      // the answer key is read only inside lib/grading.server.ts (no-key-leak rule)
+      const rewriteState: AttemptPayload["rewriteState"] = {};
+      for (const qid of row.questionIds) {
+        const ph = await dbCall((db) => getRewritePhase(db, user.id, row.id, qid));
+        if (!ph) continue;
+        rewriteState[qid] = rewriteResumeState(qid, {
+          status: ph.status as "phase1" | "phase2" | "final",
+          phase1Answer: ph.phase1Answer,
+          phase1Marks: ph.phase1Marks,
+          phase1TermOutcomes: ph.phase1TermOutcomes ?? null,
+          phase2Answer: ph.phase2Answer,
+          recordedMark: ph.recordedMark,
+        });
+      }
       payload = {
         attemptToken: signAttemptToken({
           uid: user.id,
@@ -51,6 +68,7 @@ export default async function QuizPage({
         // retired questions are dropped; MC options are in the stored display order
         questions: toPublicQuestions(row.questionIds, row.mcOptionOrder),
         answered,
+        rewriteState,
       };
     }
   } catch (error) {

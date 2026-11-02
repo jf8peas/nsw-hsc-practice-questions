@@ -18,15 +18,20 @@ export interface HomeYearRow {
   year: Year;
   /** The year has no units at all ("More units coming soon"). */
   isComingSoon: boolean;
+  /** Every unit in the year is archived and "Show all" is off: the whole group is hidden. */
+  hidden: boolean;
   units: HomeUnitRow[];
   /** The rows to render with the current "Show all" setting. */
   visibleUnits: HomeUnitRow[];
-  /** Every unit in the year is archived and "Show all" is off: show the notice. */
-  allArchivedNote: boolean;
 }
 
 export interface HomeUnitsView {
   years: HomeYearRow[];
+  /**
+   * Every year that has units is fully archived and "Show all" is off, so nothing but
+   * coming-soon groups (or nothing) is left: the page shows one line instead.
+   */
+  allArchived: boolean;
   /** Anything is archived or old enough to archive, so the "Show all" switch is worth showing. */
   showSwitch: boolean;
 }
@@ -50,15 +55,18 @@ export function homeUnitsView(
     return {
       year: group.year,
       isComingSoon: group.isEmpty,
+      hidden: !showAll && !group.isEmpty && rows.length > 0 && rows.every((r) => r.archived),
       units: rows,
       visibleUnits: rows.filter((r) => r.visible),
-      allArchivedNote: !showAll && !group.isEmpty && rows.length > 0 && rows.every((r) => r.archived),
     };
   });
+
+  const unitYears = years.filter((y) => !y.isComingSoon);
+  const allArchived = !showAll && unitYears.length > 0 && unitYears.every((y) => y.hidden);
 
   const showSwitch =
     years.some((y) => y.units.some((u) => u.archived)) ||
     years.some((y) => y.units.some((u) => u.canArchive));
 
-  return { years, showSwitch };
+  return { years, allArchived, showSwitch };
 }

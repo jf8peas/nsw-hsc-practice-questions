@@ -85,6 +85,8 @@ export const results = pgTable(
     feedback: text("feedback"),
     rubricHits: text("rubric_hits").array(),
     rubricMisses: text("rubric_misses").array(),
+    /** `rewrite` only (spec 005): per-term outcomes from phase 1, `[{ conceptId, correct }]`. */
+    conceptOutcomes: jsonb("concept_outcomes").$type<Array<{ conceptId: string; correct: boolean }>>(),
     createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [
@@ -103,6 +105,55 @@ export const results = pgTable(
     index("results_attempt_idx").on(t.attemptId),
     // concept progress (spec 002): one student, one unit, in answer order
     index("results_user_unit_created_idx").on(t.userId, t.unitId, t.createdAt, t.id),
+  ],
+);
+
+/**
+ * One row per question in a writing-practice attempt (spec 005): the phase 1 and phase 2
+ * sentences, their marks, the per-term outcomes and the feedback shown. Created at phase 1,
+ * kept for the attempt detail page, deleted with the student. A `results` row is created
+ * only when the question is final, so "a results row means answered" still holds.
+ */
+export const rewritePhases = pgTable(
+  "rewrite_phases",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    attemptId: uuid("attempt_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    unitId: text("unit_id").notNull(),
+    questionId: text("question_id").notNull(),
+    /** phase1 | phase2 | final */
+    status: text("status").notNull(),
+    phase1Answer: text("phase1_answer").notNull(),
+    phase1Marks: smallint("phase1_marks").notNull(),
+    phase1Feedback: text("phase1_feedback"),
+    phase1TermOutcomes: jsonb("phase1_term_outcomes").$type<Array<{ conceptId: string; correct: boolean }>>(),
+    phase1GradedAt: ts("phase1_graded_at").notNull().defaultNow(),
+    phase2Answer: text("phase2_answer"),
+    phase2Marks: smallint("phase2_marks"),
+    phase2Feedback: text("phase2_feedback"),
+    phase2GradedAt: ts("phase2_graded_at"),
+    recordedMark: smallint("recorded_mark"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "rewrite_phases_attempt_owner_fk",
+      columns: [t.attemptId, t.userId],
+      foreignColumns: [attempts.id, attempts.userId],
+    }).onDelete("cascade"),
+    unique("rewrite_phases_attempt_question_unique").on(t.attemptId, t.questionId),
+    check("rewrite_phases_status", sql`${t.status} in ('phase1', 'phase2', 'final')`),
+    check("rewrite_phases_phase1_marks", sql`${t.phase1Marks} >= 0 and ${t.phase1Marks} <= 3`),
+    check(
+      "rewrite_phases_phase2_marks",
+      sql`${t.phase2Marks} is null or (${t.phase2Marks} >= 0 and ${t.phase2Marks} <= 2)`,
+    ),
+    check("rewrite_phases_final_mark", sql`${t.status} <> 'final' or ${t.recordedMark} is not null`),
+    index("rewrite_phases_user_unit_idx").on(t.userId, t.unitId),
   ],
 );
 
@@ -254,3 +305,5 @@ export type User = typeof users.$inferSelect;
 export type Attempt = typeof attempts.$inferSelect;
 export type ResultRow = typeof results.$inferSelect;
 export type NewResultRow = typeof results.$inferInsert;
+export type RewritePhaseRow = typeof rewritePhases.$inferSelect;
+export type NewRewritePhaseRow = typeof rewritePhases.$inferInsert;

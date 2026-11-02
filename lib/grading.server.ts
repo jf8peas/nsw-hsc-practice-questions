@@ -3,8 +3,10 @@ import "server-only";
 import { getQuestion, getUnit } from "@/content";
 import { getAnswer } from "@/content/answers";
 import type { ReviewMaterial } from "@/lib/concepts/port";
-import type { GradeResult } from "@/lib/grading";
-import { gradeShortAnswer } from "@/lib/openrouter.server";
+import type { GradeResult, RewriteDiscussion, RewriteGradeResult, RewriteHint } from "@/lib/grading";
+import { gradeRewrite, gradeShortAnswer } from "@/lib/openrouter.server";
+import type { Answer } from "@/lib/types";
+import { countWords } from "@/lib/wordcount";
 
 export interface GradeOptions {
   /** MC only: optionOrder[displayIndex] = original option index (from the attempt). */
@@ -208,4 +210,196 @@ export async function gradeAnswer(
     answerText: answer,
     gradedBy: "llm",
   };
+}
+
+// ---- rewrite grading (spec 005) ----------------------------------------------
+
+export const REWRITE_WORD_LIMIT = 25;
+
+export interface RewriteGraded {
+  result: RewriteGradeResult;
+  /** What to store as the answer: the final sentence. */
+  answerText: string;
+  gradedBy: "auto" | "llm";
+}
+
+/**
+ * The discussion material (FR-018): the model sentences and every target term with its
+ * definition and why it fits this sentence. Read from the key at grade time; never stored.
+ */
+/** The target-term concept ids of a rewrite question (for the self-mark token, FR-046). */
+export function rewriteTermConceptIds(questionId: string): string[] {
+  const key = getAnswer(questionId);
+  return key?.targetTerms?.map((t) => t.conceptId) ?? [];
+}
+
+/** The discussion material for a rewrite question, or undefined if it is not one / has no key. */
+export function rewriteDiscussionOrNull(questionId: string): RewriteDiscussion | undefined {
+  const key = getAnswer(questionId);
+  return key ? buildRewriteDiscussion(key) : undefined;
+}
+
+export function buildRewriteDiscussion(key: Answer): RewriteDiscussion {
+  return {
+    modelSentences: key.modelSentences ?? [],
+    terms: (key.targetTerms ?? []).map((t) => ({
+      term: t.term,
+      definition: t.definition,
+      why: t.why,
+    })),
+  };
+}
+
+/**
+ * Grade one rewrite answer (spec 005). The model returns only the judgements code cannot
+ * compute (criterion A, padding, per-term status, feedback); code computes the word count,
+ * criterion C, the all-or-nothing criterion B, the marks, the phase 2 cap and the hint.
+ */
+export async function gradeRewriteAnswer(
+  questionId: string,
+  answer: string,
+  phase: 1 | 2,
+  options: { skipLlm?: boolean } = {},
+): Promise<RewriteGraded | null> {
+  const found = getQuestion(questionId);
+  const key = getAnswer(questionId);
+  if (!found || !key || found.question.type !== "rewrite" || !key.targetTerms) return null;
+  const { question } = found;
+
+  const wordCount = countWords(answer);
+  const base = {
+    questionId,
+    type: "rewrite" as const,
+    maxMarks: 3 as const,
+    phase,
+    feedback: "",
+    termOutcomes: key.targetTerms.map((t) => ({ conceptId: t.conceptId, correct: false })),
+    needsSelfMark: false,
+  };
+
+  if (!answer.trim()) {
+    return {
+      result: { ...base, marksAwarded: 0, feedback: "No answer was submitted." },
+      answerText: answer,
+      gradedBy: "auto",
+    };
+  }
+
+  if (options.skipLlm) {
+    return {
+      result: { ...base, marksAwarded: null, feedback: "", needsSelfMark: true },
+      answerText: answer,
+      gradedBy: "llm",
+    };
+  }
+
+  const llm = await gradeRewrite({
+    prompt: question.prompt,
+    targetTerms: key.targetTerms.map((t) => ({
+      term: t.term,
+      definition: t.definition,
+      equivalents: t.equivalents,
+      misuses: t.misuses,
+    })),
+    answer,
+  });
+
+  if (!llm) {
+    return {
+      result: { ...base, marksAwarded: null, feedback: "", needsSelfMark: true },
+      answerText: answer,
+      gradedBy: "llm",
+    };
+  }
+
+  // code computes the criteria and marks (research R4)
+  const criterionA = llm.criterionA;
+  const criterionC = wordCount <= REWRITE_WORD_LIMIT && !llm.padding;
+  const byTerm = new Map(llm.terms.map((t) => [t.term, t.status]));
+  const criterionB = key.targetTerms.every((t) => byTerm.get(t.term) === "used");
+  const marks = (criterionA ? 1 : 0) + (criterionB ? 1 : 0) + (criterionC ? 1 : 0);
+  const capped = phase === 2 ? Math.min(marks, 2) : marks;
+
+  const result: RewriteGradeResult = {
+    ...base,
+    marksAwarded: capped,
+    feedback: llm.feedback,
+    termOutcomes: key.targetTerms.map((t) => ({
+      conceptId: t.conceptId,
+      correct: byTerm.get(t.term) === "used",
+    })),
+  };
+
+  if (phase === 1 && capped < 3) {
+    const missed = key.targetTerms.filter((t) => byTerm.get(t.term) !== "used");
+    if (missed.length > 0) {
+      result.hint = { terms: missed.map((t) => ({ term: t.term, definition: t.definition })) };
+    } else {
+      // every term used but (a) or (c) lost (FR-045)
+      result.hint = {
+        terms: [],
+        lostCriterion: criterionA ? "c" : "a",
+        criterionText: criterionA
+          ? "Cut your sentence to 25 words or fewer."
+          : "Keep the meaning and the cause and effect of the original sentence.",
+      };
+    }
+  }
+
+  if (phase === 2 || (phase === 1 && capped === 3)) {
+    result.discussion = buildRewriteDiscussion(key);
+  }
+
+  return { result, answerText: answer, gradedBy: "llm" };
+}
+
+/**
+ * The rewrite state a resume may see (spec 005 FR-021, FR-023): built server-side from a phase
+ * row and the answer key, so the browser only ever gets what that stage allows — nothing from
+ * the key before a phase 1 grade, the hint at a phase 1 under 3, the discussion once final.
+ * This is the ONLY route by which the quiz page reads the answer key.
+ */
+export function rewriteResumeState(
+  questionId: string,
+  phaseRow: {
+    status: "phase1" | "phase2" | "final";
+    phase1Answer: string;
+    phase1Marks: number;
+    phase1TermOutcomes: Array<{ conceptId: string; correct: boolean }> | null;
+    phase2Answer: string | null;
+    recordedMark: number | null;
+  },
+): {
+  phase: "phase1" | "phase2" | "final";
+  phase1Answer: string;
+  phase2Answer?: string;
+  marks?: number;
+  hint?: RewriteHint;
+  discussion?: RewriteDiscussion;
+} {
+  const key = getAnswer(questionId);
+  const state: ReturnType<typeof rewriteResumeState> = {
+    phase: phaseRow.status,
+    phase1Answer: phaseRow.phase1Answer,
+    ...(phaseRow.phase2Answer ? { phase2Answer: phaseRow.phase2Answer } : {}),
+    ...(phaseRow.recordedMark !== null ? { marks: phaseRow.recordedMark } : { marks: phaseRow.phase1Marks }),
+  };
+  if (phaseRow.status === "phase1" && phaseRow.phase1Marks < 3 && key?.targetTerms) {
+    const outcomes = new Map((phaseRow.phase1TermOutcomes ?? []).map((o) => [o.conceptId, o.correct]));
+    const missed = key.targetTerms.filter((t) => outcomes.get(t.conceptId) === false);
+    if (missed.length > 0) {
+      state.hint = { terms: missed.map((t) => ({ term: t.term, definition: t.definition })) };
+    } else {
+      const over = countWords(phaseRow.phase1Answer) > REWRITE_WORD_LIMIT;
+      state.hint = {
+        terms: [],
+        lostCriterion: over ? "c" : "a",
+        criterionText: over
+          ? "Cut your sentence to 25 words or fewer."
+          : "Keep the meaning and the cause and effect of the original sentence.",
+      };
+    }
+  }
+  if (phaseRow.status === "final" && key) state.discussion = buildRewriteDiscussion(key);
+  return state;
 }

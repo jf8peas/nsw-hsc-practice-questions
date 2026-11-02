@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 
 import { getQuestion } from "@/content";
 import { resolveSession } from "@/lib/auth.server";
-import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
-import { getResult } from "@/lib/db/queries/results.server";
-import type { ResultRow } from "@/lib/db/schema";
 import { getConfig } from "@/lib/config.server";
+import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
+import { getRewritePhase, insertRewritePhase, finaliseRewritePhase, finaliseRewritePhaseWithoutPhase2 } from "@/lib/db/queries/rewrite-phases.server";
+import { getResult } from "@/lib/db/queries/results.server";
+import type { RewritePhaseRow, ResultRow } from "@/lib/db/schema";
 import type { AlreadyAnswered, GradeResponse } from "@/lib/grading";
-import { getOptionExplanation, gradeAnswer } from "@/lib/grading.server";
+import {
+  getOptionExplanation,
+  gradeAnswer,
+  gradeRewriteAnswer,
+  rewriteDiscussionOrNull,
+  rewriteTermConceptIds,
+} from "@/lib/grading.server";
 import { llmGradingConfigured } from "@/lib/openrouter.server";
 import { checkIpRateLimit, checkUserRateLimit } from "@/lib/ratelimit.server";
 import { buildReceipt, saveResult, type ResultFields } from "@/lib/results/save.server";
@@ -19,8 +26,12 @@ import {
   verifyAttemptToken,
   verifyTranscriptionToken,
 } from "@/lib/tokens.server";
+import type { RewriteQuestion } from "@/lib/types";
 import { extractTranscription, TRANSCRIPTION_MARKER } from "@/lib/transcribe.server";
 import { refundAiSlot, reserveAiSlot, type AiSlot } from "@/lib/usage.server";
+import type { AttemptTokenPayload } from "@/lib/tokens.server";
+import type { NewRewritePhaseRow } from "@/lib/db/schema";
+import { logRewriteGrade } from "@/lib/rewrite-log.server";
 
 export const runtime = "nodejs";
 
@@ -47,7 +58,7 @@ async function giveBack(slot: AiSlot): Promise<void> {
 }
 
 /** 409: this question already has a stored result; show that mark and move on. */
-function alreadyAnswered(row: ResultRow, type: "mc" | "short"): NextResponse {
+function alreadyAnswered(row: ResultRow, type: "mc" | "short" | "rewrite"): NextResponse {
   const body: AlreadyAnswered = {
     error: "already_answered",
     result: {
@@ -110,6 +121,11 @@ export async function POST(req: Request) {
   if (question.type === "mc") {
     const index = /^\d+$/.test(answer) ? Number(answer) : -1;
     if (index < 0 || index >= question.options.length) return bad("invalid_request");
+  }
+
+  // Spec 005: rewrite questions run their own two-phase flow.
+  if (question.type === "rewrite") {
+    return handleRewriteGrade(req, user, body, token, question, degraded);
   }
 
   // Photo answer: verify the transcription token (signature, expiry, binding to
@@ -274,4 +290,248 @@ export async function POST(req: Request) {
     attemptCompleted: outcome.completed,
   };
   return json(response);
+}
+
+// ---- rewrite questions (spec 005) ---------------------------------------------
+
+/** A minimal rewrite result for a `409 already_answered` (a double tap or a second device). */
+function rewriteResultFromRow(row: RewritePhaseRow) {
+  const phase: 1 | 2 = row.phase2Marks !== null && row.phase2Marks !== undefined ? 2 : 1;
+  return {
+    questionId: row.questionId,
+    type: "rewrite" as const,
+    maxMarks: 3,
+    phase,
+    marksAwarded: row.recordedMark ?? row.phase1Marks,
+    feedback: phase === 2 ? (row.phase2Feedback ?? row.phase1Feedback) ?? "" : (row.phase1Feedback ?? ""),
+    termOutcomes: row.phase1TermOutcomes ?? [],
+    needsSelfMark: false,
+  };
+}
+
+/**
+ * The two-phase grade flow for a rewrite question (spec 005). Phase 1 grades the first
+ * rewrite (0-3); a 3/3 finalises straight to the discussion, below 3 the student gets a
+ * hinted retry (phase 2) capped at 2 marks. The recorded mark is the best of the two
+ * (FR-019); a skipped phase 2 keeps the phase 1 mark (FR-042). All phase state lives in
+ * `rewrite_phases`; a `results` row is created only when the question is final, so history
+ * and averages never count a pending phase. `skip === true` on phase 2 means the student
+ * chose not to retry.
+ */
+async function handleRewriteGrade(
+  req: Request,
+  user: { id: string },
+  body: Record<string, unknown>,
+  token: AttemptTokenPayload,
+  question: RewriteQuestion,
+  degraded: boolean,
+): Promise<NextResponse> {
+  const attemptId = String(body.attemptId ?? "");
+  const questionId = question.id;
+  const answer = typeof body.answer === "string" ? body.answer.slice(0, MAX_ANSWER_LEN) : "";
+  const phase: 1 | 2 = body.phase === "2" ? 2 : 1;
+  const skip = body.skip === true;
+
+  // FR-041: empty or whitespace-only rewrites are refused in both phases (skip is the only way out).
+  if (!skip && !answer.trim()) return bad("invalid_request");
+
+  const termConceptIds = rewriteTermConceptIds(questionId);
+  const durations = { start: Date.now() };
+
+  // The phase row decides what may happen next (FR-023, FR-017, FR-042, FR-029).
+  let phaseRow: RewritePhaseRow | null = null;
+  if (!degraded) {
+    try {
+      phaseRow = await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
+    } catch (error) {
+      if (!(error instanceof DbUnavailableError)) throw error;
+      degraded = true;
+    }
+  }
+
+  if (phase === 2) {
+    if (degraded) {
+      logRewriteGrade({ outcome: "db_unavailable", userId: user.id, questionId, durationMs: Date.now() - durations.start });
+      return json({ error: "temporarily_unavailable" }, 503);
+    }
+    if (phaseRow?.status === "final") {
+      logRewriteGrade({ outcome: "already_answered", userId: user.id, questionId, durationMs: Date.now() - durations.start });
+      return json({ error: "already_answered", result: rewriteResultFromRow(phaseRow) }, 409);
+    }
+    if (!phaseRow || phaseRow.status !== "phase1" || phaseRow.phase1Marks >= 3) {
+      logRewriteGrade({ outcome: "phase_refused", userId: user.id, questionId, durationMs: Date.now() - durations.start });
+      return bad("phase_refused");
+    }
+  } else if (phaseRow) {
+    // phase 1 already graded: a double tap or a second device — no second slot (FR-029).
+    logRewriteGrade({ outcome: "already_answered", userId: user.id, questionId, durationMs: Date.now() - durations.start });
+    return json({ error: "already_answered", result: rewriteResultFromRow(phaseRow) }, 409);
+  }
+
+  // Rate limit and one daily-allowance slot per phase (FR-029), like short answers.
+  let skipLlm = degraded || skip || !llmGradingConfigured() || getConfig().llmDailyCap === 0;
+  let aiLimit: GradeResponse["aiLimit"];
+  let slot: AiSlot | null = null;
+  if (!skipLlm) {
+    const perUser = await checkUserRateLimit(user.id);
+    const perIp = perUser.ok ? await checkIpRateLimit(clientIp(req)) : perUser;
+    if (!perIp.ok) {
+      logRewriteGrade({ outcome: "rate_limited", userId: user.id, questionId, durationMs: Date.now() - durations.start });
+      return json(
+        { error: "rate_limited", retryAfter: perIp.retryAfter },
+        429,
+        perIp.retryAfter ? { "retry-after": String(perIp.retryAfter) } : undefined,
+      );
+    }
+    try {
+      slot = await dbCall((db) => reserveAiSlot(db, user.id, getConfig().llmDailyCap));
+      if (!slot) {
+        skipLlm = true;
+        aiLimit = { reached: true, resetsAt: toSydneyIso(nextSydneyMidnight(new Date())) };
+      }
+    } catch (error) {
+      if (!(error instanceof DbUnavailableError)) throw error;
+      degraded = true;
+      skipLlm = true;
+    }
+  }
+
+  const t0 = Date.now();
+  let graded;
+  try {
+    graded = await gradeRewriteAnswer(questionId, answer, phase, { skipLlm });
+  } catch (error) {
+    if (slot) await giveBack(slot);
+    throw error;
+  }
+  if (!graded) {
+    if (slot) await giveBack(slot);
+    return bad("not_found", 404);
+  }
+  logRewriteGrade({
+    outcome: graded.result.needsSelfMark ? "model_fail" : graded.result.feedback ? "graded" : "graded",
+    userId: user.id,
+    questionId,
+    durationMs: Date.now() - t0,
+  });
+  // The AI marker failed or fell back: that does not count against the allowance.
+  if (slot && graded.result.needsSelfMark) await giveBack(slot);
+  const { result } = graded;
+
+  // Degrade path (FR-030): no phase 2; the self-mark screen shows the model sentence and every
+  // term's definition, and the token binds the answer and the term ids (FR-046).
+  if (result.needsSelfMark) {
+    const response: GradeResponse = {
+      result: { ...result, discussion: rewriteDiscussionOrNull(questionId) },
+      saved: false,
+      degraded,
+      attemptCompleted: degraded ? null : false,
+      selfMarkToken: signSelfMarkToken({ uid: user.id, attemptId, questionId, answer, termConceptIds }),
+      ...(degraded ? { aiUnavailable: true } : {}),
+      ...(aiLimit ? { aiLimit } : {}),
+    };
+    return json(response);
+  }
+
+  // The recorded mark: phase 1 at 3, otherwise the best of phase 1 and the capped phase 2
+  // (FR-019); a skipped phase 2 keeps the phase 1 mark (FR-042).
+  const recorded =
+    phase === 1 ? (result.marksAwarded ?? 0) : skip ? (phaseRow?.phase1Marks ?? 0) : Math.max(phaseRow?.phase1Marks ?? 0, result.marksAwarded ?? 0);
+
+  const fields: ResultFields = {
+    questionId,
+    answer,
+    marks: recorded,
+    max: 3,
+    gradedBy: "llm",
+    feedback: result.feedback ?? null,
+    hits: null,
+    misses: null,
+  };
+  const attempt = attemptFieldsOf(token);
+
+  if (phase === 1 && (result.marksAwarded ?? 0) < 3) {
+    // Phase 1 under 3: store the phase row (the hint drives phase 2), no result yet.
+    const row: NewRewritePhaseRow = {
+      attemptId,
+      userId: user.id,
+      unitId: token.unitId,
+      questionId,
+      status: "phase1",
+      phase1Answer: answer,
+      phase1Marks: result.marksAwarded ?? 0,
+      phase1Feedback: result.feedback ?? null,
+      phase1TermOutcomes: result.termOutcomes,
+    };
+    if (degraded) return json({ result, saved: false, degraded: true, attemptCompleted: null });
+    try {
+      const outcome = await dbCall((db) => insertRewritePhase(db, row));
+      if (!outcome.inserted) {
+        const existing = await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
+        if (existing) return json({ error: "already_answered", result: rewriteResultFromRow(existing) }, 409);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AttemptOwnerMismatchError") return bad("not_found", 404);
+      throw error;
+    }
+    return json({ result, saved: false, phaseSaved: true, attemptCompleted: false });
+  }
+
+  // The question is final: create or update the phase row, then save the result.
+  if (phase === 1) {
+    // 3/3 phase 1: insert the phase row as final (FR-014) — no phase 2.
+    if (!degraded) {
+      try {
+        const outcome = await dbCall((db) =>
+          insertRewritePhase(db, {
+            attemptId,
+            userId: user.id,
+            unitId: token.unitId,
+            questionId,
+            status: "final",
+            phase1Answer: answer,
+            phase1Marks: 3,
+            phase1Feedback: result.feedback ?? null,
+            phase1TermOutcomes: result.termOutcomes,
+            recordedMark: 3,
+          }),
+        );
+        if (!outcome.inserted) {
+          const existing = await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
+          if (existing) return json({ error: "already_answered", result: rewriteResultFromRow(existing) }, 409);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === "AttemptOwnerMismatchError") return bad("not_found", 404);
+        throw error;
+      }
+    }
+  } else if (skip) {
+    const outcome = await dbCall((db) => finaliseRewritePhaseWithoutPhase2(db, user.id, attemptId, questionId, recorded));
+    if (!outcome) return json({ error: "already_answered", result: rewriteResultFromRow(phaseRow!) }, 409);
+  } else {
+    const outcome = await dbCall((db) =>
+      finaliseRewritePhase(db, user.id, attemptId, questionId, {
+        phase2Answer: answer,
+        phase2Marks: result.marksAwarded ?? 0,
+        phase2Feedback: result.feedback ?? null,
+        recordedMark: recorded,
+      }),
+    );
+    if (!outcome) return json({ error: "already_answered", result: rewriteResultFromRow(phaseRow!) }, 409);
+  }
+
+  if (degraded) {
+    const receipt = buildReceipt(user.id, attemptId, attempt, { ...fields, marks: recorded });
+    return json({ result, saved: false, degraded: true, attemptCompleted: null, receipt });
+  }
+
+  const save = await saveResult(user.id, attemptId, attempt, { ...fields, marks: recorded, feedback: result.feedback ?? null });
+  if (save.status === "failed") {
+    return json({ result, saved: false, degraded: false, attemptCompleted: null, receipt: buildReceipt(user.id, attemptId, attempt, { ...fields, marks: recorded }) });
+  }
+  if (!save.inserted && save.stored) {
+    const existingRow = await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId)).catch(() => phaseRow);
+    return json({ error: "already_answered", result: rewriteResultFromRow(existingRow ?? phaseRow!) }, 409);
+  }
+  return json({ result, saved: true, attemptCompleted: save.completed });
 }

@@ -36,6 +36,11 @@ if (!["pass", "fail", "illegible", "not-answer"].includes(VISION_MODE)) {
   console.error(`FAKE_VISION must be pass, fail, illegible or not-answer (got "${VISION_MODE}")`);
   process.exit(1);
 }
+const REWRITE_MODE = (process.env.FAKE_REWRITE ?? "pass") as "pass" | "partial" | "fail" | "down";
+if (!["pass", "partial", "fail", "down"].includes(REWRITE_MODE)) {
+  console.error(`FAKE_REWRITE must be pass, partial, fail or down (got "${REWRITE_MODE}")`);
+  process.exit(1);
+}
 
 const seenReviews = new Set<string>();
 
@@ -81,6 +86,26 @@ function handle(body: { model?: string; messages?: Array<{ role: string; content
     }
     return reply(
       JSON.stringify({ transcription: "F = ma", legible: true, answersQuestion: true, notes: "" }),
+    );
+  }
+
+  // Rewrite grading (spec 005): the system prompt names "sentence-writing".
+  const isRewrite = /sentence-writing/.test(system);
+  if (isRewrite) {
+    if (REWRITE_MODE === "fail") return reply("", 500);
+    if (REWRITE_MODE === "down") return reply("", 503);
+    const terms = [...user.matchAll(/^\d+\. ([^—]+) —/gm)].map((m) => m[1].trim());
+    const statuses = terms.map((t, i) => ({
+      term: t,
+      status: REWRITE_MODE === "partial" && i === 0 ? "missing" : "used",
+    }));
+    return reply(
+      JSON.stringify({
+        criterionA: true,
+        padding: false,
+        terms: statuses,
+        feedback: "Fake rewrite grader: well done.",
+      }),
     );
   }
 

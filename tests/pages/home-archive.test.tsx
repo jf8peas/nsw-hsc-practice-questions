@@ -178,7 +178,7 @@ describe("home page unit archiving", () => {
     expect(cardFor(cards, FRESH)).not.toContain("Archive");
   });
 
-  it("shows the notice instead of an empty group when every unit is archived", async () => {
+  it("hides the whole group (no heading, no note) when every unit is archived, with one page-level line", async () => {
     const { me } = await setup(year12Units());
     await env.db.insert(unitArchives).values([
       { userId: me.id, unitId: OLD },
@@ -187,11 +187,27 @@ describe("home page unit archiving", () => {
 
     const { tree, cards } = await renderCards();
     expect(cards).toHaveLength(0);
+    // no year heading, no per-group note: the group is gone entirely
+    expect(findAll(tree, (el) => el.type === "div" && String((el.props as { className?: string }).className ?? "").includes("eyebrow"))).toHaveLength(0);
+    // one page-level line under the subtitle, and the switch is still there (units are archived)
     expect(textOf(tree)).toContain("All units archived. Turn on Show all to see them.");
+    expect(switchEls(tree)).toHaveLength(1);
 
+    // Show all on: the group renders as before, muted with Unarchive
     const all = await renderCards({ all: "1" });
     expect(cardFor(all.cards, OLD)).toContain("Unarchive");
     expect(cardFor(all.cards, FRESH)).toContain("Unarchive");
+    expect(findAll(all.tree, (el) => el.type === "div" && String((el.props as { className?: string }).className ?? "").includes("eyebrow"))).toHaveLength(1);
+  });
+
+  it("a partly archived group still shows its heading and the remaining units", async () => {
+    const { me } = await setup(year12Units());
+    await env.db.insert(unitArchives).values({ userId: me.id, unitId: OLD });
+
+    const { tree, cards } = await renderCards();
+    expect(findAll(tree, (el) => el.type === "div" && String((el.props as { className?: string }).className ?? "").includes("eyebrow"))).toHaveLength(1);
+    expect(cardFor(cards, FRESH)).toContain("Fresh fixture");
+    expect(textOf(tree)).not.toContain("All units archived");
   });
 
   it("ignores other students' archives", async () => {

@@ -33,6 +33,9 @@ import { meta as y12EconGlobalMeta } from "./units/y12-economics-global-economy/
 import { questions as y12EconGlobalQuestions } from "./units/y12-economics-global-economy/questions";
 import { concepts as y12EconGlobalConcepts, retired as y12EconGlobalRetired } from "./units/y12-economics-global-economy/concepts";
 import { conceptOfQuestionId as y12EconGlobalTags } from "./units/y12-economics-global-economy/concept-tags";
+import { meta as y12EconSentenceMeta } from "./units/y12-economics-sentence-writing/meta";
+import { questions as y12EconSentenceQuestions } from "./units/y12-economics-sentence-writing/questions";
+import { concepts as y12EconSentenceConcepts, retired as y12EconSentenceRetired } from "./units/y12-economics-sentence-writing/concepts";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -84,6 +87,12 @@ export const UNITS: Unit[] = [
     concepts: y12EconGlobalConcepts,
     retired: y12EconGlobalRetired,
   },
+  {
+    ...y12EconSentenceMeta,
+    questions: y12EconSentenceQuestions,
+    concepts: y12EconSentenceConcepts,
+    retired: y12EconSentenceRetired,
+  },
 ];
 
 /** The order the home page lists them in: the HSC year first, then the preliminary year. */
@@ -123,7 +132,28 @@ export function getConcept(conceptId: string): { unit: Unit; concept: Concept } 
 export function conceptOfQuestion(unit: Unit, questionId: string): string | undefined {
   const question = unit.questions.find((q) => q.id === questionId);
   if (question) return question.concept;
-  return unit.retired?.[questionId] ?? undefined;
+  const retired = unit.retired?.[questionId];
+  if (retired === undefined || retired === null || Array.isArray(retired)) return undefined;
+  return retired;
+}
+
+/**
+ * The concepts a question counts toward (spec 005): its own `concepts` array (rewrite
+ * questions), else its single `concept`, else, for a removed question, the concept(s)
+ * recorded in the unit's `retired` map (a string or an array). A question with no tag, a
+ * removed question recorded as having none (`null`), and an unknown id all give an empty
+ * array.
+ */
+export function conceptsOfQuestion(unit: Unit, questionId: string): string[] {
+  const question = unit.questions.find((q) => q.id === questionId);
+  if (question) {
+    if (question.concepts && question.concepts.length > 0) return question.concepts;
+    if (question.concept) return [question.concept];
+    return [];
+  }
+  const retired = unit.retired?.[questionId];
+  if (retired === undefined || retired === null) return [];
+  return Array.isArray(retired) ? retired : [retired];
 }
 
 export interface YearGroup {

@@ -21,6 +21,8 @@ export interface ResultFields {
   feedback: string | null;
   hits: string[] | null;
   misses: string[] | null;
+  /** `rewrite` only (spec 005): per-term outcomes from phase 1. */
+  conceptOutcomes?: Array<{ conceptId: string; correct: boolean }> | null;
   /**
    * When the answer was given. Only the retry route sets it (from the receipt's issue time);
    * a normal save leaves it unset and the row is stamped at save time, within milliseconds of
@@ -79,6 +81,7 @@ export async function saveResult(
         feedback: fields.feedback,
         rubricHits: fields.hits,
         rubricMisses: fields.misses,
+        conceptOutcomes: fields.conceptOutcomes ?? null,
         createdAt: fields.answeredAt,
       });
       const stored = inserted ? null : await getResult(db, userId, attemptId, fields.questionId);
@@ -115,5 +118,6 @@ export function buildReceipt(
     feedback: fields.feedback,
     hits: fields.hits,
     misses: fields.misses,
+    conceptOutcomes: fields.conceptOutcomes ?? null,
   });
 }

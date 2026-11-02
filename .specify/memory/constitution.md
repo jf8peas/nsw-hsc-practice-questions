@@ -1,5 +1,19 @@
 <!--
 Sync Impact Report
+- Version change: 2.11.0 → 2.12.0 (MINOR: materially expanded guidance in Principles I and II to allow the sentence-writing unit's scoped hint/discussion release and its phase row).
+- Reason (amendment log): the sentence-writing unit (spec 005) teaches students to rewrite plain-English sentences in economics language. After phase 1 is graded below 3 marks the student needs the missed terms' definitions (the hint) to retry, and at the discussion they need the model sentence and every term's definition; the phase 1 and phase 2 sentences, marks, per-term outcomes and feedback must be stored so an attempt can be resumed on another device and the attempt detail page can show both sentences and both marks.
+- Modified principles:
+  - I. The Answer Key Never Reaches the Browser: the sentence-writing unit may send the missed/misused target terms with their one-line definitions after phase 1 is graded below 3 (the hint), and the model sentences and full target-term set with definitions at the discussion or self-mark screen; never before, including on reload or resume.
+  - II. Signed-In Students, Minimal Personal Data: per writing-practice question in an attempt, the phase 1 and phase 2 sentences, their marks, the per-term outcomes and the feedback shown are stored in a phase row, deleted with the student like results.
+- Added sections: none
+- Removed sections: none
+- Quality Gates: unchanged.
+- Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ no change needed
+  - .specify/templates/spec-template.md ✅ no change needed
+  - .specify/templates/tasks-template.md ✅ no change needed
+  - specs/005-economics-sentence-writing/{spec,plan,research,data-model,contracts,quickstart,tasks} ✅ created with the amendment in mind
+- Follow-up TODOs: none.
 - Version change: 2.10.0 → 2.11.0 (MINOR: materially expanded guidance in Principles I, II, V, VI, VII, VIII to allow photo answers).
 - Reason (amendment log): students need to answer short-answer questions by writing on paper and submitting 1-3 photos, which are transcribed to text and then AI-marked. Typing maths working on a phone is slow, so students skip steps or whole questions, and the grader never sees the working that HSC marking rewards.
 - Modified principles:
@@ -69,6 +83,12 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
 - Concept review and past-attempt MC explanations MUST get answer-key material only by calling
   functions exported from `lib/grading.server.ts`. That material MUST stay server-side and MUST
   NOT be stored per result.
+- [DECISION] The sentence-writing unit (spec 005) MAY send part of the answer key to the browser
+  at defined moments, and only then: after phase 1 is graded below 3 marks, the missed or misused
+  target terms with their one-line definitions (the hint); and at the discussion or self-mark
+  screen, the model sentences and the full target-term set with definitions. Nothing from the key
+  MAY reach the browser before phase 1 is graded (or has fallen back to self-marking), including
+  on reload or resume.
 
 Rationale: a practice tool whose answers can be read from the page source is worthless. The
 `server-only` import makes the build fail if client code ever pulls the key in.
@@ -91,7 +111,10 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     marks, graded-by LLM/self/auto, and timestamp;
   - per AI-graded result: the feedback text and the rubric points hit and missed, exactly as
     shown to the student. Model answers and rubric text MUST NOT be stored per result
-    (Principle I).
+    (Principle I);
+  - per writing-practice question in an attempt: the phase 1 and phase 2 sentences, their marks,
+    the per-term outcomes from phase 1, and the feedback shown, stored in a phase row until the
+    question is final and kept for the attempt detail page; deleted with the student like results.
   It MUST NOT store profile photos, Google tokens beyond what the session needs, or any other
   personal data without amending this constitution. Photos for transcription are never stored or logged;
   only the transcription (the "answer submitted") is stored. Answer photos are sent to an AI provider
@@ -357,4 +380,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.11.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-29
+**Version**: 2.12.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-02

@@ -54,6 +54,12 @@ export function validateConceptRules(unit: Unit): string[] {
     if (q.concept !== undefined && !conceptIds.has(q.concept)) {
       errors.push(`${q.id}: concept "${q.concept}" is not a concept of ${unit.id}`);
     }
+    // a rewrite question may carry several concepts (spec 005)
+    for (const c of q.concepts ?? []) {
+      if (!conceptIds.has(c)) {
+        errors.push(`${q.id}: concepts entry ${c} is not a concept of ${unit.id}`);
+      }
+    }
   }
 
   if (unit.conceptsReady) {
@@ -61,7 +67,7 @@ export function validateConceptRules(unit: Unit): string[] {
       errors.push(`${unit.id}: conceptsReady is set but the unit has no concepts (content/units/${unit.id}/concepts.ts)`);
     }
     for (const q of unit.questions) {
-      if (q.concept === undefined) {
+      if (q.concept === undefined && (!q.concepts || q.concepts.length === 0)) {
         errors.push(`${q.id}: has no concept tag, but ${unit.id} is marked conceptsReady`);
       }
     }
@@ -81,8 +87,13 @@ export function validateConceptRules(unit: Unit): string[] {
           `${questionId}: retired as null (no concept) but ${unit.id} is concept-ready; give it the concept it belonged to`,
         );
       }
-    } else if (!conceptIds.has(conceptId)) {
-      errors.push(`${questionId}: retired concept ${conceptId} is not a concept of ${unit.id}`);
+    } else {
+      const ids = Array.isArray(conceptId) ? conceptId : [conceptId];
+      for (const id of ids) {
+        if (!conceptIds.has(id)) {
+          errors.push(`${questionId}: retired concept ${id} is not a concept of ${unit.id}`);
+        }
+      }
     }
   }
 
@@ -105,6 +116,7 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
       if (explanations !== undefined) errors.push(`${q.id}: short questions cannot have wrongExplanations`);
       continue;
     }
+    if (q.type === "rewrite") continue; // no options to explain (spec 005)
 
     const correct = a.correctText ?? (typeof a.correctIndex === "number" ? q.options[a.correctIndex] : undefined);
     if (explanations !== undefined) {
@@ -125,6 +137,49 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
           errors.push(`${q.id}: no explanation for wrong option "${option}", but ${unit.id} is marked explanationsComplete`);
         }
       }
+    }
+  }
+  return errors;
+}
+
+/**
+ * Rewrite questions (spec 005 FR-008): every rewrite question has a model sentence and 1-3
+ * target terms each with a definition; every target term's conceptId is a concept of the
+ * unit; every `concepts[]` entry is a valid concept id; every concept of the unit appears in
+ * at least 4 questions (FR-007).
+ */
+export function validateRewriteRules(unit: Unit, answers: AnswerSet): string[] {
+  const errors: string[] = [];
+  const conceptIds = new Set((unit.concepts ?? []).map((c) => c.id));
+  const rewriteQuestions = unit.questions.filter((q) => q.type === "rewrite");
+  if (rewriteQuestions.length === 0) return errors;
+
+  const conceptCount = new Map<string, number>();
+  for (const q of rewriteQuestions) {
+    const a = answers[q.id];
+    if (!a) continue; // a missing answer entry is reported by the existing checks
+    if (!a.modelSentences || a.modelSentences.length === 0) {
+      errors.push(`${q.id}: rewrite question needs at least one model sentence`);
+    }
+    const terms = a.targetTerms ?? [];
+    if (terms.length < 1 || terms.length > 3) {
+      errors.push(`${q.id}: rewrite question needs 1-3 target terms (got ${terms.length})`);
+    }
+    for (const t of terms) {
+      if (!t.term.trim()) errors.push(`${q.id}: a target term has no term text`);
+      if (!t.definition.trim()) errors.push(`${q.id}: target term "${t.term}" has no definition`);
+      if (!conceptIds.has(t.conceptId)) {
+        errors.push(`${q.id}: target term "${t.term}" concept ${t.conceptId} is not a concept of ${unit.id}`);
+      }
+      conceptCount.set(t.conceptId, (conceptCount.get(t.conceptId) ?? 0) + 1);
+    }
+  }
+  for (const c of unit.concepts ?? []) {
+    const count = conceptCount.get(c.id) ?? 0;
+    if (count < 4) {
+      errors.push(
+        `${unit.id}: concept ${c.id} appears in ${count} rewrite question(s); every concept must appear in at least 4 (FR-007)`,
+      );
     }
   }
   return errors;

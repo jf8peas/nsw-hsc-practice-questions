@@ -54,6 +54,8 @@ export interface ReceiptPayload {
   feedback: string | null;
   hits: string[] | null;
   misses: string[] | null;
+  /** `rewrite` only (spec 005): per-term outcomes from phase 1. */
+  conceptOutcomes?: Array<{ conceptId: string; correct: boolean }> | null;
   iat: number;
   exp: number;
 }
@@ -64,6 +66,8 @@ export interface SelfMarkPayload {
   attemptId: string;
   questionId: string;
   answerHash: string;
+  /** `rewrite` only (spec 005): the question's target-term concept ids, so the client can only tick those. */
+  termConceptIds?: string[];
   iat: number;
   exp: number;
 }
@@ -171,7 +175,13 @@ export function attemptFieldsOf(token: AttemptTokenPayload): AttemptFields {
 // ---- self-mark token ----------------------------------------------------
 
 export function signSelfMarkToken(
-  input: { uid: string; attemptId: string; questionId: string; answer: string },
+  input: {
+    uid: string;
+    attemptId: string;
+    questionId: string;
+    answer: string;
+    termConceptIds?: string[];
+  },
   nowMs: number = Date.now(),
 ): string {
   const iat = seconds(nowMs);
@@ -181,6 +191,7 @@ export function signSelfMarkToken(
     attemptId: input.attemptId,
     questionId: input.questionId,
     answerHash: hashAnswer(input.answer),
+    ...(input.termConceptIds ? { termConceptIds: input.termConceptIds } : {}),
     iat,
     exp: iat + SELF_MARK_TTL_SECONDS,
   };

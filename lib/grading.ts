@@ -17,7 +17,7 @@ export interface GradeRequest {
 
 export interface GradeResult {
   questionId: string;
-  type: "mc" | "short";
+  type: "mc" | "short" | "rewrite";
   maxMarks: number;
   /** Marks awarded, once known. null while the student still needs to self-mark. */
   marksAwarded: number | null;
@@ -44,9 +44,49 @@ export interface GradeResult {
   needsSelfMark: boolean;
 }
 
+/** One target term as the browser may see it (spec 005). Never sent before phase 1 is graded. */
+export interface RewriteTermView {
+  term: string;
+  definition: string;
+}
+
+/** The hint: only the terms the student missed or misused (FR-015), or none + the lost criterion (FR-045). */
+export interface RewriteHint {
+  terms: RewriteTermView[];
+  /** Present only when `terms` is empty (every term was used, FR-045). */
+  lostCriterion?: "a" | "c";
+  /** The marker's words for the lost criterion. */
+  criterionText?: string;
+}
+
+/** The discussion: shown only after the last phase (or on the self-mark screen). */
+export interface RewriteDiscussion {
+  modelSentences: string[];
+  terms: Array<RewriteTermView & { why: string }>;
+}
+
+/** The grade result for a rewrite question (spec 005). */
+export interface RewriteGradeResult {
+  questionId: string;
+  type: "rewrite";
+  maxMarks: 3;
+  phase: 1 | 2;
+  /** Marks awarded, once known. null while the student still needs to self-mark. */
+  marksAwarded: number | null;
+  feedback: string;
+  /** Per-term outcomes from phase 1 (drives concept tracking, FR-033). */
+  termOutcomes: Array<{ conceptId: string; correct: boolean }>;
+  /** Phase 1, marks < 3, not self-marked. */
+  hint?: RewriteHint;
+  /** Phase 1 at 3/3, or phase 2, or the self-mark screen. */
+  discussion?: RewriteDiscussion;
+  needsSelfMark: boolean;
+}
+
 /** Response of POST /api/grade (specs/001-student-saved-scores/contracts/api.md). */
 export interface GradeResponse {
-  result: GradeResult;
+  /** A short-answer/MC result, or a rewrite result (spec 005). */
+  result: GradeResult | RewriteGradeResult;
   /** True if the result is stored in the database. */
   saved: boolean;
   /** True when the database could not be reached (marked from the attempt token alone). */

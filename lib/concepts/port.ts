@@ -34,7 +34,7 @@ export interface ReviewMaterial {
   questions: Array<{
     id: string;
     prompt: string;
-    type: "mc" | "short";
+    type: "mc" | "short" | "rewrite";
     modelAnswer?: string;
     rubric: string[];
     correctText?: string;

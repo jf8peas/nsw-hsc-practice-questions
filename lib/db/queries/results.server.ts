@@ -18,6 +18,8 @@ export interface ResultInsert {
   feedback: string | null;
   rubricHits: string[] | null;
   rubricMisses: string[] | null;
+  /** `rewrite` only (spec 005): per-term outcomes from phase 1. */
+  conceptOutcomes?: Array<{ conceptId: string; correct: boolean }> | null;
   /**
    * When the answer was given. Left unset the column defaults to now(); only a late save
    * (the retry route) sets it, from the receipt's issue time, so concept progress replays
@@ -96,6 +98,7 @@ export async function listUnitResultsForProgress(
       marks: results.marksAwarded,
       max: results.maxMarks,
       answeredAt: results.createdAt,
+      conceptOutcomes: results.conceptOutcomes,
     })
     .from(results)
     .where(and(eq(results.userId, userId), eq(results.unitId, unitId)))
@@ -117,6 +120,7 @@ export async function listAllResultsForProgress(db: Db, userId: string): Promise
       marks: results.marksAwarded,
       max: results.maxMarks,
       answeredAt: results.createdAt,
+      conceptOutcomes: results.conceptOutcomes,
     })
     .from(results)
     .where(eq(results.userId, userId))

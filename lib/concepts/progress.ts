@@ -18,6 +18,11 @@ export interface ConceptResult {
   max: number;
   /** When the answer was given (results.created_at, which a late save keeps; see research R2). */
   answeredAt: Date;
+  /**
+   * `rewrite` only (spec 005): the per-term outcomes from phase 1. When present, progress
+   * replays each term in order instead of using the question's current tag.
+   */
+  conceptOutcomes?: Array<{ conceptId: string; correct: boolean }> | null;
 }
 
 /** An uncleared concept. */
@@ -39,26 +44,40 @@ const MAX_COUNT = 3;
  * a removed question recorded as having none (`null`), and an unknown id count toward nothing.
  */
 export function conceptProgress(unit: Unit, results: readonly ConceptResult[]): ConceptState[] {
-  const tags = new Map(unit.questions.map((q) => [q.id, q.concept] as const));
-  const conceptOf = (questionId: string): string | undefined =>
-    tags.has(questionId) ? tags.get(questionId) : (unit.retired?.[questionId] ?? undefined);
+  const tags = new Map(
+    unit.questions.map(
+      (q) => [q.id, q.concepts ?? (q.concept ? [q.concept] : [])] as const,
+    ),
+  );
+  const conceptsOf = (questionId: string): string[] => {
+    if (tags.has(questionId)) return tags.get(questionId)!;
+    const retired = unit.retired?.[questionId];
+    if (retired === undefined || retired === null) return [];
+    return Array.isArray(retired) ? retired : [retired];
+  };
 
   const ordered = [...results].sort(
     (a, b) => a.answeredAt.getTime() - b.answeredAt.getTime() || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
   );
 
   const state = new Map<string, { count: number; lastMissedAt: Date | null }>();
-  for (const r of ordered) {
-    const concept = conceptOf(r.questionId);
-    if (!concept) continue;
+  const apply = (concept: string, correct: boolean, at: Date) => {
     const current = state.get(concept) ?? { count: 0, lastMissedAt: null };
-    if (r.marks >= r.max) {
+    if (correct) {
       current.count = Math.max(0, current.count - 1);
     } else {
       current.count = MAX_COUNT;
-      current.lastMissedAt = r.answeredAt;
+      current.lastMissedAt = at;
     }
     state.set(concept, current);
+  };
+  for (const r of ordered) {
+    if (r.conceptOutcomes && r.conceptOutcomes.length > 0) {
+      // rewrite result (spec 005): per-term outcomes from phase 1, applied in order
+      for (const o of r.conceptOutcomes) apply(o.conceptId, o.correct, r.answeredAt);
+      continue;
+    }
+    for (const c of conceptsOf(r.questionId)) apply(c, r.marks >= r.max, r.answeredAt);
   }
 
   const out: ConceptState[] = [];

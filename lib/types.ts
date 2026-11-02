@@ -2,7 +2,7 @@
 
 export type Year = "Year 11" | "Year 12";
 
-export type UnitType = "Topic Quiz" | "Milestone Test" | "Essay Practice";
+export type UnitType = "Topic Quiz" | "Milestone Test" | "Essay Practice" | "Writing Practice";
 
 /**
  * An idea within a unit that a student needs to understand (spec 002). Ids are
@@ -106,6 +106,12 @@ interface BaseQuestion {
    * answer, so it lives in public content.
    */
   concept?: string;
+  /**
+   * The several concepts a rewrite question tests (its target terms' concept ids, spec 005).
+   * A tag is not an answer, so it lives in public content. Rewrite questions use this
+   * instead of `concept`.
+   */
+  concepts?: string[];
 }
 
 export interface McQuestion extends BaseQuestion {
@@ -117,8 +123,16 @@ export interface ShortQuestion extends BaseQuestion {
   type: "short";
 }
 
+/**
+ * A sentence-writing question (spec 005): the prompt is a plain-English sentence the student
+ * rewrites as one concise sentence using the target terms. Worth 3 marks.
+ */
+export interface RewriteQuestion extends BaseQuestion {
+  type: "rewrite";
+}
+
 /** Public question — no answer key. Safe to ship to the browser. */
-export type Question = McQuestion | ShortQuestion;
+export type Question = McQuestion | ShortQuestion | RewriteQuestion;
 
 /** A full unit as consumed by the UI: metadata + public questions. */
 export interface Unit extends UnitMeta {
@@ -127,10 +141,31 @@ export interface Unit extends UnitMeta {
   concepts?: Concept[];
   /**
    * Questions removed from the unit, by id. The value is the concept the question belonged
-   * to, or `null` when it was removed before the unit was tagged (its results then count
-   * toward no concept). Lets a removed question keep counting without a tag per result.
+   * to, an array of concepts for a removed rewrite question (spec 005), or `null` when it
+   * was removed before the unit was tagged (its results then count toward no concept). Lets
+   * a removed question keep counting without a tag per result.
    */
-  retired?: Record<string, string | null>;
+  retired?: Record<string, string | string[] | null>;
+}
+
+/**
+ * One target term of a rewrite question (spec 005): the term the student must use, its
+ * one-line definition (also the concept description), why it fits this sentence, and the
+ * accepted equivalents and listed misuses the AI marker uses. SERVER ONLY.
+ */
+export interface RewriteTargetTerm {
+  /** A concept of the unit (the term IS a concept). */
+  conceptId: string;
+  /** Exact spelling, e.g. "tariff". */
+  term: string;
+  /** One line, the concept description. */
+  definition: string;
+  /** One line: why this term fits this sentence (shown in the discussion, FR-018). */
+  why: string;
+  /** Accepted equivalents, e.g. ["import tax", "customs duty"]. */
+  equivalents: string[];
+  /** Listed misuses, e.g. ["quota"]. */
+  misuses: string[];
 }
 
 /**
@@ -158,6 +193,12 @@ export interface Answer {
    * answer, and only for the option they chose.
    */
   wrongExplanations?: Record<string, string>;
+  /** `rewrite` only: one or two accepted model sentences. */
+  modelSentences?: string[];
+  /** `rewrite` only: 1-3 target terms (usually 2), each with its definition and why it fits. */
+  targetTerms?: RewriteTargetTerm[];
+  /** `rewrite` only: marking notes (accepted equivalents and common misuses), prose. */
+  markingNotes?: string;
 }
 
 /** Map of question id -> answer key, per unit. */

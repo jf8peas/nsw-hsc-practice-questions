@@ -71,7 +71,31 @@ describe("migrations and column sets (Principle II)", () => {
         "feedback",
         "rubric_hits",
         "rubric_misses",
+        "concept_outcomes",
         "created_at",
+      ].sort(),
+    );
+    // spec 005: the sentence-writing phase row holds the student's own sentences and marks
+    expect(await columns("rewrite_phases")).toEqual(
+      [
+        "id",
+        "attempt_id",
+        "user_id",
+        "unit_id",
+        "question_id",
+        "status",
+        "phase1_answer",
+        "phase1_marks",
+        "phase1_feedback",
+        "phase1_term_outcomes",
+        "phase1_graded_at",
+        "phase2_answer",
+        "phase2_marks",
+        "phase2_feedback",
+        "phase2_graded_at",
+        "recorded_mark",
+        "created_at",
+        "updated_at",
       ].sort(),
     );
     expect(await columns("daily_ai_usage")).toEqual(["user_id", "sydney_date", "count"].sort());

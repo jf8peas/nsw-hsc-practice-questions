@@ -12,6 +12,11 @@ export function tagQuestions(questions: Question[], tags: Record<string, string>
   return questions.map((q) => ({ ...q, concept: tags[q.id] }));
 }
 
+/** The questions with their `concepts` set from a `{ questionId: conceptIds }` map (spec 005). */
+export function tagQuestionsMulti(questions: Question[], tags: Record<string, string[]>): Question[] {
+  return questions.map((q) => ({ ...q, concepts: tags[q.id] }));
+}
+
 /**
  * `{ conceptSlug: ["m01", "s02", ...] }` (question numbers within the unit) becomes
  * `{ questionId: conceptId }`. A question tagged twice, or a concept slug that is not in `concepts`,
@@ -31,6 +36,32 @@ export function defineTags(
       const id = `${unitId}.${n}`;
       if (id in out) throw new Error(`${id} is tagged twice (${slug})`);
       out[id] = conceptId;
+    }
+  }
+  return out;
+}
+
+/**
+ * Multi-concept tags for a rewrite unit (spec 005): `{ conceptSlug: ["r01", "r02", ...] }`
+ * becomes `{ questionId: conceptIds }`. A question tagged twice with the same concept, or a
+ * concept slug that is not in `concepts`, is an error at load time; a question left out is
+ * caught by `npm run validate`.
+ */
+export function defineMultiTags(
+  unitId: string,
+  concepts: Concept[],
+  tags: Record<string, string[]>,
+): Record<string, string[]> {
+  const known = new Set(concepts.map((c) => c.id));
+  const out: Record<string, string[]> = {};
+  for (const [slug, numbers] of Object.entries(tags)) {
+    const conceptId = `${unitId}.c-${slug}`;
+    if (!known.has(conceptId)) throw new Error(`${conceptId} is tagged but is not in concepts.ts`);
+    for (const n of numbers) {
+      const id = `${unitId}.${n}`;
+      const list = out[id] ?? [];
+      if (list.includes(conceptId)) throw new Error(`${id} is tagged twice (${slug})`);
+      out[id] = [...list, conceptId];
     }
   }
   return out;

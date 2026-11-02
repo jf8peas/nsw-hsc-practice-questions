@@ -91,6 +91,16 @@ export default async function AttemptDetailPage({
                   {item.gradedBy === "self" && " · self-marked"}
                   {item.gradedBy === "llm" && " · AI-marked"}
                 </div>
+                {q?.type === "rewrite" && item.phase1Answer && (
+                  <>
+                    <div className="detail-answer">Phase 1: {item.phase1Answer}</div>
+                    {item.phase2Answer && <div className="detail-answer">Phase 2: {item.phase2Answer}</div>}
+                    <div className="detail-marks">
+                      Phase 1: {item.phase1Marks}/3
+                      {item.phase2Marks != null ? ` · Phase 2: ${item.phase2Marks}/2` : ""} · recorded {item.marks}/3
+                    </div>
+                  </>
+                )}
                 {item.feedback && <p className="detail-feedback">{item.feedback}</p>}
                 {(() => {
                   // shown as the key reads now: nothing is stored per result (spec 002 FR-041)

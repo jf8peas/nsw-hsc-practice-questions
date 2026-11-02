@@ -15,6 +15,7 @@ import { FORMULA_HTML } from "../content/formulas.generated";
 import {
   validateConceptRules,
   validateExplanationRules,
+  validateRewriteRules,
   validateShippedIds,
   type ShippedIds,
 } from "../lib/content-rules";
@@ -85,6 +86,7 @@ async function main() {
     }
     for (const m of validateConceptRules(unit)) err(m);
     for (const m of validateExplanationRules(unit, answers)) err(m);
+    for (const m of validateRewriteRules(unit, answers)) err(m);
 
     for (const q of unit.questions) {
       if (!q.id.startsWith(`${unit.id}.`)) {
@@ -130,6 +132,8 @@ async function main() {
         if (new Set(q.options).size !== q.options.length) {
           err(`${q.id}: mc has duplicate option text`);
         }
+      } else if (q.type === "rewrite") {
+        // model sentences and target terms are checked by the rewrite rules (FR-008)
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);
       }

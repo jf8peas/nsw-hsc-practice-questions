@@ -2,7 +2,7 @@
 // mid-quiz (FR-028, research R12) and a quiz can run when the database is down
 // (research R19). Every access is try/catch: storage may be unavailable.
 
-import type { GradeResult } from "@/lib/grading";
+import type { GradeResult, RewriteDiscussion, RewriteGradeResult, RewriteHint } from "@/lib/grading";
 import type { Question } from "@/lib/types";
 
 export interface StorageLike {
@@ -47,6 +47,32 @@ function remove(store: StorageLike | null, key: string): void {
   }
 }
 
+// ---- the rewrite sentence (spec 005), one key per phase -------------------
+
+export const rewriteDraftKey = (attemptId: string, questionId: string, phase: 1 | 2) =>
+  `draft:rewrite:${attemptId}:${questionId}:phase${phase}`;
+
+export function saveRewriteDraft(
+  attemptId: string,
+  questionId: string,
+  phase: 1 | 2,
+  text: string,
+  store: StorageLike | null = tabStorage(),
+) {
+  if (text === "") remove(store, rewriteDraftKey(attemptId, questionId, phase));
+  else write(store, rewriteDraftKey(attemptId, questionId, phase), text);
+}
+
+export function loadRewriteDraft(
+  attemptId: string,
+  questionId: string,
+  phase: 1 | 2,
+  store: StorageLike | null = tabStorage(),
+): string {
+  const v = read<string>(store, rewriteDraftKey(attemptId, questionId, phase));
+  return typeof v === "string" ? v : "";
+}
+
 // ---- the typed answer ---------------------------------------------------
 
 export const draftKey = (attemptId: string, questionId: string) =>
@@ -87,7 +113,8 @@ export function clearDraft(
  */
 export interface GradedState {
   answer: string;
-  result: GradeResult;
+  /** A short-answer/MC result, or a rewrite result (spec 005). */
+  result: GradeResult | RewriteGradeResult;
   selfMarkToken?: string;
   aiUnavailable?: boolean;
   aiLimit?: { reached: true; resetsAt: string };
@@ -178,6 +205,22 @@ export interface AttemptPayload {
   passMark: number;
   questions: Question[];
   answered: Record<string, { marks: number; max: number }>;
+  /**
+   * spec 005: per-question rewrite phase state for resume, built server-side from the phase
+   * row. Exactly what the stage allows: nothing from the key before a phase 1 grade, the hint
+   * at phase 1 under 3, the discussion once final (FR-023).
+   */
+  rewriteState?: Record<
+    string,
+    {
+      phase: "phase1" | "phase2" | "final";
+      phase1Answer: string;
+      phase2Answer?: string;
+      marks?: number;
+      hint?: RewriteHint;
+      discussion?: RewriteDiscussion;
+    }
+  >;
 }
 
 export const attemptKey = (attemptId: string) => `attempt:${attemptId}`;

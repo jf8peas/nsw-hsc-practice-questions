@@ -58,29 +58,34 @@ export default async function HomePage({
         )}
       </div>
 
-      {view.years.map((group) => (
-        <div key={group.year} style={{ marginBottom: 28 }}>
-          <div className="eyebrow">{group.year}</div>
-          {group.isComingSoon ? (
-            <div className="coming-soon">More units coming soon</div>
-          ) : group.allArchivedNote ? (
-            <div className="units-archived-note">
-              All units archived. Turn on Show all to see them.
-            </div>
-          ) : (
-            group.visibleUnits.map(({ unit, archived, canArchive }) => (
-              <UnitCard
-                key={unit.id}
-                unit={unit}
-                toReview={reviewCounts.get(unit.id)}
-                archived={archived}
-                canArchive={canArchive}
-                archivesOk={archivesOk}
-              />
-            ))
-          )}
+      {view.allArchived && (
+        <div className="units-archived-note">
+          All units archived. Turn on Show all to see them.
         </div>
-      ))}
+      )}
+
+      {view.years.map((group) => {
+        if (group.hidden) return null;
+        return (
+          <div key={group.year} style={{ marginBottom: 28 }}>
+            <div className="eyebrow">{group.year}</div>
+            {group.isComingSoon ? (
+              <div className="coming-soon">More units coming soon</div>
+            ) : (
+              group.visibleUnits.map(({ unit, archived, canArchive }) => (
+                <UnitCard
+                  key={unit.id}
+                  unit={unit}
+                  toReview={reviewCounts.get(unit.id)}
+                  archived={archived}
+                  canArchive={canArchive}
+                  archivesOk={archivesOk}
+                />
+              ))
+            )}
+          </div>
+        );
+      })}
     </Shell>
   );
 }

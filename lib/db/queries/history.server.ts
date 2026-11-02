@@ -2,6 +2,8 @@ import "server-only";
 
 import { and, desc, eq, sql } from "drizzle-orm";
 
+import { listRewritePhases } from "./rewrite-phases.server";
+
 import { getQuestion } from "@/content";
 import { finalizeIfComplete } from "@/lib/attempts/complete.server";
 import { DbUnavailableError, dbCall, type Db } from "@/lib/db/index.server";
@@ -72,6 +74,11 @@ export interface AttemptItem {
   feedback: string | null;
   hits: string[] | null;
   misses: string[] | null;
+  /** `rewrite` only (spec 005 FR-020): both sentences and both marks from the phase row. */
+  phase1Answer?: string | null;
+  phase2Answer?: string | null;
+  phase1Marks?: number | null;
+  phase2Marks?: number | null;
 }
 
 export interface AttemptDetail {
@@ -172,11 +179,14 @@ export async function attemptDetail(
     .from(results)
     .where(and(eq(results.attemptId, row.id), eq(results.userId, userId)));
   const byQuestion = new Map(rows.map((r) => [r.questionId, r]));
+  const phaseRows = await listRewritePhases(db, userId, row.id);
+  const phaseByQuestion = new Map(phaseRows.map((p) => [p.questionId, p]));
 
   const marks = rows.reduce((s, r) => s + r.marksAwarded, 0);
   const max = rows.reduce((s, r) => s + r.maxMarks, 0);
   const items: AttemptItem[] = row.questionIds.map((questionId) => {
     const r = byQuestion.get(questionId);
+    const ph = phaseByQuestion.get(questionId);
     return {
       questionId,
       retired: getQuestion(questionId) === undefined,
@@ -188,6 +198,10 @@ export async function attemptDetail(
       feedback: r?.feedback ?? null,
       hits: r?.rubricHits ?? null,
       misses: r?.rubricMisses ?? null,
+      phase1Answer: ph?.phase1Answer ?? null,
+      phase2Answer: ph?.phase2Answer ?? null,
+      phase1Marks: ph?.phase1Marks ?? null,
+      phase2Marks: ph?.phase2Marks ?? null,
     };
   });
   return {

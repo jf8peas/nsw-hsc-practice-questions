@@ -125,7 +125,9 @@ export function ConceptPanel({
         </ul>
       )}
 
-      {progress.status === "ok" && states.length > 0 && view?.status === "ok" && (
+      {/* spec 005 research R9: the sentence-writing unit lists terms by definition only —
+          no concept summary/illustration pipeline, so no background generation */}
+      {unit.type !== "Writing Practice" && progress.status === "ok" && states.length > 0 && view?.status === "ok" && (
         <ConceptLive
           unitId={unit.id}
           needsContent={needsContent}

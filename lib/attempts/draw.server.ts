@@ -77,7 +77,12 @@ function drawWeighted(unit: Unit, weighting: Weighting, rand: RandomInt): Questi
   // candidates per concept, in the order a pick should take them
   const seenFirst = (id: string) => weighting.seen.has(id);
   const lists = weighting.states.map((state) => {
-    const mine = unit.questions.filter((q) => q.concept === state.conceptId && groupOf.has(q.id));
+    // a rewrite question (spec 005) is a candidate when ANY of its concepts is the state's
+    const mine = unit.questions.filter(
+      (q) =>
+        groupOf.has(q.id) &&
+        (q.concept === state.conceptId || (q.concepts?.includes(state.conceptId) ?? false)),
+    );
     const unseen = shuffle(
       mine.filter((q) => !seenFirst(q.id)),
       rand,
