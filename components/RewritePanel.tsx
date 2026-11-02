@@ -45,9 +45,10 @@ export function RewritePanel({
   const over = words > WORD_LIMIT;
 
   const needsSelfMark = result?.needsSelfMark === true && result?.marksAwarded === null;
-  const atPhase2 = result?.phase === 2;
   const discussion = result?.discussion;
   const hint = result?.hint;
+  // At the retry: a phase 2 result, or a phase 1 result that came back with a hint.
+  const atPhase2 = result?.phase === 2 || (result?.phase === 1 && !!hint && !discussion);
   // The student may type while: nothing has been submitted yet, or phase 1 scored under 3 with
   // no discussion yet (the hinted retry).
   const canType = result === null || (result.phase === 1 && !discussion) || (atPhase2 && !discussion);

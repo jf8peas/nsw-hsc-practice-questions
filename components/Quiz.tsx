@@ -45,6 +45,11 @@ interface PhotoFail {
 const FLUSH_INTERVAL_MS = 10_000;
 const PHOTO_SELF_MARK_ANSWER = "[photo answer, not transcribed]";
 
+/** A rewrite result that is a phase 1 hint (marks under 3, no discussion), not a final mark. */
+function isPendingRewrite(r: RewriteGradeResult): boolean {
+  return r.phase === 1 && !r.needsSelfMark && !r.discussion && r.marksAwarded !== null && r.marksAwarded < 3;
+}
+
 export function Quiz({
   uid,
   attemptId,
@@ -256,6 +261,12 @@ export function Quiz({
         // show the stored mark and carry on.
         const body: AlreadyAnswered = await res.json();
         const result = body.result as GradeResult;
+        // rewrite phase 1 already graded under 3 (a double tap or another device): the 409 carries
+        // no hint, so reload to resume at the retry from the server's phase row.
+        if (isRewrite && isPendingRewrite(body.result as unknown as RewriteGradeResult)) {
+          reloadPage();
+          return;
+        }
         recordMarks(current.id, result.marksAwarded ?? 0, result.maxMarks);
         clearDraft(attemptId, current.id);
         clearPhotoDraft(attemptId, current.id);
@@ -280,6 +291,13 @@ export function Quiz({
       queueReceipt(data.receipt);
       clearDraft(attemptId, current.id);
       clearPhotoDraft(attemptId, current.id);
+      // rewrite phase 1 under 3: the hint, not a final mark. Move to the retry without recording
+      // marks or a graded state, so phase 2 can still be submitted and Next stays hidden.
+      if (data.result.type === "rewrite" && isPendingRewrite(data.result as RewriteGradeResult)) {
+        const rr = data.result as RewriteGradeResult;
+        setRewrite({ phase: 2, phase1Answer: answer, result: rr });
+        return;
+      }
       const marks = data.result.needsSelfMark ? null : data.result.marksAwarded;
       if (marks !== null) recordMarks(current.id, marks, data.result.maxMarks);
       // rewrite: remember the phase, the student's sentences and the hint/discussion
@@ -842,8 +860,8 @@ export function Quiz({
       </div>
 
       <div className="quiz-topline">
-        <span className={`rd-pill ${isShort ? "blue" : ""}`}>
-          {q.group === "essay" ? "Essay scaffold" : isShort ? "Short answer" : "Multiple choice"}
+        <span className={`rd-pill ${isShort || isRewrite ? "blue" : ""}`}>
+          {q.group === "essay" ? "Essay scaffold" : isRewrite ? "Sentence rewrite" : isShort ? "Short answer" : "Multiple choice"}
           {" · "}
           {q.maxMarks} {q.maxMarks === 1 ? "mark" : "marks"}
         </span>
@@ -873,7 +891,7 @@ export function Quiz({
           />
         )}
 
-        {isShort && isRewrite ? (
+        {isRewrite ? (
           <>
             <RewritePanel
               phase1Answer={rewrite.phase1Answer}

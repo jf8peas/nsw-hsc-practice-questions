@@ -329,7 +329,8 @@ async function handleRewriteGrade(
   const attemptId = String(body.attemptId ?? "");
   const questionId = question.id;
   const answer = typeof body.answer === "string" ? body.answer.slice(0, MAX_ANSWER_LEN) : "";
-  const phase: 1 | 2 = body.phase === "2" ? 2 : 1;
+  // the client sends a number; accept the string form too
+  const phase: 1 | 2 = body.phase === 2 || body.phase === "2" ? 2 : 1;
   const skip = body.skip === true;
 
   // FR-041: empty or whitespace-only rewrites are refused in both phases (skip is the only way out).
@@ -447,6 +448,9 @@ async function handleRewriteGrade(
     feedback: result.feedback ?? null,
     hits: null,
     misses: null,
+    // spec 005 FR-033: concept outcomes come from phase 1 only — the phase 1 grade's
+    // outcomes (a phase 2 grade or a skip must never overwrite them with phase 2's).
+    conceptOutcomes: phase === 1 ? result.termOutcomes : (phaseRow?.phase1TermOutcomes ?? result.termOutcomes),
   };
   const attempt = attemptFieldsOf(token);
 
