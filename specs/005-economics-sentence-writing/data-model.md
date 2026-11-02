@@ -131,7 +131,7 @@ detail page. Deleted with the student (cascade).
 | `phase2_marks` | smallint | null until phase 2; 0-2 |
 | `phase2_feedback` | text | |
 | `phase2_graded_at` | timestamp | |
-| `recorded_mark` | smallint | the final mark (best of phase 1 and capped phase 2; phase 1 if phase 2 skipped) |
+| `recorded_mark` | smallint | the final mark (best of phase 1 and capped phase 2; 3 for a 3/3 phase 1) |
 | `created_at` / `updated_at` | timestamp | |
 
 Constraints: `UNIQUE(attempt_id, question_id)` (idempotency key); check `phase1_marks between 0 and 3`;
@@ -162,7 +162,6 @@ phase1 (graded 0-3)
   ├─ <3   → phase2 (hint shown) → graded 0-2
   │          → final (recorded_mark = max(phase1, phase2))
   │          → phase 2 call fails → self-mark phase 2 → final (best of phase 1 and capped self-mark)
-  │          → phase 2 skipped → final (recorded_mark = phase1)
   └─ model fails / cap / db down → self-mark (no phase 2) → final (recorded_mark = self-mark, 0-3)
 ```
 

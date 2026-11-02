@@ -1795,3 +1795,15 @@ input {
   color: var(--rd-mute-500);
   text-decoration: line-through;
 }
+
+/* The student's own sentence at the retry and on the self-mark screen (spec 005): plain
+   text that wraps at 390 px with no sideways scrolling. */
+.rewrite-own-sentence {
+  background: var(--rd-surface-50);
+  border-radius: var(--rd-r-sm);
+  padding: 8px 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 390px;
+  font-size: var(--rd-fs-base);
+}

@@ -444,44 +444,6 @@ export function Quiz({
     }
   }
 
-  /** The student chose not to retry phase 2: keep the phase 1 mark (FR-042). */
-  async function skipRewrite() {
-    if (!current || busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/grade", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ attemptId, attemptToken, questionId: current.id, answer: "", phase: 2, skip: true }),
-      });
-      if (res.status === 401) {
-        setSessionEnded(true);
-        return;
-      }
-      if (res.status === 409) {
-        const body = (await res.json().catch(() => ({}))) as { result?: RewriteGradeResult };
-        const marks = body.result?.marksAwarded ?? 0;
-        recordMarks(current.id, marks, current.maxMarks);
-        if (body.result) setRewrite((prev) => ({ ...prev, result: body.result! }));
-        updateGraded({ answer: "", result: body.result as GradeResult, marks });
-        return;
-      }
-      if (!res.ok) throw new Error(`Could not save your mark (${res.status})`);
-      const data: GradeResponse = await res.json();
-      queueReceipt(data.receipt);
-      const rr = data.result as RewriteGradeResult;
-      const marks = rr.marksAwarded ?? 0;
-      recordMarks(current.id, marks, rr.maxMarks);
-      setRewrite((prev) => ({ ...prev, result: rr }));
-      updateGraded({ answer: "", result: rr, marks });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   function onDraftChange(text: string) {
     setDraft(text);
     if (current) saveDraft(attemptId, current.id, text);
@@ -898,7 +860,6 @@ export function Quiz({
               phase2Answer={rewrite.phase2Answer}
               result={rewrite.result}
               onGrade={(p, a) => handleRewriteGrade(p, a)}
-              onSkip={() => void skipRewrite()}
               onSelfMark={(t) => void rewriteSelfMark(t)}
               busy={busy}
             />

@@ -19,7 +19,6 @@ export function RewritePanel({
   phase2Answer,
   result,
   onGrade,
-  onSkip,
   onSelfMark,
   busy,
 }: {
@@ -30,7 +29,6 @@ export function RewritePanel({
   /** The last rewrite result; null before the first submit. */
   result: RewriteGradeResult | null;
   onGrade: (phase: 1 | 2, answer: string) => void;
-  onSkip: () => void;
   /** The per-criterion self-mark for the degrade path (FR-030, FR-046). */
   onSelfMark: (ticks: { criterionA: boolean; termTicks: Record<string, boolean>; criterionC: boolean }) => void;
   busy: boolean;
@@ -55,6 +53,17 @@ export function RewritePanel({
 
   return (
     <>
+      {/* the student's own phase 1 sentence at the retry (FR-042): above the feedback and the
+          hint, so the student can see what the feedback is about */}
+      {atPhase2 && !discussion && !needsSelfMark && phase1Answer && (
+        <div style={{ marginTop: 12 }}>
+          <div className="label">Your sentence</div>
+          <p className="rewrite-own-sentence" style={{ margin: "4px 0 0" }}>
+            {phase1Answer}
+          </p>
+        </div>
+      )}
+
       {result !== null && !needsSelfMark && result.feedback && (
         <div className="feedback">
           <div className="feedback-score">
@@ -106,11 +115,6 @@ export function RewritePanel({
             >
               {busy ? "Marking…" : atPhase2 ? "Submit retry" : "Submit answer"}
             </button>
-            {atPhase2 && (
-              <button type="button" className="rd-btn answer-submit" onClick={onSkip} disabled={busy}>
-                Skip retry (keep {result?.marksAwarded} / 3)
-              </button>
-            )}
           </div>
         </>
       )}
@@ -119,6 +123,16 @@ export function RewritePanel({
           student marks each criterion with one tick per target term */}
       {needsSelfMark && result?.discussion && (
         <div className="rewrite-selfmark" style={{ marginTop: 12 }}>
+          {/* the sentence being marked (phase 1, or phase 2 when it fell back to self-marking),
+              above the model sentence so the student can compare the two before ticking */}
+          {(phase2Answer || phase1Answer) && (
+            <>
+              <div className="label">Your sentence</div>
+              <p className="rewrite-own-sentence" style={{ margin: "4px 0 0" }}>
+                {phase2Answer || phase1Answer}
+              </p>
+            </>
+          )}
           {result.discussion.modelSentences.map((s, i) => (
             <p key={i} className="model-sentence" style={{ margin: "4px 0" }}>
               {s}

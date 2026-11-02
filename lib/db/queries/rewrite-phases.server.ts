@@ -104,28 +104,3 @@ export async function finaliseRewritePhase(
   return rows[0] ?? null;
 }
 
-/**
- * Finalise a question with no phase 2 (skipped, FR-042): the recorded mark is the phase 1
- * mark. Guarded by `status = 'phase1'`.
- */
-export async function finaliseRewritePhaseWithoutPhase2(
-  db: Db,
-  userId: string,
-  attemptId: string,
-  questionId: string,
-  recordedMark: number,
-): Promise<RewritePhaseRow | null> {
-  const rows = await db
-    .update(rewritePhases)
-    .set({ status: "final", recordedMark, updatedAt: new Date() })
-    .where(
-      and(
-        eq(rewritePhases.userId, userId),
-        eq(rewritePhases.attemptId, attemptId),
-        eq(rewritePhases.questionId, questionId),
-        eq(rewritePhases.status, "phase1"),
-      ),
-    )
-    .returning();
-  return rows[0] ?? null;
-}

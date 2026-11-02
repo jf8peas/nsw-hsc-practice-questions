@@ -4,7 +4,7 @@ import { getQuestion } from "@/content";
 import { resolveSession } from "@/lib/auth.server";
 import { getConfig } from "@/lib/config.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
-import { getRewritePhase, insertRewritePhase, finaliseRewritePhase, finaliseRewritePhaseWithoutPhase2 } from "@/lib/db/queries/rewrite-phases.server";
+import { getRewritePhase, insertRewritePhase, finaliseRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
 import { getResult } from "@/lib/db/queries/results.server";
 import type { RewritePhaseRow, ResultRow } from "@/lib/db/schema";
 import type { AlreadyAnswered, GradeResponse } from "@/lib/grading";
@@ -313,10 +313,9 @@ function rewriteResultFromRow(row: RewritePhaseRow) {
  * The two-phase grade flow for a rewrite question (spec 005). Phase 1 grades the first
  * rewrite (0-3); a 3/3 finalises straight to the discussion, below 3 the student gets a
  * hinted retry (phase 2) capped at 2 marks. The recorded mark is the best of the two
- * (FR-019); a skipped phase 2 keeps the phase 1 mark (FR-042). All phase state lives in
- * `rewrite_phases`; a `results` row is created only when the question is final, so history
- * and averages never count a pending phase. `skip === true` on phase 2 means the student
- * chose not to retry.
+ * (FR-019). All phase state lives in `rewrite_phases`; a `results` row is created only
+ * when the question is final, so history and averages never count a pending phase. The
+ * retry is compulsory (FR-042): a `skip: true` request is refused before anything else.
  */
 async function handleRewriteGrade(
   req: Request,
@@ -331,10 +330,12 @@ async function handleRewriteGrade(
   const answer = typeof body.answer === "string" ? body.answer.slice(0, MAX_ANSWER_LEN) : "";
   // the client sends a number; accept the string form too
   const phase: 1 | 2 = body.phase === 2 || body.phase === "2" ? 2 : 1;
-  const skip = body.skip === true;
 
-  // FR-041: empty or whitespace-only rewrites are refused in both phases (skip is the only way out).
-  if (!skip && !answer.trim()) return bad("invalid_request");
+  // FR-042: phase 2 cannot be skipped. Refuse before any grader call, slot or database write.
+  if (body.skip === true) return bad("invalid_request");
+
+  // FR-041: empty or whitespace-only rewrites are refused in both phases.
+  if (!answer.trim()) return bad("invalid_request");
 
   const termConceptIds = rewriteTermConceptIds(questionId);
   const durations = { start: Date.now() };
@@ -370,7 +371,7 @@ async function handleRewriteGrade(
   }
 
   // Rate limit and one daily-allowance slot per phase (FR-029), like short answers.
-  let skipLlm = degraded || skip || !llmGradingConfigured() || getConfig().llmDailyCap === 0;
+  let skipLlm = degraded || !llmGradingConfigured() || getConfig().llmDailyCap === 0;
   let aiLimit: GradeResponse["aiLimit"];
   let slot: AiSlot | null = null;
   if (!skipLlm) {
@@ -435,9 +436,9 @@ async function handleRewriteGrade(
   }
 
   // The recorded mark: phase 1 at 3, otherwise the best of phase 1 and the capped phase 2
-  // (FR-019); a skipped phase 2 keeps the phase 1 mark (FR-042).
+  // (FR-019). The retry is compulsory, so there is no skip case (FR-042).
   const recorded =
-    phase === 1 ? (result.marksAwarded ?? 0) : skip ? (phaseRow?.phase1Marks ?? 0) : Math.max(phaseRow?.phase1Marks ?? 0, result.marksAwarded ?? 0);
+    phase === 1 ? (result.marksAwarded ?? 0) : Math.max(phaseRow?.phase1Marks ?? 0, result.marksAwarded ?? 0);
 
   const fields: ResultFields = {
     questionId,
@@ -509,9 +510,6 @@ async function handleRewriteGrade(
         throw error;
       }
     }
-  } else if (skip) {
-    const outcome = await dbCall((db) => finaliseRewritePhaseWithoutPhase2(db, user.id, attemptId, questionId, recorded));
-    if (!outcome) return json({ error: "already_answered", result: rewriteResultFromRow(phaseRow!) }, 409);
   } else {
     const outcome = await dbCall((db) =>
       finaliseRewritePhase(db, user.id, attemptId, questionId, {

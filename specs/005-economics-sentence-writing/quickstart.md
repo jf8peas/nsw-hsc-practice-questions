@@ -43,8 +43,10 @@ model sentence and 1-3 target terms each with a definition, every target term is
 unit, every concept appears in at least 4 questions); lint clean; type check clean; the full Vitest
 suite passes, including the new rewrite tests (criterion (b) all or nothing; a 3/3 phase 1 skips
 phase 2; phase 2 capped at 2; recorded mark is the best of the two; the hint holds only missed or
-misused terms, or no terms and the lost criterion; no key field reaches the browser before a phase
-1 grade, including on resume; phase 2 refused unless phase 1 was graded below 3; one slot per phase
+misused terms, or no terms and the lost criterion; the phase 1 sentence is shown under "Your
+sentence" at the retry and on the self-mark screen; no key field reaches the browser before a phase
+1 grade, including on resume; phase 2 refused unless phase 1 was graded below 3; the retry is
+compulsory — there is no Skip button and a `skip: true` request is refused; one slot per phase
 under double taps; concept results from phase 1 only, and from self-mark ticks; existing units'
 progress unchanged; the word counter gives the same count on client and server; content validation
 of the new type; no sentence or definition in any log).
@@ -62,9 +64,11 @@ scrolling past the guide. Start an attempt (5 questions).
    sentence, each term with its definition and why it fits, your sentence, the feedback), and there
    is no hint and no retry.
 2. **A hinted retry.** On the next question, write a rewrite that misses one target term. Submit.
-   Confirm: a mark under 3, the hint lists only the missed term with its one-line definition, and
-   the phase 1 feedback is shown. Rewrite once more using the term. Confirm the phase 2 mark is
-   capped at 2 and the discussion follows. There is no third try.
+   Confirm: a mark under 3, your phase 1 sentence shown under "Your sentence" above the feedback
+   and the hint, the hint lists only the missed term with its one-line definition, and the phase 1
+   feedback is shown. There is no Skip button — the retry is compulsory (FR-042). Rewrite once more
+   using the term. Confirm the phase 2 mark is capped at 2 and the discussion follows. There is no
+   third try.
 3. **All terms but too long.** Write a rewrite that uses every target term but is over 25 words.
    Confirm submission is not blocked, the counter shows the over-limit count, the conciseness mark
    is lost, and the hint lists no terms — only the lost criterion in the marker's words (FR-045).

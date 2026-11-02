@@ -1,8 +1,8 @@
 // The two-phase grade flow for rewrite questions (spec 005) through POST /api/grade:
 // phase 1 (0-3, a 3/3 goes straight to the discussion), phase 2 (hinted retry capped at 2,
-// best-of recorded, skip keeps the phase 1 mark), the phase row, the daily-allowance slot
-// and the 409/phase_refused guards. The AI marker is stubbed so each test chooses the marks
-// and the per-term status (used / missing / misused).
+// best-of recorded, the compulsory retry — a skip request is refused, FR-042), the phase row,
+// the daily-allowance slot and the 409/phase_refused guards. The AI marker is stubbed so each
+// test chooses the marks and the per-term status (used / missing / misused).
 
 import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -423,35 +423,37 @@ describe("rewrite phase 2", () => {
     expect(r2.body.result.marksAwarded).toBe(2);
   });
 
-  it("skip (phase 2, skip: true, empty answer): a results row with the phase 1 mark, no grader call, no allowance slot, the attempt completes when last", async () => {
+  it("skip (phase 2, skip: true): 400 invalid_request, no grader call, no allowance slot, no results row, the phase row stays phase1, and a normal phase 2 afterwards still works (FR-042)", async () => {
     env = await setupRewriteEnv();
     const user = await signedInStudent(env);
     const started = await startAttempt(REWRITE_UNIT);
-    const qs = rewritesOf(started);
-    for (const q of qs.slice(0, 4)) {
-      env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q));
-      await grade(started, q.id, "A perfect concise sentence using every term.");
-    }
-    const last = qs[4];
-    const key = getAnswer(last.id)!;
-    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(last, { terms: { [key.targetTerms![0].term]: "missing" } }));
-    const p1 = await grade(started, last.id, "Phase one scores two.");
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q, { terms: { [key.targetTerms![0].term]: "missing" } }));
+    const p1 = await grade(started, q.id, "Phase one scores two.");
     expect(p1.status).toBe(200);
-    expect(env.rewrite).toHaveBeenCalledTimes(5);
+    expect(env.rewrite).toHaveBeenCalledTimes(1);
 
-    const skip = await grade(started, last.id, "", { phase: 2, skip: true });
-    expect(skip.status).toBe(200);
-    expect(skip.body.saved).toBe(true);
-    expect(skip.body.attemptCompleted).toBe(true);
-    expect(env.rewrite).toHaveBeenCalledTimes(5); // no second grader call
-    expect(await usedBy(user.id)).toBe(5); // 4 full phase 1s + 1 phase 1; the skip reserves nothing
-
-    const [row] = await env.db.select().from(results).where(eq(results.questionId, last.id));
-    expect(row.marksAwarded).toBe(2);
-    const phaseRow = await phaseRowFor(last.id);
-    expect(phaseRow.status).toBe("final");
+    const skip = await grade(started, q.id, "", { phase: 2, skip: true });
+    expect(skip.status).toBe(400);
+    expect(skip.body.error).toBe("invalid_request");
+    expect(env.rewrite).toHaveBeenCalledTimes(1); // no second grader call
+    expect(await usedBy(user.id)).toBe(1); // only the phase 1 slot; the skip reserves nothing
+    expect(await resultFor(q.id)).toBeUndefined(); // no results row
+    const phaseRow = await phaseRowFor(q.id);
+    expect(phaseRow.status).toBe("phase1"); // still phase 1
     expect(phaseRow.phase2Answer).toBeNull();
-    expect(phaseRow.recordedMark).toBe(2);
+
+    // a normal phase 2 afterwards still works
+    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q));
+    const p2 = await grade(started, q.id, "Phase two completes.", { phase: 2 });
+    expect(p2.status).toBe(200);
+    expect(p2.body.saved).toBe(true);
+    const [row] = await env.db.select().from(results).where(eq(results.questionId, q.id));
+    expect(row.marksAwarded).toBe(2);
+    const finalRow = await phaseRowFor(q.id);
+    expect(finalRow.status).toBe("final");
+    expect(finalRow.phase2Answer).toBe("Phase two completes.");
   });
 });
 
@@ -719,12 +721,6 @@ describe("resume and leaks", () => {
       await grade(started, qs[1].id, "Another answer that must not be logged.");
       env.rewrite.mockResolvedValueOnce(rewriteGradeFor(qs[1]));
       await grade(started, qs[1].id, "Phase two answer.", { phase: 2 });
-      // skip
-      const q2 = qs[2];
-      const key2 = getAnswer(q2.id)!;
-      env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q2, { terms: { [key2.targetTerms![0].term]: "missing" } }));
-      await grade(started, q2.id, "Skip phase one.");
-      await grade(started, q2.id, "", { phase: 2, skip: true });
       // model failure
       env.rewrite.mockResolvedValueOnce(null);
       await grade(started, qs[3].id, "Model failure answer.");
@@ -739,7 +735,6 @@ describe("resume and leaks", () => {
         answer,
         "Another answer that must not be logged.",
         "Phase two answer.",
-        "Skip phase one.",
         "Model failure answer.",
         "Offline answer.",
         modelSentence,

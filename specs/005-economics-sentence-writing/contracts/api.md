@@ -54,6 +54,9 @@ Request: `{ "attemptId": string, "attemptToken": string, "questionId": string, "
 - `answer` is the student's sentence, truncated at 6000 characters. Empty or whitespace-only is
   refused with `400 { error: "invalid_request" }` (FR-041).
 - `phase` is required for rewrite questions; `"1"` or `"2"` only, else `400 { error: "invalid_phase" }`.
+- There is no `skip` field: the retry is compulsory (FR-042). A request with `skip: true` is
+  refused with `400 { error: "invalid_request" }` before any grader call, allowance slot or
+  database write, and the phase row stays `phase1`.
 
 Server checks, in order: session → attempt token valid, unexpired, bound to the user and attempt →
 question is in the token's `questionIds` (404) → question is a rewrite question (else the existing
@@ -89,6 +92,8 @@ slot (only when the LLM is configured) → grade.
 **Phase 2** (`phase: "2"`):
 - Refused with `400 { error: "phase_refused" }` unless the phase row's `status` is `phase1` and
   `phase1_marks < 3` (FR-017, FR-015). Also refused when the row is `final` (already answered).
+- The retry is compulsory (FR-042): there is no skip. A student who leaves at the retry leaves the
+  question unanswered, like any other unanswered question.
 - Grade with `gradeRewrite`, capped at 2 marks (FR-016). Update the phase row to `final`
   (`UPDATE … WHERE status = 'phase1'`; a lost race returns the stored result), insert the `results`
   row with `marks_awarded = max(phase1_marks, phase2_marks)` (FR-019), `answer` = the phase 2

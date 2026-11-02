@@ -2,8 +2,9 @@
 //
 // The browser side of a sentence-rewrite question (spec 005): the rewrite panel renders (not the
 // multiple-choice layout), the live word counter, a 3/3 answer going straight to the discussion,
-// the hinted retry sending phase 2, the FR-045 hint with no terms, resuming at the retry, and
-// skipping the retry.
+// the hinted retry sending phase 2, the FR-045 hint with no terms, the phase 1 sentence shown
+// under "Your sentence" at the retry and on the self-mark screen, resuming at the retry, and the
+// compulsory retry (no Skip button, FR-042).
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -143,6 +144,8 @@ describe("phase 1", () => {
     expect(screen.getByText(DISCUSSION.modelSentences[0])).toBeTruthy();
     expect(screen.queryByPlaceholderText(/Rewrite the sentence/)).toBeNull();
     expect(screen.queryByText(/Terms to use in your retry/)).toBeNull();
+    // no separate "Your sentence" block outside the discussion (the discussion shows "Your sentences")
+    expect(screen.queryByText("Your sentence")).toBeNull();
   });
 });
 
@@ -154,6 +157,15 @@ describe("the hinted retry", () => {
     type("The government taxed imports so people bought local stuff.");
     fireEvent.click(screen.getByText("Submit answer"));
     await waitFor(() => expect(screen.getByText(/Terms to use in your retry/)).toBeTruthy());
+
+    // the phase 1 sentence is shown under "Your sentence", above the feedback and the hint
+    expect(screen.getByText("Your sentence")).toBeTruthy();
+    expect(screen.getByText("The government taxed imports so people bought local stuff.")).toBeTruthy();
+    const yourSentence = screen.getByText("Your sentence");
+    const hint = screen.getByText(/Terms to use in your retry/);
+    expect(yourSentence.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // the retry text box starts empty
+    expect((textbox() as HTMLTextAreaElement).value).toBe("");
 
     // the hint: the missed term with its definition, a fresh text box, no Next yet
     expect(screen.getByText("tariff")).toBeTruthy();
@@ -204,7 +216,7 @@ describe("the hinted retry", () => {
     expect(screen.getByText("Submit retry")).toBeTruthy();
   });
 
-  it("resumes at the retry with the hint showing (FR-021)", () => {
+  it("resumes at the retry with the hint showing and the phase 1 sentence intact (FR-021)", () => {
     mount(
       payload({
         rewriteState: {
@@ -216,9 +228,12 @@ describe("the hinted retry", () => {
     expect(screen.getByText("tariff")).toBeTruthy();
     expect(screen.getByText("Submit retry")).toBeTruthy();
     expect(screen.queryByText("Next question")).toBeNull();
+    // the phase 1 sentence is shown under "Your sentence"
+    expect(screen.getByText("Your sentence")).toBeTruthy();
+    expect(screen.getByText("The government taxed imports.")).toBeTruthy();
   });
 
-  it("skipping the retry sends phase 2 with skip and keeps the phase 1 mark (FR-042)", async () => {
+  it("has no Skip button at the retry, and Next question stays hidden until phase 2 is submitted (FR-042)", async () => {
     mount(
       payload({
         rewriteState: {
@@ -226,10 +241,42 @@ describe("the hinted retry", () => {
         },
       }),
     );
+    // the retry is compulsory: no Skip button, and no Next until phase 2 is submitted
+    expect(screen.queryByText(/Skip retry/)).toBeNull();
+    expect(screen.queryByText("Next question")).toBeNull();
+
     responder = () =>
-      json({ result: rewriteResult({ phase: 1, marksAwarded: 1, discussion: DISCUSSION }), saved: true, attemptCompleted: false });
-    fireEvent.click(screen.getByText(/Skip retry/));
+      json({
+        result: rewriteResult({ phase: 2, marksAwarded: 2, feedback: "Better.", discussion: DISCUSSION }),
+        saved: true,
+        attemptCompleted: false,
+      });
+    type("A tariff raised import prices, so people bought local goods.");
+    fireEvent.click(screen.getByText("Submit retry"));
     await waitFor(() => expect(screen.getByText("Next question")).toBeTruthy());
-    expect(gradeCalls()[0].body).toMatchObject({ questionId: REWRITE.id, phase: 2, skip: true });
+    expect(gradeCalls()).toHaveLength(1);
+    expect(gradeCalls()[0].body).toMatchObject({ questionId: REWRITE.id, phase: 2 });
+  });
+
+  it("shows the phase 1 sentence on the self-mark screen after a phase 1 model failure (FR-030)", async () => {
+    mount();
+    responder = () =>
+      json({
+        result: rewriteResult({ marksAwarded: null, needsSelfMark: true, discussion: DISCUSSION }),
+        saved: false,
+        attemptCompleted: false,
+        selfMarkToken: "SM-1",
+      });
+    type("The government taxed imports so people bought local stuff.");
+    fireEvent.click(screen.getByText("Submit answer"));
+    await waitFor(() => expect(screen.getByText("Save my mark")).toBeTruthy());
+
+    // the sentence being marked is shown under "Your sentence", above the model sentence
+    // (the model sentence also appears in the discussion block below, so take the first)
+    expect(screen.getByText("Your sentence")).toBeTruthy();
+    expect(screen.getByText("The government taxed imports so people bought local stuff.")).toBeTruthy();
+    const yourSentence = screen.getByText("Your sentence");
+    const model = screen.getAllByText(DISCUSSION.modelSentences[0])[0];
+    expect(yourSentence.compareDocumentPosition(model) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
