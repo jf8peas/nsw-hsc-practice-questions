@@ -18,7 +18,22 @@ afterEach(async () => {
   env = undefined;
 });
 
-const BANNED_KEYS = ["correctText", "correctIndex", "modelAnswer", "rubric", "notes", "answers", "wrongExplanations"];
+const BANNED_KEYS = [
+  "correctText",
+  "correctIndex",
+  "modelAnswer",
+  "rubric",
+  "notes",
+  "answers",
+  "wrongExplanations",
+  // spec 006: the display-only grading data must never appear in the attempt-start payload
+  // (it is delivered only with a phase's grade, or on resume after grading)
+  "creditedSpans",
+  "phase1CreditedSpans",
+  "phase2CreditedSpans",
+  "phase2TermOutcomes",
+  "languageNote",
+];
 
 describe("POST /api/attempts exposes no answer key, for every unit", () => {
   for (const unit of UNITS) {

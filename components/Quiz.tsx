@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Formula } from "@/components/Formula";
 import { PhotoAnswerPanel, type PhotoFile } from "@/components/PhotoAnswerPanel";
 import { ReadBackPanel } from "@/components/ReadBackPanel";
-import { RewritePanel } from "@/components/RewritePanel";
+import { RewritePanel } from "@/components/rewrite/RewritePanel";
 import {
   clearDraft,
   clearGraded,
@@ -88,6 +88,9 @@ export function Quiz({
     phase1Result: RewriteGradeResult | null;
     phase2Answer?: string;
     phase2Result?: RewriteGradeResult;
+    /** spec 006: the persisted per-phase drafts (resume, FR-053). */
+    phase1Draft?: string;
+    phase2Draft?: string;
   }>({ phase1Answer: "", phase1Result: null });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,18 +163,26 @@ export function Quiz({
     // look the same after a reload.
     const rs = (initial?.rewriteState ?? {})[current.id];
     if (rs) {
-      const phase1Result: RewriteGradeResult = {
-        questionId: current.id,
-        type: "rewrite",
-        maxMarks: 3,
-        phase: 1,
-        marksAwarded: rs.phase1Marks ?? rs.marks ?? null,
-        feedback: rs.phase1Feedback ?? "",
-        termOutcomes: [],
-        hint: rs.hint,
-        discussion: rs.phase === "final" && !rs.phase2Answer ? rs.discussion : undefined,
-        needsSelfMark: false,
-      };
+      // a draft-only entry (no phase row yet) has no phase 1 grade: keep phase1Result null so the
+      // writing state shows with the restored draft (FR-038, FR-053)
+      const graded = rs.phase !== "draft" && rs.phase1Marks !== undefined;
+      const phase1Result: RewriteGradeResult | null = graded
+        ? {
+            questionId: current.id,
+            type: "rewrite",
+            maxMarks: 3,
+            phase: 1,
+            marksAwarded: rs.phase1Marks ?? rs.marks ?? null,
+            feedback: rs.phase1Feedback ?? "",
+            termOutcomes: rs.phase1TermOutcomes ?? [],
+            hint: rs.hint,
+            discussion: rs.phase === "final" && !rs.phase2Answer ? rs.discussion : undefined,
+            // spec 006: the persisted display data restores the full result (FR-054)
+            ...(rs.phase1CreditedSpans ? { creditedSpans: rs.phase1CreditedSpans } : {}),
+            ...(rs.languageNote && !rs.phase2Answer ? { languageNote: rs.languageNote } : {}),
+            needsSelfMark: false,
+          }
+        : null;
       const phase2Result: RewriteGradeResult | undefined = rs.phase2Answer
         ? {
             questionId: current.id,
@@ -182,18 +193,40 @@ export function Quiz({
             feedback: rs.phase2Feedback ?? "",
             termOutcomes: [],
             discussion: rs.discussion,
+            ...(rs.phase2CreditedSpans ? { creditedSpans: rs.phase2CreditedSpans } : {}),
+            ...(rs.phase2TermOutcomes ? { phase2TermOutcomes: rs.phase2TermOutcomes } : {}),
+            ...(rs.languageNote ? { languageNote: rs.languageNote } : {}),
             needsSelfMark: false,
           }
         : undefined;
       setRewrite({
-        phase1Answer: rs.phase1Answer,
+        phase1Answer: rs.phase1Answer ?? "",
         phase1Result,
         phase2Answer: rs.phase2Answer,
         phase2Result,
+        phase1Draft: rs.phase1Draft,
+        phase2Draft: rs.phase2Draft,
       });
       if (rs.phase === "final" && rs.marks !== undefined) {
         recordMarks(current.id, rs.marks, 3);
-        updateGraded({ answer: rs.phase2Answer ?? rs.phase1Answer, result: phase2Result ?? phase1Result, marks: rs.marks });
+        // a final entry is always graded, so phase1Result is non-null here; the fallback keeps
+        // the type honest
+        updateGraded({
+          answer: rs.phase2Answer ?? rs.phase1Answer ?? "",
+          result:
+            phase2Result ??
+            phase1Result ?? {
+              questionId: current.id,
+              type: "rewrite",
+              maxMarks: 3,
+              phase: 1,
+              marksAwarded: rs.marks,
+              feedback: "",
+              termOutcomes: [],
+              needsSelfMark: false,
+            },
+          marks: rs.marks,
+        });
       }
     } else {
       setRewrite({ phase1Answer: "", phase1Result: null });
@@ -865,7 +898,8 @@ export function Quiz({
             </div>
           </>
         )}
-        <div className="q-prompt">{q.prompt}</div>
+        {/* the rewrite panel renders the plain-English block itself (spec 006 FR-003) */}
+        {!isRewrite && <div className="q-prompt">{q.prompt}</div>}
         {q.source && <div className="q-source">Source: {q.source}</div>}
 
         {q.diagramSvg && (
@@ -880,13 +914,25 @@ export function Quiz({
         {isRewrite ? (
           <>
             <RewritePanel
+              attemptId={attemptId}
+              questionId={current.id}
+              prompt={q.prompt}
               phase1Answer={rewrite.phase1Answer}
               phase1Result={rewrite.phase1Result}
               phase2Answer={rewrite.phase2Answer}
               phase2Result={rewrite.phase2Result}
+              phase1Draft={rewrite.phase1Draft}
+              phase2Draft={rewrite.phase2Draft}
               onGrade={(p, a) => handleRewriteGrade(p, a)}
               onSelfMark={(t) => void rewriteSelfMark(t)}
               busy={busy}
+              nextLabel={
+                isRewrite && canNext
+                  ? i + 1 >= total
+                    ? "Last question"
+                    : `Next: question ${i + 2} of ${total}`
+                  : undefined
+              }
             />
           </>
         ) : isShort ? (

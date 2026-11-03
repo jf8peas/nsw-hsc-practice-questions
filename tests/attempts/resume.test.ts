@@ -1,10 +1,14 @@
+import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { UNITS } from "@/content";
 import { attempts } from "@/lib/db/schema";
+import type { AttemptPayload } from "@/lib/drafts";
+import { insertRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
+import { upsertRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 
-import { setupTestEnv, type TestEnv } from "../helpers/env";
+import { asSessionUser, setupTestEnv, type TestEnv } from "../helpers/env";
 import { seedAttempt, seedResult, seedUser } from "../helpers/fixtures";
 
 let env: TestEnv;
@@ -105,5 +109,97 @@ describe("resume (FR-032)", () => {
     const second = (await h.unitHistory(env.db, me.id, unit.id)).resume;
     expect(second).toEqual(first);
     expect(first).not.toBeNull();
+  });
+});
+
+describe("rewrite resume restores the display data and drafts (spec 006 FR-053/FR-054)", () => {
+  const REWRITE_UNIT = "y12-economics-sentence-writing";
+  const rewriteUnit = UNITS.find((u) => u.id === REWRITE_UNIT)!;
+
+  /** Call the quiz page loader and return the Quiz component's `initial` payload. */
+  async function quizPayload(attemptId: string): Promise<AttemptPayload> {
+    const { default: QuizPage } = await import("@/app/unit/[unitId]/quiz/page");
+    const el = await QuizPage({
+      params: Promise.resolve({ unitId: REWRITE_UNIT }),
+      searchParams: Promise.resolve({ attempt: attemptId }),
+    });
+    const find = (node: ReactNode): ReactElement | null => {
+      if (isValidElement(node)) {
+        const t = node.type as { name?: string };
+        if (t.name === "Quiz") return node;
+        const found = find((node.props as { children?: ReactNode }).children);
+        if (found) return found;
+      }
+      if (Array.isArray(node)) for (const c of node) { const f = find(c); if (f) return f; }
+      return null;
+    };
+    const quiz = find(el);
+    const initial = (quiz?.props as { initial?: AttemptPayload }).initial;
+    if (!initial) throw new Error("quiz payload not found");
+    return initial;
+  }
+
+  it("restores the display data and the per-phase drafts for a final question", async () => {
+    env = await setupTestEnv();
+    const me = await seedUser(env.db);
+    env.signedInAs(asSessionUser(me));
+    const [q1, q2] = rewriteUnit.questions.slice(0, 2).map((q) => q.id);
+    const a = await seedAttempt(env.db, me.id, { unitId: REWRITE_UNIT, questionIds: [q1, q2] });
+    await insertRewritePhase(env.db, {
+      attemptId: a.id,
+      userId: me.id,
+      unitId: REWRITE_UNIT,
+      questionId: q1,
+      status: "final",
+      phase1Answer: "Phase one.",
+      phase1Marks: 1,
+      phase1Feedback: "Name the tax.",
+      phase1TermOutcomes: [{ conceptId: "c-tariff", correct: false }],
+      phase2Answer: "A tariff raised import prices.",
+      phase2Marks: 2,
+      phase2Feedback: "Better.",
+      recordedMark: 2,
+      displayData: {
+        phase1: { spanByTerm: { "c-tariff": "taxed imports" } },
+        phase2: { spanByTerm: { "c-tariff": "tariff" } },
+        phase2TermOutcomes: [{ conceptId: "c-tariff", correct: true }],
+        languageNote: { spelling: [{ wrong: "fromm", fix: "from" }] },
+      },
+    });
+    await upsertRewriteDraft(env.db, me.id, a.id, REWRITE_UNIT, q1, 1, "phase one draft");
+    await upsertRewriteDraft(env.db, me.id, a.id, REWRITE_UNIT, q1, 2, "phase two draft");
+
+    const payload = await quizPayload(a.id);
+    const rs = payload.rewriteState![q1];
+    expect(rs.phase1CreditedSpans).toEqual([{ conceptId: "c-tariff", span: "taxed imports" }]);
+    expect(rs.phase2CreditedSpans).toEqual([{ conceptId: "c-tariff", span: "tariff" }]);
+    expect(rs.phase2TermOutcomes).toEqual([{ conceptId: "c-tariff", correct: true }]);
+    expect(rs.languageNote).toEqual({ spelling: [{ wrong: "fromm", fix: "from" }] });
+    expect(rs.phase1Draft).toBe("phase one draft");
+    expect(rs.phase2Draft).toBe("phase two draft");
+  });
+
+  it("restores a server draft for a question with no phase row, with no key fields (FR-038, FR-053)", async () => {
+    env = await setupTestEnv();
+    const me = await seedUser(env.db);
+    env.signedInAs(asSessionUser(me));
+    const [q1, q2] = rewriteUnit.questions.slice(0, 2).map((q) => q.id);
+    const a = await seedAttempt(env.db, me.id, { unitId: REWRITE_UNIT, questionIds: [q1, q2] });
+    // q2 has a server draft but no phase row (phase 1 not yet graded)
+    await upsertRewriteDraft(env.db, me.id, a.id, REWRITE_UNIT, q2, 1, "half-typed sentence");
+
+    const payload = await quizPayload(a.id);
+    const rs = payload.rewriteState![q2];
+    expect(rs.phase).toBe("draft");
+    expect(rs.phase1Draft).toBe("half-typed sentence");
+    // no key fields before a phase 1 grade: no span, hint term, definition, model sentence or note
+    expect(rs.phase1Answer).toBeUndefined();
+    expect(rs.phase1CreditedSpans).toBeUndefined();
+    expect(rs.phase2CreditedSpans).toBeUndefined();
+    expect(rs.phase2TermOutcomes).toBeUndefined();
+    expect(rs.languageNote).toBeUndefined();
+    expect(rs.hint).toBeUndefined();
+    expect(rs.discussion).toBeUndefined();
+    expect(rs.phase1Marks).toBeUndefined();
   });
 });

@@ -138,7 +138,10 @@ limited. Multiple choice is never limited.
 - **Rate limits:** `GRADE_RATE_LIMIT` per signed-in student per minute (default
   20) is the primary limit, with a looser per-IP backstop `GRADE_IP_RATE_LIMIT`
   (default 150) because a school shares addresses. `ATTEMPT_RATE_LIMIT` (default
-  20) limits starting attempts. They use Upstash Redis when
+  20) limits starting attempts. `DRAFT_RATE_LIMIT` (default 30) limits the
+  sentence-writing draft saves (spec 006) — a separate namespace so draft
+  beacons never consume the grading budget; draft saves are never AI-graded and
+  never count against `LLM_DAILY_CAP`. They use Upstash Redis when
   `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set, otherwise a
   per-instance in-memory window (`lib/ratelimit.server.ts`). Over the limit →
   `429` with `retryAfter`.
@@ -358,6 +361,7 @@ Production and Preview **separately** (Preview must use a different database).
 | `GRADE_RATE_LIMIT` | no | short-answer submissions per student per minute (default 20) |
 | `GRADE_IP_RATE_LIMIT` | no | looser per-IP backstop per minute (default 150) |
 | `ATTEMPT_RATE_LIMIT` | no | attempts a student can start per minute (default 20) |
+| `DRAFT_RATE_LIMIT` | no | sentence-writing draft saves per student per minute (default 30; never AI-graded, never counted against `LLM_DAILY_CAP`) |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` | no | distributed rate limiting (create the database in `ap-southeast-2`); falls back to in-memory |
 | `CONCEPT_MODEL` | no | model that writes concept summaries (default `deepseek/deepseek-chat`) |
 | `ILLUSTRATION_MODEL` | no | model that draws concept pictures as SVG; unset = no pictures |

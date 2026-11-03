@@ -230,6 +230,8 @@ export async function gradeShortAnswer(p: GradeParams): Promise<ShortGrade | nul
 export interface RewriteTermStatus {
   term: string;
   status: "used" | "missing" | "misused";
+  /** The exact words in the student's sentence the grader credited, or null (spec 006 FR-031). */
+  span?: string | null;
 }
 
 export interface RewriteGrade {
@@ -237,6 +239,8 @@ export interface RewriteGrade {
   padding: boolean;
   terms: RewriteTermStatus[];
   feedback: string;
+  /** Optional language note for the final sentence (spec 006 FR-034). */
+  languageNote?: { spelling?: Array<{ wrong: string; fix: string }>; grammar?: string };
   gradedBy: string;
 }
 
@@ -256,6 +260,32 @@ function asBoolean(v: unknown): boolean {
   return v === true || v === "true";
 }
 
+/** A language note is kept only when it matches the shape and caps; anything else is dropped. */
+function parseLanguageNote(v: unknown): RewriteGrade["languageNote"] {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return undefined;
+  const o = v as Record<string, unknown>;
+  const note: NonNullable<RewriteGrade["languageNote"]> = {};
+  if (o.spelling !== undefined) {
+    if (!Array.isArray(o.spelling) || o.spelling.length > 3) return undefined;
+    const spelling: Array<{ wrong: string; fix: string }> = [];
+    for (const pair of o.spelling) {
+      if (!pair || typeof pair !== "object" || Array.isArray(pair)) return undefined;
+      const p = pair as Record<string, unknown>;
+      const wrong = typeof p.wrong === "string" ? p.wrong.trim() : "";
+      const fix = typeof p.fix === "string" ? p.fix.trim() : "";
+      if (!wrong || !fix || wrong.length > 60 || fix.length > 60) return undefined;
+      spelling.push({ wrong, fix });
+    }
+    if (spelling.length > 0) note.spelling = spelling;
+  }
+  if (o.grammar !== undefined) {
+    const grammar = typeof o.grammar === "string" ? o.grammar.trim() : "";
+    if (!grammar || grammar.length > 200 || /\n/.test(grammar)) return undefined;
+    note.grammar = grammar;
+  }
+  return note.spelling || note.grammar ? note : undefined;
+}
+
 /** Pull the first {...} block out of a model response and parse it. */
 function parseRewriteJson(content: string): Omit<RewriteGrade, "gradedBy"> | null {
   const start = content.indexOf("{");
@@ -271,7 +301,7 @@ function parseRewriteJson(content: string): Omit<RewriteGrade, "gradedBy"> | nul
   if (!feedback) return null;
   const terms = Array.isArray(obj.terms)
     ? obj.terms.filter(
-        (t): t is { term: string; status: string } =>
+        (t): t is { term: string; status: string; span?: unknown } =>
           !!t &&
           typeof t === "object" &&
           typeof (t as { term?: unknown }).term === "string" &&
@@ -284,8 +314,11 @@ function parseRewriteJson(content: string): Omit<RewriteGrade, "gradedBy"> | nul
     terms: terms.map((t) => ({
       term: t.term,
       status: t.status === "used" || t.status === "misused" ? t.status : "missing",
+      // a non-string span is treated as null; the new fields never make a reply unparseable
+      span: typeof t.span === "string" ? t.span : null,
     })),
     feedback,
+    languageNote: parseLanguageNote(obj.languageNote),
   };
 }
 
@@ -302,6 +335,14 @@ function buildRewriteMessages(p: RewriteGradeParams): ChatMessage[] {
     `Listed misuses NEVER count. ` +
     `"criterionA" is true when the meaning and the cause and effect of the original sentence are kept and correct. ` +
     `"padding" is true when the sentence is padded with words that add nothing (the word limit itself is checked separately). ` +
+    `For each term you mark "used", "span" must quote the exact words in the student's sentence that earned ` +
+    `the credit (a grammatical form or a listed equivalent may differ from the term itself); quote nothing the ` +
+    `student did not write; use null for a term you did not credit. ` +
+    `"feedback" must name what was done well and what would improve the sentence (more precise terms, or the ` +
+    `lost criterion when every term was used correctly). It MUST NOT name or quote any words or phrases of the ` +
+    `plain-English sentence as things to replace, and MUST NOT tell the student which words to change. ` +
+    `When the sentence has a misspelling or a grammar slip, include an optional "languageNote" with the wrong ` +
+    `word and its correction (at most three spelling pairs) and at most one short grammar note; otherwise omit it. ` +
     `Respond with JSON only, no prose outside it.`;
 
   const user =
@@ -318,8 +359,9 @@ function buildRewriteMessages(p: RewriteGradeParams): ChatMessage[] {
     `\n\nStudent's sentence:\n"""\n${p.answer}\n"""\n\n` +
     `Reply with exactly this shape:\n` +
     `{"criterionA": true|false, "padding": true|false, ` +
-    `"terms": [{"term": "<exact term text>", "status": "used"|"missing"|"misused"}], ` +
-    `"feedback": "<1-2 sentences to the student>"}`;
+    `"terms": [{"term": "<exact term text>", "status": "used"|"missing"|"misused", "span": "<exact words credited or null>"}], ` +
+    `"feedback": "<1-2 sentences to the student>", ` +
+    `"languageNote": {"spelling": [{"wrong": "<misspelt word>", "fix": "<correction>"}], "grammar": "<one short note>"}}`;
 
   return [
     { role: "system", content: system },

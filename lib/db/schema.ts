@@ -23,6 +23,18 @@ import {
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: "date" });
 
+/**
+ * spec 006: the display-only grading data stored with a rewrite question's phase row. Display
+ * only — never read by lib/concepts/progress.ts or the draw, and never changes marks or concept
+ * tracking (constitution Principle II, amended 2.13.0).
+ */
+export interface RewriteDisplayData {
+  phase1: { spanByTerm: Record<string, string> }; // credited spans, found only
+  phase2?: { spanByTerm: Record<string, string> }; // credited spans, found only
+  phase2TermOutcomes?: Array<{ conceptId: string; correct: boolean }>; // display only
+  languageNote?: { spelling?: Array<{ wrong: string; fix: string }>; grammar?: string };
+}
+
 export const users = pgTable(
   "users",
   {
@@ -136,6 +148,11 @@ export const rewritePhases = pgTable(
     phase2Feedback: text("phase2_feedback"),
     phase2GradedAt: ts("phase2_graded_at"),
     recordedMark: smallint("recorded_mark"),
+    /**
+     * spec 006: the display-only grading data (credited spans per phase, phase 2 term outcomes,
+     * optional language note). Display only; never read by lib/concepts/progress.ts or the draw.
+     */
+    displayData: jsonb("display_data").$type<RewriteDisplayData>(),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),
   },
@@ -154,6 +171,37 @@ export const rewritePhases = pgTable(
     ),
     check("rewrite_phases_final_mark", sql`${t.status} <> 'final' or ${t.recordedMark} is not null`),
     index("rewrite_phases_user_unit_idx").on(t.userId, t.unitId),
+  ],
+);
+
+/**
+ * spec 006: one row per question in a writing-practice attempt holding the student's in-progress
+ * draft text per phase, so a resume on another device restores what the student had typed
+ * (FR-053, FR-054). Created on the first draft save; deleted with the student (cascade).
+ */
+export const rewriteDrafts = pgTable(
+  "rewrite_drafts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    attemptId: uuid("attempt_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    unitId: text("unit_id").notNull(),
+    questionId: text("question_id").notNull(),
+    phase1Draft: text("phase1_draft").notNull().default(""),
+    phase2Draft: text("phase2_draft").notNull().default(""),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "rewrite_drafts_attempt_owner_fk",
+      columns: [t.attemptId, t.userId],
+      foreignColumns: [attempts.id, attempts.userId],
+    }).onDelete("cascade"),
+    unique("rewrite_drafts_attempt_question_unique").on(t.attemptId, t.questionId),
+    index("rewrite_drafts_user_unit_idx").on(t.userId, t.unitId),
   ],
 );
 
@@ -307,3 +355,5 @@ export type ResultRow = typeof results.$inferSelect;
 export type NewResultRow = typeof results.$inferInsert;
 export type RewritePhaseRow = typeof rewritePhases.$inferSelect;
 export type NewRewritePhaseRow = typeof rewritePhases.$inferInsert;
+export type RewriteDraftRow = typeof rewriteDrafts.$inferSelect;
+export type NewRewriteDraftRow = typeof rewriteDrafts.$inferInsert;

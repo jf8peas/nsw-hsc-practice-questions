@@ -5,9 +5,10 @@ import { resolveSession } from "@/lib/auth.server";
 import { getConfig } from "@/lib/config.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { getRewritePhase, insertRewritePhase, finaliseRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
+import { clearRewriteDraft, deleteRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 import { getResult } from "@/lib/db/queries/results.server";
-import type { RewritePhaseRow, ResultRow } from "@/lib/db/schema";
-import type { AlreadyAnswered, GradeResponse } from "@/lib/grading";
+import type { RewriteDisplayData, RewritePhaseRow, ResultRow } from "@/lib/db/schema";
+import type { AlreadyAnswered, GradeResponse, RewriteGradeResult } from "@/lib/grading";
 import {
   getOptionExplanation,
   gradeAnswer,
@@ -294,9 +295,35 @@ export async function POST(req: Request) {
 
 // ---- rewrite questions (spec 005) ---------------------------------------------
 
+/** The credited spans of one phase from the stored display data, or undefined when none. */
+function spansFromMap(map: Record<string, string> | undefined): Array<{ conceptId: string; span: string }> | undefined {
+  if (!map) return undefined;
+  const spans = Object.entries(map).map(([conceptId, span]) => ({ conceptId, span }));
+  return spans.length > 0 ? spans : undefined;
+}
+
+/** The phase-appropriate display data for a stored phase row (spec 006 FR-053). */
+function displayDataFromResult(result: RewriteGradeResult, phase: 1 | 2, prior?: RewriteDisplayData | null): RewriteDisplayData {
+  const spanByTerm: Record<string, string> = {};
+  for (const s of result.creditedSpans ?? []) spanByTerm[s.conceptId] = s.span;
+  if (phase === 1) {
+    return {
+      phase1: { spanByTerm },
+      ...(result.languageNote ? { languageNote: result.languageNote } : {}),
+    };
+  }
+  return {
+    phase1: prior?.phase1 ?? { spanByTerm: {} },
+    phase2: { spanByTerm },
+    phase2TermOutcomes: result.phase2TermOutcomes ?? [],
+    ...(result.languageNote ? { languageNote: result.languageNote } : {}),
+  };
+}
+
 /** A minimal rewrite result for a `409 already_answered` (a double tap or a second device). */
 function rewriteResultFromRow(row: RewritePhaseRow) {
   const phase: 1 | 2 = row.phase2Marks !== null && row.phase2Marks !== undefined ? 2 : 1;
+  const spans = spansFromMap(phase === 2 ? row.displayData?.phase2?.spanByTerm : row.displayData?.phase1?.spanByTerm);
   return {
     questionId: row.questionId,
     type: "rewrite" as const,
@@ -305,6 +332,11 @@ function rewriteResultFromRow(row: RewritePhaseRow) {
     marksAwarded: row.recordedMark ?? row.phase1Marks,
     feedback: phase === 2 ? (row.phase2Feedback ?? row.phase1Feedback) ?? "" : (row.phase1Feedback ?? ""),
     termOutcomes: row.phase1TermOutcomes ?? [],
+    ...(spans ? { creditedSpans: spans } : {}),
+    ...(phase === 2 && row.displayData?.phase2TermOutcomes
+      ? { phase2TermOutcomes: row.displayData.phase2TermOutcomes }
+      : {}),
+    ...(row.displayData?.languageNote ? { languageNote: row.displayData.languageNote } : {}),
     needsSelfMark: false,
   };
 }
@@ -467,6 +499,7 @@ async function handleRewriteGrade(
       phase1Marks: result.marksAwarded ?? 0,
       phase1Feedback: result.feedback ?? null,
       phase1TermOutcomes: result.termOutcomes,
+      displayData: displayDataFromResult(result, 1),
     };
     if (degraded) return json({ result, saved: false, degraded: true, attemptCompleted: null });
     try {
@@ -475,6 +508,8 @@ async function handleRewriteGrade(
         const existing = await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
         if (existing) return json({ error: "already_answered", result: rewriteResultFromRow(existing) }, 409);
       }
+      // the submitted sentence is now stored as phase1_answer; the draft is no longer needed
+      await dbCall((db) => clearRewriteDraft(db, user.id, attemptId, questionId, 1)).catch(() => {});
     } catch (error) {
       if (error instanceof Error && error.name === "AttemptOwnerMismatchError") return bad("not_found", 404);
       throw error;
@@ -499,12 +534,15 @@ async function handleRewriteGrade(
             phase1Feedback: result.feedback ?? null,
             phase1TermOutcomes: result.termOutcomes,
             recordedMark: 3,
+            displayData: displayDataFromResult(result, 1),
           }),
         );
         if (!outcome.inserted) {
           const existing = await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
           if (existing) return json({ error: "already_answered", result: rewriteResultFromRow(existing) }, 409);
         }
+        // the question is final: the draft row is no longer needed (research R5.2, Principle II)
+        await dbCall((db) => deleteRewriteDraft(db, user.id, attemptId, questionId)).catch(() => {});
       } catch (error) {
         if (error instanceof Error && error.name === "AttemptOwnerMismatchError") return bad("not_found", 404);
         throw error;
@@ -517,9 +555,12 @@ async function handleRewriteGrade(
         phase2Marks: result.marksAwarded ?? 0,
         phase2Feedback: result.feedback ?? null,
         recordedMark: recorded,
+        displayData: displayDataFromResult(result, 2, phaseRow?.displayData),
       }),
     );
     if (!outcome) return json({ error: "already_answered", result: rewriteResultFromRow(phaseRow!) }, 409);
+    // the question is final: the draft row is no longer needed (research R5.2, Principle II)
+    await dbCall((db) => deleteRewriteDraft(db, user.id, attemptId, questionId)).catch(() => {});
   }
 
   if (degraded) {

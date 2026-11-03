@@ -89,22 +89,30 @@ function handle(body: { model?: string; messages?: Array<{ role: string; content
     );
   }
 
-  // Rewrite grading (spec 005): the system prompt names "sentence-writing".
+  // Rewrite grading (spec 005, extended by spec 006): the system prompt names "sentence-writing".
   const isRewrite = /sentence-writing/.test(system);
   if (isRewrite) {
     if (REWRITE_MODE === "fail") return reply("", 500);
     if (REWRITE_MODE === "down") return reply("", 503);
     const terms = [...user.matchAll(/^\d+\. ([^—]+) —/gm)].map((m) => m[1].trim());
-    const statuses = terms.map((t, i) => ({
-      term: t,
-      status: REWRITE_MODE === "partial" && i === 0 ? "missing" : "used",
-    }));
+    const answer = /Student's sentence:\n"""\n([\s\S]*?)\n"""/.exec(user)?.[1] ?? "";
+    const statuses = terms.map((t, i) => {
+      const status = REWRITE_MODE === "partial" && i === 0 ? "missing" : "used";
+      // spec 006: a credited span is the exact words in the answer, or null for a non-credited term.
+      const span = status === "used" && answer.toLowerCase().includes(t.toLowerCase()) ? t : null;
+      return { term: t, status, span };
+    });
+    // spec 006: a deterministic language note when the answer contains the mockup's typo.
+    const languageNote = answer.includes("fromm")
+      ? { spelling: [{ wrong: "fromm", fix: "from" }] }
+      : undefined;
     return reply(
       JSON.stringify({
         criterionA: true,
         padding: false,
         terms: statuses,
         feedback: "Fake rewrite grader: well done.",
+        ...(languageNote ? { languageNote } : {}),
       }),
     );
   }

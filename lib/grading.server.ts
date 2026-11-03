@@ -3,7 +3,14 @@ import "server-only";
 import { getQuestion, getUnit } from "@/content";
 import { getAnswer } from "@/content/answers";
 import type { ReviewMaterial } from "@/lib/concepts/port";
-import type { GradeResult, RewriteDiscussion, RewriteGradeResult, RewriteHint } from "@/lib/grading";
+import type { RewriteDisplayData } from "@/lib/db/schema";
+import type {
+  GradeResult,
+  RewriteCreditedSpan,
+  RewriteDiscussion,
+  RewriteGradeResult,
+  RewriteHint,
+} from "@/lib/grading";
 import { gradeRewrite, gradeShortAnswer } from "@/lib/openrouter.server";
 import type { Answer } from "@/lib/types";
 import { countWords } from "@/lib/wordcount";
@@ -216,6 +223,22 @@ export async function gradeAnswer(
 
 export const REWRITE_WORD_LIMIT = 25;
 
+/** Normalise for span matching: trim and collapse runs of whitespace (incl. newlines) to one space. */
+function normaliseForSpan(text: string): string {
+  return text.trim().replace(/\s+/g, " ");
+}
+
+/**
+ * spec 006 FR-032: a credited span is kept only when it is found in the student's sentence —
+ * exact characters after case- and whitespace-normalisation (so "Subsidies" matches "subsidies"
+ * and a span split across a line break matches).
+ */
+function spanFoundIn(sentence: string, span: string): boolean {
+  const s = normaliseForSpan(sentence).toLowerCase();
+  const t = normaliseForSpan(span).toLowerCase();
+  return t.length > 0 && t.length <= s.length && s.includes(t);
+}
+
 export interface RewriteGraded {
   result: RewriteGradeResult;
   /** What to store as the answer: the final sentence. */
@@ -246,6 +269,7 @@ export function buildRewriteDiscussion(key: Answer): RewriteDiscussion {
       term: t.term,
       definition: t.definition,
       why: t.why,
+      conceptId: t.conceptId,
     })),
   };
 }
@@ -315,10 +339,41 @@ export async function gradeRewriteAnswer(
   // code computes the criteria and marks (research R4)
   const criterionA = llm.criterionA;
   const criterionC = wordCount <= REWRITE_WORD_LIMIT && !llm.padding;
-  const byTerm = new Map(llm.terms.map((t) => [t.term, t.status]));
-  const criterionB = key.targetTerms.every((t) => byTerm.get(t.term) === "used");
+  const byTerm = new Map(llm.terms.map((t) => [t.term, t]));
+  const criterionB = key.targetTerms.every((t) => byTerm.get(t.term)?.status === "used");
   const marks = (criterionA ? 1 : 0) + (criterionB ? 1 : 0) + (criterionC ? 1 : 0);
   const capped = phase === 2 ? Math.min(marks, 2) : marks;
+
+  // spec 006 FR-031/FR-032: a credited span is kept only when its term was credited AND the span
+  // is found in the student's sentence (case-insensitive, whitespace-normalised substring match).
+  const creditedSpans: RewriteCreditedSpan[] = [];
+  for (const t of key.targetTerms) {
+    const entry = byTerm.get(t.term);
+    const span = entry?.span;
+    if (
+      entry?.status === "used" &&
+      typeof span === "string" &&
+      span.length > 0 &&
+      span.length <= 200 &&
+      spanFoundIn(answer, span)
+    ) {
+      creditedSpans.push({ conceptId: t.conceptId, span });
+    }
+  }
+
+  // spec 006 FR-033: phase 2 term outcomes drive the "Added in retry" / "Not used" pills. Display
+  // only; concept tracking still comes from phase 1 (termOutcomes above).
+  const phase2TermOutcomes =
+    phase === 2
+      ? key.targetTerms.map((t) => ({
+          conceptId: t.conceptId,
+          correct: byTerm.get(t.term)?.status === "used",
+        }))
+      : undefined;
+
+  // spec 006 FR-034: the language note applies to the final sentence only (phase 2, or phase 1 at
+  // 3/3). It is already validated by parseRewriteJson; absent → nothing shown.
+  const languageNote = phase === 2 || capped === 3 ? llm.languageNote : undefined;
 
   const result: RewriteGradeResult = {
     ...base,
@@ -326,12 +381,15 @@ export async function gradeRewriteAnswer(
     feedback: llm.feedback,
     termOutcomes: key.targetTerms.map((t) => ({
       conceptId: t.conceptId,
-      correct: byTerm.get(t.term) === "used",
+      correct: byTerm.get(t.term)?.status === "used",
     })),
+    ...(creditedSpans.length > 0 ? { creditedSpans } : {}),
+    ...(phase2TermOutcomes ? { phase2TermOutcomes } : {}),
+    ...(languageNote ? { languageNote } : {}),
   };
 
   if (phase === 1 && capped < 3) {
-    const missed = key.targetTerms.filter((t) => byTerm.get(t.term) !== "used");
+    const missed = key.targetTerms.filter((t) => byTerm.get(t.term)?.status !== "used");
     if (missed.length > 0) {
       result.hint = { terms: missed.map((t) => ({ term: t.term, definition: t.definition })) };
     } else {
@@ -371,29 +429,55 @@ export function rewriteResumeState(
     phase2Marks: number | null;
     phase2Feedback: string | null;
     recordedMark: number | null;
+    /** spec 006: the display-only grading data (FR-054). */
+    displayData?: RewriteDisplayData | null;
+    /** spec 006: the per-phase drafts (FR-053). */
+    drafts?: { phase1Draft: string; phase2Draft: string } | null;
   },
 ): {
   phase: "phase1" | "phase2" | "final";
   phase1Answer: string;
   phase1Marks?: number;
   phase1Feedback?: string;
+  phase1TermOutcomes?: Array<{ conceptId: string; correct: boolean }>;
+  phase1CreditedSpans?: Array<{ conceptId: string; span: string }>;
   phase2Answer?: string;
   phase2Marks?: number;
   phase2Feedback?: string;
+  phase2CreditedSpans?: Array<{ conceptId: string; span: string }>;
+  phase2TermOutcomes?: Array<{ conceptId: string; correct: boolean }>;
+  languageNote?: { spelling?: Array<{ wrong: string; fix: string }>; grammar?: string };
   marks?: number;
   hint?: RewriteHint;
   discussion?: RewriteDiscussion;
+  phase1Draft?: string;
+  phase2Draft?: string;
 } {
   const key = getAnswer(questionId);
+  const spansOf = (map: Record<string, string> | undefined) =>
+    map && Object.keys(map).length > 0
+      ? Object.entries(map).map(([conceptId, span]) => ({ conceptId, span }))
+      : undefined;
   const state: ReturnType<typeof rewriteResumeState> = {
     phase: phaseRow.status,
     phase1Answer: phaseRow.phase1Answer,
     phase1Marks: phaseRow.phase1Marks,
     ...(phaseRow.phase1Feedback ? { phase1Feedback: phaseRow.phase1Feedback } : {}),
+    ...(phaseRow.phase1TermOutcomes ? { phase1TermOutcomes: phaseRow.phase1TermOutcomes } : {}),
+    ...(spansOf(phaseRow.displayData?.phase1?.spanByTerm)
+      ? { phase1CreditedSpans: spansOf(phaseRow.displayData?.phase1?.spanByTerm) }
+      : {}),
     ...(phaseRow.phase2Answer ? { phase2Answer: phaseRow.phase2Answer } : {}),
     ...(phaseRow.phase2Marks !== null && phaseRow.phase2Marks !== undefined ? { phase2Marks: phaseRow.phase2Marks } : {}),
     ...(phaseRow.phase2Feedback ? { phase2Feedback: phaseRow.phase2Feedback } : {}),
+    ...(spansOf(phaseRow.displayData?.phase2?.spanByTerm)
+      ? { phase2CreditedSpans: spansOf(phaseRow.displayData?.phase2?.spanByTerm) }
+      : {}),
+    ...(phaseRow.displayData?.phase2TermOutcomes ? { phase2TermOutcomes: phaseRow.displayData.phase2TermOutcomes } : {}),
+    ...(phaseRow.displayData?.languageNote ? { languageNote: phaseRow.displayData.languageNote } : {}),
     ...(phaseRow.recordedMark !== null ? { marks: phaseRow.recordedMark } : { marks: phaseRow.phase1Marks }),
+    ...(phaseRow.drafts?.phase1Draft ? { phase1Draft: phaseRow.drafts.phase1Draft } : {}),
+    ...(phaseRow.drafts?.phase2Draft ? { phase2Draft: phaseRow.drafts.phase2Draft } : {}),
   };
   if (phaseRow.status === "phase1" && phaseRow.phase1Marks < 3 && key?.targetTerms) {
     const outcomes = new Map((phaseRow.phase1TermOutcomes ?? []).map((o) => [o.conceptId, o.correct]));

@@ -122,3 +122,12 @@ export function checkAttemptRateLimit(userId: string): Promise<RateResult> {
 export function checkConceptRateLimit(userId: string): Promise<RateResult> {
   return checkRateLimit("concept", userId, getConfig().conceptRateLimit);
 }
+
+/**
+ * Limit on rewrite draft saves (spec 006): per signed-in student, a separate namespace from the
+ * grading limits so draft beacons never consume the grading budget. Never AI-graded, never
+ * counted against LLM_DAILY_CAP.
+ */
+export function checkDraftRateLimit(userId: string): Promise<RateResult> {
+  return checkRateLimit("draft", userId, getConfig().draftRateLimit);
+}

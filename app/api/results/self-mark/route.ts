@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getQuestion } from "@/content";
 import { resolveSession } from "@/lib/auth.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
+import { deleteRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 import { finaliseRewritePhase, getRewritePhase, insertRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
 import { getResult } from "@/lib/db/queries/results.server";
 import { buildReceipt, saveResult, type ResultFields } from "@/lib/results/save.server";
@@ -220,5 +221,7 @@ async function handleRewriteSelfMark(
   if (!outcome.inserted && outcome.stored) {
     return json({ error: "already_answered", result: { marksAwarded: outcome.stored.marksAwarded } }, 409);
   }
+  // the question is final: the draft row is no longer needed (research R5.2, Principle II)
+  await dbCall((db) => deleteRewriteDraft(db, user.id, attemptId, questionId)).catch(() => {});
   return json({ saved: true, attemptCompleted: outcome.completed });
 }

@@ -806,3 +806,156 @@ describe("resume and leaks", () => {
     }
   });
 });
+
+describe("spec 006 display data", () => {
+  /** A grader reply with per-term spans (spec 006 FR-031). */
+  const withSpans = (q: Question, spans: Record<string, string | null>) => {
+    const key = getAnswer(q.id)!;
+    return {
+      criterionA: true,
+      padding: false,
+      terms: key.targetTerms!.map((t) => ({
+        term: t.term,
+        status: "used" as const,
+        span: spans[t.term] ?? null,
+      })),
+      feedback: "Good work.",
+      gradedBy: "mock-model",
+    };
+  };
+
+  it("returns creditedSpans only for credited terms whose span is found in the sentence (FR-031, FR-032)", async () => {
+    env = await setupRewriteEnv();
+    await signedInStudent(env);
+    const started = await startAttempt(REWRITE_UNIT);
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    const [t1, t2] = key.targetTerms!;
+    const answer = `A sentence using ${t1.term} correctly.`;
+    env.rewrite.mockResolvedValueOnce(
+      withSpans(q, { [t1.term]: t1.term, [t2.term]: "zzz not in the sentence" }),
+    );
+    const { status, body } = await grade(started, q.id, answer);
+    expect(status).toBe(200);
+    // only the found, credited span is returned
+    expect(body.result.creditedSpans).toEqual([{ conceptId: t1.conceptId, span: t1.term }]);
+  });
+
+  it("a span for a term not credited is dropped even if present in the sentence", async () => {
+    env = await setupRewriteEnv();
+    await signedInStudent(env);
+    const started = await startAttempt(REWRITE_UNIT);
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    const [t1] = key.targetTerms!;
+    const answer = `A sentence using ${t1.term} correctly.`;
+    env.rewrite.mockResolvedValueOnce({
+      criterionA: true,
+      padding: false,
+      terms: key.targetTerms!.map((t) => ({
+        term: t.term,
+        status: t.term === t1.term ? "used" : "missing",
+        span: t.term === t1.term ? t1.term : t.term,
+      })),
+      feedback: "Good work.",
+      gradedBy: "mock-model",
+    });
+    const { body } = await grade(started, q.id, answer);
+    expect(body.result.creditedSpans).toEqual([{ conceptId: t1.conceptId, span: t1.term }]);
+  });
+
+  it("phase 2 carries phase2TermOutcomes and the language note; phase 1 under 3 carries neither", async () => {
+    env = await setupRewriteEnv();
+    await signedInStudent(env);
+    const started = await startAttempt(REWRITE_UNIT);
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    const [t1] = key.targetTerms!;
+    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q, { terms: { [t1.term]: "missing" } }));
+    const p1 = await grade(started, q.id, "Phase one under three.");
+    expect(p1.body.result.phase2TermOutcomes).toBeUndefined();
+    expect(p1.body.result.languageNote).toBeUndefined();
+
+    env.rewrite.mockResolvedValueOnce({
+      ...rewriteGradeFor(q),
+      languageNote: { spelling: [{ wrong: "fromm", fix: "from" }] },
+    });
+    const p2 = await grade(started, q.id, "A perfect retry.", { phase: 2 });
+    expect(p2.status).toBe(200);
+    expect(p2.body.result.phase2TermOutcomes).toEqual(
+      key.targetTerms!.map((t) => ({ conceptId: t.conceptId, correct: true })),
+    );
+    expect(p2.body.result.languageNote).toEqual({ spelling: [{ wrong: "fromm", fix: "from" }] });
+  });
+
+  it("a reply without the new fields grades exactly as today (marks, hint, discussion unchanged)", async () => {
+    env = await setupRewriteEnv();
+    await signedInStudent(env);
+    const started = await startAttempt(REWRITE_UNIT);
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    const [t1] = key.targetTerms!;
+    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q, { terms: { [t1.term]: "missing" } }));
+    const p1 = await grade(started, q.id, "Phase one under three.");
+    expect(p1.body.result.marksAwarded).toBe(2);
+    expect(p1.body.result.hint).toEqual({ terms: [{ term: t1.term, definition: t1.definition }] });
+    expect(p1.body.result.creditedSpans).toBeUndefined();
+    expect(p1.body.result.phase2TermOutcomes).toBeUndefined();
+    expect(p1.body.result.languageNote).toBeUndefined();
+  });
+
+  it("display_data is written at phase 1 and extended at phase 2", async () => {
+    env = await setupRewriteEnv();
+    await signedInStudent(env);
+    const started = await startAttempt(REWRITE_UNIT);
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    const [t1] = key.targetTerms!;
+    const answer1 = `A sentence using ${t1.term} correctly.`;
+    // phase 1 under 3 (t2 missing) so phase 2 is allowed; t1's span is credited and found
+    env.rewrite.mockResolvedValueOnce({
+      criterionA: true,
+      padding: false,
+      terms: key.targetTerms!.map((t) => ({
+        term: t.term,
+        status: t.term === t1.term ? "used" : "missing",
+        span: t.term === t1.term ? t1.term : null,
+      })),
+      feedback: "Name the tax.",
+      gradedBy: "mock-model",
+    });
+    await grade(started, q.id, answer1);
+    let row = await phaseRowFor(q.id);
+    expect(row.displayData?.phase1?.spanByTerm).toEqual({ [t1.conceptId]: t1.term });
+
+    env.rewrite.mockResolvedValueOnce({
+      ...withSpans(q, { [t1.term]: t1.term }),
+      languageNote: { spelling: [{ wrong: "fromm", fix: "from" }] },
+    });
+    await grade(started, q.id, `A perfect retry using ${t1.term}.`, { phase: 2 });
+    row = await phaseRowFor(q.id);
+    expect(row.displayData?.phase1?.spanByTerm).toEqual({ [t1.conceptId]: t1.term });
+    expect(row.displayData?.phase2?.spanByTerm).toEqual({ [t1.conceptId]: t1.term });
+    expect(row.displayData?.phase2TermOutcomes).toEqual(
+      key.targetTerms!.map((t) => ({ conceptId: t.conceptId, correct: true })),
+    );
+    expect(row.displayData?.languageNote).toEqual({ spelling: [{ wrong: "fromm", fix: "from" }] });
+  });
+
+  it("the 409 already_answered rewrite result carries the stored display fields", async () => {
+    env = await setupRewriteEnv();
+    await signedInStudent(env);
+    const started = await startAttempt(REWRITE_UNIT);
+    const q = rewritesOf(started)[0];
+    const key = getAnswer(q.id)!;
+    const [t1] = key.targetTerms!;
+    const answer = `A sentence using ${t1.term} correctly.`;
+    env.rewrite.mockResolvedValueOnce(withSpans(q, { [t1.term]: t1.term }));
+    await grade(started, q.id, answer);
+    // a second phase 1 for the same question returns the stored result with the display fields
+    const second = await grade(started, q.id, "A second attempt.");
+    expect(second.status).toBe(409);
+    expect(second.body.error).toBe("already_answered");
+    expect(second.body.result.creditedSpans).toEqual([{ conceptId: t1.conceptId, span: t1.term }]);
+  });
+});

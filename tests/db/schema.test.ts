@@ -75,7 +75,8 @@ describe("migrations and column sets (Principle II)", () => {
         "created_at",
       ].sort(),
     );
-    // spec 005: the sentence-writing phase row holds the student's own sentences and marks
+    // spec 005 + spec 006: the sentence-writing phase row holds the student's own sentences,
+    // marks and the display-only grading data (display_data)
     expect(await columns("rewrite_phases")).toEqual(
       [
         "id",
@@ -94,6 +95,21 @@ describe("migrations and column sets (Principle II)", () => {
         "phase2_feedback",
         "phase2_graded_at",
         "recorded_mark",
+        "display_data",
+        "created_at",
+        "updated_at",
+      ].sort(),
+    );
+    // spec 006: the draft row holds only the student's in-progress draft text per phase
+    expect(await columns("rewrite_drafts")).toEqual(
+      [
+        "id",
+        "attempt_id",
+        "user_id",
+        "unit_id",
+        "question_id",
+        "phase1_draft",
+        "phase2_draft",
         "created_at",
         "updated_at",
       ].sort(),

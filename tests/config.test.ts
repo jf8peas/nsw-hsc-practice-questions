@@ -51,6 +51,7 @@ describe("getConfig", () => {
       gradeRateLimit: 20,
       gradeIpRateLimit: 150,
       attemptRateLimit: 20,
+      draftRateLimit: 30,
       conceptDailyCap: 100,
       conceptRateLimit: 10,
     });

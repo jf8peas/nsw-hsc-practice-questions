@@ -1812,3 +1812,552 @@ input {
   color: var(--rd-mute-500);
   margin-bottom: 14px;
 }
+
+/* ==========================================================================
+   Sentence rewrite redesign (spec 006) — rw-* classes, scoped to the rewrite
+   panel. Values from design.md and the mockup sources; tokens from
+   styles/tokens.css (which is frozen). The three tokenless design colours
+   (#14653F, #5C3F00, #F1D9A8) are commented class literals.
+   ========================================================================== */
+
+.rw-card {
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-xl);
+  box-shadow: var(--rd-shadow-1);
+  padding: 20px;
+}
+@media (min-width: 640px) {
+  .rw-card { padding: 28px; }
+}
+
+/* step tracker (FR-002) */
+.rw-steps {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--rd-fs-md);
+}
+.rw-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--rd-mute-500);
+}
+.rw-step .rw-step-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--rd-r-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border: 1px solid var(--rd-border-200);
+  color: var(--rd-mute-500);
+}
+.rw-step.current { color: var(--rd-blue-700); font-weight: 600; }
+.rw-step.current .rw-step-dot { background: var(--rd-blue-500); border-color: var(--rd-blue-500); color: var(--rd-white); }
+.rw-step.done { color: var(--rd-ink-700); }
+.rw-step.done .rw-step-dot { background: var(--rd-success-50); border-color: transparent; color: var(--rd-success-500); }
+.rw-step-rule { width: 28px; height: 1px; background: var(--rd-border-200); }
+
+/* plain English block (FR-003) */
+.rw-plain {
+  background: var(--rd-surface-50);
+  border-radius: var(--rd-r-lg);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.rw-plain-label {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rd-mute-600);
+}
+.rw-plain-text {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--rd-ink-700);
+}
+
+/* writing / retry box (FR-004, FR-017) */
+.rw-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px 18px;
+  font: 400 18px/1.5 var(--rd-font-sans);
+  color: var(--rd-ink-900);
+  border: 1.5px solid var(--rd-blue-500);
+  border-radius: var(--rd-r-lg);
+  outline: none;
+  box-shadow: 0 0 0 4px var(--rd-blue-100);
+  resize: vertical;
+  margin-bottom: 14px;
+}
+
+/* word meter (FR-005) */
+.rw-meter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rw-meter-bar {
+  width: 120px;
+  height: 6px;
+  border-radius: var(--rd-r-pill);
+  background: var(--rd-surface-200);
+  overflow: hidden;
+}
+.rw-meter-fill {
+  height: 6px;
+  background: var(--rd-success-500);
+}
+.rw-meter-fill.over { background: var(--rd-warn-500); }
+.rw-meter-count {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-md);
+  color: var(--rd-ink-700);
+}
+.rw-meter-count.over { color: var(--rd-warn-500); }
+
+/* 48 px primary buttons (mockup; FR-042) */
+.rw-btn {
+  height: 48px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 10px;
+  background: var(--rd-blue-500);
+  color: var(--rd-white);
+  font: 600 16px var(--rd-font-sans);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.rw-btn:hover { background: var(--rd-blue-600); }
+.rw-btn:disabled {
+  background: var(--rd-blue-100);
+  color: var(--rd-blue-700);
+  cursor: default;
+}
+
+/* locked sentence block (FR-007, FR-018) */
+.rw-locked {
+  border: 1.5px solid var(--rd-blue-100);
+  background: var(--rd-white);
+  border-radius: var(--rd-r-lg);
+  overflow: hidden;
+}
+.rw-locked-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 18px 0;
+}
+.rw-locked-label {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--rd-ink-700);
+}
+.rw-locked-count {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-md);
+  color: var(--rd-mute-600);
+}
+.rw-locked-text {
+  margin: 0;
+  padding: 12px 18px 18px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--rd-ink-900);
+}
+
+/* indeterminate progress bar (FR-008) */
+.rw-progress {
+  height: 3px;
+  background: var(--rd-blue-50);
+  overflow: hidden;
+}
+.rw-progress-fill {
+  height: 3px;
+  background: var(--rd-blue-500);
+  animation: rw-slide 1.2s ease-in-out infinite;
+}
+.rw-progress-static {
+  height: 3px;
+  background: var(--rd-blue-500);
+  width: 50%;
+}
+@keyframes rw-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* marking status list (FR-008, FR-009) */
+.rw-status {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 2px;
+}
+.rw-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--rd-ink-700);
+}
+.rw-status-row.active { color: var(--rd-ink-900); font-weight: 600; }
+.rw-status-row.pending { color: var(--rd-mute-500); }
+.rw-spinner {
+  animation: rw-spin 0.9s linear infinite;
+}
+@keyframes rw-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* credited-term highlight (FR-014, FR-026, FR-039) */
+.rw-credit {
+  background: var(--rd-success-50);
+  color: #14653F; /* design success-700; no token (tokens.css frozen) */
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* hint cards (FR-015, FR-016) */
+.rw-hint-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+.rw-hint-card {
+  border: 1px solid #F1D9A8; /* design warn border; no token */
+  background: var(--rd-warn-50);
+  border-radius: var(--rd-r-lg);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rw-hint-term {
+  font-family: var(--rd-font-display);
+  font-weight: 700;
+  font-size: var(--rd-fs-xl);
+  color: var(--rd-ink-900);
+}
+.rw-hint-def {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--rd-ink-700);
+}
+
+/* result summary (FR-024, FR-025) */
+.rw-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 24px;
+  border-radius: var(--rd-r-lg);
+  background: var(--rd-success-50);
+}
+.rw-summary.plain { background: var(--rd-surface-50); }
+.rw-summary-mark {
+  font-family: var(--rd-font-display);
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1;
+  color: #14653F; /* design success-700; no token */
+}
+.rw-summary.plain .rw-summary-mark { color: var(--rd-ink-900); }
+.rw-summary-denom { font-size: 20px; color: var(--rd-ink-700); }
+.rw-summary-line1 { font-size: 18px; font-weight: 600; color: var(--rd-ink-900); }
+.rw-summary-line2 { font-size: 15px; line-height: 1.5; color: var(--rd-ink-700); }
+
+/* sentence comparison (FR-026, FR-027) */
+.rw-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+.rw-compare-card {
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-lg);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rw-compare-card.model {
+  border-color: var(--rd-blue-100);
+  background: var(--rd-blue-50);
+}
+.rw-compare-label {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rd-mute-600);
+}
+.rw-compare-card.model .rw-compare-label { color: var(--rd-blue-700); }
+.rw-compare-text {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--rd-ink-900);
+}
+.rw-compare-text .rw-model-term { color: var(--rd-blue-700); font-weight: 700; }
+.rw-compare-note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--rd-mute-600);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rw-misspell {
+  text-decoration: underline wavy var(--rd-danger-500);
+  text-underline-offset: 3px;
+}
+
+/* term table (FR-028) */
+.rw-term-table {
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-lg);
+  overflow: hidden;
+}
+.rw-term-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: flex-start;
+  padding: 16px 20px;
+  border-top: 1px solid var(--rd-border-100);
+}
+.rw-term-row:first-child { border-top: none; }
+.rw-term-left { flex: 1 1 220px; min-width: 0; }
+.rw-term-name {
+  font-family: var(--rd-font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--rd-ink-900);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.rw-term-why {
+  font-size: 13px;
+  color: var(--rd-mute-600);
+}
+.rw-term-def { flex: 2 1 260px; min-width: 0; font-size: 15px; line-height: 1.5; color: var(--rd-ink-700); }
+.rw-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--rd-r-pill);
+  white-space: nowrap;
+}
+.rw-pill.first-try { color: #14653F; background: var(--rd-success-50); }
+.rw-pill.added { color: var(--rd-blue-700); background: var(--rd-blue-50); }
+.rw-pill.not-used { color: var(--rd-ink-700); background: var(--rd-surface-100); }
+
+/* collapsed first try (FR-019, FR-029, FR-042) */
+.rw-collapsed {
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-lg);
+}
+.rw-collapsed summary {
+  cursor: pointer;
+  padding: 14px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  min-height: 44px;
+  box-sizing: border-box;
+  list-style: none;
+}
+.rw-collapsed summary::-webkit-details-marker { display: none; }
+.rw-collapsed-label {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rd-mute-600);
+}
+.rw-collapsed-mark { font-weight: 600; color: var(--rd-blue-700); }
+.rw-collapsed-text {
+  flex: 1 1 300px;
+  color: var(--rd-mute-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* self-mark checkboxes: ≥ 44 px hit areas (FR-037, FR-042) */
+.rw-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--rd-ink-700);
+}
+.rw-check input { width: 20px; height: 20px; }
+
+/* reduced motion (FR-041): no sliding bar or spinning; static equivalents are rendered by the
+   component (rw-progress-static / a static ring) and the animations are off as a backstop. */
+@media (prefers-reduced-motion: reduce) {
+  .rw-progress-fill { animation: none; }
+  .rw-spinner { animation: none; }
+}
+
+/* writing state header (FR-004) */
+.rw-writing-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rw-writing-title { font-size: 16px; font-weight: 600; color: var(--rd-ink-900); }
+.rw-writing-help { font-size: 14px; color: var(--rd-mute-600); }
+
+/* the retry info line under a divider (FR-006) */
+.rw-divider {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rd-surface-200);
+  font-size: 14px;
+  color: var(--rd-mute-600);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* first-try result (FR-013, FR-014) */
+.rw-first-try {
+  border: 1px solid var(--rd-border-100);
+  border-radius: var(--rd-r-lg);
+  overflow: hidden;
+}
+.rw-first-try-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 20px;
+  background: var(--rd-white);
+}
+.rw-first-try-score { display: flex; flex-direction: column; gap: 6px; min-width: 96px; }
+.rw-first-try-label {
+  font-family: var(--rd-font-mono);
+  font-size: var(--rd-fs-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rd-mute-600);
+}
+.rw-first-try-mark { display: flex; align-items: baseline; gap: 4px; }
+.rw-first-try-num {
+  font-family: var(--rd-font-display);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--rd-blue-700);
+}
+.rw-first-try-denom { font-size: 18px; color: var(--rd-mute-600); }
+.rw-first-try-feedback { margin: 0; flex: 1 1 320px; font-size: 16px; line-height: 1.55; color: var(--rd-ink-700); }
+.rw-first-try-sentence {
+  padding: 16px 20px;
+  background: var(--rd-surface-50);
+  border-top: 1px solid var(--rd-surface-200);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rw-first-try-sub { font-size: 13px; color: var(--rd-mute-600); }
+.rw-first-try-text { margin: 0; font-size: 17px; line-height: 1.6; color: var(--rd-ink-700); }
+
+/* hint heading (FR-015, FR-016) */
+.rw-hint-heading { margin: 0 0 12px; font-size: 16px; font-weight: 600; color: var(--rd-ink-900); }
+
+/* retry box (FR-017) */
+.rw-retry-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rw-retry-label { font-size: 16px; font-weight: 600; color: var(--rd-ink-900); }
+.rw-retry-help { font-size: 14px; color: var(--rd-mute-600); }
+.rw-retry-note {
+  font-size: 14px;
+  color: var(--rd-mute-600);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* marking footers (FR-010, FR-021) */
+.rw-marking-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rd-surface-200);
+}
+.rw-marking-note { font-size: 14px; color: var(--rd-mute-600); }
+
+/* result footer (FR-030) */
+.rw-result-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rd-surface-200);
+}
+.rw-result-footer-line { font-size: 14px; color: var(--rd-mute-600); }
+
+/* visually hidden text for the live region's announced label (FR-009) */
+.rw-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* the model sentence's bold terms (FR-026): a <mark> without the default highlight */
+.rw-compare-text .rw-model-term {
+  background: none;
+  color: var(--rd-blue-700);
+  font-weight: 700;
+}

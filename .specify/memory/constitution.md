@@ -1,5 +1,19 @@
 <!--
 Sync Impact Report
+- Version change: 2.12.0 → 2.13.0 (MINOR: materially expanded guidance in Principle II to allow the sentence-writing unit's display-only grading data and per-phase drafts to be stored with the attempt).
+- Reason (amendment log): the sentence-rewrite redesign (spec 006) shows the student the credited terms highlighted in their own sentence, the phase 2 term outcomes as status pills and an optional language note, and restores what the student had typed on resume from another device; the 2026-11-03 clarification requires the display-only grading data (credited spans for each phase, phase 2 term outcomes, language note) and the student's in-progress draft text for each phase to be saved with the attempt so a resumed or reloaded question shows the full result and restores the typed text. The data stays display only and never changes marks or concept tracking, which always come from the phase 1 outcomes.
+- Modified principles:
+  - II. Signed-In Students, Minimal Personal Data: per writing-practice question in an attempt, the phase row may also hold the display-only grading data (credited spans for each phase, the phase 2 term outcomes and any language note), and a draft row may hold the student's in-progress draft text for each phase; both are deleted with the student like results.
+- Added sections: none
+- Removed sections: none
+- Quality Gates: unchanged.
+- Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ no change needed
+  - .specify/templates/spec-template.md ✅ no change needed
+  - .specify/templates/tasks-template.md ✅ no change needed
+  - specs/006-sentence-rewrite-redesign/{spec,plan,research,data-model,contracts,quickstart,tasks} ✅ created with the amendment in mind
+  - specs/005-economics-sentence-writing/* ✅ unaffected
+- Follow-up TODOs: none.
 - Version change: 2.11.0 → 2.12.0 (MINOR: materially expanded guidance in Principles I and II to allow the sentence-writing unit's scoped hint/discussion release and its phase row).
 - Reason (amendment log): the sentence-writing unit (spec 005) teaches students to rewrite plain-English sentences in economics language. After phase 1 is graded below 3 marks the student needs the missed terms' definitions (the hint) to retry, and at the discussion they need the model sentence and every term's definition; the phase 1 and phase 2 sentences, marks, per-term outcomes and feedback must be stored so an attempt can be resumed on another device and the attempt detail page can show both sentences and both marks.
 - Modified principles:
@@ -113,8 +127,12 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     shown to the student. Model answers and rubric text MUST NOT be stored per result
     (Principle I);
   - per writing-practice question in an attempt: the phase 1 and phase 2 sentences, their marks,
-    the per-term outcomes from phase 1, and the feedback shown, stored in a phase row until the
-    question is final and kept for the attempt detail page; deleted with the student like results.
+    the per-term outcomes from phase 1, and the feedback shown, plus the display-only grading data
+    (the credited spans for each phase, the phase 2 term outcomes and any language note), stored in
+    a phase row until the question is final and kept for the attempt detail page; and the student's
+    in-progress draft text for each phase, stored in a draft row only until the question is final;
+    all deleted with the student like results. The display data and drafts never change marks or
+    concept tracking, which always come from the phase 1 outcomes.
   It MUST NOT store profile photos, Google tokens beyond what the session needs, or any other
   personal data without amending this constitution. Photos for transcription are never stored or logged;
   only the transcription (the "answer submitted") is stored. Answer photos are sent to an AI provider
@@ -380,4 +398,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.12.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-02
+**Version**: 2.13.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-03

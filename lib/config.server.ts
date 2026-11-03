@@ -9,6 +9,8 @@ export interface AppConfig {
   gradeIpRateLimit: number;
   /** New attempts per user per minute. */
   attemptRateLimit: number;
+  /** Rewrite draft saves per user per minute (spec 006; never AI-graded, never the grading limits). */
+  draftRateLimit: number;
   /** Concept-generation model calls per Sydney day, across all students. 0 turns generation off. */
   conceptDailyCap: number;
   /** Concept "ensure" requests per student per minute. */
@@ -40,6 +42,7 @@ export function getConfig(
     gradeRateLimit: intOr(env.GRADE_RATE_LIMIT, 20, 1),
     gradeIpRateLimit: intOr(env.GRADE_IP_RATE_LIMIT, 150, 1),
     attemptRateLimit: intOr(env.ATTEMPT_RATE_LIMIT, 20, 1),
+    draftRateLimit: intOr(env.DRAFT_RATE_LIMIT, 30, 1),
     conceptDailyCap: intOr(env.CONCEPT_DAILY_CAP, 100, 0),
     conceptRateLimit: intOr(env.CONCEPT_RATE_LIMIT, 10, 1),
   };

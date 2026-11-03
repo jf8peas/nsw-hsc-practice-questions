@@ -3,7 +3,7 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 
 import type { Db } from "@/lib/db/index.server";
-import { rewritePhases, type NewRewritePhaseRow, type RewritePhaseRow } from "@/lib/db/schema";
+import { rewritePhases, type NewRewritePhaseRow, type RewriteDisplayData, type RewritePhaseRow } from "@/lib/db/schema";
 
 /**
  * Phase-row queries for the sentence-writing unit (spec 005). One row per question in a
@@ -79,6 +79,8 @@ export async function finaliseRewritePhase(
     phase2Marks: number;
     phase2Feedback: string | null;
     recordedMark: number;
+    /** spec 006: the display-only phase 2 data (spans, outcomes, language note). */
+    displayData?: RewriteDisplayData | null;
   },
 ): Promise<RewritePhaseRow | null> {
   const rows = await db
@@ -90,6 +92,7 @@ export async function finaliseRewritePhase(
       phase2Feedback: input.phase2Feedback,
       phase2GradedAt: new Date(),
       recordedMark: input.recordedMark,
+      ...(input.displayData !== undefined ? { displayData: input.displayData } : {}),
       updatedAt: new Date(),
     })
     .where(

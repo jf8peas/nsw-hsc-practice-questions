@@ -62,10 +62,22 @@ export interface RewriteHint {
 /** The discussion: shown only after the last phase (or on the self-mark screen). */
 export interface RewriteDiscussion {
   modelSentences: string[];
-  terms: Array<RewriteTermView & { why: string }>;
+  terms: Array<RewriteTermView & { why: string; conceptId: string }>;
 }
 
-/** The grade result for a rewrite question (spec 005). */
+/** A credited span: the exact words in the student's sentence the grader credited for one term. */
+export interface RewriteCreditedSpan {
+  conceptId: string; // the target term's concept id
+  span: string; // validated: found in the sentence (case-insensitive, whitespace-normalised)
+}
+
+/** The optional language note for the final sentence (spec 006 FR-027, FR-034). */
+export interface RewriteLanguageNote {
+  spelling?: Array<{ wrong: string; fix: string }>; // ≤ 3 pairs, each string ≤ 60 chars
+  grammar?: string; // one short note, ≤ 200 chars
+}
+
+/** The grade result for a rewrite question (spec 005, extended by spec 006). */
 export interface RewriteGradeResult {
   questionId: string;
   type: "rewrite";
@@ -80,6 +92,15 @@ export interface RewriteGradeResult {
   hint?: RewriteHint;
   /** Phase 1 at 3/3, or phase 2, or the self-mark screen. */
   discussion?: RewriteDiscussion;
+  /**
+   * Phase 1 or 2: the credited-and-found spans only (spec 006 FR-031, FR-032). Phase 1 spans
+   * appear only with the phase 1 grade; a phase 1 span never names a term the student did not use.
+   */
+  creditedSpans?: RewriteCreditedSpan[];
+  /** Phase 2 only: which terms the retry used correctly. Display only (FR-033). */
+  phase2TermOutcomes?: Array<{ conceptId: string; correct: boolean }>;
+  /** Final phase only (phase 2, or phase 1 at 3/3): the optional language note (FR-034). */
+  languageNote?: RewriteLanguageNote;
   needsSelfMark: boolean;
 }
 

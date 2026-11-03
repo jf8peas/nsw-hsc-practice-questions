@@ -73,6 +73,47 @@ export function loadRewriteDraft(
   return typeof v === "string" ? v : "";
 }
 
+// ---- the rewrite draft beacon (spec 006 FR-053) ---------------------------
+
+const lastSentDraft = new Map<string, string>();
+
+/**
+ * Fire-and-forget save of one phase's draft to POST /api/rewrite/draft via sendBeacon, on blur /
+ * page hide / visibility change, so a resume on another device restores what the student had
+ * typed. The attempt token comes from the attempt payload (or is passed in). A beacon is skipped
+ * when the text equals the last text already sent for that box. Never throws: a dropped beacon is
+ * fine because sessionStorage holds the same text for the same tab (research R5.2).
+ */
+export function sendRewriteDraftBeacon(
+  attemptId: string,
+  questionId: string,
+  phase: 1 | 2,
+  text: string,
+  token?: string,
+): void {
+  try {
+    if (typeof navigator === "undefined" || typeof navigator.sendBeacon !== "function") return;
+    const key = `${attemptId}:${questionId}:${phase}`;
+    if (lastSentDraft.get(key) === text) return;
+    // skip an empty draft for a phase that has never been saved (no row should be created for a
+    // box the student never touched); a cleared box that was previously saved still sends "" to
+    // clear the column.
+    if (text === "" && !lastSentDraft.has(key)) return;
+    const attemptToken = token ?? loadAttemptPayload(attemptId)?.attemptToken ?? "";
+    if (!attemptToken) return;
+    const body = JSON.stringify({ attemptId, attemptToken, questionId, phase, draft: text });
+    // sendBeacon with a string body sends text/plain; a Blob of type application/json keeps the
+    // route's req.json() parseable.
+    const ok = navigator.sendBeacon(
+      "/api/rewrite/draft",
+      new Blob([body], { type: "application/json" }),
+    );
+    if (ok) lastSentDraft.set(key, text);
+  } catch {
+    // ignore: the draft is only a convenience
+  }
+}
+
 // ---- the typed answer ---------------------------------------------------
 
 export const draftKey = (attemptId: string, questionId: string) =>
@@ -215,16 +256,26 @@ export interface AttemptPayload {
   rewriteState?: Record<
     string,
     {
-      phase: "phase1" | "phase2" | "final";
-      phase1Answer: string;
+      phase: "phase1" | "phase2" | "final" | "draft";
+      /** Absent for a draft-only entry (no phase row yet, phase 1 not graded). */
+      phase1Answer?: string;
       phase1Marks?: number;
       phase1Feedback?: string;
+      phase1TermOutcomes?: Array<{ conceptId: string; correct: boolean }>;
+      /** spec 006: the persisted display data restores the full result (FR-054). */
+      phase1CreditedSpans?: Array<{ conceptId: string; span: string }>;
       phase2Answer?: string;
       phase2Marks?: number;
       phase2Feedback?: string;
+      phase2CreditedSpans?: Array<{ conceptId: string; span: string }>;
+      phase2TermOutcomes?: Array<{ conceptId: string; correct: boolean }>;
+      languageNote?: { spelling?: Array<{ wrong: string; fix: string }>; grammar?: string };
       marks?: number;
       hint?: RewriteHint;
       discussion?: RewriteDiscussion;
+      /** spec 006: the persisted per-phase drafts (FR-053). */
+      phase1Draft?: string;
+      phase2Draft?: string;
     }
   >;
 }
