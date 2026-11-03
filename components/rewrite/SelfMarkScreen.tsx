@@ -38,7 +38,7 @@ export function SelfMarkScreen({
   return (
     <div className="rw-selfmark">
       <LockedSentence label="Your sentence" sentence={sentence} wordCount={wordCount} />
-      <div className="rw-compare-card model" style={{ marginTop: 12 }}>
+      <div className="rw-compare-card model">
         <span className="rw-compare-label">Model sentence</span>
         {discussion.modelSentences.map((s, i) => (
           <p key={i} className="rw-compare-text">
@@ -65,7 +65,7 @@ export function SelfMarkScreen({
         />
         (c) The sentence is concise (25 words or fewer, no padding).
       </label>
-      <button type="button" className="rw-btn" style={{ marginTop: 10 }} onClick={onSave} disabled={busy}>
+      <button type="button" className="rw-btn" onClick={onSave} disabled={busy}>
         {busy ? "Saving…" : "Save my mark"}
       </button>
     </div>

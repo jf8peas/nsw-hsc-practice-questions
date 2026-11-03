@@ -361,50 +361,52 @@ export function RewritePanel({
         <>
           <RewriteStepTracker />
           <PlainEnglishBlock sentence={prompt} />
-          <div className="rw-writing-head">
-            <label className="rw-writing-title" htmlFor="rw-write">
-              Rewrite it in economics language
-            </label>
-            <span className="rw-writing-help">Use the precise terms an HSC marker looks for</span>
-          </div>
-          <textarea
-            id="rw-write"
-            className="rw-textarea"
-            value={text1}
-            onChange={(e) => {
-              setText1(e.target.value);
-              saveRewriteDraft(attemptId, questionId, 1, e.target.value);
-            }}
-            onBlur={() => sendRewriteDraftBeacon(attemptId, questionId, 1, text1Ref.current)}
-            placeholder="Write your sentence here…"
-            rows={3}
-          />
-          <div className="answer-bar">
-            <div className="rw-meter">
-              <div className="rw-meter-bar" aria-hidden="true">
-                <div
-                  className={`rw-meter-fill${countWords(text1) > WORD_LIMIT ? " over" : ""}`}
-                  style={{ width: `${Math.min(100, (countWords(text1) / WORD_LIMIT) * 100)}%` }}
-                />
-              </div>
-              <span className={`rw-meter-count${countWords(text1) > WORD_LIMIT ? " over" : ""}`}>
-                {countWords(text1)} / {WORD_LIMIT} words
-                {countWords(text1) > WORD_LIMIT ? " · over the limit — you lose the conciseness mark" : ""}
-              </span>
+          <div className="rw-field">
+            <div className="rw-writing-head">
+              <label className="rw-writing-title" htmlFor="rw-write">
+                Rewrite it in economics language
+              </label>
+              <span className="rw-writing-help">Use the precise terms an HSC marker looks for</span>
             </div>
-            <button
-              type="button"
-              className="rw-btn"
-              onClick={() => {
-                if (!text1.trim() || busy) return;
-                setSubmittingPhase(1);
-                onGrade(1, text1.trim());
+            <textarea
+              id="rw-write"
+              className="rw-textarea"
+              value={text1}
+              onChange={(e) => {
+                setText1(e.target.value);
+                saveRewriteDraft(attemptId, questionId, 1, e.target.value);
               }}
-              disabled={busy || !text1.trim()}
-            >
-              {busy ? "Marking…" : "Submit for marking"}
-              <ArrowIcon />
-            </button>
+              onBlur={() => sendRewriteDraftBeacon(attemptId, questionId, 1, text1Ref.current)}
+              placeholder="Write your sentence here…"
+              rows={3}
+            />
+            <div className="answer-bar">
+              <div className="rw-meter">
+                <div className="rw-meter-bar" aria-hidden="true">
+                  <div
+                    className={`rw-meter-fill${countWords(text1) > WORD_LIMIT ? " over" : ""}`}
+                    style={{ width: `${Math.min(100, (countWords(text1) / WORD_LIMIT) * 100)}%` }}
+                  />
+                </div>
+                <span className={`rw-meter-count${countWords(text1) > WORD_LIMIT ? " over" : ""}`}>
+                  {countWords(text1)} / {WORD_LIMIT} words
+                  {countWords(text1) > WORD_LIMIT ? " · over the limit — you lose the conciseness mark" : ""}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="rw-btn"
+                onClick={() => {
+                  if (!text1.trim() || busy) return;
+                  setSubmittingPhase(1);
+                  onGrade(1, text1.trim());
+                }}
+                disabled={busy || !text1.trim()}
+              >
+                {busy ? "Marking…" : "Submit for marking"}
+                <ArrowIcon />
+              </button>
+            </div>
           </div>
           <p className="rw-divider">
             <InfoIcon />

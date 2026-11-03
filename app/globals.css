@@ -1820,14 +1820,23 @@ input {
    (#14653F, #5C3F00, #F1D9A8) are commented class literals.
    ========================================================================== */
 
+/* one vertical rhythm for the whole panel: 24 px between sections; tighter spacing lives
+   inside each section (label → box 8 px, box → bar 12 px, heading → cards 12 px) */
 .rw-card {
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.rw-field {
+  display: flex;
+  flex-direction: column;
 }
 
 /* step tracker (FR-002) */
 .rw-steps {
   list-style: none;
-  margin: 0 0 20px;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
@@ -1866,7 +1875,6 @@ input {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
 }
 .rw-plain-label {
   font-family: var(--rd-font-mono);
@@ -1894,7 +1902,7 @@ input {
   border-radius: var(--rd-r-md);
   outline: none;
   resize: vertical;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 /* word meter (FR-005) */
@@ -2228,6 +2236,7 @@ input {
 
 /* writing state header (FR-004) */
 .rw-writing-head {
+  margin-bottom: 8px;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -2297,6 +2306,7 @@ input {
 
 /* retry box (FR-017) */
 .rw-retry-head {
+  margin-bottom: 8px;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -2355,4 +2365,11 @@ input {
   background: none;
   color: var(--rd-blue-700);
   font-weight: 700;
+}
+
+/* self-mark screen: same section rhythm, a little tighter inside its own block */
+.rw-selfmark {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
