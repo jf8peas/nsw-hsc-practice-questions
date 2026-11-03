@@ -12,6 +12,7 @@ import type {
   RewriteHint,
 } from "@/lib/grading";
 import { gradeRewrite, gradeShortAnswer } from "@/lib/openrouter.server";
+import { rewriteScore } from "@/lib/rewrite-scoring";
 import type { Answer } from "@/lib/types";
 import { countWords } from "@/lib/wordcount";
 
@@ -336,13 +337,20 @@ export async function gradeRewriteAnswer(
     };
   }
 
-  // code computes the criteria and marks (research R4)
+  // code computes the marks from the per-term status and criteria A/C (research R4; 2026-11-03 fix)
   const criterionA = llm.criterionA;
   const criterionC = wordCount <= REWRITE_WORD_LIMIT && !llm.padding;
   const byTerm = new Map(llm.terms.map((t) => [t.term, t]));
-  const criterionB = key.targetTerms.every((t) => byTerm.get(t.term)?.status === "used");
-  const marks = (criterionA ? 1 : 0) + (criterionB ? 1 : 0) + (criterionC ? 1 : 0);
-  const capped = phase === 2 ? Math.min(marks, 2) : marks;
+  const termCount = key.targetTerms.length;
+  const termsUsed = key.targetTerms.filter((t) => byTerm.get(t.term)?.status === "used").length;
+  const marksAwarded = rewriteScore({
+    totalMarks: question.maxMarks,
+    termCount,
+    termsUsed,
+    criterionA,
+    criterionC,
+    phase,
+  });
 
   // spec 006 FR-031/FR-032: a credited span is kept only when its term was credited AND the span
   // is found in the student's sentence (case-insensitive, whitespace-normalised substring match).
@@ -373,11 +381,11 @@ export async function gradeRewriteAnswer(
 
   // spec 006 FR-034: the language note applies to the final sentence only (phase 2, or phase 1 at
   // 3/3). It is already validated by parseRewriteJson; absent → nothing shown.
-  const languageNote = phase === 2 || capped === 3 ? llm.languageNote : undefined;
+  const languageNote = phase === 2 || marksAwarded === question.maxMarks ? llm.languageNote : undefined;
 
   const result: RewriteGradeResult = {
     ...base,
-    marksAwarded: capped,
+    marksAwarded,
     feedback: llm.feedback,
     termOutcomes: key.targetTerms.map((t) => ({
       conceptId: t.conceptId,
@@ -388,7 +396,7 @@ export async function gradeRewriteAnswer(
     ...(languageNote ? { languageNote } : {}),
   };
 
-  if (phase === 1 && capped < 3) {
+  if (phase === 1 && marksAwarded < question.maxMarks) {
     const missed = key.targetTerms.filter((t) => byTerm.get(t.term)?.status !== "used");
     if (missed.length > 0) {
       result.hint = { terms: missed.map((t) => ({ term: t.term, definition: t.definition })) };
@@ -404,7 +412,7 @@ export async function gradeRewriteAnswer(
     }
   }
 
-  if (phase === 2 || (phase === 1 && capped === 3)) {
+  if (phase === 2 || (phase === 1 && marksAwarded === question.maxMarks)) {
     result.discussion = buildRewriteDiscussion(key);
   }
 

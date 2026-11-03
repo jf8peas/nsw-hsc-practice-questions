@@ -196,25 +196,30 @@ export function RewritePanel({
   const announced = markingStep >= 1 ? markingSteps[1].label : markingSteps[0].label;
 
   // ---- result data (FR-024 to FR-028) ------------------------------------------------------
+  const maxMarks = phase1Result?.maxMarks ?? 3;
   const recordedMark = phase2Result
     ? Math.max(phase1Marks ?? 0, phase2Marks ?? 0)
     : (phase1Marks ?? 0);
-  const termCount = discussion?.terms.length ?? 0;
+  const firstTry = phase1Marks ?? 0;
+  const retryDone = phase2Submitted;
+  const gain = recordedMark - firstTry;
+  // the retry advice depends on what the phase 1 hint said was wrong: missed terms, or a lost
+  // criterion (meaning / length) with every term already used
+  const missedTerms = (phase1Result?.hint?.terms?.length ?? 0) > 0;
+  const retryAdvice = missedTerms
+    ? `Use every term on the first try next time for the full ${maxMarks}.`
+    : `Get every term, the meaning and the length right on the first try for the full ${maxMarks}.`;
   let line1 = "";
   let line2 = "";
-  if (phase1Marks === 3) {
+  if (firstTry === maxMarks) {
     line1 = "Full marks on your first try.";
     line2 = phase1Result?.feedback ?? "";
-  } else if (phase2Marks === 2) {
-    const used = termCount === 1 ? "the term used" : termCount === 2 ? "both terms used" : "all three terms used";
-    line1 = `Full marks for a retry — ${used}.`;
-    line2 = "A retry can earn at most 2. Use every term on the first try next time for the full 3.";
-  } else if (phase2Marks !== undefined && phase2Marks >= (phase1Marks ?? 0)) {
+  } else if (retryDone) {
     line1 = phase2Result?.feedback ?? "";
-    line2 = "A retry can earn at most 2.";
-  } else if (phase2Marks !== undefined && (phase1Marks ?? 0) > phase2Marks) {
-    line1 = phase2Result?.feedback ?? "";
-    line2 = `Your recorded mark is ${phase1Marks} / 3 (your better try).`;
+    line2 =
+      gain > 0
+        ? `A retry can earn at most ${maxMarks - 1}. ${retryAdvice}`
+        : `Your retry didn't improve your mark — it stays at ${recordedMark} / ${maxMarks}.`;
   }
 
   const finalLabel: "YOUR RETRY" | "YOUR SENTENCE" = phase2Submitted ? "YOUR RETRY" : "YOUR SENTENCE";
@@ -300,7 +305,7 @@ export function RewritePanel({
       ) : atResult ? (
         <>
           <RewriteStepTracker phase1Marks={phase1Marks} phase2Marks={phase2Marks} />
-          <OutcomeSummary recordedMark={recordedMark} line1={line1} line2={line2} />
+          <OutcomeSummary firstTry={firstTry} final={recordedMark} retryDone={retryDone} maxMarks={maxMarks} line1={line1} line2={line2} />
           <SentenceComparison
             finalLabel={finalLabel}
             finalSentence={finalSentence}

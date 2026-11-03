@@ -46,10 +46,10 @@ describe("gradeRewriteAnswer (spec 005)", () => {
     expect(out?.result.termOutcomes.every((o) => o.correct)).toBe(true);
   });
 
-  it("criterion (b) is all or nothing: one missing term loses the term mark even when the rest are used", async () => {
+  it("one missing term out of three scores 1 mark (a non-perfect first try is capped below the retry cap)", async () => {
     llmReply({ terms: allBut("tariff") });
     const out = await gradeRewriteAnswer(QID, "Imports became dearer and consumers bought more from domestic producers.", 1);
-    expect(out?.result.marksAwarded).toBe(2); // A + C, no B
+    expect(out?.result.marksAwarded).toBe(1); // 2 of 3 terms used, but capped at retryCap - 1
     expect(out?.result.termOutcomes.some((o) => !o.correct)).toBe(true);
   });
 
@@ -61,10 +61,10 @@ describe("gradeRewriteAnswer (spec 005)", () => {
   });
 
   it("phase 2 is capped at 2 marks and the recorded mark keeps the best of the two (FR-019)", async () => {
-    // Phase 1 scores 2 (one term missing), phase 2 would score 3 but is capped at 2.
+    // Phase 1 scores 1 (one term missing), phase 2 would score 3 but is capped at 2.
     llmReply({ terms: allBut("domestic producers") });
     const p1 = await gradeRewriteAnswer(QID, "A tariff makes imports dearer but buyers did not switch.", 1);
-    expect(p1?.result.marksAwarded).toBe(2);
+    expect(p1?.result.marksAwarded).toBe(1);
     expect(p1?.result.hint?.terms.length).toBe(1);
 
     llmReply(); // all terms used now
@@ -72,20 +72,28 @@ describe("gradeRewriteAnswer (spec 005)", () => {
     expect(p2?.result.marksAwarded).toBe(2); // capped
   });
 
-  it("when every term is used but criterion (a) is lost, the hint names the lost criterion with no terms (FR-045)", async () => {
+  it("every term used but criterion (a) lost: 1 mark and a lost-criterion hint (FR-045)", async () => {
     llmReply({ criterionA: false });
     const out = await gradeRewriteAnswer(QID, "Tariffs, imports and domestic producers are all economics words.", 1);
-    expect(out?.result.marksAwarded).toBe(2); // B + C
-    expect(out?.result.hint?.terms).toEqual([]);
-    expect(out?.result.hint?.lostCriterion).toBe("a");
+    expect(out?.result.marksAwarded).toBe(1); // A lost costs one mark, capped below the retry cap
+    expect(out?.result.hint).toEqual({
+      terms: [],
+      lostCriterion: "a",
+      criterionText: "Keep the meaning and the cause and effect of the original sentence.",
+    });
   });
 
-  it("a rewrite over 25 words loses the conciseness mark even when the grader sees no padding", async () => {
+  it("a rewrite over 25 words loses criterion (c): 1 mark and a lost-criterion hint (FR-045)", async () => {
     llmReply();
     const long = "A tariff is a tax that makes imported goods and services more expensive, and because of that consumers end up buying more from the domestic producers who make things at home.";
     expect(long.split(/\s+/).length).toBeGreaterThan(25);
     const out = await gradeRewriteAnswer(QID, long, 1);
-    expect(out?.result.marksAwarded).toBe(2); // A + B, no C
+    expect(out?.result.marksAwarded).toBe(1); // C lost costs one mark, capped below the retry cap
+    expect(out?.result.hint).toEqual({
+      terms: [],
+      lostCriterion: "c",
+      criterionText: "Cut your sentence to 25 words or fewer.",
+    });
   });
 
   it("falls back to self-marking (needsSelfMark) when the grader is unavailable", async () => {

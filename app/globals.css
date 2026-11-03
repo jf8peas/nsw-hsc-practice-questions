@@ -2077,6 +2077,9 @@ input {
 }
 .rw-summary.plain .rw-summary-mark { color: var(--rd-ink-900); }
 .rw-summary-denom { font-size: 16px; color: var(--rd-ink-700); }
+.rw-summary-transition { font-size: 16px; font-weight: 600; color: var(--rd-ink-900); }
+.rw-summary-transition .rw-summary-mark { font-size: 16px; }
+.rw-summary-gain { font-weight: 500; color: var(--rd-ink-700); }
 .rw-summary-line1 { font-size: 14px; font-weight: 600; color: var(--rd-ink-900); }
 .rw-summary-line2 { font-size: 14px; line-height: 1.5; color: var(--rd-ink-700); }
 

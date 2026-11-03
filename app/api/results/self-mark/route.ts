@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { rewriteScore } from "@/lib/rewrite-scoring";
 import { getQuestion } from "@/content";
 import { resolveSession } from "@/lib/auth.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
   const found = getQuestion(questionId);
   if (!found) return bad("not_found", 404);
   if (found.question.type === "rewrite") {
-    return handleRewriteSelfMark(user, body, token, degraded);
+    return handleRewriteSelfMark(user, body, token, degraded, found.question.maxMarks);
   }
   if (found.question.type !== "short") return bad("not_short_question", 422);
 
@@ -121,13 +122,13 @@ async function handleRewriteSelfMark(
   body: Record<string, unknown>,
   token: AttemptTokenPayload,
   degraded: boolean,
+  maxMarks: number,
 ): Promise<NextResponse> {
   const attemptId = String(body.attemptId ?? "");
   const questionId = String(body.questionId ?? "");
   const answer = typeof body.answer === "string" ? body.answer.slice(0, MAX_ANSWER_LEN) : "";
-  const phase: 1 | 2 = body.phase === "2" ? 2 : 1;
-  const criterionA = body.criterionA === true;
-  const criterionC = body.criterionC === true;
+  // the client sends the phase as a number; accept the string form too
+  const phase: 1 | 2 = Number(body.phase) === 2 ? 2 : 1;
   const rawTicks = body.termTicks && typeof body.termTicks === "object" ? (body.termTicks as Record<string, unknown>) : {};
   const termTicks: Record<string, boolean> = {};
   for (const [id, v] of Object.entries(rawTicks)) if (typeof v === "boolean") termTicks[id] = v;
@@ -139,9 +140,13 @@ async function handleRewriteSelfMark(
     if (!termIds.includes(id)) return bad("invalid_token");
   }
 
-  const criterionB = termIds.length > 0 ? termIds.every((id) => termTicks[id] === true) : false;
-  const raw = (criterionA ? 1 : 0) + (criterionB ? 1 : 0) + (criterionC ? 1 : 0);
-  const marks = phase === 2 ? Math.min(raw, 2) : raw;
+  // rubric (2026-11-03 fix): each term ticked contributes, criteria A/C each cost one mark when
+  // lost, a retry is capped at totalMarks - 1, and a non-perfect first try is capped below that
+  const criterionA = body.criterionA === true;
+  const criterionC = body.criterionC === true;
+  const termCount = termIds.length;
+  const termsUsed = termIds.filter((id) => termTicks[id] === true).length;
+  const marks = rewriteScore({ totalMarks: maxMarks, termCount, termsUsed, criterionA, criterionC, phase });
   const conceptOutcomes = termIds.map((id) => ({ conceptId: id, correct: termTicks[id] === true }));
 
   if (!degraded) {

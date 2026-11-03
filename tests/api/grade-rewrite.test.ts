@@ -12,6 +12,7 @@ import { getAnswer } from "@/content/answers";
 import { conceptProgress } from "@/lib/concepts/progress";
 import { dailyAiUsage, results, rewritePhases } from "@/lib/db/schema";
 import type { RewriteGrade } from "@/lib/openrouter.server";
+import { rewriteScore } from "@/lib/rewrite-scoring";
 import type { Question } from "@/lib/types";
 
 import { setupTestEnv, type TestEnv } from "../helpers/env";
@@ -156,13 +157,14 @@ describe("rewrite phase 1", () => {
     const key = getAnswer(q.id)!;
     const missed = key.targetTerms![0];
     env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q, { terms: { [missed.term]: "missing" } }));
+    const expected = 1; // a non-perfect first try is capped at retryCap - 1 = 1
 
     const { status, body } = await grade(started, q.id, "A sentence that misses one term.");
     expect(status).toBe(200);
     expect(body.saved).toBe(false);
     expect(body.phaseSaved).toBe(true);
     expect(body.attemptCompleted).toBe(false);
-    expect(body.result.marksAwarded).toBe(2); // (a) + (c); (b) is all or nothing
+    expect(body.result.marksAwarded).toBe(expected);
     expect(body.result.hint).toEqual({
       terms: [{ term: missed.term, definition: missed.definition }],
     });
@@ -171,7 +173,7 @@ describe("rewrite phase 1", () => {
     expect(await resultFor(q.id)).toBeUndefined();
     const phaseRow = await phaseRowFor(q.id);
     expect(phaseRow.status).toBe("phase1");
-    expect(phaseRow.phase1Marks).toBe(2);
+    expect(phaseRow.phase1Marks).toBe(expected);
     expect(phaseRow.phase1TermOutcomes).toEqual(
       key.targetTerms!.map((t) => ({ conceptId: t.conceptId, correct: t.term === missed.term ? false : true })),
     );
@@ -183,7 +185,7 @@ describe("rewrite phase 1", () => {
     }
   });
 
-  it("every term used but criterion (c) lost: the hint has no terms and carries the lost criterion (FR-045)", async () => {
+  it("every term used but criterion (c) lost to padding: 1 mark and a lost-criterion hint (FR-045)", async () => {
     env = await setupRewriteEnv();
     await signedInStudent(env);
     const started = await startAttempt(REWRITE_UNIT);
@@ -192,7 +194,7 @@ describe("rewrite phase 1", () => {
 
     const { status, body } = await grade(started, q.id, "A sentence that is padded with extra words that add nothing at all.");
     expect(status).toBe(200);
-    expect(body.result.marksAwarded).toBe(2); // (a) + (b); (c) lost to padding
+    expect(body.result.marksAwarded).toBe(1); // C lost costs one mark, capped below the retry cap
     expect(body.result.hint).toEqual({
       terms: [],
       lostCriterion: "c",
@@ -200,7 +202,7 @@ describe("rewrite phase 1", () => {
     });
   });
 
-  it("criterion (b) is all or nothing: one missing term out of two loses the mark", async () => {
+  it("one missing term out of two scores 1 mark (term-based, no first-try bonus)", async () => {
     env = await setupRewriteEnv();
     await signedInStudent(env);
     const started = await startAttempt(REWRITE_UNIT);
@@ -211,23 +213,22 @@ describe("rewrite phase 1", () => {
 
     const { status, body } = await grade(started, q.id, "A sentence using one term but not the other.");
     expect(status).toBe(200);
-    expect(body.result.marksAwarded).toBe(2); // one missing term costs the whole (b) mark
+    expect(body.result.marksAwarded).toBe(1); // 1 of 2 terms used
     const phaseRow = await phaseRowFor(q.id);
-    expect(phaseRow.phase1Marks).toBe(2);
+    expect(phaseRow.phase1Marks).toBe(1);
   });
 
-  it("over 25 words: criterion (c) is lost whatever the stubbed grader says", async () => {
+  it("over 25 words loses criterion (c): 1 mark and a lost-criterion hint (FR-045)", async () => {
     env = await setupRewriteEnv();
     await signedInStudent(env);
     const started = await startAttempt(REWRITE_UNIT);
     const q = rewritesOf(started)[0];
-    // the grader says everything is fine; the word count alone must lose (c)
     env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q));
     const long = "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six";
 
     const { status, body } = await grade(started, q.id, long);
     expect(status).toBe(200);
-    expect(body.result.marksAwarded).toBe(2); // (a) + (b); (c) lost to the word count
+    expect(body.result.marksAwarded).toBe(1); // C lost costs one mark, capped below the retry cap
     expect(body.result.hint).toEqual({
       terms: [],
       lostCriterion: "c",
@@ -266,7 +267,7 @@ describe("rewrite phase 1", () => {
     const second = await grade(started, q.id, "Second attempt.");
     expect(second.status).toBe(409);
     expect(second.body.error).toBe("already_answered");
-    expect(second.body.result.marksAwarded).toBe(2);
+    expect(second.body.result.marksAwarded).toBe(1);
     expect(env.rewrite).toHaveBeenCalledTimes(1);
     expect(await usedBy(user.id)).toBe(1);
   });
@@ -321,39 +322,47 @@ describe("rewrite phase 2", () => {
     expect(phaseRow.recordedMark).toBe(2);
   });
 
-  it("the recorded mark is the best of the two: 2 then 1 records 2, and 1 then 2 records 2", async () => {
+  it("the recorded mark is the best of the two phases (FR-019)", async () => {
     env = await setupRewriteEnv();
     await signedInStudent(env);
 
-    // phase 1 = 2, phase 2 = 1 -> recorded 2
+    // phase 1 uses all but the first term; phase 2 uses all but the first two
     const a = await startAttempt(REWRITE_UNIT);
     const qa = rewritesOf(a)[0];
     const keyA = getAnswer(qa.id)!;
-    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(qa, { terms: { [keyA.targetTerms![0].term]: "missing" } }));
-    await grade(a, qa.id, "Phase one scores two.");
+    const termsA = keyA.targetTerms!;
+    const nA = termsA.length;
+    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(qa, { terms: { [termsA[0].term]: "missing" } }));
+    await grade(a, qa.id, "Phase one.");
     env.rewrite.mockResolvedValueOnce(
-      rewriteGradeFor(qa, { terms: { [keyA.targetTerms![0].term]: "missing" }, padding: true }),
+      rewriteGradeFor(qa, { terms: { [termsA[0].term]: "missing", [termsA[1].term]: "missing" } }),
     );
-    const r1 = await grade(a, qa.id, "Phase two scores one.", { phase: 2 });
+    const r1 = await grade(a, qa.id, "Phase two.", { phase: 2 });
     expect(r1.status).toBe(200);
-    expect(r1.body.result.marksAwarded).toBe(1);
+    const firstTry1 = rewriteScore({ totalMarks: 3, termCount: nA, termsUsed: nA - 1, criterionA: true, criterionC: true, phase: 1 });
+    const retry1 = rewriteScore({ totalMarks: 3, termCount: nA, termsUsed: nA - 2, criterionA: true, criterionC: true, phase: 2 });
+    expect(r1.body.result.marksAwarded).toBe(retry1);
     const [rowA] = await env.db.select().from(results).where(eq(results.questionId, qa.id));
-    expect(rowA.marksAwarded).toBe(2); // best of 2 and 1
+    expect(rowA.marksAwarded).toBe(Math.max(firstTry1, retry1)); // best of the two
 
-    // phase 1 = 1, phase 2 = 2 -> recorded 2
+    // phase 1 uses all but the first two; phase 2 uses all but the first
     const b = await startAttempt(REWRITE_UNIT);
     const qb = rewritesOf(b)[0];
     const keyB = getAnswer(qb.id)!;
+    const termsB = keyB.targetTerms!;
+    const nB = termsB.length;
     env.rewrite.mockResolvedValueOnce(
-      rewriteGradeFor(qb, { terms: { [keyB.targetTerms![0].term]: "missing" }, padding: true }),
+      rewriteGradeFor(qb, { terms: { [termsB[0].term]: "missing", [termsB[1].term]: "missing" } }),
     );
-    await grade(b, qb.id, "Phase one scores one.");
-    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(qb, { terms: { [keyB.targetTerms![0].term]: "missing" } }));
-    const r2 = await grade(b, qb.id, "Phase two scores two.", { phase: 2 });
+    await grade(b, qb.id, "Phase one.");
+    env.rewrite.mockResolvedValueOnce(rewriteGradeFor(qb, { terms: { [termsB[0].term]: "missing" } }));
+    const r2 = await grade(b, qb.id, "Phase two.", { phase: 2 });
     expect(r2.status).toBe(200);
-    expect(r2.body.result.marksAwarded).toBe(2);
+    const firstTry2 = rewriteScore({ totalMarks: 3, termCount: nB, termsUsed: nB - 2, criterionA: true, criterionC: true, phase: 1 });
+    const retry2 = rewriteScore({ totalMarks: 3, termCount: nB, termsUsed: nB - 1, criterionA: true, criterionC: true, phase: 2 });
+    expect(r2.body.result.marksAwarded).toBe(retry2);
     const [rowB] = await env.db.select().from(results).where(eq(results.questionId, qb.id));
-    expect(rowB.marksAwarded).toBe(2); // best of 1 and 2
+    expect(rowB.marksAwarded).toBe(Math.max(firstTry2, retry2)); // best of the two
   });
 
   it("phase 2 creates the results row, sets the phase row final, returns the discussion, and completes the attempt when it was the last question", async () => {
@@ -579,7 +588,7 @@ describe("degrade and self-mark", () => {
     env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q, { terms: { [t1.term]: "missing" } }));
     const p1 = await grade(started, q.id, "Phase one scores two.");
     expect(p1.status).toBe(200);
-    expect(p1.body.result.marksAwarded).toBe(2);
+    expect(p1.body.result.marksAwarded).toBe(1);
 
     // phase 2: the model fails
     env.rewrite.mockResolvedValueOnce(null);
@@ -590,7 +599,7 @@ describe("degrade and self-mark", () => {
     expect(await resultFor(q.id)).toBeUndefined(); // nothing recorded yet
     const phaseRow = await phaseRowFor(q.id);
     expect(phaseRow.status).toBe("phase1"); // still phase 1
-    expect(phaseRow.phase1Marks).toBe(2);
+    expect(phaseRow.phase1Marks).toBe(1);
 
     // the student self-marks phase 2 with ticks that add to 0: the recorded mark is still the best of the two (2)
     const { POST } = await import("@/app/api/results/self-mark/route");
@@ -610,7 +619,7 @@ describe("degrade and self-mark", () => {
     );
     expect(res.status).toBe(200);
     const [row] = await env.db.select().from(results).where(eq(results.questionId, q.id));
-    expect(row.marksAwarded).toBe(2); // best of phase 1 (2) and the self-marked phase 2 (0)
+    expect(row.marksAwarded).toBe(1); // best of phase 1 (1) and the self-marked phase 2 (0)
   });
 
   it("database down: the rewrite grade still answers without a 500", async () => {
@@ -897,7 +906,7 @@ describe("spec 006 display data", () => {
     const [t1] = key.targetTerms!;
     env.rewrite.mockResolvedValueOnce(rewriteGradeFor(q, { terms: { [t1.term]: "missing" } }));
     const p1 = await grade(started, q.id, "Phase one under three.");
-    expect(p1.body.result.marksAwarded).toBe(2);
+    expect(p1.body.result.marksAwarded).toBe(1);
     expect(p1.body.result.hint).toEqual({ terms: [{ term: t1.term, definition: t1.definition }] });
     expect(p1.body.result.creditedSpans).toBeUndefined();
     expect(p1.body.result.phase2TermOutcomes).toBeUndefined();

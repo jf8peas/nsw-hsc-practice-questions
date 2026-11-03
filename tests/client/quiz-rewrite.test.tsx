@@ -297,7 +297,7 @@ describe("state 5: result", () => {
     await waitFor(() => expect(screen.getByText("Next question")).toBeTruthy());
   });
 
-  it("shows the capped-retry outcome line with the term-count wording (FR-024)", async () => {
+  it("shows the retry gain in the score banner and the cap line (FR-024)", async () => {
     mount();
     responder = () =>
       json({ result: rewriteResult({ marksAwarded: 1, feedback: "Name the tax.", hint: HINT }), saved: false, phaseSaved: true, attemptCompleted: false });
@@ -308,12 +308,12 @@ describe("state 5: result", () => {
       json({ result: rewriteResult({ phase: 2, marksAwarded: 2, feedback: "Better.", discussion: DISCUSSION }), saved: true, attemptCompleted: false });
     type("A tariff raised import prices, so people bought local goods.", 0);
     fireEvent.click(screen.getByText("Submit retry"));
-    await waitFor(() => expect(screen.getByText("Full marks for a retry — both terms used.")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/\+1 for the retry/)).toBeTruthy());
     expect(screen.getByText("A retry can earn at most 2. Use every term on the first try next time for the full 3.")).toBeTruthy();
     expect(screen.getByText("YOUR RETRY")).toBeTruthy();
   });
 
-  it("shows the retry feedback with the cap line when the retry is below 2 (FR-024)", async () => {
+  it("shows the no-gain line when the retry does not improve the first try (FR-024)", async () => {
     mount();
     responder = () =>
       json({ result: rewriteResult({ marksAwarded: 1, feedback: "Name the tax.", hint: HINT }), saved: false, phaseSaved: true, attemptCompleted: false });
@@ -325,10 +325,10 @@ describe("state 5: result", () => {
     type("A tariff raised import prices.", 0);
     fireEvent.click(screen.getByText("Submit retry"));
     await waitFor(() => expect(screen.getByText("Worse.")).toBeTruthy());
-    expect(screen.getByText("A retry can earn at most 2.")).toBeTruthy();
+    expect(screen.getByText("Your retry didn't improve your mark — it stays at 1 / 3.")).toBeTruthy();
   });
 
-  it("shows the better-try line with the real phase 1 mark when phase 1 beats phase 2 (FR-024, FR-019)", async () => {
+  it("keeps the first-try mark when the retry scores lower (FR-024, FR-019)", async () => {
     mount();
     responder = () =>
       json({ result: rewriteResult({ marksAwarded: 2, feedback: "Name the tax.", hint: HINT }), saved: false, phaseSaved: true, attemptCompleted: false });
@@ -339,7 +339,7 @@ describe("state 5: result", () => {
       json({ result: rewriteResult({ phase: 2, marksAwarded: 1, feedback: "Worse.", discussion: DISCUSSION }), saved: true, attemptCompleted: false });
     type("A tariff raised import prices.", 0);
     fireEvent.click(screen.getByText("Submit retry"));
-    await waitFor(() => expect(screen.getByText("Your recorded mark is 2 / 3 (your better try).")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Your retry didn't improve your mark — it stays at 2 / 3.")).toBeTruthy());
   });
 
   it("derives term statuses from the phase outcomes, keeping First try for a term dropped in phase 2 (FR-028, FR-049)", async () => {
@@ -507,7 +507,7 @@ describe("resume", () => {
         },
       }),
     );
-    await waitFor(() => expect(screen.getByText("Full marks for a retry — both terms used.")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/\+1 for the retry/)).toBeTruthy());
     expect(screen.getByText("YOUR RETRY")).toBeTruthy();
     expect(screen.getByText("The two terms")).toBeTruthy();
     expect(screen.getByText("Added in retry")).toBeTruthy();

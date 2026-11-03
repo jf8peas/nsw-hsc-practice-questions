@@ -26,6 +26,7 @@ import {
 } from "@/lib/drafts";
 import type { AlreadyAnswered, GradeResponse, GradeResult, RewriteGradeResult } from "@/lib/grading";
 import { reloadPage } from "@/lib/navigation";
+import { rewriteScore } from "@/lib/rewrite-scoring";
 import { enqueueReceipt, flushOutbox, pendingCount, sendReceipt } from "@/lib/outbox";
 import { startAttempt } from "@/lib/startAttempt";
 import { formatResetMessage } from "@/lib/sydney";
@@ -455,6 +456,25 @@ export function Quiz({
     setBusy(true);
     setError(null);
     try {
+      const terms = (rewrite.phase2Result ?? rewrite.phase1Result)?.discussion?.terms ?? [];
+      // without the term list we cannot work out the mark (0-of-0 terms would look like full
+      // marks); surface an error rather than show a wrong mark
+      if (terms.length === 0) {
+        throw new Error("Could not work out your mark — please try again.");
+      }
+      // the client's ticks are keyed by term text; the server expects concept ids, so map them
+      const termTicksByConceptId: Record<string, boolean> = {};
+      for (const t of terms) termTicksByConceptId[t.conceptId] = ticks.termTicks[t.term] === true;
+      const termCount = terms.length;
+      const termsUsed = terms.filter((t) => termTicksByConceptId[t.conceptId]).length;
+      const marks = rewriteScore({
+        totalMarks: current.maxMarks,
+        termCount,
+        termsUsed,
+        criterionA: ticks.criterionA,
+        criterionC: ticks.criterionC,
+        phase,
+      });
       const res = await fetch("/api/results/self-mark", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -465,7 +485,7 @@ export function Quiz({
           answer: graded.answer,
           phase,
           criterionA: ticks.criterionA,
-          termTicks: ticks.termTicks,
+          termTicks: termTicksByConceptId,
           criterionC: ticks.criterionC,
           token: graded.selfMarkToken,
         }),
@@ -474,10 +494,6 @@ export function Quiz({
         setSessionEnded(true);
         return;
       }
-      const terms = (rewrite.phase2Result ?? rewrite.phase1Result)?.discussion?.terms ?? [];
-      const criterionB = terms.length > 0 ? terms.every((t) => ticks.termTicks[t.term] === true) : false;
-      const raw = (ticks.criterionA ? 1 : 0) + (criterionB ? 1 : 0) + (ticks.criterionC ? 1 : 0);
-      const marks = phase === 2 ? Math.min(raw, 2) : raw;
       if (res.status === 409) {
         const body = (await res.json().catch(() => ({}))) as { result?: { marksAwarded?: number } };
         const stored = typeof body.result?.marksAwarded === "number" ? body.result.marksAwarded : marks;
