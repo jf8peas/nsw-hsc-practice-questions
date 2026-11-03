@@ -24,8 +24,8 @@ const unit: Unit = {
     concepts: [C1, C2],
   })),
   concepts: [
-    { id: C1, description: "A tax on imported goods that raises their price." },
-    { id: C2, description: "Goods and services bought from other countries." },
+    { id: C1, term: "tariff", description: "A tax on imported goods that raises their price." },
+    { id: C2, term: "imports", description: "Goods and services bought from other countries." },
   ],
   quiz: { short: 0, mc: 0, passMark: 60 },
 };

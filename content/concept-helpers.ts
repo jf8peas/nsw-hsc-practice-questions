@@ -7,6 +7,14 @@ export function defineConcepts(unitId: string, list: Array<[slug: string, descri
   return list.map(([slug, description]) => ({ id: `${unitId}.c-${slug}`, description }));
 }
 
+/** Term concepts for a rewrite unit (spec 005): `[slug, term, one-line definition]` triples. */
+export function defineTermConcepts(
+  unitId: string,
+  list: Array<[slug: string, term: string, definition: string]>,
+): Concept[] {
+  return list.map(([slug, term, description]) => ({ id: `${unitId}.c-${slug}`, term, description }));
+}
+
 /** The questions with their `concept` set from a `{ questionId: conceptId }` map. */
 export function tagQuestions(questions: Question[], tags: Record<string, string>): Question[] {
   return questions.map((q) => ({ ...q, concept: tags[q.id] }));

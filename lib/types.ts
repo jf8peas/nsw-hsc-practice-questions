@@ -12,6 +12,8 @@ export interface Concept {
   id: string;
   /** One line, shown to students next to the number of correct answers still needed. */
   description: string;
+  /** The term this concept defines (rewrite units, spec 005): shown in bold before the description. */
+  term?: string;
 }
 
 /** Draw `n` questions whose `group` matches, per quiz attempt. */

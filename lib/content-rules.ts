@@ -151,6 +151,7 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
 export function validateRewriteRules(unit: Unit, answers: AnswerSet): string[] {
   const errors: string[] = [];
   const conceptIds = new Set((unit.concepts ?? []).map((c) => c.id));
+  const conceptTerms = new Map((unit.concepts ?? []).map((c) => [c.id, c.term]));
   const rewriteQuestions = unit.questions.filter((q) => q.type === "rewrite");
   if (rewriteQuestions.length === 0) return errors;
 
@@ -170,6 +171,9 @@ export function validateRewriteRules(unit: Unit, answers: AnswerSet): string[] {
       if (!t.definition.trim()) errors.push(`${q.id}: target term "${t.term}" has no definition`);
       if (!conceptIds.has(t.conceptId)) {
         errors.push(`${q.id}: target term "${t.term}" concept ${t.conceptId} is not a concept of ${unit.id}`);
+      } else if (conceptTerms.get(t.conceptId) !== t.term) {
+        // "Concepts to review" shows the concept's term, so it must be the term being marked
+        errors.push(`${q.id}: target term "${t.term}" does not match concept ${t.conceptId}'s term "${conceptTerms.get(t.conceptId) ?? ""}"`);
       }
       conceptCount.set(t.conceptId, (conceptCount.get(t.conceptId) ?? 0) + 1);
     }

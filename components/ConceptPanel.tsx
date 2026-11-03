@@ -35,6 +35,16 @@ function ConceptProgress({ count }: { count: number }) {
   );
 }
 
+/** A concept's line: its description, led by the term in bold when it has one (spec 005). */
+function ConceptText({ term, description }: { term?: string; description: string }) {
+  if (!term) return <>{description}</>;
+  return (
+    <>
+      <strong className="concept-term">{term}</strong>: {description}
+    </>
+  );
+}
+
 /**
  * "Concepts to review": the student's uncleared concepts in a unit, highest count first,
  * each with its one-line description and how many correct answers are still needed. A concept
@@ -54,7 +64,7 @@ export function ConceptPanel({
   view?: Loaded<ConceptContentView>;
 }) {
   if (!unit.conceptsReady) return null;
-  const descriptions = new Map(conceptsOf(unit).map((c) => [c.id, c.description]));
+  const concepts = new Map(conceptsOf(unit).map((c) => [c.id, c]));
   const content: Map<string, ApprovedContent> = view?.status === "ok" ? view.data.content : new Map();
 
   const states = progress.status === "ok" ? progress.data : [];
@@ -84,7 +94,8 @@ export function ConceptPanel({
       ) : (
         <ul className="concept-list">
           {states.map((state) => {
-            const description = descriptions.get(state.conceptId) ?? state.conceptId;
+            const concept = concepts.get(state.conceptId);
+            const description = concept ? <ConceptText term={concept.term} description={concept.description} /> : state.conceptId;
             const approved = content.get(state.conceptId);
             if (!approved?.summary) {
               return (
