@@ -50,6 +50,15 @@ is covered in section 9.
 
 ## 3. Common frame (all states)
 
+> **Type follows the site (2026-11-03).** After implementation the font sizes below were found to
+> be larger than the rest of the quiz page. The panel now uses the quiz page's type roles instead,
+> and the sizes in this file are superseded: question text 15 px (as `.q-prompt`); body, feedback,
+> sentences, definitions and the text box 14 px (as `.feedback`, `.q-textarea`); small labels mono
+> 9.5 px uppercase (as `.model-answer .label`); marks in the display font at 16 px (as
+> `.feedback-score`); term names in the display font at 15 px; help and note lines 12–12.5 px;
+> pills as `.rd-pill`; buttons as `.rd-btn` type (14 px, weight 500) but kept 48 px tall for the
+> 44 px target. The panel no longer draws its own bordered card inside the question card.
+
 Unchanged from the current quiz page: header, five-segment progress bar, the
 "Sentence rewrite · 3 marks" pill and "Question 3 of 5". The question card is a single bordered
 card (radius 16, padding 28, `--rd-border-100`, `--rd-shadow-1`) in a column 880 px max wide.
