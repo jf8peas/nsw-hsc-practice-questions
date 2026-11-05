@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { EssayBar, EssayPartDot, ParagraphQuestionView } from "@/lib/paragraph/types";
 
@@ -164,14 +164,54 @@ const BRIEF_ROWS: Array<{ field: keyof ParagraphQuestionView["brief"]; uses: str
   { field: "limitation", uses: "limitation", label: "Limitation" },
 ];
 
-/** Every brief field, with the fields this part needs marked "Use in this part". */
-export function BriefTable({ brief, uses }: { brief: ParagraphQuestionView["brief"]; uses: string[] }) {
+const BRIEF_HELP = "The content in plain English — you do the writing";
+
+/**
+ * Every brief field, with the fields this part needs marked "Use in this part". With `initialOpen`
+ * set the section is a native <details> (the writing screen): it starts open or closed as given,
+ * the student can toggle it, and nothing is saved. Without it the table is plain (inside the
+ * collapsed "brief and model" row).
+ */
+export function BriefTable({
+  brief,
+  uses,
+  initialOpen,
+}: {
+  brief: ParagraphQuestionView["brief"];
+  uses: string[];
+  initialOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(initialOpen ?? true);
+  if (initialOpen === undefined) {
+    return (
+      <section className="pg-section" aria-labelledby="pg-brief-title">
+        <div className="pg-section-head">
+          <h3 id="pg-brief-title" className="pg-h3">The brief</h3>
+          <span className="pg-help">{BRIEF_HELP}</span>
+        </div>
+        <BriefRows brief={brief} uses={uses} />
+      </section>
+    );
+  }
+  const usedLabels = BRIEF_ROWS.filter((r) => uses.includes(r.uses)).map((r) => r.label);
   return (
     <section className="pg-section" aria-labelledby="pg-brief-title">
-      <div className="pg-section-head">
-        <h3 id="pg-brief-title" className="pg-h3">The brief</h3>
-        <span className="pg-help">The content in plain English — you do the writing</span>
-      </div>
+      <details className="pg-brief-details" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
+        <summary className="pg-brief-summary">
+          <svg className="pg-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+          <h3 id="pg-brief-title" className="pg-h3">The brief</h3>
+          <span className="pg-help">{open ? BRIEF_HELP : `Use in this part: ${usedLabels.join(" · ")}`}</span>
+        </summary>
+        <BriefRows brief={brief} uses={uses} />
+      </details>
+    </section>
+  );
+}
+
+function BriefRows({ brief, uses }: { brief: ParagraphQuestionView["brief"]; uses: string[] }) {
+  return (
       <dl className="pg-brief">
         {BRIEF_ROWS.map(({ field, uses: key, label }) => {
           const used = uses.includes(key);
@@ -203,7 +243,6 @@ export function BriefTable({ brief, uses }: { brief: ParagraphQuestionView["brie
           );
         })}
       </dl>
-    </section>
   );
 }
 

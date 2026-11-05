@@ -59,7 +59,7 @@ describe("writing", () => {
     mount({ stage: "write", view: view() });
     hasExact(
       "ESSAY QUESTION", "What this part must do", "Marked out of 4 on these", "The brief",
-      "The content in plain English — you do the writing", "The model paragraph so far", "Your part continues from here",
+      "Use in this part: Chain steps · Facts", "The model paragraph so far", "Your part continues from here",
       "Write the Evidence & Application", "Every figure you need is in the brief",
       "Lose a mark? You’ll get one correction with tips, worth up to 3 marks.",
       "Paragraph writing · 4 marks", "Essay 1 · Part 3 of 5",

@@ -314,7 +314,8 @@ export function ParagraphPanel({
           <ParagraphStepTracker step="write" />
           {questionBlock(true)}
           <PartGuidance lines={view.guidance} />
-          <BriefTable brief={view.brief} uses={view.uses} />
+          {/* open on Part 1, closed on Parts 2 to 5; not saved, so a reload starts the same way */}
+          <BriefTable key={view.part} brief={view.brief} uses={view.uses} initialOpen={view.part === 1} />
           <ModelSoFar earlier={view.earlier} partNo={view.part} partName={partName} />
           {errorBox}
           <WriteBox

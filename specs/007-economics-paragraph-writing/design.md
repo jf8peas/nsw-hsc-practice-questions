@@ -184,7 +184,8 @@ the date and time, the bar, the percentage and the mark out of 4.
 
 ## 5. Screen 2: Writing a part
 
-Mockups `2-writing-*.png`. Inside the card, in order:
+Mockups `2-writing-*.png` (they show the brief open; the collapsible brief below was added after
+the mockups and they are not redrawn). Inside the card, in order:
 
 1. Step tracker (Write current).
 2. Essay question block with the verb definition (§3.2).
@@ -197,8 +198,17 @@ Mockups `2-writing-*.png`. Inside the card, in order:
    4. Precise economic terms, within 80 words.
 
    The content task writes these lines for every part; line 4 always names the part's limit.
-4. **"The brief"**, with **"The content in plain English — you do the writing"** on the right. A
-   bordered table, one row per field, label in mono caps on the left:
+4. **"The brief"**, a collapsible section (a native `<details>`/`<summary>`, as the collapsed rows
+   on the later screens). It starts **open on Part 1** (Topic Sentence) and **closed on Parts 2 to
+   5**, on desktop and phone alike; the student can open and close it freely, and the starting
+   state is not saved (a reload or resume starts open or closed by the same rule). The summary
+   row is at least 44 px tall: a chevron that turns when the section opens, **"The brief"** as the
+   heading, and on the right **"The content in plain English — you do the writing"** when open.
+   When closed the right-hand text reads **"Use in this part: "** followed by the labels of the
+   fields this part uses, joined with " · " (for example **"Use in this part: Chain steps ·
+   Facts"**), so the student knows what is inside. The chevron does not animate under
+   `prefers-reduced-motion`. Inside, a
+   bordered table, one row per field, label in mono caps on the left (unchanged):
    **Economy**, **Argument**, **Counterpoint**, **Chain steps**, **Facts**, **Limitation**. All
    fields stay visible. The fields this part needs are emphasised: pale blue row, darker text, and
    a pill **"Use in this part"** under the label. Which fields each part needs is content data; for

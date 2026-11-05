@@ -19,6 +19,7 @@
 - FR-009: going over the limit means conventions criterion (d) is not met; the word count uses one rule for the meter and the marker (as spec 005 FR-043).
 - FR-023: scoped to the question screen, and lists the essay question and directive verb.
 - FR-033: ticked criteria count as correct first-try uses for tip tracking (spec 002 FR-005), unticked ones as misses.
+- FR-006: the brief on the writing screen is collapsible; open on Part 1, closed on Parts 2 to 5.
 
 **Input**: User description: see [specify-prompt.md](specify-prompt.md). Wording and layout reference: [design.md](design.md) and `mockups/`.
 

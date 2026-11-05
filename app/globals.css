@@ -2491,6 +2491,14 @@ input {
 .pg-collapse { border: 1px solid var(--rd-border-100); border-radius: var(--rd-r-lg); padding: 0 16px; }
 .pg-collapse > summary { min-height: 44px; display: flex; align-items: center; gap: 12px; cursor: pointer; font-weight: 600; font-size: var(--rd-fs-md); color: var(--rd-ink-700); }
 .pg-collapse[open] { padding-bottom: 16px; display: flex; flex-direction: column; gap: 16px; }
+/* the brief on the writing screen: a native <details>, open on Part 1 and closed on Parts 2 to 5 */
+.pg-brief-details > summary { min-height: 44px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; cursor: pointer; list-style: none; box-sizing: border-box; }
+.pg-brief-details > summary::-webkit-details-marker { display: none; }
+.pg-brief-details > summary:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: -2px; border-radius: var(--rd-r-md); }
+.pg-brief-details[open] > summary { margin-bottom: 12px; }
+.pg-brief-details .pg-help { flex: 1 1 200px; min-width: 0; }
+.pg-chev { flex: none; color: var(--rd-ink-700); transition: transform 150ms ease; }
+.pg-brief-details[open] .pg-chev { transform: rotate(90deg); }
 .pg-firsttry > summary { font-weight: 400; min-width: 0; }
 .pg-firsttry-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--rd-mute-600); }
 .pg-firsttry[open] .pg-firsttry-text { display: none; }
