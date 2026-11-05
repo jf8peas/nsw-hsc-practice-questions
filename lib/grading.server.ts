@@ -12,9 +12,15 @@ import type {
   RewriteHint,
 } from "@/lib/grading";
 import { gradeRewrite, gradeShortAnswer } from "@/lib/openrouter.server";
+import { verbDefinition } from "@/content/glossary";
+import { markWithModel } from "@/lib/paragraph/marker.server";
+import { PARTS, partKeyOf } from "@/lib/paragraph/parts";
+import { buildVerdicts, markOf, phase2Mark } from "@/lib/paragraph/scoring";
+import type { ParagraphDiscussion, ParagraphQuestionView } from "@/lib/paragraph/types";
 import { rewriteScore } from "@/lib/rewrite-scoring";
-import type { Answer } from "@/lib/types";
+import type { Answer, ParagraphQuestion, PartNo } from "@/lib/types";
 import { countWords } from "@/lib/wordcount";
+import type { ParagraphVerdicts } from "@/lib/db/schema";
 
 export interface GradeOptions {
   /** MC only: optionOrder[displayIndex] = original option index (from the attempt). */
@@ -505,4 +511,161 @@ export function rewriteResumeState(
   }
   if (phaseRow.status === "final" && key) state.discussion = buildRewriteDiscussion(key);
   return state;
+}
+
+
+// ---- paragraph writing (spec 007) ----------------------------------------------------------
+//
+// The ONLY readers of an essay's key. What each export may release, and when (constitution
+// Principle I, 2.14.0):
+//   paragraphQuestionView  before phase 1 is marked: the brief, which fields the part uses, the
+//                          guidance lines, the verb definition and the model text of the EARLIER
+//                          parts of the same essay. Never the current part's model, never a later
+//                          part's, never the marking notes.
+//   paragraphDiscussion    at the discussion or the self-mark screen: the current model part and
+//                          its commentary, the models up to and including this part, and LABELS
+//                          (never text) for the later parts.
+//   markParagraph          sends the current model and the marking notes to the model provider and
+//                          returns verdicts only; nothing from the key is in its return value.
+
+function paragraphKey(questionId: string): { question: ParagraphQuestion; essay: NonNullable<Answer["paragraph"]>["essay"]; part: PartNo; unitId: string } | null {
+  const found = getQuestion(questionId);
+  const key = getAnswer(questionId)?.paragraph;
+  if (!found || found.question.type !== "paragraph" || !key) return null;
+  return { question: found.question, essay: key.essay, part: key.part, unitId: found.unit.id };
+}
+
+const PART_NOS: PartNo[] = [1, 2, 3, 4, 5];
+
+function essayTotalOf(unitId: string): number {
+  const unit = getUnit(unitId);
+  return Math.floor((unit?.questions.filter((q) => q.type === "paragraph").length ?? 0) / 5);
+}
+
+/** What the question screen may show before phase 1 is marked. */
+export function paragraphQuestionView(questionId: string): ParagraphQuestionView | null {
+  const k = paragraphKey(questionId);
+  if (!k) return null;
+  const { question, essay, part } = k;
+  const info = PARTS[partKeyOf(part)];
+  return {
+    essayNo: question.essayNo,
+    essayTotal: essayTotalOf(k.unitId),
+    part,
+    partName: info.name,
+    limit: info.limit,
+    verbDefinition: verbDefinition(question.verb) ?? "",
+    guidance: essay.guidance[part],
+    brief: {
+      economy: essay.brief.economy,
+      argument: essay.brief.argument,
+      counterpoint: essay.brief.counterpoint,
+      chainSteps: [...essay.brief.chainSteps],
+      facts: [...essay.brief.facts],
+      limitation: [...essay.brief.limitation],
+    },
+    uses: [...essay.uses[part]],
+    earlier: PART_NOS.filter((n) => n < part).map((n) => ({
+      part: n,
+      label: `${n} · ${PARTS[partKeyOf(n)].name}`,
+      text: essay.models[n],
+    })),
+    parts: PART_NOS.map((n) => ({
+      part: n,
+      short: PARTS[partKeyOf(n)].short,
+      state: n < part ? "done" : n === part ? "current" : "later",
+    })),
+  };
+}
+
+const whenLabel = (distance: number): string =>
+  distance === 1 ? "NEXT QUIZ" : distance === 2 ? "QUIZ AFTER" : `IN ${distance} QUIZZES`;
+
+/** What the discussion (or the self-mark screen) may show. */
+export function paragraphDiscussion(questionId: string): ParagraphDiscussion | null {
+  const k = paragraphKey(questionId);
+  if (!k) return null;
+  const { question, essay, part } = k;
+  const unit = getUnit(k.unitId);
+  const hasNextEssay = (unit?.questions ?? []).some((q) => q.type === "paragraph" && q.essayNo === question.essayNo + 1);
+  return {
+    modelPart: essay.models[part],
+    commentary: essay.commentary[part],
+    modelWords: countWords(essay.models[part]),
+    modelSoFar: PART_NOS.filter((n) => n <= part).map((n) => ({
+      part: n,
+      label: `${n} · ${PARTS[partKeyOf(n)].name}`,
+      text: essay.models[n],
+      current: n === part,
+    })),
+    laterSlots: PART_NOS.filter((n) => n > part).map((n) => ({
+      part: n,
+      label: `${n} · ${PARTS[partKeyOf(n)].short.toUpperCase()}`,
+      when: whenLabel(n - part),
+    })),
+    next:
+      part < 5
+        ? { kind: "part", essayNo: question.essayNo, part: (part + 1) as PartNo, name: PARTS[partKeyOf((part + 1) as PartNo)].name }
+        : hasNextEssay
+          ? { kind: "essay", essayNo: question.essayNo + 1, part: 1, name: PARTS.topic.name }
+          : { kind: "none" },
+  };
+}
+
+export interface ParagraphMarked {
+  verdicts: ParagraphVerdicts;
+  /** 0..4 at phase 1; 0..3 at phase 2 (the cap is applied here). */
+  mark: number;
+  feedback: string;
+  wordCount: number;
+  promptVersion: string;
+  model: string;
+}
+
+/**
+ * Mark one paragraph part. Returns null when the marker is unavailable (the caller self-marks at
+ * phase 1 and keeps the first-try mark at phase 2). The word-limit half of criterion (d), the mark
+ * and the phase 2 cap are computed in code (research R4).
+ */
+export async function markParagraph(
+  questionId: string,
+  answer: string,
+  phase: 1 | 2,
+  options: { skipLlm?: boolean } = {},
+): Promise<ParagraphMarked | null> {
+  const k = paragraphKey(questionId);
+  if (!k || options.skipLlm) return null;
+  const { question, essay, part } = k;
+  const partKey = partKeyOf(part);
+  const out = await markWithModel({
+    part: partKey,
+    question: question.prompt,
+    verb: question.verb,
+    economy: question.economy,
+    economyType: essay.economyType,
+    strategy: essay.strategy,
+    brief: essay.brief,
+    earlierModels: PART_NOS.filter((n) => n < part).map((n) => essay.models[n]),
+    model: essay.models[part],
+    markingNotes: essay.markingNotes[part],
+    answer,
+  });
+  if (!out) return null;
+  const wordCount = countWords(answer);
+  const verdicts = buildVerdicts(out.raw, wordCount, PARTS[partKey].limit);
+  const raw = markOf(verdicts);
+  return {
+    verdicts,
+    mark: phase === 2 ? phase2Mark(raw) : raw,
+    feedback: out.raw.feedback,
+    wordCount,
+    promptVersion: out.promptVersion,
+    model: out.model,
+  };
+}
+
+/** The part key and number of a paragraph question, for the grade handler (no key text). */
+export function paragraphPartOf(questionId: string): { part: PartNo; unitId: string } | null {
+  const k = paragraphKey(questionId);
+  return k ? { part: k.part, unitId: k.unitId } : null;
 }

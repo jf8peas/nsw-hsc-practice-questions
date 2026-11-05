@@ -15,6 +15,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "delete-student": "tsx --conditions=react-server scripts/delete-student.ts",
+    "paragraph-flags": "tsx --conditions=react-server scripts/paragraph-flags.ts",
+    "paragraph-remark": "tsx --conditions=react-server scripts/paragraph-remark.ts",
     "concept:approve": "tsx --conditions=react-server scripts/approve-concept.ts",
     "fake-openrouter": "tsx scripts/fake-openrouter.ts",
     "vercel-build": "npm run db:migrate && npm run build"

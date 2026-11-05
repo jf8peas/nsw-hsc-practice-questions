@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Formula } from "@/components/Formula";
 import { PhotoAnswerPanel, type PhotoFile } from "@/components/PhotoAnswerPanel";
 import { ReadBackPanel } from "@/components/ReadBackPanel";
+import { ParagraphPanel } from "@/components/paragraph/ParagraphPanel";
 import { RewritePanel } from "@/components/rewrite/RewritePanel";
 import {
   clearDraft,
@@ -72,11 +73,14 @@ export function Quiz({
   const total = questions.length;
   const passMark = payload?.passMark ?? 70;
 
+  // a paragraph attempt (spec 007) is one question that ends in its own discussion screen, never in
+  // the quiz results screen, even when the part already has a result
+  const isParagraphAttempt = (p: AttemptPayload | null | undefined) => Boolean(p?.paragraphState);
   const [i, setI] = useState(() =>
-    initial ? firstUnanswered(initial.questions, initial.answered) : 0,
+    initial && !isParagraphAttempt(initial) ? firstUnanswered(initial.questions, initial.answered) : 0,
   );
   const [phase, setPhase] = useState<"quiz" | "results">(
-    initial && firstUnanswered(initial.questions, initial.answered) >= initial.questions.length
+    initial && !isParagraphAttempt(initial) && firstUnanswered(initial.questions, initial.answered) >= initial.questions.length
       ? "results"
       : "quiz",
   );
@@ -131,15 +135,17 @@ export function Quiz({
       if (Object.keys(merged).length !== Object.keys(initial.answered).length) {
         setAnswered(merged);
         const next = firstUnanswered(initial.questions, merged);
-        setI(next);
-        if (next >= initial.questions.length) setPhase("results");
+        if (!isParagraphAttempt(initial)) {
+          setI(next);
+          if (next >= initial.questions.length) setPhase("results");
+        }
       }
     } else if (stored) {
       setPayload(stored);
       setAnswered(stored.answered);
       const next = firstUnanswered(stored.questions, stored.answered);
-      setI(next);
-      setPhase(next >= stored.questions.length ? "results" : "quiz");
+      setI(isParagraphAttempt(stored) ? 0 : next);
+      setPhase(!isParagraphAttempt(stored) && next >= stored.questions.length ? "results" : "quiz");
     }
     setLoaded(true);
     setPending(pendingCount(uid));
@@ -872,6 +878,23 @@ export function Quiz({
 
   // ---- quiz view ------------------------------------------------------------
   if (!current) return null;
+
+  // spec 007: one part of one essay; the panel draws its own progress bar, pill row and states
+  if (current.type === "paragraph" && payload?.paragraphState) {
+    return (
+      <>
+        {banners}
+        <ParagraphPanel
+          attemptId={attemptId}
+          attemptToken={attemptToken}
+          unitId={unitId}
+          question={current}
+          state={payload.paragraphState}
+          onFinish={() => router.push(`/unit/${unitId}`)}
+        />
+      </>
+    );
+  }
   const q = current;
   const isShort = q.type === "short";
   const isRewrite = q.type === "rewrite";

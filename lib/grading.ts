@@ -17,7 +17,7 @@ export interface GradeRequest {
 
 export interface GradeResult {
   questionId: string;
-  type: "mc" | "short" | "rewrite";
+  type: "mc" | "short" | "rewrite" | "paragraph";
   maxMarks: number;
   /** Marks awarded, once known. null while the student still needs to self-mark. */
   marksAwarded: number | null;

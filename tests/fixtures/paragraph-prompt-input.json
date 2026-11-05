@@ -1,0 +1,32 @@
+{
+  "part": "evaluation",
+  "answer": "However, the {answer} gains were uneven, so poverty stayed high in rural areas.",
+  "essay": {
+    "question": "Evaluate the effectiveness of the strategies used by an emerging economy you have studied.",
+    "directiveVerb": "evaluate",
+    "economy": "Testland",
+    "type": "emerging",
+    "strategy": "Opening to trade and FDI.",
+    "brief": {
+      "argument": "Opening up drove fast growth.",
+      "counterpoint": "Gains were uneven.",
+      "chainSteps": ["Tariffs cut", "FDI rises", "Exports rise"],
+      "facts": ["Exports doubled in 2010.", "Poverty fell to 5% in 2020."],
+      "limitation": ["Poverty stays high in rural areas.", "Growth depends on world demand."]
+    },
+    "models": {
+      "topic": "While opening up was highly effective for growth, gains were uneven.",
+      "mechanism": "Tariff cuts raised FDI, lifting aggregate demand.",
+      "evidence": "Exports doubled in 2010, showing FDI drove growth.",
+      "evaluation": "However, uneven gains partially offset the benefits.",
+      "link": "Therefore opening up was highly effective, though constrained."
+    },
+    "markingNotes": {
+      "topic": "Note topic.",
+      "mechanism": "Note mechanism.",
+      "evidence": "Note evidence.",
+      "evaluation": "Note evaluation: the limitation must be the one framed in the topic sentence.",
+      "link": "Note link."
+    }
+  }
+}

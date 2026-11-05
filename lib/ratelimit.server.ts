@@ -131,3 +131,8 @@ export function checkConceptRateLimit(userId: string): Promise<RateResult> {
 export function checkDraftRateLimit(userId: string): Promise<RateResult> {
   return checkRateLimit("draft", userId, getConfig().draftRateLimit);
 }
+
+/** Limit on "This mark seems wrong" flags (spec 007): per signed-in student, its own namespace. */
+export function checkFlagRateLimit(userId: string): Promise<RateResult> {
+  return checkRateLimit("flag", userId, getConfig().flagRateLimit);
+}

@@ -18,12 +18,12 @@ const TO_CLEAR = 3;
  * How close a concept is to being cleared: one pip per correct answer needed, filled as they
  * are earned, with "n to go" beside them. Screen readers get the full sentence instead.
  */
-function ConceptProgress({ count }: { count: number }) {
-  const earned = TO_CLEAR - count;
+function ConceptProgress({ count, clearAfter = TO_CLEAR }: { count: number; clearAfter?: number }) {
+  const earned = clearAfter - count;
   return (
     <span className="concept-progress">
       <span className="concept-pips" aria-hidden="true">
-        {Array.from({ length: TO_CLEAR }, (_, i) => (
+        {Array.from({ length: clearAfter }, (_, i) => (
           <span key={i} className={i < earned ? "pip on" : "pip"} />
         ))}
       </span>
@@ -68,16 +68,22 @@ export function ConceptPanel({
   const content: Map<string, ApprovedContent> = view?.status === "ok" ? view.data.content : new Map();
 
   const states = progress.status === "ok" ? progress.data : [];
+  // spec 007: the paragraph unit calls these "Things I need to know" (writing tips); a part tip clears
+  // after 2 correct first tries, an all-parts tip after 3 (`clearAfter`)
+  const tips = Boolean(unit.sequence);
+  const clearOf = (conceptId: string) => concepts.get(conceptId)?.clearAfter ?? TO_CLEAR;
   const needsContent = states.some((s) => !content.get(s.conceptId)?.summary);
 
   return (
     <section className="unit-section concept-panel" aria-labelledby="concepts-title">
       <SectionHead
         id="concepts-title"
-        title="Concepts to review"
+        title={tips ? "Things I need to know" : "Concepts to review"}
         aside={states.length > 0 ? <span className="rd-pill review">{states.length} to review</span> : undefined}
         sub={
-          states.length > 0
+          states.length > 0 && tips
+            ? "Writing tips you missed on a first try. A part tip clears after 2 correct first tries at that part; an all-parts tip after 3."
+            : states.length > 0
             ? `Ideas you have missed in this quiz. Answer each one correctly ${TO_CLEAR} times in a row to clear it; your next attempts include extra questions on them.`
             : undefined
         }
@@ -89,7 +95,9 @@ export function ConceptPanel({
         </div>
       ) : states.length === 0 ? (
         <div className="section-empty">
-          All clear — nothing to review right now. Any concept you miss in a quiz will show up here.
+          {tips
+            ? "All clear — nothing to review right now. Any writing tip you miss on a first try will show up here."
+            : "All clear — nothing to review right now. Any concept you miss in a quiz will show up here."}
         </div>
       ) : (
         <ul className="concept-list">
@@ -101,7 +109,7 @@ export function ConceptPanel({
               return (
                 <li key={state.conceptId} className="concept-item">
                   <span className="concept-desc">{description}</span>
-                  <ConceptProgress count={state.count} />
+                  <ConceptProgress count={state.count} clearAfter={clearOf(state.conceptId)} />
                 </li>
               );
             }
@@ -111,7 +119,7 @@ export function ConceptPanel({
                   <summary>
                     <span className="concept-desc">{description}</span>
                     <span className="concept-end">
-                      <ConceptProgress count={state.count} />
+                      <ConceptProgress count={state.count} clearAfter={clearOf(state.conceptId)} />
                       <span className="concept-chev" aria-hidden="true" />
                     </span>
                   </summary>

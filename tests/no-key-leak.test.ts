@@ -26,6 +26,14 @@ const BANNED_KEYS = [
   "notes",
   "answers",
   "wrongExplanations",
+  // spec 007: the paragraph essay key (the brief and earlier models are released on purpose, by
+  // lib/grading.server.ts, and are checked separately below)
+  "markingNotes",
+  "models",
+  "commentary",
+  "modelPart",
+  "modelSoFar",
+  "laterSlots",
   // spec 006: the display-only grading data must never appear in the attempt-start payload
   // (it is delivered only with a phase's grade, or on resume after grading)
   "creditedSpans",
@@ -34,6 +42,12 @@ const BANNED_KEYS = [
   "phase2TermOutcomes",
   "languageNote",
 ];
+
+/**
+ * Offline teacher tasks (spec 007 R8) that read the paragraph essay key to build test cases and to
+ * re-mark. They run on a teacher's machine, never at request time and never in a bundle.
+ */
+const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts"]);
 
 describe("POST /api/attempts exposes no answer key, for every unit", () => {
   for (const unit of UNITS) {
@@ -78,7 +92,7 @@ describe("the answer-key registry stays server-only", () => {
   it("only lib/grading.server.ts imports content/answers (outside content/ itself and tests)", () => {
     const root = path.resolve(__dirname, "..");
     const offenders: string[] = [];
-    const skip = new Set(["node_modules", ".next", "content", "tests", ".git", "specs", ".specify", "resources"]);
+    const skip = new Set(["node_modules", ".next", "content", "tests", ".git", "specs", ".specify", "resources", ".cline"]);
     const walk = (dir: string) => {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         if (skip.has(entry.name)) continue;
@@ -87,7 +101,8 @@ describe("the answer-key registry stays server-only", () => {
         else if (/\.(ts|tsx)$/.test(entry.name)) {
           const rel = path.relative(root, full).split(path.sep).join("/");
           if (rel === "lib/grading.server.ts") continue;
-          if (/from\s+["']@\/content\/answers|from\s+["'][./]*content\/answers/.test(fs.readFileSync(full, "utf8"))) {
+          if (OFFLINE_KEY_READERS.has(rel)) continue;
+          if (/from\s+["']@\/content\/answers|from\s+["'][./]*content\/answers|content\/units\/[^"']+\/(?:answers|essays)["']/.test(fs.readFileSync(full, "utf8"))) {
             offenders.push(rel);
           }
         }
@@ -109,9 +124,9 @@ describe("no application code reads a unit's answers except through the key (spe
         if (entry.isDirectory()) walk(full);
         else if (/\.(ts|tsx)$/.test(entry.name)) {
           const rel = path.relative(root, full).split(path.sep).join("/");
-          if (allowed.has(rel)) continue;
+          if (allowed.has(rel) || OFFLINE_KEY_READERS.has(rel)) continue;
           const src = fs.readFileSync(full, "utf8");
-          if (/from\s+["'](?:@\/|(?:\.\.?\/)+)content\/(?:answers|units\/[^"']+\/answers)/.test(src)) offenders.push(rel);
+          if (/from\s+["'](?:@\/|(?:\.\.?\/)+)content\/(?:answers|units\/[^"']+\/(?:answers|essays))/.test(src)) offenders.push(rel);
         }
       }
     };
@@ -120,3 +135,115 @@ describe("no application code reads a unit's answers except through the key (spe
   });
 });
 
+
+// ---- the paragraph unit (spec 007): a staged release, never later parts or the notes ---------------
+
+import { paragraphDiscussion, paragraphQuestionView } from "@/lib/grading.server";
+import { paragraphStateFrom } from "@/lib/paragraph/state.server";
+import type { ParagraphPhaseRow, ParagraphVerdicts } from "@/lib/db/schema";
+import type { ParagraphQuestion } from "@/lib/types";
+
+import { gradeParagraph, q as pq, restoreParagraphEnv, setupParagraphEnv } from "./helpers/paragraph";
+import { startAttempt as startRoute } from "./helpers/routes";
+import { seedAttempt, seedResult } from "./helpers/fixtures";
+
+const PARA = "y12-economics-paragraph-writing";
+const paragraphQuestions = (UNITS.find((u) => u.id === PARA)!.questions as ParagraphQuestion[]).filter((x) => x.type === "paragraph");
+const escaped = (s: string) => JSON.stringify(s).slice(1, -1);
+/** A run long enough to be unmistakably the key's, short enough to survive JSON escaping. */
+const run = (s: string) => escaped(s).slice(0, 60);
+
+describe("paragraph unit: the question view and the discussion, for every shipped part", () => {
+  for (const question of paragraphQuestions) {
+    const key = getAnswer(question.id)!.paragraph!;
+    const { essay, part } = key;
+    it(`${question.id}: view has the earlier models and nothing else from the key; discussion has models up to this part and labels only`, () => {
+      const view = JSON.stringify(paragraphQuestionView(question.id));
+      for (let n = 1; n <= 5; n++) {
+        const model = essay.models[n as 1];
+        if (n < part) expect(view, `earlier model ${n}`).toContain(run(model));
+        else expect(view, `model ${n} (current or later)`).not.toContain(run(model));
+        expect(view, `notes ${n}`).not.toContain(run(essay.markingNotes[n as 1]));
+        expect(view, `commentary ${n}`).not.toContain(run(essay.commentary[n as 1]));
+      }
+
+      const disc = paragraphDiscussion(question.id)!;
+      const discText = JSON.stringify(disc);
+      for (let n = 1; n <= 5; n++) {
+        const model = essay.models[n as 1];
+        if (n <= part) expect(discText, `model ${n}`).toContain(run(model));
+        else expect(discText, `later model ${n}`).not.toContain(run(model));
+        expect(discText, `notes ${n}`).not.toContain(run(essay.markingNotes[n as 1]));
+        if (n !== part) expect(discText, `commentary ${n}`).not.toContain(run(essay.commentary[n as 1]));
+      }
+      expect(disc.modelSoFar).toHaveLength(part);
+      expect(disc.laterSlots).toHaveLength(5 - part);
+      for (const slot of disc.laterSlots) {
+        expect(Object.keys(slot).sort()).toEqual(["label", "part", "when"]);
+        expect(slot.label.length).toBeLessThan(30);
+      }
+    });
+  }
+});
+
+describe("paragraph unit: the resume state at every stage", () => {
+  const verdicts: ParagraphVerdicts = {
+    a: { met: true, reason: "r" }, b: { met: false, reason: "r" }, c: { met: true, reason: "r" },
+    d: { met: true, reason: "r", subs: { preciseLanguage: true, noPadding: true, withinLimit: true } },
+  };
+  const base = { phase1Text: "my text", phase1Mark: 3, phase1Verdicts: verdicts, phase1Feedback: "f", flaggedAt: null, mode: "marker", recordedMark: null, phase2Text: null, phase2Mark: null, phase2Verdicts: null, phase2Feedback: null, ending: null };
+  for (const question of paragraphQuestions) {
+    const { essay, part } = getAnswer(question.id)!.paragraph!;
+    it(`${question.id}: write and correct stages hold no current/later model, notes or commentary; discussion holds models up to this part`, () => {
+      const write = JSON.stringify(paragraphStateFrom(question.id, null, { phase1Draft: "draft", phase2Draft: "" }));
+      const correct = JSON.stringify(paragraphStateFrom(question.id, { ...base, status: "phase1", questionId: question.id } as unknown as ParagraphPhaseRow, null));
+      for (const stage of [write, correct]) {
+        for (let n = part; n <= 5; n++) expect(stage).not.toContain(run(essay.models[n as 1]));
+        for (let n = 1; n <= 5; n++) {
+          expect(stage).not.toContain(run(essay.markingNotes[n as 1]));
+          expect(stage).not.toContain(run(essay.commentary[n as 1]));
+        }
+        for (let n = 1; n < part; n++) expect(stage).toContain(run(essay.models[n as 1]));
+      }
+      const final = JSON.stringify(
+        paragraphStateFrom(question.id, { ...base, status: "final", ending: "corrected", recordedMark: 3, questionId: question.id } as unknown as ParagraphPhaseRow, null),
+      );
+      for (let n = 1; n <= part; n++) expect(final).toContain(run(essay.models[n as 1]));
+      for (let n = part + 1; n <= 5; n++) expect(final).not.toContain(run(essay.models[n as 1]));
+      for (let n = 1; n <= 5; n++) expect(final).not.toContain(run(essay.markingNotes[n as 1]));
+    });
+  }
+});
+
+describe("paragraph unit: through the routes (start at part 3, then grade under 4)", () => {
+  it("the start response has models 1 and 2 only, and a grade under 4 releases no model text", async () => {
+    const penv = await setupParagraphEnv();
+    try {
+      const { signedInStudent } = await import("./helpers/routes");
+      const user = await signedInStudent(penv);
+      const earlier = await seedAttempt(penv.db, user.id, { unitId: PARA, questionIds: [pq(1, 1)] });
+      await seedResult(penv.db, { attemptId: earlier.id, userId: user.id }, { unitId: PARA, questionId: pq(1, 1), marksAwarded: 1, maxMarks: 4, gradedBy: "llm" });
+      const earlier2 = await seedAttempt(penv.db, user.id, { unitId: PARA, questionIds: [pq(1, 2)] });
+      await seedResult(penv.db, { attemptId: earlier2.id, userId: user.id }, { unitId: PARA, questionId: pq(1, 2), marksAwarded: 0, maxMarks: 4, gradedBy: "llm" });
+
+      const started = await startRoute(PARA);
+      expect(started.questions[0].id).toBe(pq(1, 3));
+      const essay = getAnswer(pq(1, 3))!.paragraph!.essay;
+      const startText = JSON.stringify(started);
+      expect(startText).toContain(run(essay.models[1])); // whatever the student scored on it
+      expect(startText).toContain(run(essay.models[2]));
+      for (const n of [3, 4, 5]) expect(startText).not.toContain(run(essay.models[n as 1]));
+      for (const n of [1, 2, 3, 4, 5]) expect(startText).not.toContain(run(essay.markingNotes[n as 1]));
+      expect(allKeys(started).has("discussion")).toBe(false);
+
+      const graded = await gradeParagraph(started, pq(1, 3), "Some evidence. [met:ad]");
+      const gradedText = JSON.stringify(graded.body);
+      for (const n of [3, 4, 5]) expect(gradedText).not.toContain(run(essay.models[n as 1]));
+      for (const n of [1, 2, 3, 4, 5]) expect(gradedText).not.toContain(run(essay.markingNotes[n as 1]));
+      expect(graded.body.result.discussion).toBeUndefined();
+    } finally {
+      restoreParagraphEnv();
+      await penv.close();
+    }
+  });
+});

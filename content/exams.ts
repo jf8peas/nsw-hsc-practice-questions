@@ -4,7 +4,14 @@ import type { Exam } from "@/lib/types";
  * Upcoming exams. Shown on the home page and on unit pages they cover.
  * Past exams (date before today) are filtered out at render time.
  */
-export const EXAMS: Exam[] = [];
+export const EXAMS: Exam[] = [
+  {
+    id: "y12-econ-at1-2026",
+    title: "Year 12 Economics Assessment Task 1",
+    date: "2026-12-01",
+    unitIds: ["y12-economics-paragraph-writing"],
+  },
+];
 
 export function upcomingExams(now: Date = new Date()): Exam[] {
   const today = now.toISOString().slice(0, 10);

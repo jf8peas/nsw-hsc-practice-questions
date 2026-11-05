@@ -36,6 +36,13 @@
       "when": 1793660406190,
       "tag": "0004_yellow_flatman",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793842053899,
+      "tag": "0005_clammy_raider",
+      "breakpoints": true
     }
   ]
 }

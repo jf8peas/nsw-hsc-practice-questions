@@ -246,6 +246,9 @@ export interface AttemptPayload {
   passMark: number;
   questions: Question[];
   answered: Record<string, { marks: number; max: number }>;
+  /** spec 007: the essay bar and the question state for a paragraph attempt (released per Principle I). */
+  essay?: import("@/lib/paragraph/types").EssayBar;
+  paragraphState?: import("@/lib/paragraph/types").ParagraphState;
   /**
    * spec 005: per-question rewrite phase state for resume, built server-side from the phase
    * row. Exactly what the stage allows: nothing from the key before a phase 1 grade, the hint

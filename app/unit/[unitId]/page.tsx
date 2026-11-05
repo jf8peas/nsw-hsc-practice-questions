@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AttemptHistory } from "@/components/AttemptHistory";
 import { ClampedText } from "@/components/ClampedText";
 import { ConceptPanel } from "@/components/ConceptPanel";
+import { EssayBlock, essayButtonLabel } from "@/components/EssayBlock";
 import { Formula } from "@/components/Formula";
 import { HistoryUnavailable } from "@/components/HistoryUnavailable";
 import { SectionHead } from "@/components/SectionHead";
@@ -13,7 +14,8 @@ import { getUnit, unitIsNew } from "@/content";
 import { daysUntil, examsForUnit } from "@/content/exams";
 import { requirePageUser } from "@/lib/auth.server";
 import { loadConceptContentViewForPage, loadUnitConceptProgress } from "@/lib/db/queries/concepts.server";
-import { loadUnitHistory } from "@/lib/db/queries/history.server";
+import { load, loadUnitHistory } from "@/lib/db/queries/history.server";
+import { loadEssayProgressFor } from "@/lib/db/queries/sequence.server";
 
 export default async function UnitPage({
   params,
@@ -36,7 +38,14 @@ export default async function UnitPage({
     conceptProgress.status === "ok" && conceptProgress.data.length > 0
       ? await loadConceptContentViewForPage(conceptProgress.data.map((s) => s.conceptId))
       : undefined;
-  const resume = history.status === "ok" ? history.data.resume : null;
+  // a sequential unit (spec 007) shows the essay in progress; its start route resumes the part, so
+  // the usual "Continue attempt" button is not used
+  const essay = unit.sequence
+    ? degraded
+      ? ({ status: "unavailable" } as const)
+      : await load((db) => loadEssayProgressFor(db, user.id, unit))
+    : null;
+  const resume = !unit.sequence && history.status === "ok" ? history.data.resume : null;
 
   const exams = examsForUnit(unit.id);
 
@@ -66,7 +75,22 @@ export default async function UnitPage({
         })}
 
         <div className="start-actions">
-          {resume ? (
+          {essay ? (
+            essay.status === "unavailable" ? (
+              <p className="pg-notice" role="status">
+                We can&apos;t load your place in the essay right now. Try again in a moment.
+              </p>
+            ) : essay.data.finished ? (
+              <p className="pg-notice" role="status">
+                You&apos;ve finished every essay so far. New essays are added as they&apos;re written.
+              </p>
+            ) : (
+              <>
+                <EssayBlock progress={essay.data} />
+                <StartQuiz unitId={unit.id} label={essayButtonLabel(essay.data.nextPart)} />
+              </>
+            )
+          ) : resume ? (
             <>
               <Link
                 href={`/unit/${unit.id}/quiz?attempt=${resume.attemptId}`}

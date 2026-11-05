@@ -14,6 +14,11 @@ export interface Concept {
   description: string;
   /** The term this concept defines (rewrite units, spec 005): shown in bold before the description. */
   term?: string;
+  /**
+   * Correct first tries that clear this concept once missed (spec 007): 2 for a paragraph part
+   * tip, 3 (the default) for everything else. Public: holds no answers.
+   */
+  clearAfter?: 2 | 3;
 }
 
 /** Draw `n` questions whose `group` matches, per quiz attempt. */
@@ -73,6 +78,11 @@ export interface UnitMeta {
    * answer key. Public metadata: it holds no answers.
    */
   explanationsComplete?: boolean;
+  /**
+   * Set on a unit whose quiz is the NEXT part of one essay, not a random draw (spec 007).
+   * Public metadata: it holds no answers.
+   */
+  sequence?: { kind: "essay-parts"; parts: 5 };
   /** Formulas tested by this unit, shown on the unit page below Start quiz. */
   formulas?: FormulaRef[];
   /** A structured "how to" panel shown on the unit page below Start quiz. */
@@ -133,8 +143,29 @@ export interface RewriteQuestion extends BaseQuestion {
   type: "rewrite";
 }
 
+/**
+ * A paragraph-writing question (spec 007): one part of one essay. `prompt` is the essay question
+ * in full. The brief, models, guidance and marking notes are the answer key (SERVER ONLY).
+ * Worth 4 marks.
+ */
+export interface ParagraphQuestion extends BaseQuestion {
+  type: "paragraph";
+  group: "paragraph";
+  /** "e01": the essay this part belongs to. */
+  essayId: string;
+  /** 1-based position of the essay in the bank. */
+  essayNo: number;
+  /** 1 topic, 2 mechanism, 3 evidence, 4 evaluation, 5 link. */
+  part: 1 | 2 | 3 | 4 | 5;
+  /** The directive verb, lower case, a key of content/glossary.ts. */
+  verb: string;
+  /** The model economy, e.g. "Vietnam". */
+  economy: string;
+  maxMarks: 4;
+}
+
 /** Public question — no answer key. Safe to ship to the browser. */
-export type Question = McQuestion | ShortQuestion | RewriteQuestion;
+export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion;
 
 /** A full unit as consumed by the UI: metadata + public questions. */
 export interface Unit extends UnitMeta {
@@ -201,6 +232,45 @@ export interface Answer {
   targetTerms?: RewriteTargetTerm[];
   /** `rewrite` only: marking notes (accepted equivalents and common misuses), prose. */
   markingNotes?: string;
+  /** `paragraph` only (spec 007): the essay's key and which of its five parts this question is. */
+  paragraph?: { essay: EssayKey; part: 1 | 2 | 3 | 4 | 5 };
+}
+
+// ---- paragraph-writing key (spec 007). SERVER ONLY content: see content/units/y12-economics-paragraph-writing/essays.ts
+
+export type PartNo = 1 | 2 | 3 | 4 | 5;
+export type BriefField = "economy" | "argument" | "counterpoint" | "chainSteps" | "facts" | "limitation";
+export type LimitationTag = "inequality" | "sustainability" | "external-shocks" | "dependence" | "time-lags";
+
+export interface EssayKey {
+  /** Matches the questions' `essayId`. */
+  essayId: string;
+  economyType: "emerging" | "developing";
+  /** One line, goes to the marker. */
+  strategy: string;
+  brief: {
+    economy: string;
+    argument: string;
+    counterpoint: string;
+    chainSteps: string[];
+    /** Every figure carries its year. */
+    facts: string[];
+    limitation: string[];
+  };
+  /** The brief fields marked "Use in this part". */
+  uses: Record<PartNo, BriefField[]>;
+  /** "What this part must do": four plain lines per part, the last naming the word limit. */
+  guidance: Record<PartNo, [string, string, string, string]>;
+  /** The five model parts, each within its word limit. */
+  models: Record<PartNo, string>;
+  /** The text after the dash under "MODEL …" at the discussion. */
+  commentary: Record<PartNo, string>;
+  /** Marker only; never leaves the server. */
+  markingNotes: Record<PartNo, string>;
+  /** Anchors that make "the evaluation discusses the limitation the topic sentence framed" checkable. */
+  limitation: { tag: LimitationTag; topicPhrase: string; evaluationPhrase: string };
+  /** ISO date the content task last checked every figure against its source. */
+  figuresVerified: string;
 }
 
 /** Map of question id -> answer key, per unit. */

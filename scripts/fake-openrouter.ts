@@ -4,6 +4,7 @@
  *
  *   FAKE_REVIEW=pass|fail|fail-once|down npx tsx scripts/fake-openrouter.ts
  *   FAKE_VISION=pass|fail|illegible|not-answer npx tsx scripts/fake-openrouter.ts
+ *   FAKE_PARAGRAPH=pass|partial|fail|malformed|down|slow npx tsx scripts/fake-openrouter.ts
  *
  * then in .env.local:
  *   OPENROUTER_API_KEY=local-test
@@ -19,6 +20,16 @@
  *   fail       every vision request answers HTTP 500 (the model is unavailable)
  *   illegible  the transcription is unreadable (legible: false)
  *   not-answer the photo is not an answer to the question (answersQuestion: false)
+ *
+ *   FAKE_PARAGRAPH (spec 007, the paragraph marker). A directive in the student's text,
+ *   [met:abd], chooses the verdicts: a, b, c are the part's criteria and d is the conventions
+ *   (precise language and no padding); a letter missing from the directive is NOT met.
+ *   pass       no directive means all four met; with a directive it is obeyed
+ *   partial    no directive means a and d met, b and c not met; with a directive it is obeyed
+ *   fail       every request answers HTTP 500
+ *   down       every request answers HTTP 503
+ *   malformed  every reply is prose, not JSON (the app retries once, then the marker is unavailable)
+ *   slow       as pass, but each reply takes 12 seconds (to watch the marking status steps)
  *
  * Generators always answer. Each request is logged with its purpose and model. Development
  * tool only: it is never imported by the app.
@@ -42,6 +53,12 @@ if (!["pass", "partial", "fail", "down"].includes(REWRITE_MODE)) {
   process.exit(1);
 }
 
+const PARAGRAPH_MODE = (process.env.FAKE_PARAGRAPH ?? "pass") as "pass" | "partial" | "fail" | "malformed" | "down" | "slow";
+if (!["pass", "partial", "fail", "malformed", "down", "slow"].includes(PARAGRAPH_MODE)) {
+  console.error(`FAKE_PARAGRAPH must be pass, partial, fail, malformed, down or slow (got "${PARAGRAPH_MODE}")`);
+  process.exit(1);
+}
+
 const seenReviews = new Set<string>();
 
 const SVG =
@@ -59,6 +76,26 @@ function lineOf(text: string, label: string): string {
 
 function reply(content: string, status = 200) {
   return { status, body: JSON.stringify({ choices: [{ message: { content } }] }) };
+}
+
+/** The paragraph marker's reply (spec 007): verdicts from a [met:...] directive in the student's text. */
+function paragraphReply(user: string) {
+  const answer = /Student's [^\n]+:\n"""\n([\s\S]*?)\n"""/.exec(user)?.[1] ?? "";
+  const directive = /\[met:([abcd]*)\]/.exec(answer)?.[1];
+  const met = (k: string) =>
+    directive !== undefined ? directive.includes(k) : PARAGRAPH_MODE === "partial" ? k === "a" || k === "d" : true;
+  return reply(
+    JSON.stringify({
+      restated: "Fake restated text.",
+      criteria: {
+        a: { reason: met("a") ? "Fake: criterion a is met." : "Fake: criterion a is not met.", met: met("a") },
+        b: { reason: met("b") ? "Fake: criterion b is met." : "Fake: criterion b is not met.", met: met("b") },
+        c: { reason: met("c") ? "Fake: criterion c is met." : "Fake: criterion c is not met.", met: met("c") },
+      },
+      conventions: { reason: met("d") ? "Fake: formal and concise." : "Fake: informal wording.", preciseLanguage: met("d"), noPadding: met("d") },
+      feedback: "Fake paragraph marker: keep tying each point back to the question.",
+    }),
+  );
 }
 
 function handle(body: { model?: string; messages?: Array<{ role: string; content: unknown }> }) {
@@ -87,6 +124,14 @@ function handle(body: { model?: string; messages?: Array<{ role: string; content
     return reply(
       JSON.stringify({ transcription: "F = ma", legible: true, answersQuestion: true, notes: "" }),
     );
+  }
+
+  // Paragraph marking (spec 007): the system prompt starts "You are marking one part of a body paragraph".
+  if (/one part of a body paragraph/.test(system)) {
+    if (PARAGRAPH_MODE === "fail") return reply("", 500);
+    if (PARAGRAPH_MODE === "down") return reply("", 503);
+    if (PARAGRAPH_MODE === "malformed") return reply("I am sorry, I cannot give JSON today.");
+    return paragraphReply(user);
   }
 
   // Rewrite grading (spec 005, extended by spec 006): the system prompt names "sentence-writing".
@@ -163,7 +208,8 @@ createServer((req, res) => {
   req.on("end", () => {
     try {
       const out = handle(JSON.parse(raw));
-      res.writeHead(out.status, { "content-type": "application/json" }).end(out.body);
+      const delay = PARAGRAPH_MODE === "slow" && /one part of a body paragraph/.test(raw) ? 12_000 : 0;
+      setTimeout(() => res.writeHead(out.status, { "content-type": "application/json" }).end(out.body), delay);
     } catch (error) {
       console.error("[fake] bad request", error);
       res.writeHead(400).end("bad request");

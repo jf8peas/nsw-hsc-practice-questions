@@ -2,12 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Formula } from "@/components/Formula";
+import { ParagraphAttemptDetailView } from "@/components/paragraph/AttemptDetail";
 import { HistoryUnavailable } from "@/components/HistoryUnavailable";
 import { Shell } from "@/components/Shell";
 import { getQuestion, getUnit } from "@/content";
 import { requirePageUser } from "@/lib/auth.server";
 import { loadAttemptDetail } from "@/lib/db/queries/history.server";
 import { formatWhen } from "@/lib/format";
+import { PARTS, partKeyOf } from "@/lib/paragraph/parts";
 import { getOptionExplanation } from "@/lib/grading.server";
 
 /**
@@ -69,6 +71,11 @@ export default async function AttemptDetailPage({
               )}
             </div>
 
+            {q?.type === "paragraph" && (
+              <div className="pg-label">
+                Essay {q.essayNo} · {PARTS[partKeyOf(q.part)].name}
+              </div>
+            )}
             <div className="detail-q">
               {q ? (
                 q.formula ? (
@@ -85,7 +92,7 @@ export default async function AttemptDetailPage({
 
             {item.answered ? (
               <>
-                <div className="detail-answer">{item.answer}</div>
+                {!item.paragraph && <div className="detail-answer">{item.answer}</div>}
                 <div className="detail-marks">
                   {item.marks} / {item.max} marks
                   {item.gradedBy === "self" && " · self-marked"}
@@ -101,7 +108,10 @@ export default async function AttemptDetailPage({
                     </div>
                   </>
                 )}
-                {item.feedback && <p className="detail-feedback">{item.feedback}</p>}
+                {item.paragraph && q?.type === "paragraph" && (
+                  <ParagraphAttemptDetailView detail={item.paragraph} partNo={q.part} />
+                )}
+                {!item.paragraph && item.feedback && <p className="detail-feedback">{item.feedback}</p>}
                 {(() => {
                   // shown as the key reads now: nothing is stored per result (spec 002 FR-041)
                   const why =

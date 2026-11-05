@@ -1,5 +1,21 @@
 <!--
 Sync Impact Report
+- Version change: 2.13.0 → 2.14.0 (MINOR: materially expanded guidance in Principles I, II, VI and VII to allow the paragraph-writing unit's staged release of its essay key, its stored per-criterion verdicts and flag, its sequential draw and capped-correction ending, and the offline re-mark model).
+- Reason (amendment log): the paragraph-writing unit (spec 007) teaches a Band 6 body paragraph one part at a time. Before phase 1 is marked the student needs the brief, the guidance lines and the model text of the EARLIER parts of the essay; after phase 1 the per-criterion verdicts; at the discussion the current model part. Later parts' model text and the marking notes must never reach the browser. Each marked phase's verdicts, the marker's one-line reasons, the prompt version and a once-only flag must be stored so the marker can be revised from real use. Part tips clear after 2 correct first tries. The unit's draw is the next part of one essay, so it cannot start without reading results; and a correction that cannot be marked keeps the first-try mark instead of self-marking.
+- Modified principles:
+  - I. The Answer Key Never Reaches the Browser: paragraph-unit release schedule; the request fields now also list the phase number, per-criterion tick flags and the paragraph flag route's fields.
+  - II. Signed-In Students, Minimal Personal Data: paragraph phase row (texts, marks, per-criterion verdicts and reasons, prompt version, model, ending, recorded mark, flag); answer text may be copied without identity into local test files and re-marked by the same provider; the derived concept-count rule gains a clear-after number (3, or 2 for part tips).
+  - VI. Grading Is Fair, Explainable and Degrades Gracefully: a sequential unit does not start when the database cannot be read; a phase 2 failure or cap ends the question with the first-try mark.
+  - VII. Cost and Abuse Controls on Paid Paths: `REMARK_MODEL` is server-only, read by scripts only, and offline re-marks do not count against `LLM_DAILY_CAP`.
+- Added sections: none
+- Removed sections: none
+- Quality Gates: constitution check gains paragraph-unit key leakage; testing bullets gain the capped-correction ending, the clear-after counts and the concept rule wording.
+- Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ no change needed
+  - .specify/templates/spec-template.md ✅ no change needed
+  - .specify/templates/tasks-template.md ✅ no change needed
+  - specs/007-economics-paragraph-writing/* ✅ created with the amendment in mind
+- Follow-up TODOs: school consent wording gains one sentence about re-marking (tasks T071).
 - Version change: 2.12.0 → 2.13.0 (MINOR: materially expanded guidance in Principle II to allow the sentence-writing unit's display-only grading data and per-phase drafts to be stored with the attempt).
 - Reason (amendment log): the sentence-rewrite redesign (spec 006) shows the student the credited terms highlighted in their own sentence, the phase 2 term outcomes as status pills and an optional language note, and restores what the student had typed on resume from another device; the 2026-11-03 clarification requires the display-only grading data (credited spans for each phase, phase 2 term outcomes, language note) and the student's in-progress draft text for each phase to be saved with the attempt so a resumed or reloaded question shows the full result and restores the typed text. The data stays display only and never changes marks or concept tracking, which always come from the phase 1 outcomes.
 - Modified principles:
@@ -70,10 +86,11 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
 - Public files (`meta.ts`, `questions.ts`, `content/index.ts`) MUST NOT contain correct answers,
   model answers, rubrics or marking notes.
 - On answer-submission routes (grading, self-mark and save retry), the client MAY send only:
-  `questionId`, `answer`, an opaque `attemptId` together with the
-  server-issued signed attempt token; for a self-mark, a binary `correct` flag together with the
-  server-issued signed self-mark token; and, for a save retry, the server-issued signed result
-  receipt. The transcribe route (`POST /api/transcribe`) MAY accept 1-3 images and an optional note;
+  `questionId`, `answer`, a `phase` number (1 or 2), an opaque `attemptId` together with the
+  server-issued signed attempt token; for a self-mark, a binary `correct` flag or per-criterion
+  tick flags together with the server-issued signed self-mark token; for the paragraph unit's
+  flag route, `attemptId`, `questionId` and the signed attempt token; and, for a save retry, the
+  server-issued signed result receipt. The transcribe route (`POST /api/transcribe`) MAY accept 1-3 images and an optional note;
   `/api/grade` MAY accept the signed transcription token. The vision prompt gets no model answer or rubric.
 - The client MUST NOT send a user id, marks, max marks or grading method. The only exception is
   the binary self-mark flag, which the server accepts only with a valid token.
@@ -103,6 +120,16 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   screen, the model sentences and the full target-term set with definitions. Nothing from the key
   MAY reach the browser before phase 1 is graded (or has fallen back to self-marking), including
   on reload or resume.
+- [DECISION] The paragraph-writing unit (spec 007) MAY send part of its essay key to the browser
+  at defined moments, and only then. Before phase 1 is marked: the essay's brief, which brief
+  fields the part uses, the "What this part must do" lines, the directive verb's definition, and
+  the model text of the EARLIER parts of the same essay. After phase 1 is marked: the
+  per-criterion verdicts, the marker's one-line reasons and its overall feedback (never model
+  text). At the discussion or self-mark screen: the current part's model text and commentary,
+  the model text of the earlier parts, and labels (never text) for the later parts. Never, at any
+  moment, including on reload, resume or the attempt detail page: the model text of LATER parts,
+  the marking notes, or any model text in a tip. Earlier parts' model text MUST come through
+  functions exported from `lib/grading.server.ts`.
 
 Rationale: a practice tool whose answers can be read from the page source is worthless. The
 `server-only` import makes the build fail if client code ever pulls the key in.
@@ -132,13 +159,24 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     a phase row until the question is final and kept for the attempt detail page; and the student's
     in-progress draft text for each phase, stored in a draft row only until the question is final;
     all deleted with the student like results. The display data and drafts never change marks or
-    concept tracking, which always come from the phase 1 outcomes.
+    concept tracking, which always come from the phase 1 outcomes;
+  - per paragraph-writing question in an attempt (spec 007): the phase 1 and phase 2 texts, their
+    marks, the four per-criterion verdicts each with the marker's one-line reason, the overall
+    feedback shown, the prompt version and model that marked each phase, how the question ended
+    (marker, self-mark, or first-try mark kept because the correction could not be marked), the
+    recorded mark, and whether and when the student flagged the mark for review; stored in a phase
+    row, kept for the attempt detail page, deleted with the student like results. The student's
+    in-progress draft text is stored in the existing draft row. Verdicts, reasons and the flag
+    never change marks or concept tracking, which always come from the phase 1 outcomes.
   It MUST NOT store profile photos, Google tokens beyond what the session needs, or any other
   personal data without amending this constitution. Photos for transcription are never stored or logged;
   only the transcription (the "answer submitted") is stored. Answer photos are sent to an AI provider
   that may use them for training; school consent must state this and tell students to keep personal or
   sensitive information out of photos. Minimal observability metrics (hashed userId, questionId, outcome,
-  duration_ms, model) are allowed in logs (FR-026).
+  duration_ms, model) are allowed in logs (FR-026). Answer text and per-criterion results MAY be
+  copied, without any student identifier, into local test files outside the repository
+  (`/resources/`) to test and improve the marker, and re-marked by the same AI provider; school
+  consent must state this.
 - Student data MUST be stored in an Australian region (Neon Postgres, AWS ap-southeast-2 Sydney).
 - Retention: a student and all their data MUST be deleted automatically 2 years after their last
   activity (a scheduled job). Last activity is the later of last answer and last sign-in, or the
@@ -147,7 +185,8 @@ Rationale: a practice tool whose answers can be read from the page source is wor
 - Students are minors. Before production launch the project MUST have school approval / consent
   covering this data.
 - No new per-student fields. A student's concept counts MUST be derived from their stored
-  results, not stored separately: a wrong answer sets the concept's count to 3, a correct answer
+  results, not stored separately: a wrong answer sets the concept's count to its clear-after number
+  (3, or 2 for a concept whose `concepts.ts` entry declares `clearAfter: 2`), a correct answer
   takes 1 away, and the concept clears at 0.
 - Other server-side state is limited to rate-limit and daily-cap counters (Principle VII)
   and shared concept content. Shared concept content is, per concept id: the summary and the
@@ -245,6 +284,13 @@ but the README does not yet say so.
   it is not refunded when the student reads and then leaves without marking.
 - [DECISION] When a student is over the LLM daily cap, short answers fall back to self-marking
   (`needsSelfMark`), exactly like an LLM failure.
+- [DECISION] A unit whose draw is sequential (spec 007) cannot choose its next question without
+  reading the student's results. If the database cannot be read, such a unit does not start a
+  quiz: it shows a notice and asks the student to try again; it MUST NOT guess a question.
+- [DECISION] On a correction (phase 2) of the paragraph-writing unit, a daily-cap or LLM failure
+  ends the question with the first-try mark and the discussion; the correction is never
+  self-marked and no error is shown. At phase 1 the self-marking fallback applies as for other
+  units.
 - [DECISION] MC grading MUST be instant and server-side. It requires sign-in like everything
   else, but has no daily cap.
 - [DECISION] Results MUST be saved for both MC and short answers. If saving fails, the student
@@ -296,6 +342,9 @@ block practice.
   toward the concept-generation cap.
 - `VISION_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. Photo reads count
   against `LLM_DAILY_CAP` (one slot per question, no separate cap).
+- `REMARK_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. It is read only by
+  `scripts/**` for the offline re-mark of full-mark paragraph answers, which does not count
+  against `LLM_DAILY_CAP`.
 - In production, missing auth or database config MUST fail closed (refuse to serve), never fall
   back to open access. In local development only, a documented dev-login MAY stand in for Google,
   and results MAY be stored in a local or branch database. Without `OPENROUTER_API_KEY`, short
@@ -362,6 +411,7 @@ Every feature plan MUST satisfy:
   - no MC explanation in any client bundle;
   - illustrations are rendered only through `<img>`;
   - concept generation enforces its own cap;
+  - the paragraph unit's later-part model text and marking notes never leave the server;
   - every question copied from a school paper shows its source (school, year, paper type,
     question number), no real HSC question is included, and no diagram is a scanned image.
 - Testing: authorization and cost-control logic MUST ship with automated tests covering:
@@ -370,8 +420,9 @@ Every feature plan MUST satisfy:
   - production fails closed when auth/DB config is missing;
   - the daily cap falls back to self-marking;
   - the concept cap falls back to descriptions only;
-  - concept counts follow the rule: a wrong answer sets the count to 3, a correct answer takes 1
-    away, and the concept clears at 0;
+  - concept counts follow the rule: a wrong answer sets the count to the concept's clear-after
+    number (3, or 2 for part tips), a correct answer takes 1 away, and the concept clears at 0;
+  - the paragraph unit's capped-correction ending keeps the first-try mark and shows no error;
   - the regenerate route rejects non-allowlisted emails;
   - an item that fails review twice is never shown to students.
   Other logic MAY have tests but is not required to.
@@ -398,4 +449,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.13.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-03
+**Version**: 2.14.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-05

@@ -36,6 +36,9 @@ import { conceptOfQuestionId as y12EconGlobalTags } from "./units/y12-economics-
 import { meta as y12EconSentenceMeta } from "./units/y12-economics-sentence-writing/meta";
 import { questions as y12EconSentenceQuestions } from "./units/y12-economics-sentence-writing/questions";
 import { concepts as y12EconSentenceConcepts, retired as y12EconSentenceRetired } from "./units/y12-economics-sentence-writing/concepts";
+import { meta as y12EconParagraphMeta } from "./units/y12-economics-paragraph-writing/meta";
+import { questions as y12EconParagraphQuestions } from "./units/y12-economics-paragraph-writing/questions";
+import { concepts as y12EconParagraphConcepts, retired as y12EconParagraphRetired } from "./units/y12-economics-paragraph-writing/concepts";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -92,6 +95,12 @@ export const UNITS: Unit[] = [
     questions: y12EconSentenceQuestions,
     concepts: y12EconSentenceConcepts,
     retired: y12EconSentenceRetired,
+  },
+  {
+    ...y12EconParagraphMeta,
+    questions: y12EconParagraphQuestions,
+    concepts: y12EconParagraphConcepts,
+    retired: y12EconParagraphRetired,
   },
 ];
 

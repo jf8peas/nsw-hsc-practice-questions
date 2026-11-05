@@ -2,12 +2,13 @@ import "server-only";
 
 import { and, desc, eq, sql } from "drizzle-orm";
 
+import { listParagraphPhases } from "./paragraph-phases.server";
 import { listRewritePhases } from "./rewrite-phases.server";
 
 import { getQuestion } from "@/content";
 import { finalizeIfComplete } from "@/lib/attempts/complete.server";
 import { DbUnavailableError, dbCall, type Db } from "@/lib/db/index.server";
-import { attempts, results } from "@/lib/db/schema";
+import { attempts, results, type ParagraphVerdicts } from "@/lib/db/schema";
 import { attemptPercent, bestLatest, trend, type Trend } from "@/lib/stats";
 
 import { getAttemptForUser } from "./attempts.server";
@@ -30,6 +31,8 @@ export interface AttemptSummary {
   answered: number;
   /** Questions drawn. */
   total: number;
+  /** The first question drawn; a paragraph attempt (spec 007) is exactly one part of one essay. */
+  firstQuestionId?: string | null;
   /** Rounded percentage of the marks available for the answers given. */
   percent: number;
 }
@@ -79,11 +82,43 @@ export interface AttemptItem {
   phase2Answer?: string | null;
   phase1Marks?: number | null;
   phase2Marks?: number | null;
+  /** `paragraph` only (spec 007 FR-036): both tries with their per-criterion verdicts and reasons. */
+  paragraph?: ParagraphAttemptDetail | null;
+}
+
+export interface ParagraphAttemptPhase {
+  text: string;
+  mark: number;
+  criteria: Array<{ key: "a" | "b" | "c" | "d"; met: boolean; reason: string }>;
+  feedback: string;
+}
+export interface ParagraphAttemptDetail {
+  phase1: ParagraphAttemptPhase;
+  phase2: ParagraphAttemptPhase | null;
+  /** full_marks | corrected | no_correction | self_mark; null while the correction is pending. */
+  ending: string | null;
+  recordedMark: number | null;
+  selfMarked: boolean;
+  flagged: boolean;
 }
 
 export interface AttemptDetail {
   attempt: AttemptSummary;
   items: AttemptItem[];
+}
+
+function paragraphPhaseOf(
+  text: string,
+  mark: number,
+  verdicts: ParagraphVerdicts,
+  feedback: string | null,
+): ParagraphAttemptPhase {
+  return {
+    text,
+    mark,
+    criteria: (["a", "b", "c", "d"] as const).map((key) => ({ key, met: verdicts[key].met, reason: verdicts[key].reason })),
+    feedback: feedback ?? "",
+  };
 }
 
 // ---- pure queries (take the Db and the SESSION user's id, never a client id) --
@@ -97,6 +132,7 @@ async function summaries(db: Db, userId: string, unitId?: string): Promise<Attem
       startedAt: attempts.startedAt,
       completedAt: attempts.completedAt,
       total: sql<number>`cardinality(${attempts.questionIds})::int`,
+      firstQuestionId: sql<string | null>`${attempts.questionIds}[1]`,
       marks: sql<number>`coalesce(sum(${results.marksAwarded}), 0)::int`,
       max: sql<number>`coalesce(sum(${results.maxMarks}), 0)::int`,
       answered: sql<number>`count(${results.id})::int`,
@@ -181,12 +217,15 @@ export async function attemptDetail(
   const byQuestion = new Map(rows.map((r) => [r.questionId, r]));
   const phaseRows = await listRewritePhases(db, userId, row.id);
   const phaseByQuestion = new Map(phaseRows.map((p) => [p.questionId, p]));
+  const paragraphRows = await listParagraphPhases(db, userId, row.id);
+  const paragraphByQuestion = new Map(paragraphRows.map((p) => [p.questionId, p]));
 
   const marks = rows.reduce((s, r) => s + r.marksAwarded, 0);
   const max = rows.reduce((s, r) => s + r.maxMarks, 0);
   const items: AttemptItem[] = row.questionIds.map((questionId) => {
     const r = byQuestion.get(questionId);
     const ph = phaseByQuestion.get(questionId);
+    const pg = paragraphByQuestion.get(questionId);
     return {
       questionId,
       retired: getQuestion(questionId) === undefined,
@@ -202,6 +241,19 @@ export async function attemptDetail(
       phase2Answer: ph?.phase2Answer ?? null,
       phase1Marks: ph?.phase1Marks ?? null,
       phase2Marks: ph?.phase2Marks ?? null,
+      paragraph: pg
+        ? {
+            phase1: paragraphPhaseOf(pg.phase1Text, pg.phase1Mark, pg.phase1Verdicts, pg.phase1Feedback),
+            phase2:
+              pg.phase2Text && pg.phase2Verdicts && pg.phase2Mark !== null
+                ? paragraphPhaseOf(pg.phase2Text, pg.phase2Mark, pg.phase2Verdicts, pg.phase2Feedback)
+                : null,
+            ending: pg.ending,
+            recordedMark: pg.recordedMark,
+            selfMarked: pg.mode === "self_mark",
+            flagged: pg.flaggedAt !== null,
+          }
+        : null,
     };
   });
   return {

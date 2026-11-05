@@ -9,6 +9,7 @@ import { loadWeighting, type Weighting } from "@/lib/concepts/weighting.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { createAttempt } from "@/lib/db/queries/attempts.server";
 import { checkAttemptRateLimit } from "@/lib/ratelimit.server";
+import { startSequential } from "@/lib/paragraph/start.server";
 import { signAttemptToken } from "@/lib/tokens.server";
 
 export const runtime = "nodejs";
@@ -47,6 +48,45 @@ export async function POST(req: Request) {
         status: 429,
         headers: rl.retryAfter ? { "retry-after": String(rl.retryAfter) } : undefined,
       },
+    );
+  }
+
+  // A sequential unit (spec 007): the next part of the student's essay, derived from their results.
+  // Not random and not weighted; two tabs starting at once end on the same attempt. It cannot guess
+  // a place without reading results, so an unreadable database is a 503 (constitution Principle VI).
+  if (unit.sequence) {
+    if (session.kind !== "user") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    const started = await startSequential(user.id, unit);
+    if (started.kind === "unavailable") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    if (started.kind === "finished") {
+      return NextResponse.json({ finished: true, essayTotal: started.essayTotal }, { status: 200 });
+    }
+    const { attempt, question } = started;
+    const attemptToken = signAttemptToken({
+      uid: user.id,
+      attemptId: attempt.id,
+      unitId: unit.id,
+      questionIds: [question.id],
+      mcOptionOrder: {},
+    });
+    return NextResponse.json(
+      {
+        attemptId: attempt.id,
+        attemptToken,
+        persisted: true,
+        unitId: unit.id,
+        passMark: unit.quiz?.passMark ?? DEFAULT_PASS_MARK,
+        questions: [question],
+        answered: {},
+        essay: started.essay,
+        paragraphState: started.paragraphState,
+        ...(started.created ? {} : { resumed: true }),
+      },
+      { status: started.created ? 201 : 200 },
     );
   }
 

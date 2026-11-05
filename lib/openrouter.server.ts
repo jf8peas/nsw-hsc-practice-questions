@@ -6,7 +6,7 @@ import "server-only";
 // back to student self-marking.
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "deepseek/deepseek-chat";
+export const DEFAULT_MODEL = "deepseek/deepseek-chat";
 const TIMEOUT_MS = 20_000;
 
 /**

@@ -18,6 +18,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -74,6 +75,11 @@ export const attempts = pgTable(
     index("attempts_incomplete_idx")
       .on(t.userId, t.unitId)
       .where(sql`${t.completedAt} is null`),
+    // spec 007: a paragraph-unit part can have only one attempt per student, so two tabs starting
+    // at once end up on the same attempt (research R1). Partial: other units are unaffected.
+    uniqueIndex("attempts_paragraph_part_unique")
+      .on(t.userId, sql`(${t.questionIds}[1])`)
+      .where(sql`${t.unitId} = 'y12-economics-paragraph-writing'`),
   ],
 );
 
@@ -171,6 +177,93 @@ export const rewritePhases = pgTable(
     ),
     check("rewrite_phases_final_mark", sql`${t.status} <> 'final' or ${t.recordedMark} is not null`),
     index("rewrite_phases_user_unit_idx").on(t.userId, t.unitId),
+  ],
+);
+
+/** spec 007: one criterion's verdict with the marker's one-line reason. */
+export interface ParagraphCriterionVerdict {
+  met: boolean;
+  /** The marker's one line; "" on the self-mark path. */
+  reason: string;
+  /** Criterion d only: the halves of the conventions criterion. */
+  subs?: { preciseLanguage: boolean; noPadding: boolean; withinLimit: boolean };
+}
+export type ParagraphVerdicts = Record<"a" | "b" | "c" | "d", ParagraphCriterionVerdict>;
+
+/**
+ * spec 007: one row per question in a paragraph-writing attempt. Phase 1 and phase 2 text, marks,
+ * the four per-criterion verdicts with the marker's reasons, the prompt version and model that
+ * marked each phase, how the question ended, and the once-only flag. Created at phase 1, kept for
+ * the attempt detail page, deleted with the student. A `results` row is created only when the
+ * question is final. Verdicts, reasons and the flag never change marks or concept tracking.
+ */
+export const paragraphPhases = pgTable(
+  "paragraph_phases",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    attemptId: uuid("attempt_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    unitId: text("unit_id").notNull(),
+    questionId: text("question_id").notNull(),
+    /** phase1 | final */
+    status: text("status").notNull(),
+    /** marker | self_mark */
+    mode: text("mode").notNull(),
+    /** full_marks | corrected | no_correction | self_mark; null until final */
+    ending: text("ending"),
+    phase1Text: text("phase1_text").notNull(),
+    phase1Mark: smallint("phase1_mark").notNull(),
+    phase1Verdicts: jsonb("phase1_verdicts").$type<ParagraphVerdicts>().notNull(),
+    phase1Feedback: text("phase1_feedback"),
+    phase1PromptVersion: text("phase1_prompt_version"),
+    phase1Model: text("phase1_model"),
+    phase1GradedAt: ts("phase1_graded_at").notNull().defaultNow(),
+    phase2Text: text("phase2_text"),
+    phase2Mark: smallint("phase2_mark"),
+    phase2Verdicts: jsonb("phase2_verdicts").$type<ParagraphVerdicts>(),
+    phase2Feedback: text("phase2_feedback"),
+    phase2PromptVersion: text("phase2_prompt_version"),
+    phase2Model: text("phase2_model"),
+    phase2GradedAt: ts("phase2_graded_at"),
+    recordedMark: smallint("recorded_mark"),
+    /** Set once, when the student presses "This mark seems wrong". Never changes a mark. */
+    flaggedAt: ts("flagged_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "paragraph_phases_attempt_owner_fk",
+      columns: [t.attemptId, t.userId],
+      foreignColumns: [attempts.id, attempts.userId],
+    }).onDelete("cascade"),
+    unique("paragraph_phases_attempt_question_unique").on(t.attemptId, t.questionId),
+    check("paragraph_phases_status", sql`${t.status} in ('phase1', 'final')`),
+    check("paragraph_phases_mode", sql`${t.mode} in ('marker', 'self_mark')`),
+    check(
+      "paragraph_phases_ending",
+      sql`${t.ending} is null or ${t.ending} in ('full_marks', 'corrected', 'no_correction', 'self_mark')`,
+    ),
+    check("paragraph_phases_phase1_mark", sql`${t.phase1Mark} >= 0 and ${t.phase1Mark} <= 4`),
+    check(
+      "paragraph_phases_phase2_mark",
+      sql`${t.phase2Mark} is null or (${t.phase2Mark} >= 0 and ${t.phase2Mark} <= 3)`,
+    ),
+    check(
+      "paragraph_phases_final_shape",
+      sql`${t.status} <> 'final' or (${t.recordedMark} is not null and ${t.ending} is not null)`,
+    ),
+    check(
+      "paragraph_phases_recorded_is_higher",
+      sql`${t.recordedMark} is null or ${t.recordedMark} = greatest(${t.phase1Mark}, coalesce(${t.phase2Mark}, 0))`,
+    ),
+    check("paragraph_phases_flag_needs_marker", sql`${t.flaggedAt} is null or ${t.mode} = 'marker'`),
+    index("paragraph_phases_user_unit_idx").on(t.userId, t.unitId),
+    index("paragraph_phases_flagged_idx")
+      .on(t.flaggedAt)
+      .where(sql`${t.flaggedAt} is not null`),
   ],
 );
 
@@ -354,6 +447,8 @@ export type Attempt = typeof attempts.$inferSelect;
 export type ResultRow = typeof results.$inferSelect;
 export type NewResultRow = typeof results.$inferInsert;
 export type RewritePhaseRow = typeof rewritePhases.$inferSelect;
+export type ParagraphPhaseRow = typeof paragraphPhases.$inferSelect;
+export type NewParagraphPhaseRow = typeof paragraphPhases.$inferInsert;
 export type NewRewritePhaseRow = typeof rewritePhases.$inferInsert;
 export type RewriteDraftRow = typeof rewriteDrafts.$inferSelect;
 export type NewRewriteDraftRow = typeof rewriteDrafts.$inferInsert;

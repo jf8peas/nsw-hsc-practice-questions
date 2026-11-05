@@ -10,6 +10,7 @@ import { answers as y12PhysCircPracAnswers } from "../units/y12-physics-circular
 import { answers as y11EconEssayAnswers } from "../units/y11-economics-essay-scaffold/answers";
 import { answers as y12EconGlobalAnswers } from "../units/y12-economics-global-economy/answers";
 import { answers as y12EconSentenceAnswers } from "../units/y12-economics-sentence-writing/answers";
+import { answers as y12EconParagraphAnswers } from "../units/y12-economics-paragraph-writing/answers";
 
 /**
  * The answer-key registry. SERVER ONLY — the "server-only" import above makes
@@ -26,6 +27,7 @@ const ALL_ANSWERS: AnswerSet = {
   ...y12PhysCircPracAnswers,
   ...y12EconGlobalAnswers,
   ...y12EconSentenceAnswers,
+  ...y12EconParagraphAnswers,
 };
 
 export function getAnswer(questionId: string): Answer | undefined {

@@ -15,6 +15,7 @@ import { FORMULA_HTML } from "../content/formulas.generated";
 import {
   validateConceptRules,
   validateExplanationRules,
+  validateParagraphRules,
   validateRewriteRules,
   validateShippedIds,
   type ShippedIds,
@@ -87,6 +88,7 @@ async function main() {
     for (const m of validateConceptRules(unit)) err(m);
     for (const m of validateExplanationRules(unit, answers)) err(m);
     for (const m of validateRewriteRules(unit, answers)) err(m);
+    for (const m of validateParagraphRules(unit, answers)) err(m);
 
     for (const q of unit.questions) {
       if (!q.id.startsWith(`${unit.id}.`)) {
@@ -110,7 +112,9 @@ async function main() {
         err(`${q.id}: no entry in answers.ts`);
         continue;
       }
-      if (!a.rubric || a.rubric.length === 0) {
+      if (q.type === "paragraph") {
+        // the essay key is checked by the paragraph rules (spec 007 FR-039); no rubric or model answer
+      } else if (!a.rubric || a.rubric.length === 0) {
         err(`${q.id}: rubric must have at least one point`);
       } else if (q.type === "short" && a.rubric.length !== q.maxMarks) {
         err(`${q.id}: short rubric has ${a.rubric.length} points but maxMarks is ${q.maxMarks}`);
@@ -132,8 +136,8 @@ async function main() {
         if (new Set(q.options).size !== q.options.length) {
           err(`${q.id}: mc has duplicate option text`);
         }
-      } else if (q.type === "rewrite") {
-        // model sentences and target terms are checked by the rewrite rules (FR-008)
+      } else if (q.type === "rewrite" || q.type === "paragraph") {
+        // model sentences, target terms and essay keys are checked by their own rules (FR-008, spec 007)
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);
       }

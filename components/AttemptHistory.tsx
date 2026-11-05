@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { SectionHead } from "@/components/SectionHead";
+import { getQuestion } from "@/content";
+import { PARTS, partKeyOf } from "@/lib/paragraph/parts";
 import { formatWhen } from "@/lib/format";
 import type { UnitHistory } from "@/lib/db/queries/history.server";
 
@@ -9,6 +11,13 @@ import type { UnitHistory } from "@/lib/db/queries/history.server";
  * "Past attempts" (each attempt, newest first, opening to its answers). Best and latest come
  * from COMPLETED attempts only; unfinished attempts are listed and labelled "incomplete".
  */
+/** A paragraph attempt (spec 007) is named for its essay and part: "Essay 3 · Mechanism". */
+function attemptName(questionId: string | null | undefined): string | null {
+  const found = questionId ? getQuestion(questionId) : undefined;
+  if (!found || found.question.type !== "paragraph") return null;
+  return `Essay ${found.question.essayNo} · ${PARTS[partKeyOf(found.question.part)].short}`;
+}
+
 export function AttemptHistory({ history }: { history: UnitHistory }) {
   const { attempts, best, latest, completed } = history;
   const show = (v: number | null) => (v === null ? "—" : `${v}%`);
@@ -71,7 +80,7 @@ export function AttemptHistory({ history }: { history: UnitHistory }) {
                 <Link href={`/attempts/${a.id}`} className="unit-attempt">
                   <span className="unit-attempt-main">
                     <span className="unit-attempt-name">
-                      Attempt {attempts.length - i}
+                      {attemptName(a.firstQuestionId) ?? `Attempt ${attempts.length - i}`}
                       {a.completedAt === null && (
                         <span className="rd-pill warn" title={`${a.answered} of ${a.total} answered`}>
                           incomplete

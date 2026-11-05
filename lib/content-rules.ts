@@ -5,7 +5,10 @@
 // units and answer sets, and tests/content-rules.test.ts feeds it small fixtures. Every
 // message starts with the unit or question id it is about.
 
-import type { AnswerSet, Unit } from "@/lib/types";
+import { GLOSSARY } from "@/content/glossary";
+import { LIMITS, PART_ORDER, TIPS, conceptIdsForPart, tipConceptId } from "@/lib/paragraph/parts";
+import type { AnswerSet, BriefField, EssayKey, ParagraphQuestion, PartNo, Unit } from "@/lib/types";
+import { countWords } from "@/lib/wordcount";
 
 export const MAX_CONCEPT_DESCRIPTION = 120;
 
@@ -116,7 +119,7 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
       if (explanations !== undefined) errors.push(`${q.id}: short questions cannot have wrongExplanations`);
       continue;
     }
-    if (q.type === "rewrite") continue; // no options to explain (spec 005)
+    if (q.type === "rewrite" || q.type === "paragraph") continue; // no options to explain (spec 005, 007)
 
     const correct = a.correctText ?? (typeof a.correctIndex === "number" ? q.options[a.correctIndex] : undefined);
     if (explanations !== undefined) {
@@ -235,5 +238,182 @@ export function validateShippedIds(snapshot: ShippedIds, units: Unit[]): string[
     }
   }
 
+  return errors;
+}
+
+
+// ---- paragraph-writing rules (spec 007 FR-039, research R2) --------------------------------
+
+const BRIEF_FIELDS: BriefField[] = ["economy", "argument", "counterpoint", "chainSteps", "facts", "limitation"];
+const LIMITATION_TAGS = ["inequality", "sustainability", "external-shocks", "dependence", "time-lags"];
+/** A figure placeholder from the design (US$x bn, 0.xxx), a TODO, or the design's own caveat. */
+const PLACEHOLDER_RE = /\bUS\$x\b|\b0\.x{2,}\b|\bx{1,3}\b(?=\s*(?:bn|%|m\b))|\bTODO\b|\bTBC\b|supplied by the content task/i;
+/** The shortest run of key text that must never appear in a public file. */
+const LEAK_RUN = 30;
+/**
+ * A longer run for the essay question itself: it legitimately shares everyday wording with the model
+ * ("the impact of globalisation on"), because the Link is meant to echo the question's words.
+ */
+const PROMPT_LEAK_RUN = 60;
+
+/** Every number, percentage or year-like token in a text, e.g. "774%", "16.8%", "1986". */
+function figuresIn(text: string): string[] {
+  return (text.match(/\d[\d,]*(?:\.\d+)?%?/g) ?? []).map((t) => t.replace(/[,.]+$/, ""));
+}
+
+function briefText(b: EssayKey["brief"]): string {
+  return [b.economy, b.argument, b.counterpoint, ...b.chainSteps, ...b.facts, ...b.limitation].join("\n");
+}
+
+/** Every string of an essay key that must stay server-side (models, notes, brief). */
+function keyTexts(e: EssayKey): string[] {
+  return [
+    ...Object.values(e.models),
+    ...Object.values(e.markingNotes),
+    e.brief.argument,
+    e.brief.counterpoint,
+    ...e.brief.chainSteps,
+    ...e.brief.facts,
+    ...e.brief.limitation,
+  ];
+}
+
+/**
+ * Paragraph-writing rules: the 17 tips and their clear-after counts; the bank shape (five parts
+ * per essay, ids `eNNpK` in order); per essay all five parts with a model within its word limit,
+ * four guidance lines (the last naming the limit), the brief fields each part uses, commentary and
+ * marking notes; the counterpoint thread (anchor phrases in the Topic Sentence and Evaluation
+ * models); no figure in a model that the brief lacks (FR-007); no placeholder figures; a past
+ * `figuresVerified` date; and no run of key text in any public file (Principle I).
+ */
+export function validateParagraphRules(unit: Unit, answers: AnswerSet, today: Date = new Date()): string[] {
+  const errors: string[] = [];
+  const questions = unit.questions.filter((q): q is ParagraphQuestion => q.type === "paragraph");
+  if (questions.length === 0) return errors;
+
+  // the 17 tips
+  const concepts = new Map((unit.concepts ?? []).map((c) => [c.id, c]));
+  if (concepts.size !== TIPS.length) {
+    errors.push(`${unit.id}: expected the 17 tips as concepts, found ${concepts.size}`);
+  }
+  for (const tip of TIPS) {
+    const c = concepts.get(tipConceptId(tip.slug));
+    if (!c) errors.push(`${unit.id}: missing tip concept ${tipConceptId(tip.slug)}`);
+    else if ((c.clearAfter ?? 3) !== tip.clearAfter) {
+      errors.push(`${c.id}: clearAfter must be ${tip.clearAfter} (part tips 2, all-parts tips 3)`);
+    }
+  }
+
+  // bank shape
+  if (questions.length % 5 !== 0) errors.push(`${unit.id}: ${questions.length} paragraph questions; a bank is a multiple of 5 (5 parts per essay)`);
+  const byEssay = new Map<string, ParagraphQuestion[]>();
+  for (const q of questions) byEssay.set(q.essayId, [...(byEssay.get(q.essayId) ?? []), q]);
+
+  const publicTexts: Array<{ text: string; run: number }> = [
+    { text: unit.description, run: LEAK_RUN },
+    ...(unit.guide?.items.map((i) => ({ text: i.text, run: LEAK_RUN })) ?? []),
+    ...(unit.concepts ?? []).map((c) => ({ text: c.description, run: LEAK_RUN })),
+    ...questions.map((q) => ({ text: q.prompt, run: PROMPT_LEAK_RUN })),
+  ];
+
+  let essayIndex = 0;
+  for (const [essayId, qs] of byEssay) {
+    essayIndex += 1;
+    const label = `${unit.id} ${essayId}`;
+    if (qs.length !== 5) errors.push(`${label}: ${qs.length} parts; an essay has 5 parts`);
+    qs.forEach((q, i) => {
+      if (q.part !== i + 1) errors.push(`${q.id}: part ${q.part} is out of order (expected part ${i + 1})`);
+      if (q.id !== `${unit.id}.${essayId}p${i + 1}`) errors.push(`${q.id}: id must be ${unit.id}.${essayId}p${i + 1}`);
+      if (q.essayNo !== essayIndex) errors.push(`${q.id}: essayNo ${q.essayNo} but this is essay ${essayIndex} in the bank`);
+      if (q.maxMarks !== 4) errors.push(`${q.id}: maxMarks must be 4`);
+      if (q.prompt !== qs[0].prompt || q.verb !== qs[0].verb) errors.push(`${q.id}: every part of an essay must share its question and verb`);
+      const want = conceptIdsForPart(PART_ORDER[i]);
+      if (JSON.stringify(q.concepts ?? []) !== JSON.stringify(want)) {
+        errors.push(`${q.id}: concepts must be the part's tips ${want.join(", ")}`);
+      }
+    });
+
+    const verb = qs[0].verb;
+    if (!(verb in GLOSSARY)) errors.push(`${label}: verb "${verb}" is not in content/glossary.ts`);
+    if (!new RegExp(`\\b${verb}\\b`, "i").test(qs[0].prompt)) errors.push(`${label}: the question does not contain its verb "${verb}"`);
+
+    const key: EssayKey | undefined = answers[qs[0].id]?.paragraph?.essay;
+    if (!key) {
+      errors.push(`${label}: no essay key in answers.ts`);
+      continue;
+    }
+    for (const q of qs) {
+      if (answers[q.id]?.paragraph?.essay !== key) errors.push(`${q.id}: its answer entry must point at the essay's one key`);
+    }
+    if (key.essayId !== essayId) errors.push(`${label}: key essayId is ${key.essayId}`);
+
+    // per part
+    for (let i = 0; i < 5; i++) {
+      const no = (i + 1) as PartNo;
+      const limit = LIMITS[PART_ORDER[i]];
+      const model = key.models[no];
+      if (!model || !model.trim()) errors.push(`${label}: missing model for part ${no}`);
+      else if (countWords(model) > limit) {
+        errors.push(`${label}: part ${no} model is ${countWords(model)} words (limit ${limit})`);
+      }
+      const g = key.guidance[no];
+      if (!g || g.length !== 4 || g.some((l) => !l.trim())) errors.push(`${label}: part ${no} needs 4 non-empty guidance lines`);
+      else if (!g[3].includes(`${limit} words`)) errors.push(`${label}: part ${no} guidance line 4 must name the limit ("${limit} words")`);
+      const uses = key.uses[no];
+      if (!uses || uses.length === 0) errors.push(`${label}: part ${no} uses no brief field`);
+      else for (const f of uses) if (!BRIEF_FIELDS.includes(f)) errors.push(`${label}: part ${no} uses unknown brief field "${f}"`);
+      if (!key.commentary[no]?.trim()) errors.push(`${label}: part ${no} has no commentary`);
+      if (!key.markingNotes[no]?.trim()) errors.push(`${label}: part ${no} has no marking notes`);
+    }
+
+    // brief fields present
+    const b = key.brief;
+    for (const [name, v] of Object.entries({ economy: b.economy, argument: b.argument, counterpoint: b.counterpoint })) {
+      if (!v.trim()) errors.push(`${label}: brief ${name} is empty`);
+    }
+    for (const [name, v] of Object.entries({ chainSteps: b.chainSteps, facts: b.facts, limitation: b.limitation })) {
+      if (v.length === 0 || v.some((x) => !x.trim())) errors.push(`${label}: brief ${name} is empty`);
+    }
+
+    // counterpoint thread
+    if (!LIMITATION_TAGS.includes(key.limitation.tag)) errors.push(`${label}: unknown limitation tag "${key.limitation.tag}"`);
+    if (!key.models[1]?.toLowerCase().includes(key.limitation.topicPhrase.toLowerCase())) {
+      errors.push(`${label}: limitation.topicPhrase is not in the model Topic Sentence`);
+    }
+    if (!key.models[4]?.toLowerCase().includes(key.limitation.evaluationPhrase.toLowerCase())) {
+      errors.push(`${label}: limitation.evaluationPhrase is not in the model Evaluation`);
+    }
+
+    // no new facts: every figure in a model is in the brief
+    const brief = briefText(b);
+    for (let i = 0; i < 5; i++) {
+      const no = (i + 1) as PartNo;
+      for (const fig of new Set(figuresIn(key.models[no] ?? ""))) {
+        if (!brief.includes(fig)) errors.push(`${label}: part ${no} model has the figure "${fig}" that the brief does not`);
+      }
+    }
+
+    // placeholders
+    const everyText = [brief, ...Object.values(key.models), ...Object.values(key.commentary), ...Object.values(key.guidance).flat()];
+    if (everyText.some((t) => PLACEHOLDER_RE.test(t))) errors.push(`${label}: contains a placeholder (US$x, 0.xxx, TODO, TBC or "supplied by the content task")`);
+
+    // verified date
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key.figuresVerified ?? "")) {
+      errors.push(`${label}: figuresVerified must be an ISO date`);
+    } else if (new Date(key.figuresVerified + "T00:00:00Z").getTime() > today.getTime()) {
+      errors.push(`${label}: figuresVerified is in the future`);
+    }
+
+    // public files hold no key text (Principle I)
+    for (const k of keyTexts(key)) {
+      for (let s = 0; s + LEAK_RUN <= k.length; s += 5) {
+        const hit = publicTexts.find((p) => s + p.run <= k.length && p.text.includes(k.slice(s, s + p.run)));
+        if (hit !== undefined) {
+          errors.push(`${label}: public text contains a run of key text ("${k.slice(s, s + 30)}…"): model parts, notes and the brief stay server-side`);
+          break;
+        }
+      }
+    }
+  }
   return errors;
 }

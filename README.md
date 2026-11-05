@@ -305,6 +305,7 @@ content/
 | `y12-physics-advanced-mechanics` | Module 5 Advanced Mechanics (2017 syllabus, examined in the 2027 HSC) — see `docs/y12-physics-advanced-mechanics-research.md`. 180 MC + 180 SA, every question copied word for word from a school trial or half-yearly paper with its source shown (no HSC questions). Gravitation 90/90, projectiles 54/54, circular motion 36/36, weighted like the HSC. SVG diagrams from a per-unit `diagram.ts` (orbits, banked tracks, force diagrams, graphs). Draws 5 MC + 4 SA (MC first). |
 | `y12-physics-circular-motion-practical` | Preparation for the whirling-bung practical (Module 5 dot point C1) — see `resources/topic007/` (the student's practical guide, the Qwen research prompt, its batches and `03-review.md`). 30 original short-answer questions (2–4 marks) on the aim and variables, apparatus, procedure, the Mg = mv²/r model, the v² vs r graph, data processing, measuring r, errors and recording. Draws 5 SA per attempt. `meta.guide` shows the key relationships. |
 | `y12-economics-global-economy` | HSC Economics Topic 1: The Global Economy (2009 syllabus, examined in the 2027 HSC) — see `docs/y12-economics-global-economy-research.md`. 96 MC + 73 SA (73 MC + 64 SA copied word for word from school trial papers with their source shown, 23 MC + 9 SA original to fill syllabus gaps; no HSC questions). 14 concepts, 19 redrawn market diagrams and 13 data tables. Draws 5 MC + 4 SA (MC first). |
+| `y12-economics-paragraph-writing` | Writing economics paragraphs (spec 007): the paragraph-level sequel to sentence writing. Students build a Band 6 body paragraph one part at a time (Topic Sentence, Theoretical Mechanism, Evidence & Application, Evaluation & Limitation, Linking Judgement). A quiz is one part of one essay; the next quiz continues the same essay, chosen in order from the student's results (not random). Each part is marked out of 4 on three part criteria plus conventions (precise language, within the part's word limit) by the AI marker built from `lib/paragraph/rubric.json`; a first try under 4 gets tips for the lost criteria and one correction capped at 3; the recorded mark is the higher try. If the marker is unavailable at the first try the student self-marks (ticks); if it is unavailable for the correction the first-try mark stands. Essays live in `content/units/y12-economics-paragraph-writing/` (briefs, model parts and marking notes are server-only). 17 writing tips as concepts (part tips clear after 2 correct first tries, all-parts tips after 3). "This mark seems wrong" flags an answer for offline review (`npm run paragraph-flags`; `npm run paragraph-remark` re-marks full-mark answers with a stronger model; `python scripts/pilot-paragraph-marker.py --gate` reruns every labelled case). Sources: `docs/y12-economics-paragraph-writing-research.md`. |
 | `y12-economics-sentence-writing` | Economics Sentence Writing (spec 005): 61 original sentence-writing questions for HSC Economics Topic 1 (2009 syllabus, examined in the 2027 HSC). The student rewrites a plain-English sentence as one concise sentence in economics language, graded out of 3 (meaning and cause-effect kept; every target term used correctly, all or nothing; concise within 25 words). Scores under 3 get a hinted retry capped at 2 marks, then the model sentence and feedback. 31 tracked terms as concepts. Draws 5 per attempt. |
 
 ### Adding a unit
@@ -361,6 +362,8 @@ Production and Preview **separately** (Preview must use a different database).
 | `GRADE_RATE_LIMIT` | no | short-answer submissions per student per minute (default 20) |
 | `GRADE_IP_RATE_LIMIT` | no | looser per-IP backstop per minute (default 150) |
 | `ATTEMPT_RATE_LIMIT` | no | attempts a student can start per minute (default 20) |
+| `FLAG_RATE_LIMIT` | no | "This mark seems wrong" flags per student per minute (default 10; paragraph unit, never AI-graded) |
+| `REMARK_MODEL` | no | scripts only (`npm run paragraph-remark`): a model STRONGER than `GRADING_MODEL` that re-marks a sample of full-mark paragraph answers offline; never read at request time and never counted against `LLM_DAILY_CAP` |
 | `DRAFT_RATE_LIMIT` | no | sentence-writing draft saves per student per minute (default 30; never AI-graded, never counted against `LLM_DAILY_CAP`) |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` | no | distributed rate limiting (create the database in `ap-southeast-2`); falls back to in-memory |
 | `CONCEPT_MODEL` | no | model that writes concept summaries (default `deepseek/deepseek-chat`) |
@@ -384,7 +387,8 @@ a stable preview domain registered as a redirect URI in the Google OAuth client.
 students' name, email and results — including that the text they type for short
 answers is sent to a third-party AI service for marking, and that answer photos
 are sent to an AI provider that may use them for training (students must keep
-personal or sensitive information out of photos) — and a named person who
+personal or sensitive information out of photos) — and that some answers may be re-marked later, without the student's name, to check and
+improve the marker (paragraph unit, spec 007) — and a named person who
 handles `npm run delete-student` requests.
 
 Locally, copy `.env.example` to `.env.local`. `.env.local` is gitignored — never

@@ -32,6 +32,11 @@ export function StartQuiz({
       router.push(`/unit/${unitId}/quiz?attempt=${result.attemptId}`);
       return; // keep the button busy while navigating
     }
+    if (result.finished) {
+      router.refresh(); // the unit page now shows the "finished every essay" state
+      setBusy(false);
+      return;
+    }
     setError(result.error);
     setSignedOut(Boolean(result.unauthenticated));
     setBusy(false);

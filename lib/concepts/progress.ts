@@ -4,7 +4,8 @@
 // the answers were given, using each question's CURRENT concept tag. A plain module with no I/O,
 // no secrets and no answer key, so it is cheap to test and safe anywhere.
 //
-//   a wrong answer sets the concept's count to 3
+//   a wrong answer sets the concept's count to its clear-after number (3, or 2 for a concept
+//   that declares `clearAfter: 2`, spec 007)
 //   a correct answer (full marks) takes 1 away, never below 0
 //   a concept at 0 is cleared and is not listed
 
@@ -60,13 +61,14 @@ export function conceptProgress(unit: Unit, results: readonly ConceptResult[]): 
     (a, b) => a.answeredAt.getTime() - b.answeredAt.getTime() || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
   );
 
+  const startOf = new Map((unit.concepts ?? []).map((c) => [c.id, c.clearAfter ?? MAX_COUNT] as const));
   const state = new Map<string, { count: number; lastMissedAt: Date | null }>();
   const apply = (concept: string, correct: boolean, at: Date) => {
     const current = state.get(concept) ?? { count: 0, lastMissedAt: null };
     if (correct) {
       current.count = Math.max(0, current.count - 1);
     } else {
-      current.count = MAX_COUNT;
+      current.count = startOf.get(concept) ?? MAX_COUNT;
       current.lastMissedAt = at;
     }
     state.set(concept, current);

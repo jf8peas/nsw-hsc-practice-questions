@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
 import type { Db } from "@/lib/db/index.server";
 import { attempts, type Attempt } from "@/lib/db/schema";
@@ -94,6 +94,43 @@ export async function markAttemptCompleted(db: Db, userId: string, attemptId: st
     .where(and(eq(attempts.id, attemptId), eq(attempts.userId, userId), isNull(attempts.completedAt)))
     .returning({ id: attempts.id });
   return rows.length > 0;
+}
+
+/**
+ * Start (or rejoin) the one attempt for a part of a sequential unit (spec 007, research R1). The
+ * partial unique index `attempts_paragraph_part_unique` makes a second insert for the same
+ * student and first question id conflict, so two tabs starting at once end on the same attempt.
+ */
+export async function createSequentialAttempt(
+  db: Db,
+  input: { id: string; userId: string; unitId: string; questionId: string },
+): Promise<{ attempt: Attempt; created: boolean }> {
+  const inserted = await db
+    .insert(attempts)
+    .values({
+      id: input.id,
+      userId: input.userId,
+      unitId: input.unitId,
+      questionIds: [input.questionId],
+      mcOptionOrder: {},
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (inserted[0]) return { attempt: inserted[0], created: true };
+  const existing = await db
+    .select()
+    .from(attempts)
+    .where(
+      and(
+        eq(attempts.userId, input.userId),
+        eq(attempts.unitId, input.unitId),
+        sql`${attempts.questionIds}[1] = ${input.questionId}`,
+      ),
+    )
+    .orderBy(desc(attempts.startedAt))
+    .limit(1);
+  if (!existing[0]) throw new Error("sequential attempt vanished after a conflict");
+  return { attempt: existing[0], created: false };
 }
 
 /** The student's most recent unfinished attempt at a unit, if any. */

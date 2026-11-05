@@ -7,6 +7,7 @@ import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { deleteRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 import { finaliseRewritePhase, getRewritePhase, insertRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
 import { getResult } from "@/lib/db/queries/results.server";
+import { handleParagraphSelfMark } from "@/lib/paragraph/self-mark-handler.server";
 import { buildReceipt, saveResult, type ResultFields } from "@/lib/results/save.server";
 import {
   attemptFieldsOf,
@@ -44,7 +45,9 @@ export async function POST(req: Request) {
   const attemptId = typeof body.attemptId === "string" ? body.attemptId : "";
   const questionId = typeof body.questionId === "string" ? body.questionId : "";
   const answer = typeof body.answer === "string" ? body.answer.slice(0, MAX_ANSWER_LEN) : "";
-  if (!attemptId || !questionId || typeof body.correct !== "boolean") return bad("invalid_request");
+  // a short answer sends a binary `correct`; a paragraph part sends per-criterion `ticks` (spec 007)
+  const hasTicks = Boolean(body.ticks) && typeof body.ticks === "object";
+  if (!attemptId || !questionId || (typeof body.correct !== "boolean" && !hasTicks)) return bad("invalid_request");
 
   const attemptToken = verifyAttemptToken(body.attemptToken, { uid: user.id, attemptId });
   if (!attemptToken.ok) return bad("invalid_attempt_token");
@@ -60,6 +63,9 @@ export async function POST(req: Request) {
   if (!token.questionIds.includes(questionId)) return bad("not_found", 404);
   const found = getQuestion(questionId);
   if (!found) return bad("not_found", 404);
+  if (found.question.type === "paragraph") {
+    return handleParagraphSelfMark(user, body, token, found.question, degraded);
+  }
   if (found.question.type === "rewrite") {
     return handleRewriteSelfMark(user, body, token, degraded, found.question.maxMarks);
   }
