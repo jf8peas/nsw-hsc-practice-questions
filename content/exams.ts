@@ -6,6 +6,12 @@ import type { Exam } from "@/lib/types";
  */
 export const EXAMS: Exam[] = [
   {
+    id: "y12-phys-at1-2026",
+    title: "Year 12 Physics Assessment Task 1",
+    date: "2026-11-18",
+    unitIds: ["y12-physics-task1-exam-practice", "y12-physics-circular-motion-practical"],
+  },
+  {
     id: "y12-econ-at1-2026",
     title: "Year 12 Economics Assessment Task 1",
     date: "2026-12-01",

@@ -7,6 +7,7 @@ import { answers as y11EconPreliminaryAnswers } from "../units/y11-economics-pre
 import { answers as y11PhysPreliminaryAnswers } from "../units/y11-physics-preliminary/answers";
 import { answers as y12PhysAdvMechAnswers } from "../units/y12-physics-advanced-mechanics/answers";
 import { answers as y12PhysCircPracAnswers } from "../units/y12-physics-circular-motion-practical/answers";
+import { answers as y12PhysTask1Answers } from "../units/y12-physics-task1-exam-practice/answers";
 import { answers as y11EconEssayAnswers } from "../units/y11-economics-essay-scaffold/answers";
 import { answers as y12EconGlobalAnswers } from "../units/y12-economics-global-economy/answers";
 import { answers as y12EconSentenceAnswers } from "../units/y12-economics-sentence-writing/answers";
@@ -25,6 +26,7 @@ const ALL_ANSWERS: AnswerSet = {
   ...y11EconEssayAnswers,
   ...y12PhysAdvMechAnswers,
   ...y12PhysCircPracAnswers,
+  ...y12PhysTask1Answers,
   ...y12EconGlobalAnswers,
   ...y12EconSentenceAnswers,
   ...y12EconParagraphAnswers,
