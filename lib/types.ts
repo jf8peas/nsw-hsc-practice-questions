@@ -245,7 +245,8 @@ export type LimitationTag = "inequality" | "sustainability" | "external-shocks" 
 export interface EssayKey {
   /** Matches the questions' `essayId`. */
   essayId: string;
-  economyType: "emerging" | "developing";
+  /** "emerging and developing" for an essay that compares one of each (e.g. China and Nepal). */
+  economyType: "emerging" | "developing" | "emerging and developing";
   /** One line, goes to the marker. */
   strategy: string;
   brief: {

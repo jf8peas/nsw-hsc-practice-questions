@@ -73,7 +73,7 @@ describe("POST /api/paragraph/flag", () => {
     const { started, questionId, req } = await finalAnswer();
     expect((await flag({})).status).toBe(400);
     expect((await flag({ ...req, attemptToken: "nope" })).status).toBe(401);
-    expect((await flag({ ...req, questionId: "y12-economics-paragraph-writing.e01p2" })).status).toBe(404);
+    expect((await flag({ ...req, questionId: "y12-economics-paragraph-writing.e03p2" })).status).toBe(404);
     expect((await flag({ ...req, questionId: "y11-physics-preliminary.q1" })).status).toBe(404);
 
     await signedInStudent(env); // a different student

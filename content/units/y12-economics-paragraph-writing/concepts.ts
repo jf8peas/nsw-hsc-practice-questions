@@ -1,5 +1,5 @@
 import type { Concept } from "@/lib/types";
-import { TIPS, tipConceptId } from "@/lib/paragraph/parts";
+import { TIPS, conceptIdsForPart, tipConceptId } from "@/lib/paragraph/parts";
 
 // PUBLIC — the 17 tracked writing tips of this unit (spec 007): three per part and the two
 // shared conventions tips, one per criterion. Wording lives in lib/paragraph/parts.ts so the tip
@@ -14,5 +14,19 @@ export const concepts: Concept[] = TIPS.map((t) => ({
   clearAfter: t.clearAfter,
 }));
 
-/** Questions removed from this unit, with the concept(s) each carried. None so far. */
-export const retired: Record<string, string | string[] | null> = {};
+/**
+ * Questions removed from this unit, with the concepts each carried. e01 (Vietnam) and e02
+ * (Bangladesh) were archived on 17 Nov 2026 (content/archive/y12-economics-paragraph-writing/).
+ */
+export const retired: Record<string, string | string[] | null> = {
+  "y12-economics-paragraph-writing.e01p1": conceptIdsForPart("topic"),
+  "y12-economics-paragraph-writing.e01p2": conceptIdsForPart("mechanism"),
+  "y12-economics-paragraph-writing.e01p3": conceptIdsForPart("evidence"),
+  "y12-economics-paragraph-writing.e01p4": conceptIdsForPart("evaluation"),
+  "y12-economics-paragraph-writing.e01p5": conceptIdsForPart("link"),
+  "y12-economics-paragraph-writing.e02p1": conceptIdsForPart("topic"),
+  "y12-economics-paragraph-writing.e02p2": conceptIdsForPart("mechanism"),
+  "y12-economics-paragraph-writing.e02p3": conceptIdsForPart("evidence"),
+  "y12-economics-paragraph-writing.e02p4": conceptIdsForPart("evaluation"),
+  "y12-economics-paragraph-writing.e02p5": conceptIdsForPart("link"),
+};

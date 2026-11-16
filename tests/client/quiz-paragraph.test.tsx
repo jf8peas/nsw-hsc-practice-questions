@@ -30,8 +30,8 @@ const UID = "6f0b6a53-3a39-4a3e-8d5b-0b2f6f3c9d11";
 const ATTEMPT = "44444444-3a39-4a3e-8d5b-0b2f6f3c9d11";
 const UNIT = "y12-economics-paragraph-writing";
 const questionOf = (id: string) => UNITS.find((u) => u.id === UNIT)!.questions.find((q) => q.id === id) as ParagraphQuestion;
-const Q3 = `${UNIT}.e01p3`; // Evidence & Application: limit 80, uses chain steps and facts
-const Q5 = `${UNIT}.e01p5`;
+const Q3 = `${UNIT}.e03p3`; // Evidence & Application: limit 80, uses chain steps and facts
+const Q5 = `${UNIT}.e03p5`;
 
 const crit = (met: string, reason = "A reason."): CriterionView[] =>
   (["a", "b", "c", "d"] as const).map((key) => ({

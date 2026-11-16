@@ -69,7 +69,7 @@ describe("paragraph drafts", () => {
     const { started, questionId } = await startParagraph();
     const bad = await draft({ attemptId: started.attemptId, attemptToken: "nope", questionId, phase: 1, draft: "x" });
     expect(bad.status).toBe(401);
-    const other = await draft({ attemptId: started.attemptId, attemptToken: started.attemptToken, questionId: "y12-economics-paragraph-writing.e01p2", phase: 1, draft: "x" });
+    const other = await draft({ attemptId: started.attemptId, attemptToken: started.attemptToken, questionId: "y12-economics-paragraph-writing.e03p2", phase: 1, draft: "x" });
     expect(other.status).toBe(404);
   });
 });

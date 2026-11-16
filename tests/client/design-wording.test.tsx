@@ -25,7 +25,7 @@ vi.mock("next/link", () => ({
 }));
 
 const UNIT = "y12-economics-paragraph-writing";
-const Q3 = `${UNIT}.e01p3`;
+const Q3 = `${UNIT}.e03p3`;
 const question = UNITS.find((u) => u.id === UNIT)!.questions.find((q) => q.id === Q3) as ParagraphQuestion;
 const crit = (met: string): CriterionView[] =>
   (["a", "b", "c", "d"] as const).map((key) => ({ key, met: met.includes(key), reason: "Because." }));
@@ -142,8 +142,8 @@ describe("discussion", () => {
   });
 
   it("the footer names the next essay after the Link", () => {
-    expect(paragraphDiscussion(`${UNIT}.e01p5`)!.next).toEqual({ kind: "essay", essayNo: 2, part: 1, name: "Topic Sentence" });
-    expect(paragraphDiscussion(`${UNIT}.e02p5`)!.next).toEqual({ kind: "none" }); // the last essay in the shipped bank
-    expect(paragraphDiscussion(`${UNIT}.e01p2`)!.next).toEqual({ kind: "part", essayNo: 1, part: 3, name: "Evidence & Application" });
+    expect(paragraphDiscussion(`${UNIT}.e03p5`)!.next).toEqual({ kind: "essay", essayNo: 2, part: 1, name: "Topic Sentence" });
+    expect(paragraphDiscussion(`${UNIT}.e08p5`)!.next).toEqual({ kind: "none" }); // the last essay in the shipped bank
+    expect(paragraphDiscussion(`${UNIT}.e03p2`)!.next).toEqual({ kind: "part", essayNo: 1, part: 3, name: "Evidence & Application" });
   });
 });

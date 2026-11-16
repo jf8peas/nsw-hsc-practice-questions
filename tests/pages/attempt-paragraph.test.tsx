@@ -25,7 +25,7 @@ afterEach(async () => {
 });
 
 const UNIT = "y12-economics-paragraph-writing";
-const QID = `${UNIT}.e01p3`;
+const QID = `${UNIT}.e03p3`;
 const raw = (a: boolean, b: boolean, c: boolean, d = true) => ({
   a: { met: a, reason: "Used the figures with years." },
   b: { met: b, reason: "The figures are listed, not explained." },

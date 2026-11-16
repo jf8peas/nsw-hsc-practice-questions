@@ -2,6 +2,7 @@ import { vi } from "vitest";
 
 import { setupTestEnv, type TestEnv } from "./env";
 import { post, startAttempt, type StartedAttempt } from "./routes";
+import { ESSAYS } from "@/content/units/y12-economics-paragraph-writing/questions";
 
 // Test helpers for the paragraph unit (spec 007): a stubbed model that answers like the fake
 // OpenRouter (scripts/fake-openrouter.ts): the student's text can carry a directive [met:abd] that
@@ -12,7 +13,8 @@ import { post, startAttempt, type StartedAttempt } from "./routes";
 export const PARAGRAPH_UNIT = "y12-economics-paragraph-writing";
 export const REASON = "MOCK-REASON-7731";
 export const FEEDBACK = "MOCK-FEEDBACK-4417";
-export const q = (essay: number, part: number) => `${PARAGRAPH_UNIT}.e${String(essay).padStart(2, "0")}p${part}`;
+/** The question id of part `part` of the n-th essay IN THE LIVE BANK (1-based), whatever its essay id. */
+export const q = (essay: number, part: number) => `${PARAGRAPH_UNIT}.${ESSAYS[essay - 1].essayId}p${part}`;
 
 export type ChatMock = ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
 

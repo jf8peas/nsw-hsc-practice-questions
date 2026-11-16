@@ -2,6 +2,7 @@
 // dots with the recorded marks, the Continue/Start button, "Things I need to know", the finished
 // and database-down states, and the exam row.
 
+import { ESSAYS } from "@/content/units/y12-economics-paragraph-writing/questions";
 import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -22,7 +23,7 @@ afterEach(async () => {
 });
 
 const UNIT = "y12-economics-paragraph-writing";
-const qid = (part: number) => `${UNIT}.e01p${part}`;
+const qid = (part: number) => `${UNIT}.${ESSAYS[0].essayId}p${part}`;
 
 function findAll(node: ReactNode, match: (el: ReactElement) => boolean, out: ReactElement[] = []) {
   if (Array.isArray(node)) node.forEach((n) => findAll(n, match, out));
@@ -49,7 +50,7 @@ async function setup() {
   return me;
 }
 async function answered(userId: string, part: number, marks: number, outcomes?: ReturnType<typeof conceptOutcomes>, essay = 1) {
-  const id = `${UNIT}.e0${essay}p${part}`;
+  const id = `${UNIT}.${ESSAYS[essay - 1].essayId}p${part}`; // the live bank, in order
   const a = await seedAttempt(env.db, userId, { unitId: UNIT, questionIds: [id], completedAt: new Date() });
   await seedResult(env.db, { attemptId: a.id, userId }, { unitId: UNIT, questionId: id, marksAwarded: marks, maxMarks: 4, gradedBy: "llm", conceptOutcomes: outcomes ?? null });
 }
@@ -65,8 +66,8 @@ describe("the essay in progress", () => {
     const block = findAll(tree, named("EssayBlock"))[0];
     expect(block).toBeDefined();
     const html = staticOf(block);
-    expect(html).toContain("Essay 1 of 2 · next: Topic Sentence");
-    expect(html).toContain("Model economy: Vietnam");
+    expect(html).toContain(`Essay 1 of ${ESSAYS.length} · next: Topic Sentence`);
+    expect(html).toContain("Model economy: China");
     expect(html).toContain('aria-label="Essay 1 parts"');
     expect(html).toContain("Evaluate"); // the directive verb, highlighted
     expect(html).toContain('<mark class="pg-verb">Evaluate</mark>');
@@ -92,8 +93,7 @@ describe("the essay in progress", () => {
 
   it("when every essay is finished: the message, no essay block, no start button", async () => {
     const me = await setup();
-    for (let p = 1; p <= 5; p++) await answered(me.id, p, 3);
-    for (let p = 1; p <= 5; p++) await answered(me.id, p, 3, undefined, 2);
+    for (let e = 1; e <= ESSAYS.length; e++) for (let p = 1; p <= 5; p++) await answered(me.id, p, 3, undefined, e);
     const tree = await render();
     expect(findAll(tree, named("EssayBlock"))).toHaveLength(0);
     expect(findAll(tree, named("StartQuiz"))).toHaveLength(0);

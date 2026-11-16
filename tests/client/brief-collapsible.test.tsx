@@ -27,7 +27,7 @@ vi.mock("next/link", () => ({
 }));
 
 const UNIT = "y12-economics-paragraph-writing";
-const qid = (part: number) => `${UNIT}.e01p${part}`;
+const qid = (part: number) => `${UNIT}.e03p${part}`;
 const questionOf = (part: number) => UNITS.find((u) => u.id === UNIT)!.questions.find((q) => q.id === qid(part)) as ParagraphQuestion;
 const crit = (met: string): CriterionView[] => (["a", "b", "c", "d"] as const).map((key) => ({ key, met: met.includes(key), reason: "Because." }));
 

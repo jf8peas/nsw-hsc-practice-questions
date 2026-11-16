@@ -2,6 +2,7 @@
 // FR-035): the next part in order from recorded marks, one essay in progress, two tabs, an unfinished
 // part offered again with its saved state, the finished state, and a database that cannot be read.
 
+import { ESSAYS } from "@/content/units/y12-economics-paragraph-writing/questions";
 import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -49,9 +50,14 @@ describe("the next part, in order, from recorded marks", () => {
   });
 
   it("each finished part moves the student to the next, across essays, never skipping one, until the bank is done", async () => {
+    // walking the whole bank (5 parts per essay) starts and grades more than a student could per
+    // minute, so lift the per-minute limits for this test only
+    vi.stubEnv("ATTEMPT_RATE_LIMIT", "1000");
+    vi.stubEnv("GRADE_RATE_LIMIT", "1000");
+    vi.stubEnv("GRADE_IP_RATE_LIMIT", "1000");
     env = await setupParagraphEnv();
     await signedInStudent(env);
-    for (const essay of [1, 2]) {
+    for (let essay = 1; essay <= ESSAYS.length; essay++) {
       for (let part = 1; part <= 5; part++) {
         const r = await start();
         expect(r.status, `essay ${essay} part ${part}`).toBe(201);
@@ -65,8 +71,9 @@ describe("the next part, in order, from recorded marks", () => {
     // the shipped bank is finished: no attempt is created
     const done = await start();
     expect(done.status).toBe(200);
-    expect(done.body).toMatchObject({ finished: true, essayTotal: 2 });
-    expect(await attemptRows()).toHaveLength(10);
+    expect(done.body).toMatchObject({ finished: true, essayTotal: ESSAYS.length });
+    expect(await attemptRows()).toHaveLength(5 * ESSAYS.length);
+    vi.unstubAllEnvs();
   });
 
   it("a part finished with the correction capped still counts, and the essay bar shows the recorded mark", async () => {

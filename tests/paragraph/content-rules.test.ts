@@ -7,7 +7,7 @@ import type { AnswerSet, EssayKey, Unit } from "@/lib/types";
 
 const unitOf = (): Unit => structuredClone(UNITS.find((u) => u.id === "y12-economics-paragraph-writing")!);
 const answersOf = (): AnswerSet => structuredClone(realAnswers);
-const essayOf = (a: AnswerSet): EssayKey => a["y12-economics-paragraph-writing.e01p1"].paragraph!.essay;
+const essayOf = (a: AnswerSet): EssayKey => a["y12-economics-paragraph-writing.e03p1"].paragraph!.essay;
 
 /** Mutate the (single shared) essay object so all five answers see the change. */
 function withEssay(mutate: (e: EssayKey) => void, today?: Date): string[] {
@@ -33,7 +33,7 @@ describe("five parts, limits and guidance", () => {
     const errs = withEssay((e) => {
       (e.models as Record<number, string>)[3] = "";
     });
-    expect(errs.join("\n")).toMatch(/e01.*model.*part 3|part 3.*model/i);
+    expect(errs.join("\n")).toMatch(/e03.*model.*part 3|part 3.*model/i);
   });
   it("fails when a model part is over its word limit", () => {
     const errs = withEssay((e) => {

@@ -13,7 +13,7 @@ import { decidingTry, noteFor } from "../../scripts/paragraph-flags";
 import { CASE_KEYS, exportFieldCases, type PilotEssay, type PilotFile } from "../../scripts/paragraph-field-cases";
 import type { ParagraphPhaseRow, ParagraphVerdicts } from "@/lib/db/schema";
 
-const Q = (part: number) => `y12-economics-paragraph-writing.e01p${part}`;
+const Q = (part: number) => `y12-economics-paragraph-writing.e03p${part}`;
 const india: PilotEssay = {
   id: "in", set: "holdout", economy: "India", type: "emerging", question: "q", directiveVerb: "evaluate", strategy: "s",
   brief: {}, sources: [], models: {}, markingNotes: {},
@@ -25,20 +25,27 @@ describe("exportFieldCases", () => {
   it("adds an unlabelled field case under a field essay built from the content key", () => {
     const out = exportFieldCases(base(), [{ questionId: Q(5), text: "Faster growth and lower poverty.", note: "flagged by a student." }]);
     expect(out.added).toBe(1);
-    const field = out.file.essays.find((e) => e.id === "field-e01")!;
+    const field = out.file.essays.find((e) => e.id === "field-e03")!;
     expect(field.set).toBe("field");
-    expect(field.economy).toBe("Vietnam");
+    expect(field.economy).toBe("China");
     expect(field.directiveVerb).toBe("evaluate");
     expect(Object.keys(field.models)).toEqual(["topic", "mechanism", "evidence", "evaluation", "link"]);
     expect(field.cases).toHaveLength(1);
     expect(field.cases[0]).toMatchObject({ part: "link", text: "Faster growth and lower poverty.", fails: [], needsLabel: true });
   });
 
+  it("still exports a flagged answer to an archived essay (e01 Vietnam)", () => {
+    const out = exportFieldCases(base(), [{ questionId: "y12-economics-paragraph-writing.e01p2", text: "Old essay.", note: "flagged by a student." }]);
+    const field = out.file.essays.find((e) => e.id === "field-e01")!;
+    expect(field.economy).toBe("Vietnam");
+    expect(field.cases[0]).toMatchObject({ part: "mechanism", text: "Old essay.", needsLabel: true });
+  });
+
   it("carries the student's writing and nothing that identifies them", () => {
     const out = exportFieldCases(base(), [{ questionId: Q(3), text: "Some writing.", note: "flagged by a student. Marker: (a) met." }]);
-    const c = out.file.essays.find((e) => e.id === "field-e01")!.cases[0];
+    const c = out.file.essays.find((e) => e.id === "field-e03")!.cases[0];
     expect(Object.keys(c).sort()).toEqual([...CASE_KEYS].filter((k) => k in c).sort());
-    const text = JSON.stringify(out.file.essays.find((e) => e.id === "field-e01"));
+    const text = JSON.stringify(out.file.essays.find((e) => e.id === "field-e03"));
     expect(text).not.toMatch(/email|userId|user_id|attemptId|attempt_id|googleSub/i);
     expect(text).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i); // no uuid
     expect(text).not.toMatch(/\b20\d\d-\d\d-\d\dT/); // no timestamp

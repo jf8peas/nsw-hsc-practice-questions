@@ -9,8 +9,8 @@ import { createTestDb, type TestDb } from "../helpers/db";
 import { seedAttempt, seedUser } from "../helpers/fixtures";
 
 const UNIT = "y12-economics-paragraph-writing";
-const Q1 = `${UNIT}.e01p1`;
-const Q2 = `${UNIT}.e01p2`;
+const Q1 = `${UNIT}.e03p1`;
+const Q2 = `${UNIT}.e03p2`;
 
 const verdicts: ParagraphVerdicts = {
   a: { met: true, reason: "ok" },

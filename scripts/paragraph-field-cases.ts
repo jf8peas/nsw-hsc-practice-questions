@@ -6,6 +6,7 @@
 
 import { essays } from "../content/units/y12-economics-paragraph-writing/essays";
 import { ESSAYS } from "../content/units/y12-economics-paragraph-writing/questions";
+import { archivedEssays, archivedHeaders } from "../content/archive/y12-economics-paragraph-writing/essays-archived";
 import { PART_ORDER } from "../lib/paragraph/parts";
 import type { PartNo } from "../lib/types";
 
@@ -54,8 +55,10 @@ const parse = (questionId: string): { essayId: string; part: PartNo } | null => 
 
 /** The pilot-format essay entry for a content essay, as a "field" essay. */
 export function fieldEssayFor(essayId: string): PilotEssay {
-  const key = essays.find((e) => e.essayId === essayId);
-  const header = ESSAYS.find((e) => e.essayId === essayId);
+  // Archived essays (e01 Vietnam, e02 Bangladesh) still have students' answers in the database, so a
+  // flagged answer to one of them must still export.
+  const key = essays.find((e) => e.essayId === essayId) ?? archivedEssays.find((e) => e.essayId === essayId);
+  const header = ESSAYS.find((e) => e.essayId === essayId) ?? archivedHeaders.find((e) => e.essayId === essayId);
   if (!key || !header) throw new Error(`no content essay ${essayId}`);
   const byPart = <T>(rec: Record<PartNo, T>) => Object.fromEntries(PART_ORDER.map((p, i) => [p, rec[(i + 1) as PartNo]])) as Record<string, T>;
   return {
