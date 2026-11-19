@@ -62,7 +62,7 @@ scroll sideways on any screen below.
 | 3 | Scroll to the box, tap **View Text 1** | the text opens in a dialog titled "Text 1 – Poem" over the page, scrolls, closes with Close and Esc, and the typed text and scroll position are unchanged |
 | 4 | Type 10 words | Submit is disabled with "Write at least 20 words before you submit." |
 | 5 | Paste a 260-word answer (suggested 204) | at 205 to 244 words the meter warns ("N words over the suggested length") and Submit works; at 245 words Submit is disabled with "N words over the limit. Cut it to submit."; cut to 240 and submit still works |
-| 6 | **Full-mark first try**: 150 words, `[mark:3]`, all met | locked answer with three status steps (the second ticks after about 1.5 s); no layout jump; goes straight to the discussion; the summary is focused; "Full marks on your first try."; seven skill verdicts each marked "First try" with an icon as well as colour; the final answer beside the model answer (stacked on the phone); no skills added; the first-try row is absent; a **"To go further"** line under the feedback (one sentence, same look as "Biggest gap", no warning colour); Finish |
+| 6 | **Full-mark first try**: 150 words, `[mark:3]`, all met | locked answer with three status steps (the second ticks after about 1.5 s); no layout jump; goes straight to the discussion; the summary is focused; "Full marks on your first try."; seven skill verdicts each marked "First try" with an icon as well as colour; the final answer beside the model answer (stacked on the phone); no skills added; the first-try row is absent; a green **"Make it even stronger"** panel after the seven skill pills and before the answer comparison (one sentence; 4 px green left border, light green tint, bold green heading, no red or warning colour; at 390 px it fills the card width with no sideways scroll); Finish |
 | 7 | Finish, start again; get a **prose** text | same layout without line numbers; paragraphs kept |
 | 8 | **A retry that is capped**: `[mark:2][miss:technique-effect,apt-evidence]` on a 4-mark question | result "2 / 4" with feedback, the biggest-gap line and seven verdicts (Met / Missed with icons and a reason each); "Try again" and "Skip the retry and see the model answer"; no model answer yet |
 | 9 | Tap "Try again" | the box holds the first try, focused with the caret at the end; one tip card for each of the two missed skills with its name and tip, **no model text**; the meter works |
@@ -106,7 +106,7 @@ layout is the same single column at every width:
 | Bank finished | Answer every question of the starter bank | "You've answered every question in the bank so far. New questions are added as the papers are processed." and no start button |
 | Database unreadable | Break `DATABASE_URL` | the unit page shows "We can't load your questions right now. Try again in a moment." and no start button; a submit mid-quiz returns the box with your text and the usual error; nothing is marked or self-marked |
 | Skills clear | Meet a skill on a first try on two later questions | it leaves "Things I need to know" after the second; a skill met only in a retry stays |
-| Past attempt | Open a finished question from Past attempts | "Fort St 2025 · Q1 · Poem": the text, both tries with verdicts and reasons, the feedback and biggest gap (or "To go further" for a full-mark first try), and the model answer (the attempt is final); an unfinished attempt shows no model answer |
+| Past attempt | Open a finished question from Past attempts | "Fort St 2025 · Q1 · Poem": the text, both tries with verdicts and reasons, the feedback and biggest gap (or "Make it even stronger" for a full-mark first try), and the model answer (the attempt is final); an unfinished attempt shows no model answer |
 | Draw | Answer several questions with different marks | forms with lower average marks and questions tagged with an uncleared skill appear more often; an answered question never reappears (the automated seeded test is the proof) |
 
 ## 4. Revision loop (offline)
@@ -145,7 +145,7 @@ Network tab through a full quiz: the model answer first appears in the discussio
 ## 7. Real-model pass and latency
 
 With the real `ENGLISH_ADV_GRADING_MODEL`, mark two answers per starter question (one genuinely good, one deliberately
-thin). Expect the good ones to reach full marks and the thin ones to lose a mark with a biggest-gap line (and each full-mark reply with a "To go further" line: the report prints it and its check section must say PASS; marks must not move against `unseen-pilot-4`)
+thin). Expect the good ones to reach full marks and the thin ones to lose a mark with a biggest-gap line (and each full-mark reply with a go-further line: the report prints it and its check section must say PASS; marks must not move against `unseen-pilot-4`)
 that names what is missing. **Record ten marking durations** (the server log's `duration_ms`): the p95 must
 be under 35 s; if not, raise `maxDuration` on the grade route before launch (research R5). Check the server
 logs for the run contain only `[unseen] outcome=… user=<hash> question=… phase=… duration_ms=…` lines.

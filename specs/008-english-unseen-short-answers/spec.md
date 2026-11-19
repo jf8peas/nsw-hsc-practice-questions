@@ -60,11 +60,11 @@ When the first try scores below full marks, the student may retry once or declin
 
 **Acceptance Scenarios**:
 
-1. **Given** a first try at full marks, **When** the result arrives, **Then** the student goes straight to the discussion, which shows one "To go further" sentence below the feedback (the single most useful step to make the answer stronger still); it is never shown for a try below full marks and never changes the mark.
+1. **Given** a first try at full marks, **When** the result arrives, **Then** the student goes straight to the discussion, which shows one "Make it even stronger" panel after the seven skill verdicts and before the answer comparison (the single most useful step to make the answer stronger still); it is never shown for a try below full marks and never changes the mark.
 2. **Given** a first try below full marks, **When** the result arrives, **Then** the student sees the mark, feedback, biggest gap and skill verdicts, and can choose to retry once or decline, and the model answer is not shown or sent to the browser.
 3. **Given** the student chooses to retry, **When** the retry screen opens, **Then** the box holds their first try, with one tip card per skill missed on the first try, and the tip cards contain no model-answer text.
 4. **Given** a retry is submitted, **When** it is marked, **Then** it is marked on the same rubric, its mark is capped at one mark below full marks, no third try is offered, and the recorded mark is the higher of the first try and the capped retry.
-5. **Given** the discussion, **When** it appears, **Then** it shows the recorded mark and an explanation of the cap where it applied, each skill marked "First try", "Fixed in retry" or missed, the student's final answer beside the model answer, the skills added to "Things I need to know", and the first try collapsed; a full-mark first try also shows its "To go further" sentence below the feedback.
+5. **Given** the discussion, **When** it appears, **Then** it shows the recorded mark and an explanation of the cap where it applied, each skill marked "First try", "Fixed in retry" or missed, the student's final answer beside the model answer, the skills added to "Things I need to know", and the first try collapsed; a full-mark first try also shows its "Make it even stronger" panel between the skill verdicts and the answer comparison.
 6. **Given** the student declines the retry, **When** they decline, **Then** the first-try mark is recorded and the discussion appears with the model answer.
 7. **Given** an answer is being marked, **When** the student waits, **Then** their text stays on screen, locked, with status steps.
 
@@ -184,7 +184,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 - **FR-015**: A reply that is empty, cut off, unparseable or missing any field (the mark, any skill verdict, the feedback or the biggest gap, or `goFurther` on a full-mark reply) MUST be retried like a failed call; a `goFurther` on a below-full reply is dropped.
 - **FR-016**: The model answer given to the marker MUST be the school's sample answer where one exists, otherwise a generated answer reviewed before the question goes live.
 - **FR-017**: The marker MUST also say whether a visual text's description was enough to mark from. Before a visual question goes live its description MUST be checked this way, and a visual text whose description is not enough MUST be blocked from the bank and never shown.
-- **FR-018**: The result MUST show the mark out of the question's value, the feedback, the biggest gap and the seven skill verdicts. For a first try at full marks it MUST show the "To go further" sentence below the feedback instead of a biggest gap, in the same style as "Biggest gap" (not a warning or error colour), on the result, the discussion and the attempt detail page; it is never shown for a try below full marks.
+- **FR-018**: The result MUST show the mark out of the question's value, the feedback, the biggest gap and the seven skill verdicts. For a first try at full marks it MUST show the "Make it even stronger" sentence instead of a biggest gap, as a panel after the seven skill verdicts (before the answer and model answer comparison) with the success green as a 4px left border, a light green tint, a bold success-green heading and body text in the body ink colour, never a red or warning colour and at 4.5:1 contrast for both texts, on the result, the discussion and the attempt detail page; it is never shown for a try below full marks.
 
 **Retry and discussion**
 
@@ -248,7 +248,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
   5. Uses apt evidence: short, precise quotations or visual details that prove the point.
   6. Links to the human experience: ties the analysis to the experience or emotion in the question.
   7. Writes succinctly: no padding, repetition or drift, and not well past the suggested length. Never missed for being short.
-- **Attempt record**: per quiz, the first-try and retry text, the mark of each, every skill verdict with the marker's one-line reason, the feedback and biggest gap, the "to go further" sentence (full-mark first try only), the prompt version and the recorded mark.
+- **Attempt record**: per quiz, the first-try and retry text, the mark of each, every skill verdict with the marker's one-line reason, the feedback and biggest gap, the "make it even stronger" sentence (full-mark first try only), the prompt version and the recorded mark.
 - **Review report**: per paper, questions kept and skipped with reasons, counts by text form and mark value, and the rubric source (school or drafted).
 
 ## Success Criteria *(mandatory)*

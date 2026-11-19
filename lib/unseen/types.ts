@@ -20,7 +20,7 @@ export interface TryView {
   skills: SkillView[];
   feedback: string;
   biggestGap: string;
-  /** "To go further": only for a first try at full marks, else null. */
+  /** "Make it even stronger": only for a first try at full marks, else null. */
   goFurther: string | null;
   wordCount: number;
 }

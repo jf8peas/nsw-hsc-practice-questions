@@ -36,6 +36,7 @@
   /* ───── Color · Status ───── */
   --rd-success-50:   #ECF8F1;
   --rd-success-500:  #1F8A5B;
+  --rd-success-700:  #166B46; /* text on success-50 or white at 4.5:1 (success-500 is below that) */
   --rd-warn-50:      #FFF6E5;
   --rd-warn-500:     #B47900;
   --rd-danger-50:    #FDECEC;

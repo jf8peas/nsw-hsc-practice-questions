@@ -64,7 +64,7 @@ describe("try 1 at full marks", () => {
     expect(row.try1Verdicts["technique-effect"]).toEqual({ met: true, reason: REASON });
     expect(row.try1Feedback).toBe(FEEDBACK);
     expect(row.try1BiggestGap).toBe(GAP);
-    // "To go further": stored with the full-mark try and released with it, never touching the mark
+    // "Make it even stronger": stored with the full-mark try and released with it, never touching the mark
     expect(row.try1GoFurther).toBe(GO_FURTHER);
     expect(body.result.goFurther).toBe(GO_FURTHER);
     const res = await resultRow();

@@ -453,7 +453,7 @@ fires, or the mark equals `maxMarks` and `goFurther` is missing, null, blank or 
 the feedback and the biggest gap. Strings are trimmed and capped (reason 300, feedback 600, biggest gap 300,
 go further 300 characters).
 
-**"To go further" (prompt `unseen-pilot-5`).** A full-mark answer has no biggest gap, so the student would learn
+**"Make it even stronger" (the `goFurther` field, prompt `unseen-pilot-5`).** A full-mark answer has no biggest gap, so the student would learn
 nothing about how to lift it. The reply gains `goFurther`: when the mark equals the question's full marks, one
 sentence naming the single most useful step that would make this answer stronger still, specific to this text
 and this answer; otherwise null. The system prompt says it is advice beyond the top band, not a reason to
@@ -877,7 +877,7 @@ panel tests must stay untouched.
 | `QuestionBlock` | the question (with parts), "N marks", the source credit |
 | `AnswerBox` | the textarea, word meter, limit notes, Submit; props for `locked`, `limit`, `notice` |
 | `LockedAnswer` | the locked text during marking (reuses the paragraph unit's look, own class) |
-| `ResultCard` | mark out of N, feedback, biggest gap (for a full-mark try, `GoFurther` "To go further" in the same `un-gap` style instead), `SkillList` (seven verdicts as "Met" / "Missed" with an icon and the reason) |
+| `ResultCard` | mark out of N, feedback, biggest gap (for a full-mark try, `GoFurther`, "Make it even stronger", instead: a panel after the skill verdicts), `SkillList` (seven verdicts as "Met" / "Missed" with an icon and the reason) |
 | `RetryChoice` | "Try again" and "Skip the retry and see the model answer", the cap line |
 | `RetryBox` | `AnswerBox` pre-filled with try 1, plus `TipCards` (one per skill missed on try 1, from `skills.ts`) |
 | `NotMarkedNotice` | the marker-failed status and the daily-limit status (the "waiting-on-cap" and "marker-failed" states) |
@@ -932,6 +932,17 @@ with the criteria", "Writing your feedback"), the second ticks at 1.5 s, the thi
 response and on unmount, and each change announced once through a polite `role="status"` region. A
 footer note: "Marking can take up to a minute." Reduced motion: the progress element is static.
 
+**"Make it even stronger" panel** (`GoFurther`, class `un-go-further`). It reads as the next step once the basics
+are met, so it sits **after the seven skill pills and before the answer / model answer comparison** in the
+discussion, after the skill list on the result card, and after the skill list of each try on the attempt detail
+page. It is a `<section>` labelled by its heading: a 4 px solid `--rd-success-500` left border, a
+`--rd-success-50` tint, the heading bold in success green, the sentence at the normal size in `--rd-ink-900`, and
+the padding of the tip cards (12px 14px). No red, amber or warning colour. **Contrast:** `success-500` is 3.96:1
+on `success-50` and 4.33:1 on white, below the 4.5:1 this unit holds for text, so the heading uses a new darker
+token `--rd-success-700` (`#166B46`, about 6:1 on the tint); the border keeps `success-500` (non-text, 3:1).
+`tests/styles/contrast.test.ts` checks both text pairs and `unseen-a11y.test.tsx` the rule. Rejected: the heading
+in `success-500` (fails 4.5:1); the `un-gap` blue rule (reads as a fault to fix, not a next step).
+
 **Focus** (FR-047, as spec 007 FR-022): the result summary takes focus when the result or the discussion
 appears; the retry box takes focus with the caret at the end when the retry opens; the not-marked notice
 takes focus when it appears; the dialogs trap focus natively and return it on close.
@@ -963,7 +974,7 @@ text (reading the text is the task); auto-scroll on focus (jarring with the keyb
    and the form), as spec 007 returns "Essay 3 · Mechanism". Marks show "/N" with the question's value.
 
 **Attempt detail** (`app/attempts/[attemptId]/page.tsx`, an `unseen` branch): the question and its credit;
-**try 1** (text, mark, the seven verdicts with reasons, feedback, biggest gap, or "To go further" for a full-mark first try); **try 2** if any; the
+**try 1** (text, mark, the seven verdicts with reasons, feedback, biggest gap, or "Make it even stronger" for a full-mark first try); **try 2** if any; the
 recorded mark and how it ended; and the **model answer only when the row is `final`** (the student has
 already seen it at the discussion, A3). The stimulus text is shown above (public). An unfinished attempt
 shows its tries and no model answer. No criteria, notes or description at any time.

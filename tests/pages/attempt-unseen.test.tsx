@@ -90,9 +90,10 @@ describe("unseen attempt detail", () => {
     expect(html).not.toContain("flagged");
   });
 
-  it("shows \"To go further\" for a full-mark first try and never for a below-full one", async () => {
+  it("shows \"Make it even stronger\" for a full-mark first try and never for a below-full one", async () => {
     const full = await render((await seeded({ final: true, full: true })).id);
-    expect(full).toContain("To go further: GO-FURTHER-TEXT-4417");
+    expect(full).toContain("Make it even stronger");
+    expect(full).toContain("GO-FURTHER-TEXT-4417");
     expect(full).not.toContain("Biggest gap: GAP-TEXT-9930");
     await env.close();
     // a stored goFurther on a below-full row is never shown (the app only stores it for full marks)

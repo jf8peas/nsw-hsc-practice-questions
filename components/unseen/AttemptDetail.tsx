@@ -1,6 +1,6 @@
 import type { UnseenAttemptDetail, UnseenAttemptTry } from "@/lib/db/queries/history.server";
 
-import { SkillList } from "./Results";
+import { GoFurther, SkillList } from "./Results";
 
 // One unseen-text question on the attempt detail page (spec 008, research R13): each try's text, mark,
 // seven verdicts with the marker's reasons, the feedback and the biggest gap, and the model answer
@@ -13,12 +13,9 @@ function Try({ title, t, maxMarks }: { title: string; t: UnseenAttemptTry; maxMa
       <div className="un-result-label">{title}</div>
       <div className="detail-answer">{t.text}</div>
       <SkillList skills={t.skills} />
+      {t.mark >= maxMarks && t.goFurther && <GoFurther text={t.goFurther} />}
       {t.feedback && <p className="detail-feedback">{t.feedback}</p>}
-      {t.mark >= maxMarks && t.goFurther ? (
-        <p className="detail-feedback">To go further: {t.goFurther}</p>
-      ) : (
-        t.biggestGap && <p className="detail-feedback">Biggest gap: {t.biggestGap}</p>
-      )}
+      {!(t.mark >= maxMarks && t.goFurther) && t.biggestGap && <p className="detail-feedback">Biggest gap: {t.biggestGap}</p>}
     </div>
   );
 }

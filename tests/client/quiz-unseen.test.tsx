@@ -223,24 +223,29 @@ describe("marking the first try", () => {
     expect(screen.getByText(MODEL)).toBeTruthy();
     expect(screen.getByText(words(60))).toBeTruthy();
     expect(screen.getAllByText("First try")).toHaveLength(7);
-    expect(screen.getByRole("button", { name: "This mark seems wrong" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "This mark seems wrong" })).toBeNull();
     expect(document.activeElement).toBe(document.querySelector(".un-summary"));
     fireEvent.click(screen.getByRole("button", { name: "Finish" }));
     expect(push).toHaveBeenCalledWith(`/unit/${UNIT}`);
   });
 });
 
-describe("To go further", () => {
-  it("shows under the feedback of a full-mark first try in the discussion, labelled, in the Biggest gap style", async () => {
+describe("Make it even stronger", () => {
+  it("shows after the seven skill pills and before the answer comparison of a full-mark first try, as a green panel", async () => {
     responder = (url) => (url === "/api/grade" ? jsonRes({ result: fullResult(), saved: true, attemptCompleted: true }) : jsonRes({}));
     mount();
     type(words(60));
     fireEvent.click(submitBtn());
     await waitFor(() => expect(screen.getByText("3 / 3 marks")).toBeTruthy());
-    const label = screen.getByText("To go further");
-    expect(label.className).toContain("un-gap-label");
-    expect(label.parentElement!.className).toContain("un-gap");
-    expect(label.parentElement!.textContent).toContain(GO_FURTHER);
+    const label = screen.getByText("Make it even stronger");
+    const panel = label.closest(".un-go-further") as HTMLElement;
+    expect(panel.textContent).toContain(GO_FURTHER);
+    expect(label.className).toContain("un-go-further-label");
+    const pills = document.querySelector(".un-pills")!;
+    const compare = document.querySelector(".un-compare")!;
+    expect(pills.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(panel.compareDocumentPosition(compare) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByText("To go further")).toBeNull();
     expect(screen.queryByText("Biggest gap")).toBeNull();
   });
 
@@ -250,7 +255,7 @@ describe("To go further", () => {
     type(words(60));
     fireEvent.click(submitBtn());
     await waitFor(() => expect(screen.getByText("1 / 3 marks")).toBeTruthy());
-    expect(screen.queryByText("To go further")).toBeNull();
+    expect(screen.queryByText("Make it even stronger")).toBeNull();
     expect(document.body.textContent).not.toContain(GO_FURTHER);
     expect(screen.getByText("Biggest gap")).toBeTruthy();
   });
@@ -260,7 +265,7 @@ describe("To go further", () => {
       stage: "discussion", text, try1: tryView(1, ["technique-effect"]), try2: { ...tryView(2), goFurther: GO_FURTHER }, ending: "retried",
       recordedMark: 2, discussion: { modelAnswer: MODEL, modelWords: 12 },
     });
-    expect(screen.queryByText("To go further")).toBeNull();
+    expect(screen.queryByText("Make it even stronger")).toBeNull();
   });
 });
 

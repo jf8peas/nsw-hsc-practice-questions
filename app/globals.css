@@ -2689,6 +2689,10 @@ input {
 .un-gap { border-left: 3px solid var(--rd-blue-500); padding: 4px 0 4px 12px; }
 .un-gap p { margin: 2px 0 0; font-size: var(--rd-fs-md); color: var(--rd-ink-900); }
 .un-gap-label { font-weight: 600; font-size: var(--rd-fs-sm); color: var(--rd-ink-700); }
+/* "Make it even stronger": the full-mark next step. Success green border and tint, never a warning colour. */
+.un-go-further { border-left: 4px solid var(--rd-success-500); background: var(--rd-success-50); border-radius: 0 var(--rd-r-lg) var(--rd-r-lg) 0; padding: 12px 14px; }
+.un-go-further p { margin: 4px 0 0; font-size: var(--rd-fs-md); line-height: 1.5; color: var(--rd-ink-900); }
+.un-go-further .un-go-further-label { margin: 0; font-weight: 700; font-size: var(--rd-fs-md); color: var(--rd-success-700); }
 .un-skills { margin: 0; padding: 0; list-style: none; border: 1px solid var(--rd-border-100); border-radius: var(--rd-r-lg); }
 .un-skill { display: flex; gap: 12px; padding: 10px 14px; min-height: 44px; border-top: 1px solid var(--rd-border-100); align-items: flex-start; }
 .un-skill:first-child { border-top: none; }

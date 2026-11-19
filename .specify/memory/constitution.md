@@ -2,7 +2,7 @@
 Sync Impact Report
 - Version change: 2.15.0 → 2.15.1 (PATCH: two clarifications of the unseen-text unit's Principle I and II wording; no new class of behaviour).
 - Amendment log (2.15.1, second line): the unseen-text unit has no student flag. The "This mark seems wrong" button, its route (`POST /api/unseen/flag`) and the stored flag (`unseen_phases.flagged_at`) are removed, so the 2.15.0 amendments no longer list them: Principle I's submission-routes bullet names only the unit's retry-decline route, and Principle II's stored unseen fields no longer include a flag. The marker is revised from an offline re-mark of real first tries in every mark band instead. The paragraph unit's flag route and stored flag (spec 007) are unchanged.
-- Reason (amendment log): the unseen-text marker (spec 008, prompt unseen-pilot-5) adds one advice sentence, "To go further", to a full-mark first try. It is stored in the unseen phase row with the try, shown only for a full-mark first try, and never changes a mark. Principle II lists the stored fields, so it is added there.
+- Reason (amendment log): the unseen-text marker (spec 008, prompt unseen-pilot-5) adds one advice sentence, "Make it even stronger" (field `goFurther`), to a full-mark first try. It is stored in the unseen phase row with the try, shown only for a full-mark first try, and never changes a mark. Principle II lists the stored fields, so it is added there.
 - Modified principles: I. The Answer Key Never Reaches the Browser (the unseen unit's flag route removed from the submission-routes bullet); II. Signed-In Students, Minimal Personal Data (the unseen phase row also holds the to-go-further sentence, and holds no flag).
 
 Previous report (2.15.0):

@@ -87,6 +87,15 @@ describe("styles", () => {
     expect(body(".un-image")).toMatch(/width:\s*100%/);
   });
 
+  it("the Make it even stronger panel has a 4px success border, a success tint and success-700 heading text, no warning colours", () => {
+    const panel = body(".un-go-further");
+    expect(panel).toMatch(/border-left:\s*4px solid var\(--rd-success-500\)/);
+    expect(panel).toMatch(/background:\s*var\(--rd-success-50\)/);
+    expect(body(".un-go-further .un-go-further-label")).toMatch(/color:\s*var\(--rd-success-700\)/);
+    expect(body(".un-go-further p")).toMatch(/color:\s*var\(--rd-ink-900\)/);
+    expect(rules.filter(([s]) => s.includes("un-go-further")).map(([, d]) => d).join(" ")).not.toMatch(/warn|danger/);
+  });
+
   it("reduced motion switches off animation and transitions in the unit", () => {
     expect(css).toMatch(/prefers-reduced-motion: reduce\)\s*\{\s*\.un-card \*, \.un-dialog \*\s*\{\s*animation: none !important;\s*transition: none !important;/);
   });

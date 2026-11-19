@@ -37,13 +37,15 @@ export function SkillList({ skills }: { skills: SkillView[] }) {
   );
 }
 
-/** "To go further": one step beyond the top band for a full-mark first try. Same look as "Biggest gap"; never changes the mark. */
+/** "Make it even stronger": one step beyond the top band for a full-mark first try, a green panel after the skills. Never changes the mark. */
 export function GoFurther({ text }: { text: string }) {
   return (
-    <div className="un-gap un-go-further">
-      <span className="un-gap-label">To go further</span>
+    <section className="un-go-further" aria-labelledby="un-go-further-title">
+      <p id="un-go-further-title" className="un-go-further-label">
+        Make it even stronger
+      </p>
       <p>{text}</p>
-    </div>
+    </section>
   );
 }
 
@@ -68,13 +70,14 @@ export function ResultCard({
         </h3>
         <p className="un-result-feedback">{result.feedback}</p>
       </div>
-      {result.mark >= maxMarks && result.goFurther ? <GoFurther text={result.goFurther} /> : (
+      {!(result.mark >= maxMarks && result.goFurther) && (
         <div className="un-gap">
           <span className="un-gap-label">Biggest gap</span>
           <p>{result.biggestGap}</p>
         </div>
       )}
       <SkillList skills={result.skills} />
+      {result.mark >= maxMarks && result.goFurther && <GoFurther text={result.goFurther} />}
     </section>
   );
 }
@@ -243,8 +246,8 @@ export function Discussion({
           <p className="rw-summary-line2">{deciding.feedback}</p>
         </div>
       </div>
-      {deciding.mark >= maxMarks && deciding.goFurther && <GoFurther text={deciding.goFurther} />}
       <SkillPills try1={try1} try2={try2} />
+      {deciding.mark >= maxMarks && deciding.goFurther && <GoFurther text={deciding.goFurther} />}
       <FinalVsModel answer={final.text} answerWords={final.wordCount} discussion={discussion} />
       <SkillsAdded try1={try1} />
       {try2 && <FirstTryCollapsed try1={try1} maxMarks={maxMarks} />}
