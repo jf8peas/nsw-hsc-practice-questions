@@ -80,6 +80,13 @@ describe("styles", () => {
     expect(body(".un-form-row")).toMatch(/min-height:\s*44px/);
   });
 
+  it("has no two-column card layout, sticky text column or rule that hides the Text button", () => {
+    expect(css).not.toMatch(/\.un-layout|\.un-text-col|\.un-textbtn/);
+    expect(body(".un-poem")).toMatch(/max-width:\s*68ch/);
+    expect(body(".un-prose")).toMatch(/max-width:\s*68ch/);
+    expect(body(".un-image")).toMatch(/width:\s*100%/);
+  });
+
   it("reduced motion switches off animation and transitions in the unit", () => {
     expect(css).toMatch(/prefers-reduced-motion: reduce\)\s*\{\s*\.un-card \*, \.un-dialog \*\s*\{\s*animation: none !important;\s*transition: none !important;/);
   });

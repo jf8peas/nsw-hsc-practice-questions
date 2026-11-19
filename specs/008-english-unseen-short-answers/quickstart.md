@@ -71,8 +71,20 @@ scroll sideways on any screen below.
 | 12 | **A visual text** (zoom) | the image fills the column width with a "Zoom" button; Zoom opens a dialog; "Zoom in" steps the image larger and it scrolls both ways; pinch also works; Close and Esc return focus to the Zoom button; the page itself never scrolls sideways; the image alt is the short label, **not** the description |
 | 13 | Answer the visual question and open the Network tab | `GET /api/unseen/image/<id>` is 200 with the session; the page, start response and grade response contain no description, criteria or notes |
 
-Also at 390 px: the two columns collapse, the compare cards stack, every button and summary row is at least
+Also at 390 px: the layout is one column (text, question, answer), the compare cards stack, every button and summary row is at least
 44 px tall, text zoom at 200% still wraps.
+
+### 2b. The same quiz on a desktop
+
+Open the same questions in a desktop browser at about 1280 px wide (and once narrower than 900 px). The
+layout is the same single column at every width:
+
+| Step | Do | Expect |
+|---|---|---|
+| 1 | A **poem** and a **prose** text | the text panel comes first at the full card width, then the question block, then the answer box; the lines of prose, poem and footnotes stop at a comfortable reading width and do not run across the whole card |
+| 2 | The **visual** text | the image fills the full card width and is shown large; **Zoom** still opens the dialog with Zoom in, Zoom out and Close |
+| 3 | Look for a second column | there is none: the text is not beside the question and nothing is sticky; resizing across 900 px changes nothing about the card |
+| 4 | Click **Text** in the answer footer | the text opens in the bottom-sheet dialog at this width too; the typed answer and scroll position are untouched; Close returns focus to the button |
 
 ## 3. Failure and resume checks
 

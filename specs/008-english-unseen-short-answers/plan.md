@@ -76,8 +76,8 @@ files under the unit folder. The labelled test cases live in the gitignored
 `scripts/fake-openrouter.ts` for manual runs, `python scripts/pilot-unseen-marker.py --gate` for the marker
 regression. Listed under Quality Gates below.
 
-**Target Platform**: Mobile-first web at 390 px, no sideways scroll; desktop browsers (two columns from 900
-px); keyboard and screen-reader accessible; reduced-motion aware.
+**Target Platform**: Mobile-first web at 390 px, no sideways scroll; desktop browsers (one column at every width,
+prose capped at 68ch, images at full card width); keyboard and screen-reader accessible; reduced-motion aware.
 
 **Project Type**: Web application (Next.js App Router), server-rendered pages plus JSON API routes and one
 binary route.

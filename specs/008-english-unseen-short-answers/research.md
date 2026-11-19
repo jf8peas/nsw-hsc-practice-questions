@@ -865,7 +865,7 @@ panel tests must stay untouched.
 | `PoemText` | stanzas of `.un-line`s, optional line numbers (`aria-hidden`), `white-space: pre-wrap` |
 | `ProseText` | paragraphs |
 | `VisualText` | `<img>` from the authenticated route, "Zoom" button, `ZoomDialog` |
-| `TextSheet` | phone only: a "Text" button in the answer footer that opens the text in a bottom-sheet `<dialog>` so the text is reachable while writing (FR-006) |
+| `TextSheet` | a "Text" button in the answer footer, at every width, that opens the text in a bottom-sheet `<dialog>` so the text is reachable while writing (FR-006) |
 | `QuestionBlock` | the question (with parts), "N marks", the source credit |
 | `AnswerBox` | the textarea, word meter, limit notes, Submit; props for `locked`, `limit`, `notice` |
 | `LockedAnswer` | the locked text during marking (reuses the paragraph unit's look, own class) |
@@ -907,12 +907,14 @@ Invariants: the submitted text is held in React state across `marking*` and neve
 reachable only from `result` (a `try1` row below the maximum); `discussion` is reachable only from a
 server response that carried `discussion`; no state offers a third try; no state offers self-marking.
 
-**Phone layout (FR-006).** Below 900 px the card is one column: the text, then the question block, then the
-answer box. The text is a full inline panel (not collapsed, so the student reads it where they expect it);
-in the answer box footer a **"Text"** button (44 px) opens `TextSheet` so the text stays reachable while the
-keyboard is up and the textarea is in view, without losing the typed text or the scroll position. At 900 px
-and wider the card is two columns with the text column sticky (`position: sticky`, its own scroll), and
-the "Text" button is hidden. `TextSheet` and `ZoomDialog` share one `<dialog>` wrapper with a labelled
+**Layout (FR-006).** The card is one column at every width: the text panel first at the full card width,
+then the question block, then the answer box. The text is a full inline panel (not collapsed, so the student
+reads it where they expect it). Prose, poems and footnotes are capped at a comfortable reading width
+(`max-width: 68ch`); an image uses the full card width, so it is shown large, and the Zoom dialog is still
+there for detail. In the answer box footer a **"Text"** button (44 px), shown at every width, opens
+`TextSheet` so the text stays reachable while the textarea is in view (on a phone, with the keyboard up),
+without losing the typed text or the scroll position. There is no two-column layout, no 900 px breakpoint
+for the card and no sticky text column. `TextSheet` and `ZoomDialog` share one `<dialog>` wrapper with a labelled
 "Close" button, `Esc`, focus return, and `prefers-reduced-motion` handled by having no animation at all.
 
 **Timed status steps** are the paragraph unit's pattern: three steps ("Reading your answer", "Comparing it
@@ -926,9 +928,11 @@ appears; the retry box takes focus with the caret at the end when the retry open
 takes focus when it appears; the dialogs trap focus natively and return it on close.
 
 **Rejected.** Generalising `components/paragraph/*` (it would touch the paragraph unit and its tests for
-the two pieces that overlap); a modal for the text on desktop (two columns fit, and a modal hides the
-question); collapsing the text on a phone (reading the text is the task); auto-scroll on focus (jarring
-with the keyboard open).
+the two pieces that overlap); a two-column card with a sticky text column from 900 px (the first design:
+it squeezes an image into half the card, makes a long poem scroll inside its own column, and needs a second
+layout to test and keep right, while one column reads the same on every screen and the "Text" button already
+keeps the text reachable); a modal for the text as the only view (it hides the question); collapsing the
+text (reading the text is the task); auto-scroll on focus (jarring with the keyboard open).
 
 ---
 
@@ -967,8 +971,7 @@ form, the pending attempt) and an `unseen` member on the history item (as `parag
 collapsed rows) and add a small set scoped with the prefix **`un-`** at the end of `app/globals.css`, using
 tokens only (no colour literals).
 
-New classes: `un-layout` (two columns from 900 px, `gap`), `un-text-col` (sticky and independently scrolling
-on desktop), `un-text` (heading, title, author, source line), `un-poem` / `un-stanza` / `un-line` (a hanging
+New classes: `un-main` (the question and answer column below the text, `gap`), `un-text` (heading, title, author, source line), `un-poem` / `un-stanza` / `un-line` (a hanging
 indent so wrapped lines are distinguishable from new lines, line numbers in a fixed 3 ch gutter), `un-prose`,
 `un-footnotes`, `un-image` and `un-zoom` (the dialog scroll container driven by `--un-zoom`), `un-sheet`
 (the bottom-sheet dialog), `un-q` (question block), `un-meter` (the word meter states: short, ok, warn,

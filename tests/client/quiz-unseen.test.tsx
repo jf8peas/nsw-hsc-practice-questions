@@ -101,7 +101,7 @@ const fullResult = (over: Partial<UnseenGradeResult> = {}): UnseenGradeResult =>
 describe("the question screen", () => {
   it("shows the text first, then the question with its marks and credit, then the answer box", () => {
     const { container } = mount();
-    const textCol = container.querySelector(".un-text-col")!;
+    const textCol = container.querySelector(".un-text")!;
     const q = container.querySelector(".un-q")!;
     expect(textCol.compareDocumentPosition(q) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(within(textCol as HTMLElement).getByText(text.heading)).toBeTruthy();
@@ -118,7 +118,13 @@ describe("the question screen", () => {
     expect(container.textContent).not.toMatch(/countdown|time left|minutes left|reading time/i);
   });
 
-  it("offers a Text button for the phone sheet that opens the same text in a dialog", () => {
+  it("is one column: no two-column layout wrapper or sticky text column", () => {
+    const { container } = mount();
+    expect(container.querySelector(".un-layout, .un-text-col")).toBeNull();
+    expect(container.querySelector(".un-card")!.children[0].classList.contains("un-text")).toBe(true);
+  });
+
+  it("offers a Text button, at every width, that opens the same text in a dialog", () => {
     mount();
     fireEvent.click(screen.getByRole("button", { name: "Text" }));
     const sheet = document.querySelector("dialog.un-sheet") as HTMLDialogElement;

@@ -293,10 +293,7 @@ export function UnseenPanel({
 
   return (
     <div className="rw-card un-card">
-      <div className="un-layout">
-        <div className="un-text-col">
-          <TextPanel text={state.text} />
-        </div>
+      <TextPanel text={state.text} />
         <div className="un-main">
           <Steps stage={stage} first={try1?.mark} maxMarks={question.maxMarks} />
           <QuestionBlock question={question} />
@@ -383,7 +380,6 @@ export function UnseenPanel({
             />
           )}
         </div>
-      </div>
       <TextSheet text={state.text} open={sheetOpen} onClose={() => setSheetOpen(false)} />
     </div>
   );
