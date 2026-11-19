@@ -7,14 +7,18 @@ import { SkillList } from "./Results";
 // ONLY once the question is final (the student has already seen it at the discussion). Never the
 // criteria, the marking notes or a visual's description.
 
-function Try({ title, t }: { title: string; t: UnseenAttemptTry }) {
+function Try({ title, t, maxMarks }: { title: string; t: UnseenAttemptTry; maxMarks: number }) {
   return (
     <div className="un-attempt-try">
       <div className="un-result-label">{title}</div>
       <div className="detail-answer">{t.text}</div>
       <SkillList skills={t.skills} />
       {t.feedback && <p className="detail-feedback">{t.feedback}</p>}
-      {t.biggestGap && <p className="detail-feedback">Biggest gap: {t.biggestGap}</p>}
+      {t.mark >= maxMarks && t.goFurther ? (
+        <p className="detail-feedback">To go further: {t.goFurther}</p>
+      ) : (
+        t.biggestGap && <p className="detail-feedback">Biggest gap: {t.biggestGap}</p>
+      )}
     </div>
   );
 }
@@ -22,8 +26,8 @@ function Try({ title, t }: { title: string; t: UnseenAttemptTry }) {
 export function UnseenAttemptDetailView({ detail, maxMarks }: { detail: UnseenAttemptDetail; maxMarks: number }) {
   return (
     <>
-      <Try title={`First try · ${detail.try1.mark}/${maxMarks}`} t={detail.try1} />
-      {detail.try2 && <Try title={`Retry · ${detail.try2.mark}/${maxMarks - 1}`} t={detail.try2} />}
+      <Try title={`First try · ${detail.try1.mark}/${maxMarks}`} t={detail.try1} maxMarks={maxMarks} />
+      {detail.try2 && <Try title={`Retry · ${detail.try2.mark}/${maxMarks - 1}`} t={detail.try2} maxMarks={maxMarks} />}
       {detail.ending === "declined" && <p className="detail-feedback">You skipped the retry, so your first try is recorded.</p>}
       {detail.recordedMark !== null && (
         <div className="detail-marks">

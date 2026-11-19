@@ -43,6 +43,7 @@
  *   empty      the reply content is empty
  *   cutoff     the reply stops mid-JSON with finish_reason "length"
  *   missing    the reply has no biggestGap
+ *   missing-go-further  a full-mark reply has no goFurther (the app retries it like any missing field)
  *   malformed  the reply is prose, not JSON
  *   echo       the feedback repeats the example (model) answer, which the app must reject
  *   slow       as pass, but each reply takes 12 seconds (to watch the marking status steps)
@@ -70,9 +71,9 @@ if (!["pass", "partial", "fail", "down"].includes(REWRITE_MODE)) {
 }
 
 const UNSEEN_MODE = (process.env.FAKE_UNSEEN ?? "pass") as
-  | "pass" | "partial" | "fail" | "down" | "empty" | "cutoff" | "missing" | "malformed" | "echo" | "slow";
-if (!["pass", "partial", "fail", "down", "empty", "cutoff", "missing", "malformed", "echo", "slow"].includes(UNSEEN_MODE)) {
-  console.error(`FAKE_UNSEEN must be pass, partial, fail, down, empty, cutoff, missing, malformed, echo or slow (got "${UNSEEN_MODE}")`);
+  | "pass" | "partial" | "fail" | "down" | "empty" | "cutoff" | "missing" | "missing-go-further" | "malformed" | "echo" | "slow";
+if (!["pass", "partial", "fail", "down", "empty", "cutoff", "missing", "missing-go-further", "malformed", "echo", "slow"].includes(UNSEEN_MODE)) {
+  console.error(`FAKE_UNSEEN must be pass, partial, fail, down, empty, cutoff, missing, missing-go-further, malformed, echo or slow (got "${UNSEEN_MODE}")`);
   process.exit(1);
 }
 
@@ -144,9 +145,11 @@ function unseenReply(user: string) {
     ),
     feedback: UNSEEN_MODE === "echo" ? `Fake marker: a full-mark answer reads like this: ${example}` : "Fake unseen marker: a clear reading, supported by evidence.",
     biggestGap: "Fake: explain the effect of each technique you name.",
+    goFurther: mark === max ? "Fake: end on what the text suggests about the experience rather than restating your argument." : null,
     descriptionAdequate: visual ? !/\[desc:false\]/.test(answer) : null,
   };
   if (UNSEEN_MODE === "missing") delete body.biggestGap;
+  if (UNSEEN_MODE === "missing-go-further") delete body.goFurther;
   return reply(JSON.stringify(body));
 }
 

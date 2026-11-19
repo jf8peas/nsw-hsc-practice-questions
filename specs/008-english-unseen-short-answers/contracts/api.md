@@ -24,7 +24,8 @@ interface SkillView { id: SkillId; met: boolean; reason: string }       // reaso
 
 interface TryView {
   text: string; mark: number; skills: SkillView[];                      // all seven, in rubric order
-  feedback: string; biggestGap: string; wordCount: number;
+  feedback: string; biggestGap: string; goFurther: string | null;   // goFurther: a first try at full marks only
+  wordCount: number;
 }
 
 /** Public. The stimulus; an image's src is the authenticated route below. */
@@ -49,6 +50,7 @@ interface UnseenGradeResult {
   skills: SkillView[];
   feedback: string;
   biggestGap: string;
+  goFurther?: string | null;            // phase 1 at full marks only ("To go further"); absent or null otherwise
   wordCount: number;
   retryOffered?: boolean;               // phase 1 only: marksAwarded < maxMarks and maxMarks > 1
   ending?: "full_marks" | "retried" | "declined" | "no_retry";   // present when final
@@ -124,7 +126,7 @@ token and is an `unseen` question (`404 not_found`) → phase row (a final row �
 `200 { result, saved, phaseSaved?, attemptCompleted }`
 
 - mark = `maxMarks`: row inserted `final / full_marks`, result row saved. `result` has `phase: 1`,
-  `marksAwarded`, `recordedMark`, `ending: "full_marks"`, `skills`, `feedback`, `biggestGap`,
+  `marksAwarded`, `recordedMark`, `ending: "full_marks"`, `skills`, `feedback`, `biggestGap`, `goFurther`,
   `discussion`. `saved: true`, `attemptCompleted` from the save.
 - mark below `maxMarks`, `maxMarks > 1`: row inserted `try1`, no result row. `result` has `phase: 1`,
   `marksAwarded`, `skills`, `feedback`, `biggestGap`, `retryOffered: true`, **no `discussion`, no
@@ -250,6 +252,7 @@ Reply (the first `{…}` block is parsed; one retry on failure; failure twice, o
   },
   "feedback": "<two or three sentences: what earned the mark>",
   "biggestGap": "<one sentence>",
+  "goFurther": "<one sentence at full marks; null below full marks>",
   "descriptionAdequate": true
 }
 ```
@@ -257,9 +260,9 @@ Reply (the first `{…}` block is parsed; one retry on failure; failure twice, o
 A reply is a failure, retried like a failed call, when: it is empty; the provider reports
 `finish_reason: "length"`; it does not parse; `mark` is not an integer in `0..maxMarks`; any of the seven
 `met` values is missing or is not a boolean (or `"true"`/`"false"`); `feedback` or `biggestGap` is missing
-or blank; or `feedback`, `biggestGap` or any `reason` shares a 60-character run with the model answer that
+or blank; the mark equals `maxMarks` and `goFurther` is missing, null or blank (a `goFurther` on a below-full reply is dropped); or `feedback`, `biggestGap`, `goFurther` or any `reason` shares a 60-character run with the model answer that
 is not also in the stimulus text. A missing `reason` is stored as "". Strings are trimmed and capped
-(reason 300, feedback 600, biggest gap 300). `descriptionAdequate` is `true`/`false` for a visual text and
+(reason 300, feedback 600, biggest gap 300, go further 300). `descriptionAdequate` is `true`/`false` for a visual text and
 `null` otherwise; the app ignores it at request time and the description-check script reads it. The server
 then computes: the retry cap (`maxMarks − 1`) and the higher-mark rule (research R8) and the seven
 first-try outcomes. The model is not asked for tips.

@@ -15,6 +15,7 @@ import { signedInStudent } from "../helpers/routes";
 import {
   FEEDBACK,
   GAP,
+  GO_FURTHER,
   Q,
   REASON,
   fillWords,
@@ -59,10 +60,13 @@ describe("try 1 at full marks", () => {
     expect(body.result.skills.every((s: { met: boolean }) => s.met)).toBe(true);
     expect(body.result.discussion).toEqual({ modelAnswer: model(), modelWords: model().trim().split(/\s+/).length });
     const row = await phaseRow();
-    expect(row).toMatchObject({ status: "final", ending: "full_marks", recordedMark: 3, try1Mark: 3, maxMarks: 3, try1PromptVersion: "unseen-pilot-4" });
+    expect(row).toMatchObject({ status: "final", ending: "full_marks", recordedMark: 3, try1Mark: 3, maxMarks: 3, try1PromptVersion: "unseen-pilot-5" });
     expect(row.try1Verdicts["technique-effect"]).toEqual({ met: true, reason: REASON });
     expect(row.try1Feedback).toBe(FEEDBACK);
     expect(row.try1BiggestGap).toBe(GAP);
+    // "To go further": stored with the full-mark try and released with it, never touching the mark
+    expect(row.try1GoFurther).toBe(GO_FURTHER);
+    expect(body.result.goFurther).toBe(GO_FURTHER);
     const res = await resultRow();
     expect(res).toMatchObject({ marksAwarded: 3, maxMarks: 3, gradedBy: "llm" });
     expect(res.conceptOutcomes).toHaveLength(7);
@@ -83,6 +87,10 @@ describe("try 1 below full marks", () => {
     expect(body.result).toMatchObject({ phase: 1, marksAwarded: 1, retryOffered: true, feedback: FEEDBACK, biggestGap: GAP });
     expect(body.result.recordedMark).toBeUndefined();
     expect(body.result.discussion).toBeUndefined();
+    // the stub sends a goFurther on every reply: below full marks it is dropped, stored as null and never released
+    expect(body.result.goFurther ?? null).toBeNull();
+    expect((await phaseRow()).try1GoFurther).toBeNull();
+    expect(JSON.stringify(body)).not.toContain(GO_FURTHER);
     expect(body.result.skills.filter((s: { met: boolean }) => !s.met).map((s: { id: string }) => s.id)).toEqual(["technique-effect", "apt-evidence"]);
     expect(JSON.stringify(body)).not.toContain(model().slice(0, 40));
     expect(await resultRow()).toBeUndefined();
@@ -112,6 +120,18 @@ describe("the retry", () => {
     expect(state.every((s) => s.count === 2)).toBe(true);
     expect(await used(user.id)).toBe(2);
     expect(await drafts()).toBeUndefined();
+  });
+
+  it("never stores or returns a goFurther for the retry, even when the model replied at full marks", async () => {
+    env = await setupUnseenEnv();
+    await signedInStudent(env);
+    const { started } = await startUnseen();
+    await gradeUnseen(started, q, BELOW);
+    const { body } = await gradeUnseen(started, q, fillWords(60, "[mark:3]"), { phase: 2 });
+    expect(body.result.marksAwarded).toBe(2);
+    expect(body.result.goFurther ?? null).toBeNull();
+    expect(JSON.stringify(body)).not.toContain(GO_FURTHER);
+    expect((await phaseRow()).try1GoFurther).toBeNull();
   });
 
   it("keeps the first try's mark when the retry scores lower", async () => {
@@ -245,6 +265,20 @@ describe("a try that cannot be marked: the box returns, nothing is invented, not
     const { started } = await startUnseen();
     const { body } = await gradeUnseen(started, q, fillWords(60));
     expect(body.result.marksAwarded).toBe(3);
+    expect(env.chat).toHaveBeenCalledTimes(2);
+    expect(await used(user.id)).toBe(1);
+  });
+
+  it("a full-mark reply with no goFurther is retried like any missing field", async () => {
+    env = await setupUnseenEnv();
+    const user = await signedInStudent(env);
+    quiet();
+    env.chat
+      .mockResolvedValueOnce({ ok: true, content: markerContent(3, [], { goFurther: null }), finishReason: "stop" })
+      .mockResolvedValueOnce({ ok: true, content: markerContent(3), finishReason: "stop" });
+    const { started } = await startUnseen();
+    const { body } = await gradeUnseen(started, q, fillWords(60));
+    expect(body.result).toMatchObject({ marksAwarded: 3, goFurther: GO_FURTHER });
     expect(env.chat).toHaveBeenCalledTimes(2);
     expect(await used(user.id)).toBe(1);
   });

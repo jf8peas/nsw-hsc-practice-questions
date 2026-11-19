@@ -30,7 +30,7 @@ python scripts/pilot-unseen-marker.py --check          # offline: data, word cou
 python scripts/pilot-unseen-marker.py --runs 3 --gate  # EVERY case, all sets; prints tuning, holdout and field separately; exits non-zero under 90 % tuning / 80 % holdout or any case more than 1 mark out
 ```
 
-Expected: the report header shows the prompt version from `lib/unseen/rubric.json` (`unseen-pilot-4` at
+Expected: the report header shows the prompt version from `lib/unseen/rubric.json` (`unseen-pilot-5` at
 launch); the same prompt text is what the app sends (the golden test); tuning about 23/24 and holdout about
 19/20 in range, all within 1 (the pilot's recorded results); the "echoes the model answer" count is 0 or
 near 0; the holdout section carries the line "not for tuning".
@@ -58,11 +58,11 @@ scroll sideways on any screen below.
 | Step | Do | Expect |
 |---|---|---|
 | 1 | Unit page, new student | button "Start a question"; "Things I need to know" shows "All clear"; "Your results" lists the forms in the bank, each "Not tried yet" |
-| 2 | Start; get a **poem** | the text is first, headed "Text 1 – Poem", with title, author and source line; stanza and line breaks kept; line numbers where the paper has them; the footnote line; below it the question, "3 marks", the credit "Fort St 2025 Trial, Q1", and the answer box with the meter "0 / 204 words" and a **Text** button next to Submit; no timer anywhere |
-| 3 | Scroll to the box, tap **Text** | the text opens in a bottom sheet over the page, scrolls, closes with Close and Esc, and the typed text and scroll position are unchanged |
+| 2 | Start; get a **poem** | the text is first, headed "Text 1 – Poem", with title, author and source line; stanza and line breaks kept; line numbers where the paper has them; the footnote line; below it the question, "3 marks", the credit "Fort St 2025 Trial, Q1", and the answer box with the meter "0 / 204 words" and a **View Text 1** button next to Submit (its accessible name is "View Text 1 – Poem"); no timer anywhere |
+| 3 | Scroll to the box, tap **View Text 1** | the text opens in a dialog titled "Text 1 – Poem" over the page, scrolls, closes with Close and Esc, and the typed text and scroll position are unchanged |
 | 4 | Type 10 words | Submit is disabled with "Write at least 20 words before you submit." |
 | 5 | Paste a 260-word answer (suggested 204) | at 205 to 244 words the meter warns ("N words over the suggested length") and Submit works; at 245 words Submit is disabled with "N words over the limit. Cut it to submit."; cut to 240 and submit still works |
-| 6 | **Full-mark first try**: 150 words, `[mark:3]`, all met | locked answer with three status steps (the second ticks after about 1.5 s); no layout jump; goes straight to the discussion; the summary is focused; "Full marks on your first try."; seven skill verdicts each marked "First try" with an icon as well as colour; the final answer beside the model answer (stacked on the phone); no skills added; the first-try row is absent; Finish |
+| 6 | **Full-mark first try**: 150 words, `[mark:3]`, all met | locked answer with three status steps (the second ticks after about 1.5 s); no layout jump; goes straight to the discussion; the summary is focused; "Full marks on your first try."; seven skill verdicts each marked "First try" with an icon as well as colour; the final answer beside the model answer (stacked on the phone); no skills added; the first-try row is absent; a **"To go further"** line under the feedback (one sentence, same look as "Biggest gap", no warning colour); Finish |
 | 7 | Finish, start again; get a **prose** text | same layout without line numbers; paragraphs kept |
 | 8 | **A retry that is capped**: `[mark:2][miss:technique-effect,apt-evidence]` on a 4-mark question | result "2 / 4" with feedback, the biggest-gap line and seven verdicts (Met / Missed with icons and a reason each); "Try again" and "Skip the retry and see the model answer"; no model answer yet |
 | 9 | Tap "Try again" | the box holds the first try, focused with the caret at the end; one tip card for each of the two missed skills with its name and tip, **no model text**; the meter works |
@@ -84,7 +84,7 @@ layout is the same single column at every width:
 | 1 | A **poem** and a **prose** text | the text panel comes first at the full card width, then the question block, then the answer box; the lines of prose, poem and footnotes stop at a comfortable reading width and do not run across the whole card |
 | 2 | The **visual** text | the image fills the full card width and is shown large; **Zoom** still opens the dialog with Zoom in, Zoom out and Close |
 | 3 | Look for a second column | there is none: the text is not beside the question and nothing is sticky; resizing across 900 px changes nothing about the card |
-| 4 | Click **Text** in the answer footer | the text opens in the bottom-sheet dialog at this width too; the typed answer and scroll position are untouched; Close returns focus to the button |
+| 4 | Click **View Text 1** in the answer footer | the text opens in the dialog, titled with the full heading, at this width too; the typed answer and scroll position are untouched; Close returns focus to the button |
 
 ## 3. Failure and resume checks
 
@@ -106,7 +106,7 @@ layout is the same single column at every width:
 | Bank finished | Answer every question of the starter bank | "You've answered every question in the bank so far. New questions are added as the papers are processed." and no start button |
 | Database unreadable | Break `DATABASE_URL` | the unit page shows "We can't load your questions right now. Try again in a moment." and no start button; a submit mid-quiz returns the box with your text and the usual error; nothing is marked or self-marked |
 | Skills clear | Meet a skill on a first try on two later questions | it leaves "Things I need to know" after the second; a skill met only in a retry stays |
-| Past attempt | Open a finished question from Past attempts | "Fort St 2025 · Q1 · Poem": the text, both tries with verdicts and reasons, the feedback and biggest gap, and the model answer (the attempt is final); an unfinished attempt shows no model answer |
+| Past attempt | Open a finished question from Past attempts | "Fort St 2025 · Q1 · Poem": the text, both tries with verdicts and reasons, the feedback and biggest gap (or "To go further" for a full-mark first try), and the model answer (the attempt is final); an unfinished attempt shows no model answer |
 | Draw | Answer several questions with different marks | forms with lower average marks and questions tagged with an uncleared skill appear more often; an answered question never reappears (the automated seeded test is the proof) |
 
 ## 4. Revision loop (offline)
@@ -147,7 +147,7 @@ Network tab through a full quiz: the model answer first appears in the discussio
 ## 7. Real-model pass and latency
 
 With the real `ENGLISH_ADV_GRADING_MODEL`, mark two answers per starter question (one genuinely good, one deliberately
-thin). Expect the good ones to reach full marks and the thin ones to lose a mark with a biggest-gap line
+thin). Expect the good ones to reach full marks and the thin ones to lose a mark with a biggest-gap line (and each full-mark reply with a "To go further" line: the report prints it and its check section must say PASS; marks must not move against `unseen-pilot-4`)
 that names what is missing. **Record ten marking durations** (the server log's `duration_ms`): the p95 must
 be under 35 s; if not, raise `maxDuration` on the grade route before launch (research R5). Check the server
 logs for the run contain only `[unseen] outcome=… user=<hash> question=… phase=… duration_ms=…` lines.

@@ -237,6 +237,7 @@ export async function handleUnseenGrade(
           try1Verdicts: marked.verdicts,
           try1Feedback: marked.feedback,
           try1BiggestGap: marked.biggestGap,
+          try1GoFurther: marked.goFurther,
           try1PromptVersion: marked.promptVersion,
           try1Model: marked.model,
         }),

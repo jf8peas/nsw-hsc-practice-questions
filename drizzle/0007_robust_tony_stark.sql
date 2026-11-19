@@ -1,0 +1,1 @@
+ALTER TABLE "unseen_phases" ADD COLUMN "try1_go_further" text;

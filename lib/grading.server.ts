@@ -700,6 +700,8 @@ export interface UnseenMarked {
   mark: number;
   feedback: string;
   biggestGap: string;
+  /** First try at full marks only; null otherwise (the retry is capped below full marks). */
+  goFurther: string | null;
   wordCount: number;
   promptVersion: string;
   model: string;
@@ -741,6 +743,7 @@ export async function markUnseen(
     mark: phase === 2 ? cappedMark(out.reply.mark, question.maxMarks) : out.reply.mark,
     feedback: out.reply.feedback,
     biggestGap: out.reply.biggestGap,
+    goFurther: phase === 1 && out.reply.mark === question.maxMarks ? out.reply.goFurther : null,
     wordCount: countWords(answer),
     promptVersion: out.promptVersion,
     model: out.model,

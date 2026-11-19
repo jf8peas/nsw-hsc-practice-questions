@@ -25,8 +25,10 @@ A skill is met only if the answer shows it clearly. A full-mark answer normally 
 
 For a VISUAL text you cannot see the image; you only have the written description. Set descriptionAdequate to false if the description does not give you enough detail to check the student's claims or to judge the answer fairly (for example, the student analyses composition, colour, gaze or symbols the description does not mention). Otherwise set it to true. For non-visual texts set it to null.
 
+goFurther is advice beyond the top band, not a reason to withhold marks. Decide the mark first, exactly as above, and never lower it because a goFurther point exists. When the mark equals the question's maximum, goFurther is ONE sentence naming the single most useful step that would make this answer stronger still, specific to this text and this answer (for example: "End on what the poet suggests about families through the mirror image rather than restating your argument"). It must not quote or paraphrase the example full-mark answer and must not mention marks. When the mark is below the maximum, set goFurther to null (biggestGap already does that job).
+
 Reply with JSON only, in exactly this shape:
-{"mark": <integer>, "skills": {"answers-question": {"met": <true|false>, "reason": "<one line>"}, "directive-verb": {...}, "analyses-not-retells": {...}, "technique-effect": {...}, "apt-evidence": {...}, "human-experience": {...}, "succinct": {...}}, "feedback": "<two or three sentences: what earned the mark>", "biggestGap": "<one sentence: the single most important thing to fix>", "descriptionAdequate": <true|false|null>}
+{"mark": <integer>, "skills": {"answers-question": {"met": <true|false>, "reason": "<one line>"}, "directive-verb": {...}, "analyses-not-retells": {...}, "technique-effect": {...}, "apt-evidence": {...}, "human-experience": {...}, "succinct": {...}}, "feedback": "<two or three sentences: what earned the mark>", "biggestGap": "<one sentence: the single most important thing to fix>", "goFurther": "<one sentence when the mark is the maximum, else null>", "descriptionAdequate": <true|false|null>}
 ===== USER =====
 QUESTION (3 marks)
 Text 1 – Poem

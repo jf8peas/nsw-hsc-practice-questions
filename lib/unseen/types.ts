@@ -20,6 +20,8 @@ export interface TryView {
   skills: SkillView[];
   feedback: string;
   biggestGap: string;
+  /** "To go further": only for a first try at full marks, else null. */
+  goFurther: string | null;
   wordCount: number;
 }
 
@@ -43,6 +45,8 @@ export interface UnseenGradeResult {
   skills: SkillView[];
   feedback: string;
   biggestGap: string;
+  /** Phase 1 at full marks only. */
+  goFurther?: string | null;
   wordCount: number;
   /** Phase 1 only: below full marks and the question is worth more than 1 mark. */
   retryOffered?: boolean;

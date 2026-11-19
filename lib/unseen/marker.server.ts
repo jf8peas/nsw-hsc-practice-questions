@@ -33,6 +33,7 @@ const RETRY_MARGIN_MS = 2_000;
 const MAX_REASON = 300;
 const MAX_FEEDBACK = 600;
 const MAX_GAP = 300;
+const MAX_GO_FURTHER = 300;
 /** A run of the model answer this long in the reply is an echo (shorter runs are quotations). */
 export const ECHO_RUN = 60;
 
@@ -111,6 +112,8 @@ export interface ParsedReply {
   skills: SkillVerdicts;
   feedback: string;
   biggestGap: string;
+  /** One sentence of advice beyond the top band: set only when the mark is full marks, else null (FR-018). */
+  goFurther: string | null;
   /** true or false for a visual text; null otherwise. */
   descriptionAdequate: boolean | null;
 }
@@ -128,7 +131,8 @@ const text = (v: unknown, max: number): string => (typeof v === "string" ? v.tri
 /**
  * The first {...} block of the reply, as the pilot does. A missing mark, verdict, feedback or
  * biggest gap makes the whole reply a failure: it is never read as "missed" or as a default
- * (FR-015). A missing reason is stored as "".
+ * (FR-015); so does a full-mark reply with a missing or empty goFurther. A goFurther on a below-full
+ * reply is dropped (biggestGap already does that job). A missing reason is stored as "".
  */
 export function parseUnseenReply(content: string, maxMarks: number): ParsedReply | null {
   const start = content.indexOf("{");
@@ -157,8 +161,12 @@ export function parseUnseenReply(content: string, maxMarks: number): ParsedReply
   const biggestGap = text(obj.biggestGap, MAX_GAP);
   if (!feedback || !biggestGap) return null;
 
+  // goFurther never affects the mark: it is read after the mark and only kept for full marks
+  const goFurther = mark === maxMarks ? text(obj.goFurther, MAX_GO_FURTHER) : "";
+  if (mark === maxMarks && !goFurther) return null;
+
   const adequate = flag(obj.descriptionAdequate);
-  return { mark, skills, feedback, biggestGap, descriptionAdequate: adequate };
+  return { mark, skills, feedback, biggestGap, goFurther: goFurther || null, descriptionAdequate: adequate };
 }
 
 const squash = (s: string): string => s.replace(/\s+/g, " ").trim().toLowerCase();
@@ -172,7 +180,7 @@ export function containsModelEcho(reply: ParsedReply, modelAnswer: string, stimu
   const model = squash(modelAnswer);
   if (model.length < ECHO_RUN) return false;
   const inStimulus = squash(stimulus);
-  const strings = [reply.feedback, reply.biggestGap, ...SKILL_IDS.map((id: SkillId) => reply.skills[id].reason)].map(squash);
+  const strings = [reply.feedback, reply.biggestGap, reply.goFurther ?? "", ...SKILL_IDS.map((id: SkillId) => reply.skills[id].reason)].map(squash);
   const haystack = strings.join(" ¶ ");
   for (let i = 0; i + ECHO_RUN <= model.length; i++) {
     const window = model.slice(i, i + ECHO_RUN);

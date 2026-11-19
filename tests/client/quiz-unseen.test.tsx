@@ -34,12 +34,13 @@ const UNIT = "y12-english-advanced-unseen-texts";
 const unit = UNITS.find((u) => u.id === UNIT)!;
 const question = unit.questions.find((q) => q.type === "unseen") as UnseenQuestion;
 const text = unit.texts!.find((t) => t.id === question.textId)!;
+const GO_FURTHER = "GO-FURTHER-SENTENCE end on what the image suggests about families";
 const MODEL = "MODEL-ANSWER-TEXT the model answer, released at the discussion only";
 
 const words = (n: number) => Array.from({ length: n }, () => "word").join(" ");
 const skills = (missed: SkillId[] = []) => SKILL_IDS.map((id) => ({ id, met: !missed.includes(id), reason: `reason for ${id}` }));
 const tryView = (mark: number, missed: SkillId[] = [], t = "first try text here"): TryView => ({
-  text: t, mark, skills: skills(missed), feedback: "Feedback on the first try.", biggestGap: "Explain the effect of each technique.", wordCount: 4,
+  text: t, mark, skills: skills(missed), feedback: "Feedback on the first try.", biggestGap: "Explain the effect of each technique.", goFurther: mark === 3 ? GO_FURTHER : null, wordCount: 4,
 });
 
 const payloadFor = (state: UnseenState): AttemptPayload => ({
@@ -95,7 +96,7 @@ const belowResult = (over: Partial<UnseenGradeResult> = {}): UnseenGradeResult =
 });
 const fullResult = (over: Partial<UnseenGradeResult> = {}): UnseenGradeResult => ({
   ...belowResult({ marksAwarded: 3, skills: skills(), retryOffered: undefined }),
-  recordedMark: 3, ending: "full_marks", discussion: { modelAnswer: MODEL, modelWords: 12 }, ...over,
+  goFurther: GO_FURTHER, recordedMark: 3, ending: "full_marks", discussion: { modelAnswer: MODEL, modelWords: 12 }, ...over,
 });
 
 describe("the question screen", () => {
@@ -124,11 +125,17 @@ describe("the question screen", () => {
     expect(container.querySelector(".un-card")!.children[0].classList.contains("un-text")).toBe(true);
   });
 
-  it("offers a Text button, at every width, that opens the same text in a dialog", () => {
+  it("offers a View button, at every width, labelled with the short label and named with the full heading, that opens the text in a dialog titled with the heading", () => {
     mount();
-    fireEvent.click(screen.getByRole("button", { name: "Text" }));
+    const short = text.heading.split(/\s[–—-]\s/)[0].trim();
+    const btn = screen.getByRole("button", { name: `View ${text.heading}` });
+    expect(btn.textContent).toBe(`View ${short}`);
+    expect(screen.queryByRole("button", { name: "Text" })).toBeNull();
+    fireEvent.click(btn);
     const sheet = document.querySelector("dialog.un-sheet") as HTMLDialogElement;
     expect(sheet.hasAttribute("open")).toBe(true);
+    expect(sheet.getAttribute("aria-label")).toBe(text.heading);
+    expect(sheet.querySelector(".un-dialog-title")!.textContent).toBe(text.heading);
     expect(within(sheet).getByRole("heading", { name: text.title })).toBeTruthy();
     fireEvent.click(within(sheet).getByRole("button", { name: "Close" }));
     expect(sheet.hasAttribute("open")).toBe(false);
@@ -220,6 +227,40 @@ describe("marking the first try", () => {
     expect(document.activeElement).toBe(document.querySelector(".un-summary"));
     fireEvent.click(screen.getByRole("button", { name: "Finish" }));
     expect(push).toHaveBeenCalledWith(`/unit/${UNIT}`);
+  });
+});
+
+describe("To go further", () => {
+  it("shows under the feedback of a full-mark first try in the discussion, labelled, in the Biggest gap style", async () => {
+    responder = (url) => (url === "/api/grade" ? jsonRes({ result: fullResult(), saved: true, attemptCompleted: true }) : jsonRes({}));
+    mount();
+    type(words(60));
+    fireEvent.click(submitBtn());
+    await waitFor(() => expect(screen.getByText("3 / 3 marks")).toBeTruthy());
+    const label = screen.getByText("To go further");
+    expect(label.className).toContain("un-gap-label");
+    expect(label.parentElement!.className).toContain("un-gap");
+    expect(label.parentElement!.textContent).toContain(GO_FURTHER);
+    expect(screen.queryByText("Biggest gap")).toBeNull();
+  });
+
+  it("shows on the result card for a full-mark try, and never for a below-full one", async () => {
+    responder = (url) => (url === "/api/grade" ? jsonRes({ result: belowResult({ goFurther: GO_FURTHER }) }) : jsonRes({}));
+    mount();
+    type(words(60));
+    fireEvent.click(submitBtn());
+    await waitFor(() => expect(screen.getByText("1 / 3 marks")).toBeTruthy());
+    expect(screen.queryByText("To go further")).toBeNull();
+    expect(document.body.textContent).not.toContain(GO_FURTHER);
+    expect(screen.getByText("Biggest gap")).toBeTruthy();
+  });
+
+  it("is not shown in a retry discussion, whose recorded try is below full marks", () => {
+    mount({
+      stage: "discussion", text, try1: tryView(1, ["technique-effect"]), try2: { ...tryView(2), goFurther: GO_FURTHER }, ending: "retried",
+      recordedMark: 2, flagged: false, discussion: { modelAnswer: MODEL, modelWords: 12 },
+    });
+    expect(screen.queryByText("To go further")).toBeNull();
   });
 });
 

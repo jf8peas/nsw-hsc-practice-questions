@@ -115,6 +115,8 @@ export interface UnseenAttemptTry {
   skills: SkillView[];
   feedback: string;
   biggestGap: string;
+  /** First try at full marks only. */
+  goFurther: string | null;
 }
 export interface UnseenAttemptDetail {
   try1: UnseenAttemptTry;
@@ -155,6 +157,7 @@ function unseenDetailOf(row: UnseenPhaseRow): UnseenAttemptDetail {
     skills: t.skills,
     feedback: t.feedback,
     biggestGap: t.biggestGap,
+    goFurther: t.goFurther,
   });
   return {
     try1: pick(t1),

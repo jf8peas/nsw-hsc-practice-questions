@@ -20,6 +20,7 @@ export function tryViewFrom(row: UnseenPhaseRow, which: 1 | 2): TryView | null {
       skills: skillViewsFrom(row.try1Verdicts),
       feedback: row.try1Feedback,
       biggestGap: row.try1BiggestGap,
+      goFurther: row.try1Mark >= row.maxMarks ? row.try1GoFurther : null,
       wordCount: countWords(row.try1Text),
     };
   }
@@ -30,6 +31,7 @@ export function tryViewFrom(row: UnseenPhaseRow, which: 1 | 2): TryView | null {
     skills: skillViewsFrom(row.try2Verdicts),
     feedback: row.try2Feedback ?? "",
     biggestGap: row.try2BiggestGap ?? "",
+    goFurther: null,
     wordCount: countWords(row.try2Text),
   };
 }
@@ -50,6 +52,7 @@ export function gradeResultFrom(row: UnseenPhaseRow, discussion?: UnseenDiscussi
       skills: t1.skills,
       feedback: t1.feedback,
       biggestGap: t1.biggestGap,
+      goFurther: t1.goFurther,
       wordCount: t1.wordCount,
       retryOffered: retryOffered(row.try1Mark, row.maxMarks),
     };
@@ -79,6 +82,7 @@ export function gradeResultFrom(row: UnseenPhaseRow, discussion?: UnseenDiscussi
     skills: t1.skills,
     feedback: t1.feedback,
     biggestGap: t1.biggestGap,
+    goFurther: t1.goFurther,
     wordCount: t1.wordCount,
     ending,
     ...(ending === "declined" ? { try1: t1 } : {}),

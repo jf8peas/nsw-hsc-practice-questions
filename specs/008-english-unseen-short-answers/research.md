@@ -371,7 +371,7 @@ allowlist in `tests/no-key-leak.test.ts`; no route or page imports it.
 |---|---|---|
 | `POST /api/attempts` (start or resume), `unseenState.stage = write` | the question (public fields), the text (public, image as `/api/unseen/image/<id>` URL), `draft1`, `dailyLimit` | any key field |
 | quiz page resume, stage `write`, `choice`, `retry` | the same, plus `try1` (text, mark, seven verdicts with reasons, feedback, biggest gap), `draft2` | the model answer, criteria, notes, description |
-| `POST /api/grade` try 1 marked below full | `result`: mark, verdicts, reasons, feedback, biggest gap, `retryOffered` | `discussion`, the model answer |
+| `POST /api/grade` try 1 marked below full | `result`: mark, verdicts, reasons, feedback, biggest gap, `retryOffered` (never `goFurther`) | `discussion`, the model answer |
 | `POST /api/grade` try 1 at full marks, or no retry offered, or try 2 marked | `result` + `discussion` (model answer) + `try1` on try 2 | criteria, notes, description |
 | `POST /api/grade` not marked (marker down, daily limit) | `notMarked: { reason, resetsAt? }` | everything else |
 | `POST /api/unseen/decline` | `result` (final) + `discussion` | criteria, notes, description |
@@ -417,7 +417,7 @@ returning the model answer with the first try's result "to save a request" (brea
 
 - `lib/unseen/rubric.json` (server-only; `{ promptVersion, directiveVerbs, systemPrompt, userTemplate }`).
   At port it is `resources/english-unseen/rubric.json` with the `skills` array removed: **byte-identical
-  prompt text, `promptVersion: "unseen-pilot-4"`**. The old file in `resources/` is deleted (the three
+  prompt text, `promptVersion: "unseen-pilot-4"`** (now `unseen-pilot-5`, which adds `goFurther`). The old file in `resources/` is deleted (the three
   `rubric.pilot-N.json` history files stay as records) so there is one source of truth.
 - `lib/unseen/skills.json` (public; `[{ id, name, tip, description }]`, the seven skills). The `skills`
   array moves out of the prompt file because the prompt file is server-only and the tips must reach the
@@ -445,15 +445,27 @@ paragraphs joined by blank lines, then the footnotes. The pilot file's `text` st
 and differ from this rendering only in whitespace; the Python regression keeps using them for the stored
 cases, and `scripts/unseen-field-cases.ts` writes field cases with the app's rendering.
 
-**Reply.** `{ mark, skills: { <seven ids>: { met, reason } }, feedback, biggestGap, descriptionAdequate }`
+**Reply.** `{ mark, skills: { <seven ids>: { met, reason } }, feedback, biggestGap, goFurther, descriptionAdequate }`
 (`contracts/api.md`, "The marker's reply format"). `parseUnseenReply(content, maxMarks)` takes the first
 `{…}` block, as the pilot and spec 007 do. A reply is a **failure** (retried like a failed call) when: it is
 empty; the model stopped because of length (`finish_reason: "length"`); it does not parse; `mark` is not an
 integer from 0 to `maxMarks`; any of the seven `met` values is missing or not a boolean (or the strings
 `"true"`/`"false"`); `feedback` or `biggestGap` is missing or blank after trimming; or the echo guard (R4)
-fires. A missing `reason` is **not** a failure (stored as ""); the spec lists only the mark, the verdicts,
-the feedback and the biggest gap. Strings are trimmed and capped (reason 300, feedback 600, biggest gap 300
-characters).
+fires, or the mark equals `maxMarks` and `goFurther` is missing, null, blank or not a string. A `goFurther` on a below-full reply is dropped (stored as null), and it is part of the echo guard's strings. A missing `reason` is **not** a failure (stored as ""); the spec lists only the mark, the verdicts,
+the feedback and the biggest gap. Strings are trimmed and capped (reason 300, feedback 600, biggest gap 300,
+go further 300 characters).
+
+**"To go further" (prompt `unseen-pilot-5`).** A full-mark answer has no biggest gap, so the student would learn
+nothing about how to lift it. The reply gains `goFurther`: when the mark equals the question's full marks, one
+sentence naming the single most useful step that would make this answer stronger still, specific to this text
+and this answer; otherwise null. The system prompt says it is advice beyond the top band, not a reason to
+withhold marks: the mark is decided first and never lowered because a point exists; it must not quote or
+paraphrase the example answer or mention marks. The retry is capped below full marks, so only a first try can
+have one; it is stored in `unseen_phases.try1_go_further` (nullable, migration 0007) and the views release it
+only when `try1_mark = max_marks`. Rejected: a second model call (cost and a second failure path); showing the
+biggest gap at full marks (the marker has nothing to fix there); reusing `feedback` (it explains what earned
+the mark). The offline pilot script reports it and checks every full-mark reply has one; marks must not move
+against `unseen-pilot-4`.
 
 **Cut-off detection needs one small change to shared code.** `chatCompletion` returns only `{ ok, content }`
 and does not expose `finish_reason`, so the pilot's "cut off at max_tokens" failure cannot be seen in the
@@ -497,7 +509,7 @@ so the pilot's injection behaviour is the behaviour measured; the model answer r
 **Fake model.** `FAKE_UNSEEN=pass|partial|fail|down|empty|cutoff|missing|malformed|slow`. A directive in the
 student's text, `[mark:2]` and `[miss:technique-effect,apt-evidence]`, chooses the reply (no directive: full
 marks and all skills met in `pass`; mark 2 and `technique-effect` missed in `partial`). `empty` returns an
-empty content, `cutoff` returns `finish_reason: "length"`, `missing` omits `biggestGap`, `malformed` returns
+empty content, `cutoff` returns `finish_reason: "length"`, `missing` omits `biggestGap`, `missing-go-further` is a full-mark reply without `goFurther`, `malformed` returns
 prose, `slow` waits 12 s, `fail` is HTTP 500, `down` HTTP 503. The fake echoes the model answer in the
 feedback in a mode `echo` to exercise the guard.
 
@@ -865,11 +877,11 @@ panel tests must stay untouched.
 | `PoemText` | stanzas of `.un-line`s, optional line numbers (`aria-hidden`), `white-space: pre-wrap` |
 | `ProseText` | paragraphs |
 | `VisualText` | `<img>` from the authenticated route, "Zoom" button, `ZoomDialog` |
-| `TextSheet` | a "Text" button in the answer footer, at every width, that opens the text in a bottom-sheet `<dialog>` so the text is reachable while writing (FR-006) |
+| `TextSheet` | a "View …" button in the answer footer, at every width (label "View " + the text's short label from its heading, e.g. "View Text 1"; `aria-label` "View " + the full heading, e.g. "View Text 1 – Image"), that opens the text in a `<dialog>` titled with the full heading, so the text is reachable while writing (FR-006); its close button stays "Close" |
 | `QuestionBlock` | the question (with parts), "N marks", the source credit |
 | `AnswerBox` | the textarea, word meter, limit notes, Submit; props for `locked`, `limit`, `notice` |
 | `LockedAnswer` | the locked text during marking (reuses the paragraph unit's look, own class) |
-| `ResultCard` | mark out of N, feedback, biggest gap, `SkillList` (seven verdicts as "Met" / "Missed" with an icon and the reason) |
+| `ResultCard` | mark out of N, feedback, biggest gap (for a full-mark try, `GoFurther` "To go further" in the same `un-gap` style instead), `SkillList` (seven verdicts as "Met" / "Missed" with an icon and the reason) |
 | `RetryChoice` | "Try again" and "Skip the retry and see the model answer", the cap line |
 | `RetryBox` | `AnswerBox` pre-filled with try 1, plus `TipCards` (one per skill missed on try 1, from `skills.ts`) |
 | `NotMarkedNotice` | the marker-failed status and the daily-limit status (the "waiting-on-cap" and "marker-failed" states) |
@@ -911,8 +923,10 @@ server response that carried `discussion`; no state offers a third try; no state
 then the question block, then the answer box. The text is a full inline panel (not collapsed, so the student
 reads it where they expect it). Prose, poems and footnotes are capped at a comfortable reading width
 (`max-width: 68ch`); an image uses the full card width, so it is shown large, and the Zoom dialog is still
-there for detail. In the answer box footer a **"Text"** button (44 px), shown at every width, opens
-`TextSheet` so the text stays reachable while the textarea is in view (on a phone, with the keyboard up),
+there for detail. In the answer box footer a **"View …"** button (44 px), shown at every width, opens
+`TextSheet`. Its label is "View " + the short label from the text's heading (the part before the dash:
+"Text 1 – Image" gives "View Text 1"), and its `aria-label` is "View " + the full heading ("View Text 1 – Image").
+The sheet's title is the full heading and its close button stays "Close". It opens the sheet so the text stays reachable while the textarea is in view (on a phone, with the keyboard up),
 without losing the typed text or the scroll position. There is no two-column layout, no 900 px breakpoint
 for the card and no sticky text column. `TextSheet` and `ZoomDialog` share one `<dialog>` wrapper with a labelled
 "Close" button, `Esc`, focus return, and `prefers-reduced-motion` handled by having no animation at all.
@@ -930,7 +944,7 @@ takes focus when it appears; the dialogs trap focus natively and return it on cl
 **Rejected.** Generalising `components/paragraph/*` (it would touch the paragraph unit and its tests for
 the two pieces that overlap); a two-column card with a sticky text column from 900 px (the first design:
 it squeezes an image into half the card, makes a long poem scroll inside its own column, and needs a second
-layout to test and keep right, while one column reads the same on every screen and the "Text" button already
+layout to test and keep right, while one column reads the same on every screen and the "View …" button already
 keeps the text reachable); a modal for the text as the only view (it hides the question); collapsing the
 text (reading the text is the task); auto-scroll on focus (jarring with the keyboard open).
 
@@ -954,7 +968,7 @@ text (reading the text is the task); auto-scroll on focus (jarring with the keyb
    and the form), as spec 007 returns "Essay 3 · Mechanism". Marks show "/N" with the question's value.
 
 **Attempt detail** (`app/attempts/[attemptId]/page.tsx`, an `unseen` branch): the question and its credit;
-**try 1** (text, mark, the seven verdicts with reasons, feedback, biggest gap); **try 2** if any; the
+**try 1** (text, mark, the seven verdicts with reasons, feedback, biggest gap, or "To go further" for a full-mark first try); **try 2** if any; the
 recorded mark and how it ended; and the **model answer only when the row is `final`** (the student has
 already seen it at the discussion, A3). The stimulus text is shown above (public). An unfinished attempt
 shows its tries and no model answer. No criteria, notes or description at any time.

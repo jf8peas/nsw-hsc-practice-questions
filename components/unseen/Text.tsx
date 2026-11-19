@@ -120,7 +120,12 @@ export function TextPanel({ text }: { text: UnseenText }) {
   );
 }
 
-/** Phone only: the text in a bottom sheet, so it stays reachable while the student writes (FR-006). */
+/** The text's short label from its heading: "Text 1 – Image" gives "Text 1". */
+export function shortLabel(heading: string): string {
+  return heading.split(/\s[–—-]\s/)[0].trim() || heading;
+}
+
+/** The text in a sheet at every width, so it stays reachable while the student writes (FR-006). Titled with the full heading. */
 export function TextSheet({ text, open, onClose }: { text: UnseenText; open: boolean; onClose: () => void }) {
   return (
     <Dialog open={open} onClose={onClose} label={text.heading} className="un-sheet">

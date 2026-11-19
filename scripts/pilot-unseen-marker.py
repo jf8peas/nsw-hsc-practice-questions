@@ -180,6 +180,15 @@ def parse_reply(content: str, max_mark: int) -> tuple[dict | None, str | None]:
     missing = [s for s in SKILLS if not isinstance(skills.get(s, {}).get("met"), bool)]
     if missing:
         return None, f"missing skill verdicts: {', '.join(missing)}"
+    # goFurther mirrors lib/unseen/marker.server.ts: required (non-empty) at full marks, dropped below them
+    go = r.get("goFurther")
+    go = go.strip() if isinstance(go, str) else ""
+    if mark == max_mark:
+        if not go:
+            return None, "full-mark reply has no goFurther"
+        r["goFurther"] = go
+    else:
+        r["goFurther"] = None
     return r, None
 
 
@@ -201,7 +210,7 @@ def reply_echoes_anchor(q: dict, c: dict, reply: dict) -> bool:
     model = _squash(by_id[anchor_id]["answer"])
     stimulus = _squash(c.get("textOverride") or q["text"])
     out = " ".join(
-        [reply.get("feedback", ""), reply.get("biggestGap", "")]
+        [reply.get("feedback", ""), reply.get("biggestGap", ""), reply.get("goFurther") or ""]
         + [v.get("reason", "") for v in (reply.get("skills") or {}).values() if isinstance(v, dict)]
     )
     out = _squash(out)
@@ -413,10 +422,23 @@ def summarise(data: dict, records: list[dict], model: str, runs: int) -> str:
         lines.append(f"**{c['id']}** — mark {r['mark']}/{q['marks']}")
         lines.append(f"- Feedback: {r.get('feedback', '')}")
         lines.append(f"- Biggest gap: {r.get('biggestGap', '')}")
+        if r.get("goFurther"):
+            lines.append(f"- To go further: {r['goFurther']}")
         for s in SKILLS:
             v = r["skills"][s]
             lines.append(f"  - {'met' if v['met'] else 'MISSED'} · {s}: {v.get('reason', '')}")
         lines.append("")
+    full = [(q, r) for q, c in all_cases(data) for r in by_case.get(c["id"], []) if "reply" in r and r["reply"]["mark"] == q["marks"]]
+    with_go = [1 for _, r in full if r["reply"].get("goFurther")]
+    no_go = [r for r in records if "error" in r and "goFurther" in r["error"]]
+    lines += [
+        "## To go further check",
+        "",
+        f"- Full-mark replies with a goFurther: {len(with_go)}/{len(full)}"
+        + (f"; {len(no_go)} reply(ies) rejected for lacking one" if no_go else ""),
+        "- PASS" if len(with_go) == len(full) else "- FAIL: a full-mark reply has no goFurther",
+        "",
+    ]
     errs = [r for r in records if "error" in r]
     if errs:
         lines += ["## Errors", ""] + [f"- {r['case']} run {r['run']}: {r['error']}" for r in errs]

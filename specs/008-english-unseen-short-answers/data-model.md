@@ -116,6 +116,7 @@ export const unseenPhases = pgTable("unseen_phases", {
   try1Verdicts: jsonb("try1_verdicts").$type<SkillVerdicts>().notNull(),
   try1Feedback: text("try1_feedback").notNull(),
   try1BiggestGap: text("try1_biggest_gap").notNull(),
+  try1GoFurther: text("try1_go_further"),          // nullable; set only for a full-mark first try (migration 0007)
   try1PromptVersion: text("try1_prompt_version").notNull(),
   try1Model: text("try1_model").notNull(),
   try1GradedAt: ts("try1_graded_at").notNull().defaultNow(),
@@ -248,7 +249,7 @@ interface UnseenState {
   flagged?: boolean;
   discussion?: { modelAnswer: string; modelWords: number };   // only when stage = "discussion"
 }
-interface TryView { text: string; mark: number; skills: SkillView[]; feedback: string; biggestGap: string; wordCount: number }
+interface TryView { text: string; mark: number; skills: SkillView[]; feedback: string; biggestGap: string; goFurther: string | null; wordCount: number }   // goFurther: a first try at full marks only
 interface SkillView { id: SkillId; met: boolean; reason: string }
 ```
 

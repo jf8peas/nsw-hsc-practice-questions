@@ -38,6 +38,7 @@ const tryFrom = (r: UnseenGradeResult, text: string): TryView => ({
   skills: r.skills,
   feedback: r.feedback,
   biggestGap: r.biggestGap,
+  goFurther: r.goFurther ?? null,
   wordCount: r.wordCount,
 });
 
@@ -310,6 +311,7 @@ export function UnseenPanel({
                 onBlur={() => blurBeacon(1)}
                 onSubmit={() => void submit(1)}
                 onShowText={() => setSheetOpen(true)}
+                textHeading={state.text.heading}
                 suggestedWords={suggested}
                 limitReached={limitReached}
               />
@@ -346,6 +348,7 @@ export function UnseenPanel({
                 onBlur={() => blurBeacon(2)}
                 onSubmit={() => void submit(2)}
                 onShowText={() => setSheetOpen(true)}
+                textHeading={state.text.heading}
                 suggestedWords={suggested}
                 textareaRef={retryRef}
                 limitReached={limitReached}

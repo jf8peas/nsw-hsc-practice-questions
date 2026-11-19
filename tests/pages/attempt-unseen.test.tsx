@@ -53,7 +53,7 @@ async function render(attemptId: string) {
   return textOf(tree) + detail.map((el) => renderToStaticMarkup(createElement(el.type as never, el.props as never))).join("");
 }
 
-async function seeded(opts: { final: boolean; retried?: boolean }) {
+async function seeded(opts: { final: boolean; retried?: boolean; full?: boolean }) {
   env = await setupTestEnv();
   const me = await seedUser(env.db);
   env.signedInAs(asSessionUser(me));
@@ -61,11 +61,11 @@ async function seeded(opts: { final: boolean; retried?: boolean }) {
   await env.db.insert(unseenPhases).values({
     attemptId: attempt.id, userId: me.id, unitId: UNIT, questionId: QID, maxMarks: 3,
     status: opts.final ? "final" : "try1",
-    ...(opts.final ? { ending: opts.retried ? "retried" : "declined", recordedMark: opts.retried ? 2 : 1 } : {}),
-    try1Text: "FIRST-TRY-TEXT the poem uses repetition", try1Mark: 1, try1Verdicts: verdicts(["technique-effect"]),
-    try1Feedback: "Name the effect.", try1BiggestGap: "GAP-TEXT-9930", try1PromptVersion: "unseen-pilot-4", try1Model: "m",
+    ...(opts.final ? { ending: opts.full ? "full_marks" : opts.retried ? "retried" : "declined", recordedMark: opts.full ? 3 : opts.retried ? 2 : 1 } : {}),
+    try1Text: "FIRST-TRY-TEXT the poem uses repetition", try1Mark: opts.full ? 3 : 1, try1Verdicts: verdicts(["technique-effect"]),
+    try1Feedback: "Name the effect.", try1BiggestGap: "GAP-TEXT-9930", try1GoFurther: "GO-FURTHER-TEXT-4417", try1PromptVersion: "unseen-pilot-5", try1Model: "m",
     ...(opts.retried
-      ? { try2Text: "RETRY-TEXT the repetition shows resistance", try2Mark: 2, try2Verdicts: verdicts(), try2Feedback: "Better.", try2BiggestGap: "Add a quotation.", try2PromptVersion: "unseen-pilot-4", try2Model: "m" }
+      ? { try2Text: "RETRY-TEXT the repetition shows resistance", try2Mark: 2, try2Verdicts: verdicts(), try2Feedback: "Better.", try2BiggestGap: "Add a quotation.", try2PromptVersion: "unseen-pilot-5", try2Model: "m" }
       : {}),
     flaggedAt: opts.final ? new Date() : null,
   });
@@ -88,6 +88,17 @@ describe("unseen attempt detail", () => {
     expect(html).toContain("REASON-MET-7002");
     expect(html).toContain("Biggest gap: GAP-TEXT-9930");
     expect(html).toContain("Recorded 2/3 · flagged for your teacher");
+  });
+
+  it("shows \"To go further\" for a full-mark first try and never for a below-full one", async () => {
+    const full = await render((await seeded({ final: true, full: true })).id);
+    expect(full).toContain("To go further: GO-FURTHER-TEXT-4417");
+    expect(full).not.toContain("Biggest gap: GAP-TEXT-9930");
+    await env.close();
+    // a stored goFurther on a below-full row is never shown (the app only stores it for full marks)
+    const below = await render((await seeded({ final: true })).id);
+    expect(below).not.toContain("GO-FURTHER-TEXT-4417");
+    expect(below).toContain("Biggest gap: GAP-TEXT-9930");
   });
 
   it("shows the model answer for a final question, and says when the retry was skipped", async () => {

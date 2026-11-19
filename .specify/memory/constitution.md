@@ -1,10 +1,15 @@
 <!--
 Sync Impact Report
+- Version change: 2.15.0 → 2.15.1 (PATCH: clarification of Principle II's stored fields for the unseen-text unit; no new class of behaviour).
+- Reason (amendment log): the unseen-text marker (spec 008, prompt unseen-pilot-5) adds one advice sentence, "To go further", to a full-mark first try. It is stored in the unseen phase row with the try, shown only for a full-mark first try, and never changes a mark. Principle II lists the stored fields, so it is added there.
+- Modified principles: II. Signed-In Students, Minimal Personal Data (the unseen phase row also holds the to-go-further sentence).
+
+Previous report (2.15.0):
 - Version change: 2.14.0 → 2.15.0 (MINOR: materially expanded guidance in Principles I, II, V, VI and VII to allow the Advanced English unseen-text unit's cropped visual stimulus images and stimulus texts, its key schedule, its stored attempt, its no-self-marking behaviour and its own marking model).
 - Reason (amendment log): the unseen-text unit (spec 008) shows one unseen text (a poem, prose, or a visual cropped from a school paper) with one question, marks the answer with an LLM against the school's band descriptors and seven skills, and offers one capped retry. A visual stimulus cannot be redrawn in code without changing the text the student analyses, so a cropped school-paper image is allowed under the school-paper exception, served only to signed-in students. Self-marking an interpretive English answer is not a fair mark, so the unit never self-marks: a marker failure returns the editable box with the text, and the daily limit holds the question at its step until the next Sydney day. The unit's draw and resume need the database, so it cannot start without it. Marking criteria, notes, the model answer and a visual's written description are server-only key material; the model answer is released at the discussion only. Each try's verdicts, reasons, feedback, biggest gap, prompt version and the flag are stored so the marker can be revised from real use. The unit marks with its own model, which the pilot showed is needed for school full-mark answers.
 - Modified principles:
   - I. The Answer Key Never Reaches the Browser: unseen-text release schedule; the decline and flag routes' fields; the image route's text id.
-  - II. Signed-In Students, Minimal Personal Data: unseen phase row (both tries' texts, marks, seven verdicts and reasons, feedback, biggest gap, prompt version and model, ending, recorded mark, flag); per-skill results may be copied without identity into local test files.
+  - II. Signed-In Students, Minimal Personal Data: unseen phase row (both tries' texts, marks, seven verdicts and reasons, feedback, biggest gap, to-go-further sentence for a full-mark first try, prompt version and model, ending, recorded mark, flag); per-skill results may be copied without identity into local test files.
   - V. Syllabus Fidelity and Original Content: a cropped visual stimulus from a school paper is allowed under the school-paper exception, behind sign-in, never from a real HSC paper, removed or replaced before the app goes commercial; the exception covers stimulus texts and school guidelines.
   - VI. Grading Is Fair, Explainable and Degrades Gracefully: the unseen-text unit is never self-marked on either try; wait, then return the box; the daily limit holds the question; it needs the database.
   - VII. Cost and Abuse Controls on Paid Paths: `ENGLISH_ADV_GRADING_MODEL` is server-only; one slot per marked try, refunded on failure; `REMARK_MODEL` also serves the unseen-text re-mark.
@@ -199,7 +204,7 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     never change marks or concept tracking, which always come from the phase 1 outcomes;
   - per unseen-text question in an attempt (spec 008): the first-try and retry texts, their marks,
     the seven per-skill verdicts each with the marker's one-line reason, the feedback and
-    biggest-gap sentence shown, the prompt version and model that marked each try, how the
+    biggest-gap sentence shown, the "to go further" sentence for a full-mark first try, the prompt version and model that marked each try, how the
     question ended (full marks, retried, declined, or no retry offered), the recorded mark, and
     whether and when the student flagged the attempt for review; stored in a phase row, kept for
     the attempt detail page, deleted with the student like results. The student's in-progress
@@ -529,4 +534,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.15.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-19
+**Version**: 2.15.1 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-19

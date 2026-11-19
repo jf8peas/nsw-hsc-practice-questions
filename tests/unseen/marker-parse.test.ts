@@ -65,6 +65,31 @@ describe("parseUnseenReply", () => {
     expect(r.descriptionAdequate).toBeNull();
   });
 
+  it("keeps goFurther for a full-mark reply, trimmed and capped, and never lets it touch the mark", async () => {
+    const { parseUnseenReply } = await marker();
+    const r = parseUnseenReply(good({ mark: 4, goFurther: "  End on the mirror image.  " }), 4)!;
+    expect(r.mark).toBe(4);
+    expect(r.goFurther).toBe("End on the mirror image.");
+    expect(parseUnseenReply(good({ mark: 4, goFurther: "z".repeat(500) }), 4)!.goFurther).toHaveLength(300);
+  });
+
+  it.each([
+    ["missing", undefined],
+    ["null", null],
+    ["empty", "   "],
+    ["not a string", 7],
+  ])("fails a full-mark reply whose goFurther is %s, so it is retried like any missing field", async (_l, value) => {
+    const { parseUnseenReply } = await marker();
+    expect(parseUnseenReply(good({ mark: 4, goFurther: value }), 4)).toBeNull();
+  });
+
+  it("drops a goFurther on a below-full reply, and does not need one", async () => {
+    const { parseUnseenReply } = await marker();
+    expect(parseUnseenReply(good({ mark: 3, goFurther: "Do more." }), 4)!.goFurther).toBeNull();
+    expect(parseUnseenReply(good({ mark: 3 }), 4)!.goFurther).toBeNull();
+    expect(parseUnseenReply(good({ mark: 3, goFurther: null }), 4)!.mark).toBe(3);
+  });
+
   it("finds the JSON inside prose or a code fence", async () => {
     const { parseUnseenReply } = await marker();
     expect(parseUnseenReply("Here you go:\n```json\n" + good() + "\n```", 4)?.mark).toBe(3);

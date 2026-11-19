@@ -311,6 +311,8 @@ export const unseenPhases = pgTable(
     try1Verdicts: jsonb("try1_verdicts").$type<SkillVerdicts>().notNull(),
     try1Feedback: text("try1_feedback").notNull(),
     try1BiggestGap: text("try1_biggest_gap").notNull(),
+    /** One sentence of advice beyond the top band; set only for a full-mark first try (the retry is capped below full marks). */
+    try1GoFurther: text("try1_go_further"),
     try1PromptVersion: text("try1_prompt_version").notNull(),
     try1Model: text("try1_model").notNull(),
     try1GradedAt: ts("try1_graded_at").notNull().defaultNow(),

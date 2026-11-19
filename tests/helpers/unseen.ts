@@ -16,6 +16,7 @@ export const UNSEEN_UNIT = "y12-english-advanced-unseen-texts";
 export const REASON = "MOCK-REASON-8842";
 export const FEEDBACK = "MOCK-FEEDBACK-5519";
 export const GAP = "MOCK-GAP-3306";
+export const GO_FURTHER = "MOCK-GOFURTHER-7714";
 
 /** The bank's questions in order; `Q[0]` is the first starter question. */
 export const Q = questions.map((q) => q.id);
@@ -32,6 +33,8 @@ export function markerContent(mark: number, missed: string[] = [], overrides: Re
     skills: Object.fromEntries(SKILL_IDS.map((id) => [id, { met: !missed.includes(id), reason: REASON }])),
     feedback: FEEDBACK,
     biggestGap: GAP,
+    // always sent, so the app is what keeps it to full-mark tries (a below-full reply's goFurther is dropped)
+    goFurther: GO_FURTHER,
     descriptionAdequate: null,
     ...overrides,
   });

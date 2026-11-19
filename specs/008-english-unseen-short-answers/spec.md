@@ -59,11 +59,11 @@ When the first try scores below full marks, the student may retry once or declin
 
 **Acceptance Scenarios**:
 
-1. **Given** a first try at full marks, **When** the result arrives, **Then** the student goes straight to the discussion.
+1. **Given** a first try at full marks, **When** the result arrives, **Then** the student goes straight to the discussion, which shows one "To go further" sentence below the feedback (the single most useful step to make the answer stronger still); it is never shown for a try below full marks and never changes the mark.
 2. **Given** a first try below full marks, **When** the result arrives, **Then** the student sees the mark, feedback, biggest gap and skill verdicts, and can choose to retry once or decline, and the model answer is not shown or sent to the browser.
 3. **Given** the student chooses to retry, **When** the retry screen opens, **Then** the box holds their first try, with one tip card per skill missed on the first try, and the tip cards contain no model-answer text.
 4. **Given** a retry is submitted, **When** it is marked, **Then** it is marked on the same rubric, its mark is capped at one mark below full marks, no third try is offered, and the recorded mark is the higher of the first try and the capped retry.
-5. **Given** the discussion, **When** it appears, **Then** it shows the recorded mark and an explanation of the cap where it applied, each skill marked "First try", "Fixed in retry" or missed, the student's final answer beside the model answer, the skills added to "Things I need to know", the first try collapsed, and a "This mark seems wrong" button.
+5. **Given** the discussion, **When** it appears, **Then** it shows the recorded mark and an explanation of the cap where it applied, each skill marked "First try", "Fixed in retry" or missed, the student's final answer beside the model answer, the skills added to "Things I need to know", the first try collapsed, and a "This mark seems wrong" button; a full-mark first try also shows its "To go further" sentence below the feedback.
 6. **Given** the student declines the retry, **When** they decline, **Then** the first-try mark is recorded and the discussion appears with the model answer.
 7. **Given** an answer is being marked, **When** the student waits, **Then** their text stays on screen, locked, with status steps.
 8. **Given** the discussion, **When** the student presses "This mark seems wrong", **Then** the attempt (the first try and any retry) is flagged, the button shows a done state ("Flagged for your teacher"), and the mark does not change.
@@ -149,7 +149,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 - The marker is unavailable on the first try: the answer stays locked while the app waits and retries; if marking still fails the editable box returns with the student's text, and no mark is invented. There is no self-marking.
 - The student has reached the daily marking limit: they are told to come back tomorrow, the answer stays in the box, and Submit stays disabled until the next day.
 - The marker is unavailable, or the limit is reached, when the retry is submitted: handled exactly as on the first try (FR-032). The retry text is kept; the student resubmits, or comes back tomorrow and the question is offered again at the retry. The student may still decline the retry instead, which records the first-try mark.
-- The marker's reply is empty, cut off, unparseable, or missing the mark, any skill verdict, the feedback or the biggest gap: it is retried like a failed call.
+- The marker's reply is empty, cut off, unparseable, or missing the mark, any skill verdict, the feedback or the biggest gap (or, at full marks, the "to go further" sentence): it is retried like a failed call.
 - A request that never reached the server (network down): the editable box returns holding the text with the usual error.
 - The student leaves after a first try below full marks, or mid-retry, and returns: the next quiz offers the same question again at the retry choice or the retry with the saved text; no recorded mark exists yet, marking states are never restored and typed text is not lost.
 - A visual text whose description is not enough for the marker: blocked from the bank, never shown.
@@ -180,11 +180,11 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 
 - **FR-012**: An LLM MUST mark each answer against the question's rubric (the school's band descriptors for each mark, with the marking notes as features a student could discuss, not a checklist). The unit MUST mark with the model named by a new environment variable, `ENGLISH_ADV_GRADING_MODEL`, defaulting to `deepseek/deepseek-v4.1-flash` when unset. It MUST NOT fall back to `GRADING_MODEL` (the rest of the app's marker, `deepseek/deepseek-chat`), which marked full-mark answers one mark low in the pilot.
 - **FR-013**: The marker MUST receive the question, the directive verb and its definition, the text (or the visual's description), the school's marking criteria, the marking notes, the suggested length and the answer's word count, the question's model answer as an example of a full-mark answer, and the student's answer.
-- **FR-014**: The marker MUST return one whole mark; a met or missed verdict with a one-line reason for each of the seven skills; two or three sentences of feedback on what earned the mark; and one sentence naming the biggest gap. The prompt is the pilot's passing prompt (`unseen-pilot-4`), moved into the app as `lib/unseen/rubric.json` so the app and the pilot script read one file, and its `promptVersion` MUST be bumped on every change.
-- **FR-015**: A reply that is empty, cut off, unparseable or missing any field (the mark, any skill verdict, the feedback or the biggest gap) MUST be retried like a failed call.
+- **FR-014**: The marker MUST return one whole mark; a met or missed verdict with a one-line reason for each of the seven skills; two or three sentences of feedback on what earned the mark; and one sentence naming the biggest gap. At full marks only, it MUST also return one "go further" sentence (`goFurther`): the single most useful step that would make this answer stronger still, specific to this text and this answer; below full marks `goFurther` is null (the biggest gap does that job). `goFurther` is advice beyond the top band: the mark is decided first and MUST NOT be lowered because a `goFurther` point exists, and it MUST NOT quote or paraphrase the model answer or mention marks. The prompt is the pilot's passing prompt (`unseen-pilot-4`, then `unseen-pilot-5` with `goFurther` added and the marks unchanged), moved into the app as `lib/unseen/rubric.json` so the app and the pilot script read one file, and its `promptVersion` MUST be bumped on every change.
+- **FR-015**: A reply that is empty, cut off, unparseable or missing any field (the mark, any skill verdict, the feedback or the biggest gap, or `goFurther` on a full-mark reply) MUST be retried like a failed call; a `goFurther` on a below-full reply is dropped.
 - **FR-016**: The model answer given to the marker MUST be the school's sample answer where one exists, otherwise a generated answer reviewed before the question goes live.
 - **FR-017**: The marker MUST also say whether a visual text's description was enough to mark from. Before a visual question goes live its description MUST be checked this way, and a visual text whose description is not enough MUST be blocked from the bank and never shown.
-- **FR-018**: The result MUST show the mark out of the question's value, the feedback, the biggest gap and the seven skill verdicts.
+- **FR-018**: The result MUST show the mark out of the question's value, the feedback, the biggest gap and the seven skill verdicts. For a first try at full marks it MUST show the "To go further" sentence below the feedback instead of a biggest gap, in the same style as "Biggest gap" (not a warning or error colour), on the result, the discussion and the attempt detail page; it is never shown for a try below full marks.
 
 **Retry and discussion**
 
@@ -248,7 +248,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
   5. Uses apt evidence: short, precise quotations or visual details that prove the point.
   6. Links to the human experience: ties the analysis to the experience or emotion in the question.
   7. Writes succinctly: no padding, repetition or drift, and not well past the suggested length. Never missed for being short.
-- **Attempt record**: per quiz, the first-try and retry text, the mark of each, every skill verdict with the marker's one-line reason, the feedback and biggest gap, the prompt version, the recorded mark and the flag.
+- **Attempt record**: per quiz, the first-try and retry text, the mark of each, every skill verdict with the marker's one-line reason, the feedback and biggest gap, the "to go further" sentence (full-mark first try only), the prompt version, the recorded mark and the flag.
 - **Review report**: per paper, questions kept and skipped with reasons, counts by text form and mark value, and the rubric source (school or drafted).
 
 ## Success Criteria *(mandatory)*
