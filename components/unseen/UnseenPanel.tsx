@@ -77,9 +77,6 @@ export function UnseenPanel({
   const [ending, setEnding] = useState<UnseenEnding | undefined>(state.ending);
   const [recorded, setRecorded] = useState<number>(state.recordedMark ?? 0);
   const [discussion, setDiscussion] = useState<UnseenDiscussion | undefined>(state.discussion);
-  const [flagged, setFlagged] = useState<boolean>(state.flagged ?? false);
-  const [flagBusy, setFlagBusy] = useState(false);
-  const [flagError, setFlagError] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice>(state.dailyLimit ? { reason: "daily_limit", resetsAt: state.dailyLimit.resetsAt } : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -249,24 +246,6 @@ export function UnseenPanel({
     }
   }
 
-  async function flag() {
-    if (flagged || flagBusy) return;
-    setFlagBusy(true);
-    setFlagError(null);
-    try {
-      const res = await fetch("/api/unseen/flag", {
-        method: "POST",
-        headers: json,
-        body: JSON.stringify({ attemptId, attemptToken, questionId }),
-      });
-      if (res.ok) setFlagged(true);
-      else setFlagError("Could not flag that just now. Try again in a moment.");
-    } catch {
-      setFlagError(OFFLINE_ERROR);
-    }
-    setFlagBusy(false);
-  }
-
   function startRetry() {
     focusRetry.current = true;
     setError(null);
@@ -374,10 +353,6 @@ export function UnseenPanel({
               ending={ending}
               recorded={recorded}
               discussion={discussion}
-              flagged={flagged}
-              flagBusy={flagBusy}
-              flagError={flagError}
-              onFlag={() => void flag()}
               onFinish={onFinish}
               summaryRef={summaryRef}
             />

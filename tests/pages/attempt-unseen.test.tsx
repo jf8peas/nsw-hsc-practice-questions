@@ -67,7 +67,6 @@ async function seeded(opts: { final: boolean; retried?: boolean; full?: boolean 
     ...(opts.retried
       ? { try2Text: "RETRY-TEXT the repetition shows resistance", try2Mark: 2, try2Verdicts: verdicts(), try2Feedback: "Better.", try2BiggestGap: "Add a quotation.", try2PromptVersion: "unseen-pilot-5", try2Model: "m" }
       : {}),
-    flaggedAt: opts.final ? new Date() : null,
   });
   if (opts.final) {
     await seedResult(env.db, { attemptId: attempt.id, userId: me.id }, { unitId: UNIT, questionId: QID, answer: "x", marksAwarded: opts.retried ? 2 : 1, maxMarks: 3, gradedBy: "llm", feedback: "x" });
@@ -76,7 +75,7 @@ async function seeded(opts: { final: boolean; retried?: boolean; full?: boolean 
 }
 
 describe("unseen attempt detail", () => {
-  it("shows the paper, both tries with their verdicts, reasons, feedback and gap, the recorded mark and the flag", async () => {
+  it("shows the paper, both tries with their verdicts, reasons, feedback and gap, the recorded mark", async () => {
     const attempt = await seeded({ final: true, retried: true });
     const html = await render(attempt.id);
     expect(html).toContain("Fort St 2025 · Q1");
@@ -87,7 +86,8 @@ describe("unseen attempt detail", () => {
     expect(html).toContain("REASON-MISSED-7001");
     expect(html).toContain("REASON-MET-7002");
     expect(html).toContain("Biggest gap: GAP-TEXT-9930");
-    expect(html).toContain("Recorded 2/3 · flagged for your teacher");
+    expect(html).toContain("Recorded 2/3");
+    expect(html).not.toContain("flagged");
   });
 
   it("shows \"To go further\" for a full-mark first try and never for a below-full one", async () => {

@@ -17,9 +17,7 @@ export type UnseenOutcome =
   | "phase_refused"
   | "answer_rejected"
   | "db_unavailable"
-  | "declined"
-  | "flagged"
-  | "flag_repeat";
+  | "declined";
 
 export function logUnseen(input: {
   outcome: UnseenOutcome;

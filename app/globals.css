@@ -2730,7 +2730,6 @@ input {
 .un-collapse[open] { padding-bottom: 14px; }
 .un-collapse-text { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--rd-fs-md); line-height: 1.5; color: var(--rd-ink-900); }
 .un-discussion-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.un-flag { display: flex; flex-direction: column; gap: 6px; }
 @media (max-width: 480px) { .un-skill-verdict { width: 78px; } }
 
 /* Unseen-text unit: results by text form on the unit page. */

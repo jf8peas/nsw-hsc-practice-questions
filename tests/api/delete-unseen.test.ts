@@ -1,5 +1,5 @@
 // Deleting a student, immediately or by the 2-year retention job, removes every unseen-text row too
-// (spec 008 FR-034, constitution Principle II): phases (with verdicts, reasons and the flag), drafts,
+// (spec 008 FR-034, constitution Principle II): phases (with verdicts and reasons), drafts,
 // attempts and results. Nobody else's rows are touched.
 
 import { eq, sql } from "drizzle-orm";
@@ -28,7 +28,7 @@ async function withUnseenData(email: string, sub: string) {
   await env.db.insert(unseenPhases).values({
     attemptId: a.id, userId: u.id, unitId: UNIT, questionId: Q, maxMarks: 3, status: "final", ending: "full_marks",
     try1Text: "student writing", try1Mark: 3, try1Verdicts: verdicts, try1Feedback: "f", try1BiggestGap: "g",
-    try1PromptVersion: "unseen-pilot-4", try1Model: "m", recordedMark: 3, flaggedAt: new Date(),
+    try1PromptVersion: "unseen-pilot-4", try1Model: "m", recordedMark: 3,
   });
   await env.db.insert(rewriteDrafts).values({ attemptId: a.id, userId: u.id, unitId: UNIT, questionId: Q, phase1Draft: "draft", phase2Draft: "" });
   return u;

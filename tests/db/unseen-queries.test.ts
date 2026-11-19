@@ -6,7 +6,6 @@ import { createUnseenAttempt } from "@/lib/db/queries/attempts.server";
 import {
   finaliseUnseenDecline,
   finaliseUnseenRetry,
-  flagUnseenPhase,
   getUnseenPhase,
   insertUnseenPhase,
   listUnseenPhases,
@@ -99,20 +98,6 @@ describe("finaliseUnseenDecline", () => {
     const u = await seedUser(t.db, { googleSub: "uq-6" });
     const at = await seedAttempt(t.db, u.id, { unitId: UNIT, questionIds: [Q1] });
     expect(await finaliseUnseenDecline(t.db, u.id, at.id, Q1)).toBeNull();
-  });
-});
-
-describe("flagUnseenPhase", () => {
-  it("flags only a final row, once, and never touches the mark", async () => {
-    const { u, at, row } = await seeded("uq-7");
-    await insertUnseenPhase(t.db, row);
-    expect(await flagUnseenPhase(t.db, u.id, at.id, Q1)).toBe(false); // still try1
-    await finaliseUnseenDecline(t.db, u.id, at.id, Q1);
-    expect(await flagUnseenPhase(t.db, u.id, at.id, Q1)).toBe(true);
-    expect(await flagUnseenPhase(t.db, u.id, at.id, Q1)).toBe(false);
-    const stored = await getUnseenPhase(t.db, u.id, at.id, Q1);
-    expect(stored?.flaggedAt).not.toBeNull();
-    expect(stored?.recordedMark).toBe(2);
   });
 });
 

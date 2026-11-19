@@ -59,7 +59,6 @@ export function unseenStateFrom(
     ...(try2 ? { try2 } : {}),
     ending: row.ending as UnseenEnding,
     recordedMark: row.recordedMark ?? row.try1Mark,
-    flagged: row.flaggedAt !== null,
     ...(discussion ? { discussion } : {}),
   };
 }

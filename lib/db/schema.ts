@@ -285,10 +285,9 @@ export type SkillVerdicts = Record<SkillId, SkillVerdict>;
 /**
  * spec 008: one row per question in an unseen-text attempt. Both tries' text and marks, the seven
  * per-skill verdicts with the marker's reasons, the feedback and biggest-gap sentences, the prompt
- * version and model that marked each try, how the question ended, and the once-only flag. Created
- * when the first try is marked, kept for the attempt detail page, deleted with the student. A
- * `results` row is created only when the question is final. Verdicts, reasons and the flag never
- * change marks or concept tracking.
+ * version and model that marked each try, and how the question ended. Created when the first try
+ * is marked, kept for the attempt detail page, deleted with the student. A `results` row is created
+ * only when the question is final. Verdicts and reasons never change marks or concept tracking.
  */
 export const unseenPhases = pgTable(
   "unseen_phases",
@@ -325,8 +324,6 @@ export const unseenPhases = pgTable(
     try2Model: text("try2_model"),
     try2GradedAt: ts("try2_graded_at"),
     recordedMark: smallint("recorded_mark"),
-    /** Set once, when the student presses "This mark seems wrong". Never changes a mark. */
-    flaggedAt: ts("flagged_at"),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),
   },
@@ -366,11 +363,7 @@ export const unseenPhases = pgTable(
       "unseen_phases_recorded_is_higher",
       sql`${t.recordedMark} is null or ${t.recordedMark} = greatest(${t.try1Mark}, coalesce(${t.try2Mark}, 0))`,
     ),
-    check("unseen_phases_flag_when_final", sql`${t.flaggedAt} is null or ${t.status} = 'final'`),
     index("unseen_phases_user_unit_idx").on(t.userId, t.unitId),
-    index("unseen_phases_flagged_idx")
-      .on(t.flaggedAt)
-      .where(sql`${t.flaggedAt} is not null`),
   ],
 );
 

@@ -10,7 +10,7 @@ A new Writing Practice unit, `y12-english-advanced-unseen-texts`, practises the 
 of Section I of HSC English Advanced Paper 1. A quiz is one unseen text with one question below it, no
 timer, marked by an LLM against the school's band descriptors and seven tracked skills. It is the app's
 first English unit and the second unit built on spec 007's machinery (one capped retry, tip cards, a
-discussion with a model, stored verdicts, a once-only flag, an offline revision loop).
+discussion with a model, stored verdicts, an offline revision loop; no student flag).
 
 What is new, and where it lands:
 
@@ -37,14 +37,14 @@ What is new, and where it lands:
   source so the probabilities are asserted exactly
   ([R9](research.md#r9-the-draw-fr-027-to-fr-029-sc-008)).
 - **New persistence.** An `unseen_phases` table stores both tries' text, seven verdicts with reasons,
-  feedback, biggest gap, prompt version, ending and the flag; a partial unique index keeps one open attempt
+  feedback, biggest gap, prompt version and ending; a partial unique index keeps one open attempt
   per student so two tabs end on one attempt ([R8](research.md#r8-persistence-and-resume-fr-024-fr-027-fr-034-fr-035-principle-ii),
   [data-model.md](data-model.md)).
 - **Seven skills as concepts** with `clearAfter: 2`, derived from the first try's seven outcomes. No change
   to `lib/concepts/progress.ts` ([R10](research.md#r10-skill-tracking-fr-025-fr-026)).
-- **A revision loop** of offline scripts: flag export to a `field` set, a regression over every case
-  reporting tuning, holdout and field separately, and a stronger-model re-mark that samples answers at or
-  just below full marks ([R11](research.md#r11-flag-and-the-offline-revision-loop-fr-035-to-fr-038-sc-005)).
+- **A revision loop** of offline scripts, with no student flag: a stronger-model re-mark that samples first tries
+  from every mark band and exports disagreements to a `field` set, and a regression over every case
+  reporting tuning, holdout and field separately ([R11](research.md#r11-the-offline-revision-loop-fr-035-to-fr-038-sc-005)).
 - **New components** in `components/unseen/*`, driven by an explicit state machine, with a phone text sheet
   so the text stays reachable while writing
   ([R12](research.md#r12-components-and-the-question-cards-state-machine)).
@@ -104,15 +104,15 @@ requires, the amendment is listed and becomes task T001 (research R1, A1 to A6).
 
 | Principle | Status | Notes |
 |---|---|---|
-| I. Answer key never reaches the browser | ⚠ amend (A3) | New key fields (criteria, notes, model answer, visual description). The model answer is released only at the discussion; verdicts, reasons, feedback and the biggest gap after a try; criteria, notes and the description never. All reads stay in `lib/grading.server.ts`. The decline and flag routes' fields (`attemptId`, `questionId`, token) and the image route's text id are added to the allowed list. A marker reply that echoes the model answer is rejected. |
-| II. Signed-in students, minimal personal data | ⚠ amend (A4) | New stored items: both tries' text, seven verdicts and reasons, feedback, biggest gap, prompt version, model, ending, flag, in `unseen_phases`. Every new route needs a session (the image route and the two POSTs); all queries scoped to the session user; cascade delete and 2-year retention cover the table; the concept rule is unchanged (`clearAfter: 2` already supported). No new consent sentence. |
+| I. Answer key never reaches the browser | ⚠ amend (A3) | New key fields (criteria, notes, model answer, visual description). The model answer is released only at the discussion; verdicts, reasons, feedback and the biggest gap after a try; criteria, notes and the description never. All reads stay in `lib/grading.server.ts`. The decline route's fields (`attemptId`, `questionId`, token) and the image route's text id are added to the allowed list. A marker reply that echoes the model answer is rejected. |
+| II. Signed-in students, minimal personal data | ⚠ amend (A4) | New stored items: both tries' text, seven verdicts and reasons, feedback, biggest gap, prompt version, model and ending, in `unseen_phases` (no flag). Every new route needs a session (the image route and the decline POST); all queries scoped to the session user; cascade delete and 2-year retention cover the table; the concept rule is unchanged (`clearAfter: 2` already supported). No new consent sentence. |
 | III. Content is code | ✅ | Typed files under `content/units/<unit-id>/`; registered in both registries; ids `<short><yy>-q<n>` appended, never renumbered; every question carries 1 to 3 concept tags; removing a question keeps results. The unit's `images/` folder holds the cropped visual stimuli (Principle V amendment). `npm run validate:shipped` after adding the unit. |
 | IV. Validation gates the build | ✅ | `validateUnseenRules` added to `lib/content-rules.ts` and `scripts/validate-content.ts` in the same change (source, text id, tags, criteria, model, suggested length, drafted-needs-review, visual check, no key text in public strings). |
 | V. Syllabus fidelity, original content | ⚠ amend (A1) | Stimulus texts and cropped images are copied from school papers under the school-paper exception with a source on each question; no real HSC question or text (a `hscChecked` date per text); the "no copied images" rule gets one narrow, access-controlled exception that must be removed before the app goes commercial. Sources in `docs/y12-english-advanced-unseen-texts-research.md`. |
 | VI. Grading fair, explainable, graceful | ⚠ amend (A2) | No self-marking on either try; a marker failure returns the editable box with the text and refunds the slot; the daily limit disables Submit until the next Sydney day and the question waits; a retry that cannot be marked does not end the question; the unit cannot start, resume, mark or save without the database (no guessing). Overrides the general fallback and the unweighted-draw rule for this unit only. |
-| VII. Cost and abuse controls | ⚠ amend (A5) | One slot of `LLM_DAILY_CAP` per marked try, refunded on failure; per-user and per-IP limits on grade; the decline and flag routes are limited; `ENGLISH_ADV_GRADING_MODEL` is a new server-only env var; `REMARK_MODEL` is reused by scripts only and never counts against a student. Secrets read only in `lib/*.server.ts`, routes and scripts. `maxDuration` stays 60. |
+| VII. Cost and abuse controls | ⚠ amend (A5) | One slot of `LLM_DAILY_CAP` per marked try, refunded on failure; per-user and per-IP limits on grade; the decline route is limited; `ENGLISH_ADV_GRADING_MODEL` is a new server-only env var; `REMARK_MODEL` is reused by scripts only and never counts against a student. Secrets read only in `lib/*.server.ts`, routes and scripts. `maxDuration` stays 60. |
 | VIII. Simplicity | ✅ | No new dependency; native `<dialog>`, `fs` and `<img>`; mobile-first; tokens from `styles/tokens.css`, no colour literals. Complexity Tracking lists the choices that add files. |
-| IX. Teacher access server-side | ✅ | No teacher route is added (FR-038). The offline scripts read the database directly like `delete-student`. The flag, decline and image routes are student routes scoped by session. |
+| IX. Teacher access server-side | ✅ | No teacher route is added (FR-038). The offline scripts read the database directly like `delete-student`. The decline and image routes are student routes scoped by session. |
 
 **Quality gates** (constitution "Quality Gates"): `npm run build`, `npm run lint` and `npm test` pass; no
 answer-key leakage into client bundles (extended `tests/no-key-leak.test.ts` and a static scan); the client
@@ -124,7 +124,7 @@ visual stimuli served through the authenticated route; authorization and cost-co
 automated tests.
 
 **Re-check after design (2026-11-19):** unchanged. The design adds one table, one index, one binary route,
-two JSON routes (`decline`, `flag`) and one env var (`ENGLISH_ADV_GRADING_MODEL`), and the key schedule in
+one JSON route (`decline`) and one env var (`ENGLISH_ADV_GRADING_MODEL`), and the key schedule in
 `contracts/api.md` matches A3.
 
 ## Project Structure
@@ -139,7 +139,7 @@ specs/008-english-unseen-short-answers/
 ├── data-model.md            # content types, schema, derived data, state machine
 ├── quickstart.md            # manual validation and the automated gates
 ├── contracts/
-│   └── api.md               # start/resume, grade (both tries, not-marked), decline, draft, flag, image, marker reply
+│   └── api.md               # start/resume, grade (both tries, not-marked), decline, draft, image, marker reply
 ├── checklists/requirements.md
 ├── specify-prompt.md
 └── tasks.md                 # /speckit-tasks (not created here)
@@ -191,7 +191,7 @@ lib/
 └── db/
     ├── schema.ts                                 # EDIT: unseenPhases, attempts partial unique index, SkillVerdicts
     └── queries/
-        ├── unseen-phases.server.ts               # NEW: get, list, insert, finalise (retry, decline), flag
+        ├── unseen-phases.server.ts               # NEW: get, list, insert, finalise (retry, decline)
         ├── unseen-progress.server.ts             # NEW: answered by form, pending attempt (unit page)
         ├── attempts.server.ts                    # EDIT: createUnseenAttempt (insert or get the open attempt)
         └── history.server.ts                     # EDIT: unseen attempt detail
@@ -203,7 +203,6 @@ app/
 │   ├── rewrite/draft/route.ts                    # EDIT: unseen branch
 │   └── unseen/
 │       ├── decline/route.ts                      # NEW
-│       ├── flag/route.ts                         # NEW
 │       └── image/[textId]/route.ts               # NEW: authenticated image bytes
 ├── unit/[unitId]/page.tsx                        # EDIT: unseen branch (start button states, results by form)
 ├── unit/[unitId]/quiz/page.tsx                   # EDIT: unseenState for resume
@@ -221,7 +220,6 @@ scripts/
 ├── validate-content.ts                           # EDIT: call validateUnseenRules
 ├── fake-openrouter.ts                            # EDIT: FAKE_UNSEEN modes, [mark:] and [miss:] directives
 ├── pilot-unseen-marker.py                        # EDIT: read lib/unseen/*.json, --set field, --gate, --check golden, --write-golden
-├── unseen-flags.ts                               # NEW offline: list, export field cases
 ├── unseen-field-cases.ts                         # NEW offline pure: field export logic
 ├── unseen-remark.ts                              # NEW offline: stronger-model re-mark
 ├── check-unseen-descriptions.ts                  # NEW offline: the pre-release description check
@@ -231,13 +229,13 @@ scripts/
 drizzle/0006_*.sql                                # NEW migration
 docs/y12-english-advanced-unseen-texts-research.md  # NEW sources (Principle V)
 next.config.mjs                                   # EDIT: trace the images folder into the image route
-.specify/memory/constitution.md                   # EDIT FIRST: amendments A1 to A6, version 2.15.0
+.specify/memory/constitution.md                   # EDIT FIRST: amendments A1 to A6, version 2.15.0 (then 2.15.1)
 README.md, .env.example                           # EDIT: ENGLISH_ADV_GRADING_MODEL, unit row, consent wording ("per-skill")
-package.json                                      # EDIT: scripts unseen-flags, unseen-remark, check-unseen-descriptions
+package.json                                      # EDIT: scripts unseen-remark, check-unseen-descriptions
 
 tests/
 ├── unseen/{prompt,rubric-drift,marker-parse,limits,scoring,draw,skills,content-rules,tips,no-key-leak-static}.test.ts
-├── api/{grade-unseen,attempts-unseen,decline-unseen,flag-unseen,rewrite-draft-unseen,delete-unseen,image-unseen}.test.ts
+├── api/{grade-unseen,attempts-unseen,decline-unseen,rewrite-draft-unseen,delete-unseen,image-unseen}.test.ts
 ├── client/{quiz-unseen,unseen-a11y,unseen-text}.test.tsx
 ├── pages/{unit-unseen,attempt-unseen}.test.tsx
 ├── styles/contrast.test.ts                       # EDIT
@@ -271,14 +269,14 @@ The listed tests all use the existing PGlite route env (`tests/helpers`), the cl
 | First-try verdicts only feed skills; all seven count whatever the tags; clear after 2; decline and retry add nothing | `tests/unseen/skills.test.ts`, `tests/rewrite/progress.test.ts` (kept green) |
 | Draw offers a pending question first, never repeats an answered one, weights weak forms and uncleared skills exactly (every `r` enumerated), reports a finished bank; two tabs end on one attempt | `tests/unseen/draw.test.ts`, `tests/api/attempts-unseen.test.ts` (parallel starts) |
 | Database unreadable: the unit does not start (`503`), does not mark | `tests/api/attempts-unseen.test.ts`, `tests/api/grade-unseen.test.ts` |
-| Flag stored once, idempotent across tabs, covers both tries, never changes the mark; not-final refused | `tests/api/flag-unseen.test.ts` |
+| No flag route and no stored flag: the unit has no student flag (the 2026-11-19 clarification) | nothing to test (the route, button and column are removed) |
 | Verdicts, reasons, feedback, biggest gap, prompt version and model stored for every marked try | `tests/api/grade-unseen.test.ts` (reads `unseen_phases`), `tests/unseen/rubric-drift.test.ts` |
 | Logs carry no text | `tests/api/grade-unseen.test.ts` (spy on `console.*` across a full run) |
 | Content validation rules, including the visual description check, hash, suggested length and drafted-needs-review | `tests/unseen/content-rules.test.ts` (each rule has a failing and a passing fixture) |
 | Delete-student and retention remove the new rows | `tests/api/delete-unseen.test.ts` |
 | Resume to each state with drafts; marking never restored | `tests/api/attempts-unseen.test.ts`, `tests/client/quiz-unseen.test.tsx` |
 | Live region, focus, reduced motion, 44 px targets, contrast, phone text sheet | `tests/client/unseen-a11y.test.tsx`, `tests/styles/contrast.test.ts` |
-| Rubric and prompt do not drift between app and Python; the regression reads `lib/unseen/` and reports tuning, holdout and field separately; field export has no identity | `tests/unseen/prompt.test.ts` (golden), `python scripts/pilot-unseen-marker.py --check` and `--gate` (quickstart), `tests/scripts/unseen-flags.test.ts` |
+| Rubric and prompt do not drift between app and Python; the regression reads `lib/unseen/` and reports tuning, holdout and field separately; field export has no identity | `tests/unseen/prompt.test.ts` (golden), `python scripts/pilot-unseen-marker.py --check` and `--gate` (quickstart), `tests/scripts/unseen-flags.test.ts` (field-case export; the file name predates the flag's removal) |
 
 Constitution tests (Quality Gates): "the daily cap falls back to self-marking" does not apply to this unit
 (it is covered for the other units); the unit adds "marker failure returns the box, no self-mark" and "the
@@ -294,4 +292,4 @@ with seven outcomes.
 | One shared `rubric.json` plus a public `skills.json` and a golden-file test | The Python pilot and the app must send the same prompt; the tips must reach the browser while the prompt must not | Two copies drift; a single file would put the system prompt in the client bundle |
 | Authenticated image route + files under the unit | Images must reach signed-in students only, with no new dependency | `public/` is unauthenticated; object storage adds a dependency and a secret |
 | Partial unique index on `attempts (user_id)` for open unseen attempts | Two tabs with a random draw must still end on one attempt | Spec 007's per-question index allows two different open questions |
-| Six small offline scripts | Flag export (with its pure helper), re-mark, description check, bank generator and report are each a distinct teacher task | One script with flags hides what each task reads (some read the key, some the database) and breaks the key-import allowlist's granularity |
+| Five small offline scripts | Field-case export (a pure helper the re-mark uses), re-mark, description check, bank generator and report are each a distinct teacher task | One script with flags hides what each task reads (some read the key, some the database) and breaks the key-import allowlist's granularity |

@@ -66,7 +66,7 @@ scroll sideways on any screen below.
 | 7 | Finish, start again; get a **prose** text | same layout without line numbers; paragraphs kept |
 | 8 | **A retry that is capped**: `[mark:2][miss:technique-effect,apt-evidence]` on a 4-mark question | result "2 / 4" with feedback, the biggest-gap line and seven verdicts (Met / Missed with icons and a reason each); "Try again" and "Skip the retry and see the model answer"; no model answer yet |
 | 9 | Tap "Try again" | the box holds the first try, focused with the caret at the end; one tip card for each of the two missed skills with its name and tip, **no model text**; the meter works |
-| 10 | Edit to `[mark:4]`, all met, and submit | marking screen; discussion summary "3 / 4 marks" with "A retry can earn at most 3 out of 4. Meet every skill on the first try next time for the full 4."; pills: the two skills "Fixed in retry", the rest "First try"; the final answer beside the model answer; "Added to Things I need to know" lists the two skills missed on the **first** try, each "2 to go"; the first try is collapsed; the "This mark seems wrong" button |
+| 10 | Edit to `[mark:4]`, all met, and submit | marking screen; discussion summary "3 / 4 marks" with "A retry can earn at most 3 out of 4. Meet every skill on the first try next time for the full 4."; pills: the two skills "Fixed in retry", the rest "First try"; the final answer beside the model answer; "Added to Things I need to know" lists the two skills missed on the **first** try, each "2 to go"; the first try is collapsed; no flag button |
 | 11 | **A retry declined**: next question, `[mark:1]` on a 3-mark question, then "Skip the retry…" | straight to the discussion; "You skipped the retry, so your first try is recorded: 1 / 3."; recorded 1; the model answer shown |
 | 12 | **A visual text** (zoom) | the image fills the column width with a "Zoom" button; Zoom opens a dialog; "Zoom in" steps the image larger and it scrolls both ways; pinch also works; Close and Esc return focus to the Zoom button; the page itself never scrolls sideways; the image alt is the short label, **not** the description |
 | 13 | Answer the visual question and open the Network tab | `GET /api/unseen/image/<id>` is 200 with the session; the page, start response and grade response contain no description, criteria or notes |
@@ -102,7 +102,7 @@ layout is the same single column at every width:
 | **Daily limit, first try** | `LLM_DAILY_CAP=1`; mark one question, finish it; start the next and submit | "You've reached today's marking limit. Come back tomorrow (from midnight Sydney time, …)"; your text stays; Submit is disabled with that note; reload the same evening: still disabled; the question is the one offered next |
 | **Daily limit, retry** | `LLM_DAILY_CAP=1`; get a below-full first try (uses the slot); try again and submit | the same limit notice on the retry box; your retry text stays; Submit disabled; "Skip the retry…" works; the next day (or `reserveAiSlot` with another date in a test) the question resumes at the retry |
 | 429 / offline | Turn off the network and submit | the box returns holding your text with the usual one-line error; nothing recorded |
-| **Flag twice** | On a discussion press "This mark seems wrong", reload, press again | first press: "Flagged for your teacher", the mark unchanged; second: the same state; one `flagged_at` in `unseen_phases`; the flag covers both tries |
+| No flag | Open a discussion | there is no "This mark seems wrong" button, and `POST /api/unseen/flag` answers 404 (the route does not exist); `unseen_phases` has no `flagged_at` column |
 | Bank finished | Answer every question of the starter bank | "You've answered every question in the bank so far. New questions are added as the papers are processed." and no start button |
 | Database unreadable | Break `DATABASE_URL` | the unit page shows "We can't load your questions right now. Try again in a moment." and no start button; a submit mid-quiz returns the box with your text and the usual error; nothing is marked or self-marked |
 | Skills clear | Meet a skill on a first try on two later questions | it leaves "Things I need to know" after the second; a skill met only in a retry stays |
@@ -112,15 +112,13 @@ layout is the same single column at every width:
 ## 4. Revision loop (offline)
 
 ```bash
-npm run unseen-flags -- list                       # flagged attempts, newest first
-npm run unseen-flags -- export 3 5                 # appends field cases (needsLabel: true) to resources/english-unseen/pilot-questions.json
+REMARK_MODEL=<a model stronger than ENGLISH_ADV_GRADING_MODEL> npm run unseen-remark -- --sample 40 --export   # samples first tries from every mark band; --export appends the disagreements as field cases (needsLabel: true) to resources/english-unseen/pilot-questions.json
 # edit expectMark / expectMissed of each exported case and set needsLabel to false
-REMARK_MODEL=<a model stronger than ENGLISH_ADV_GRADING_MODEL> npm run unseen-remark -- --sample 40 --export
 python scripts/pilot-unseen-marker.py --gate       # whole file: tuning, holdout, field, each reported separately
 ```
 
 Expected: exported cases hold no name, email, user id, attempt id or date; the holdout questions are
-present and unchanged; the re-mark lists "marked too high" disagreements first, lower bands first; after any
+present and unchanged; the re-mark samples answers from every mark band and lists "marked too high" disagreements first, lower bands first; after any
 edit to `lib/unseen/rubric.json` the prompt version in the report header is the new one and
 `tests/fixtures/unseen-prompt.golden.txt` has been regenerated (`--write-golden`); running the re-mark does
 not change `daily_ai_usage`.

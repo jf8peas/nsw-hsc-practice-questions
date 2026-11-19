@@ -14,9 +14,10 @@
 
 - Q: When does a question count as "answered" if the student leaves after a first try below full marks? → A: Not until the retry is marked or declined. The next quiz offers the same question again, resumed at the retry choice with the saved first try, and the first-try mark is not yet the recorded mark.
 - Q: Which skills' verdicts count toward adding and clearing? → A: All seven verdicts on every first try, whatever the question's tags. Tags only steer the draw.
-- Q: Does the flag cover the whole question or one marked answer? → A: One flag per question. The single button flags the whole attempt, with the first try, any retry, verdicts, reasons and marks all stored for the reviewer.
+- Q: Does the flag cover the whole question or one marked answer? → A: (Superseded the same day: see the removal below.) One flag per question, covering the whole attempt.
 - Q: What happens when the retry cannot be marked? → A: The same as the first try (review edit, 2026-11-19, restoring the requirements doc's decision): marker unavailable → the retry text stays locked while the app waits and retries, then the editable box returns holding it to resubmit; daily limit reached → the student is told to come back tomorrow and the question stays at the retry, offered again first. The spec 007 FR-019a ending (record the first try, discard the retry) does not apply.
 - Q: Visual texts are cropped images from the papers, which constitution Principle V forbids ("scanned, photographed or otherwise copied images MUST NOT be committed or served"). → A: Amend Principle V (review decision, 2026-11-19) to allow a visual stimulus text cropped from a school paper under the school-paper exception: credited with its source, served only to signed-in students, never a real HSC image, and removed or replaced if the app goes commercial.
+- Q: Should students be able to flag a mark ("This mark seems wrong")? → A: No (decision, 2026-11-19). The button, its route, the stored flag and the flag-export script are removed from this unit. Students rarely flag a mark that is too generous, and a flag turned a student into an unpaid reviewer of the marker. The marker is revised from an offline re-mark of a sample of real first tries in every mark band (User Story 5), not from student reports. The paragraph unit's flag (spec 007) is unchanged.
 
 ## Terms
 
@@ -51,11 +52,11 @@ A Year 12 Advanced English student opens the unit and gets one quiz: an unseen t
 
 ### User Story 2 - Fix it once with tips, then see the model answer (Priority: P1)
 
-When the first try scores below full marks, the student may retry once or decline. The retry box starts from their first try, with one tip card for each skill missed on the first try. The retry is marked on the same rubric and capped at one mark below full marks. The discussion shows the recorded mark (the higher of the two), which skills were met on the first try or fixed in the retry, the student's final answer beside the model answer, and a "This mark seems wrong" button.
+When the first try scores below full marks, the student may retry once or decline. The retry box starts from their first try, with one tip card for each skill missed on the first try. The retry is marked on the same rubric and capped at one mark below full marks. The discussion shows the recorded mark (the higher of the two), which skills were met on the first try or fixed in the retry, the student's final answer beside the model answer. There is no button for disputing a mark.
 
 **Why this priority**: The retry and the model answer turn marking into learning, and are the agreed approach from the paragraph-writing unit (spec 007). The model answer is also answer-key material, so when it appears matters.
 
-**Independent Test**: Submit an answer that scores below full marks, confirm tip cards for the missed skills and a pre-filled box, submit the retry, and confirm the mark is capped, there is no third try, and the model answer first appears at the discussion; then flag the attempt twice and confirm one stored flag and an unchanged mark.
+**Independent Test**: Submit an answer that scores below full marks, confirm tip cards for the missed skills and a pre-filled box, submit the retry, and confirm the mark is capped, there is no third try, and the model answer first appears at the discussion.
 
 **Acceptance Scenarios**:
 
@@ -63,11 +64,9 @@ When the first try scores below full marks, the student may retry once or declin
 2. **Given** a first try below full marks, **When** the result arrives, **Then** the student sees the mark, feedback, biggest gap and skill verdicts, and can choose to retry once or decline, and the model answer is not shown or sent to the browser.
 3. **Given** the student chooses to retry, **When** the retry screen opens, **Then** the box holds their first try, with one tip card per skill missed on the first try, and the tip cards contain no model-answer text.
 4. **Given** a retry is submitted, **When** it is marked, **Then** it is marked on the same rubric, its mark is capped at one mark below full marks, no third try is offered, and the recorded mark is the higher of the first try and the capped retry.
-5. **Given** the discussion, **When** it appears, **Then** it shows the recorded mark and an explanation of the cap where it applied, each skill marked "First try", "Fixed in retry" or missed, the student's final answer beside the model answer, the skills added to "Things I need to know", the first try collapsed, and a "This mark seems wrong" button; a full-mark first try also shows its "To go further" sentence below the feedback.
+5. **Given** the discussion, **When** it appears, **Then** it shows the recorded mark and an explanation of the cap where it applied, each skill marked "First try", "Fixed in retry" or missed, the student's final answer beside the model answer, the skills added to "Things I need to know", and the first try collapsed; a full-mark first try also shows its "To go further" sentence below the feedback.
 6. **Given** the student declines the retry, **When** they decline, **Then** the first-try mark is recorded and the discussion appears with the model answer.
 7. **Given** an answer is being marked, **When** the student waits, **Then** their text stays on screen, locked, with status steps.
-8. **Given** the discussion, **When** the student presses "This mark seems wrong", **Then** the attempt (the first try and any retry) is flagged, the button shows a done state ("Flagged for your teacher"), and the mark does not change.
-9. **Given** an attempt already flagged, **When** the student presses the button again (or from another tab), **Then** nothing further is stored.
 
 ---
 
@@ -106,19 +105,20 @@ Each new quiz picks a question the student has not answered. It leans toward the
 
 ---
 
-### User Story 5 - Review flagged marks offline (Priority: P2)
+### User Story 5 - Revise the marker from an offline re-mark (Priority: P2)
 
-The flags students raise with the discussion's "This mark seems wrong" button (User Story 2) are reviewed offline. A teacher exports reviewed flags as labelled test cases, every prompt change reruns every labelled case with the tuning, holdout and field sets reported separately, and a stronger model re-marks a sample of real answers near full marks so disagreements become new test cases. A teacher review page is not part of v1.
+The marker is revised from real use without asking students to report anything. A teacher runs an offline script that has a stronger model re-mark a sample of real first tries drawn from every mark band; the answers where the two marks differ are listed, worst first, and become labelled test cases. Every prompt change reruns every labelled case with the tuning, holdout and field sets reported separately. A teacher review page is not part of v1, and students have no button for disputing a mark.
 
-**Why this priority**: The marker passed its pilot but is not perfect (middle-band answers are sometimes marked one too high). Real use is the only source of further test cases, and the loop only matters once students are using the unit.
+**Why this priority**: The marker passed its pilot but is not perfect (middle-band answers are sometimes marked one too high, and a low or middle mark can be too harsh). Real answers are the only source of further test cases, and the loop only matters once students are using the unit.
 
-**Independent Test**: Export a flagged answer as a field case, label it, run the regression and confirm tuning, holdout and field are reported separately and the exported case carries no student identity; run the re-mark and confirm "marked too high" disagreements are listed first.
+**Independent Test**: Run the re-mark over a database with first tries in several mark bands and confirm the sample draws from every band, "marked too high" disagreements are listed first with lower bands first, and an exported case carries no student identity; run the regression and confirm tuning, holdout and field are reported separately.
 
 **Acceptance Scenarios**:
 
-1. **Given** a flagged answer reviewed offline, **When** the teacher exports it, **Then** it becomes a labelled "field" case in the pilot file with no student identity, and every prompt change reruns every case in that file.
-2. **Given** a sample of real answers marked at full marks or one below, **When** the teacher re-marks them offline with a stronger model, **Then** disagreements are listed with "marked too high" first and lower bands first, and can be exported as labelled field cases.
-3. **Given** the regression run, **When** it finishes, **Then** the tuning, holdout and field sets are reported separately, and the holdout set is never used to tune the prompt.
+1. **Given** the stored first tries, **When** the teacher runs the re-mark, **Then** the sample is drawn from every mark band the unit has produced (from zero to full marks), not only from full marks, using a model other than the marker's and never touching a student's daily allowance.
+2. **Given** the stronger model's marks, **When** the teacher reviews the result, **Then** disagreements are listed with "marked too high" first and lower bands first, and each can be exported as an unlabelled "field" case with no student identity.
+3. **Given** a labelled field case in the pilot file, **When** the prompt changes, **Then** every case in that file is rerun, so fixing one answer cannot silently break another.
+4. **Given** the regression run, **When** it finishes, **Then** the tuning, holdout and field sets are reported separately, and the holdout set is never used to tune the prompt.
 
 ---
 
@@ -190,7 +190,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 
 - **FR-019**: A first try at full marks MUST go straight to the discussion.
 - **FR-020**: Below full marks, the student MAY retry once or decline. The retry MUST start from the first try in the box, with one tip card per skill missed on the first try. The retry MUST be marked on the same rubric and capped at one mark below full marks. There MUST be no third try. The recorded mark MUST be the higher of the first try and the capped retry.
-- **FR-021**: The discussion MUST show the recorded mark (and explain the cap where it applied); each skill marked "First try", "Fixed in retry" or missed; the student's final answer beside the model answer; the skills added to "Things I need to know"; the first try collapsed; and a "This mark seems wrong" button.
+- **FR-021**: The discussion MUST show the recorded mark (and explain the cap where it applied); each skill marked "First try", "Fixed in retry" or missed; the student's final answer beside the model answer; the skills added to "Things I need to know"; and the first try collapsed. There is no way for a student to dispute a mark: the marker is checked offline (FR-035 to FR-038).
 - **FR-022**: The model answer MUST NOT be shown, or reach the browser, before the discussion (after the retry, or once the retry is declined). Marking criteria, marking notes, model answers and visual descriptions are answer-key material and MUST stay server-only (constitution Principle I). Tip cards MUST NOT contain model-answer text.
 - **FR-023**: While an answer is being marked, it MUST stay on screen, locked, with status steps announced through a live status region. On an error the editable box MUST return holding the student's text.
 - **FR-024**: The first try and the retry MUST be recorded with the higher mark as the question's recorded mark. Scores MUST save per question like the other units; the question's text form and skill tags come from the bank by question id.
@@ -216,10 +216,10 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 **Revision from real use**
 
 - **FR-034**: For each attempt the system MUST store the first-try and retry text, every skill verdict with the marker's one-line reason, the mark, and the prompt version that marked it (constitution Principle II).
-- **FR-035**: The "This mark seems wrong" button MUST flag the question's attempt for review (the first try, any retry, their verdicts, reasons and marks). It MUST NOT change the mark, and an attempt MUST be flaggable once, idempotently across tabs, with one button for the whole question.
-- **FR-036**: Reviewed flagged answers MUST become labelled test cases in `resources/english-unseen/pilot-questions.json` as a "field" set, exported with no student identity, and every prompt change MUST rerun every case in that file, reporting the tuning, holdout and field sets separately. The holdout set (Cheltenham Girls 2023, St George Girls 2025) MUST stay frozen and the prompt MUST never be tuned to it.
-- **FR-037**: A periodic sample of real full-mark answers MUST be re-markable offline by a stronger model, with disagreements becoming labelled test cases, checking middle-band answers marked one too high first.
-- **FR-038**: Reviewing flags and running the re-mark MUST be offline teacher tasks run by script. A teacher review page is not part of v1.
+- **FR-035**: The unit MUST NOT offer students a way to flag or dispute a mark: no "This mark seems wrong" button, no flag route and no stored flag. The attempt record keeps what the offline loop needs: both tries' text, every verdict with its reason, the marks and the prompt version.
+- **FR-036**: Answers found by the offline re-mark (FR-037) MUST become labelled test cases in `resources/english-unseen/pilot-questions.json` as a "field" set, exported with no student identity, and every prompt change MUST rerun every case in that file, reporting the tuning, holdout and field sets separately. The holdout set (Cheltenham Girls 2023, St George Girls 2025) MUST stay frozen and the prompt MUST never be tuned to it.
+- **FR-037**: A periodic sample of real first-try answers, drawn from every mark band, MUST be re-markable offline by a stronger model than the marker (OpenRouter, never counted against a student's daily allowance), with disagreements becoming labelled test cases. Marked-too-high disagreements, and middle-band answers marked one too high in particular, are checked first.
+- **FR-038**: Running the re-mark and exporting field cases MUST be offline teacher tasks run by script. A teacher review page is not part of v1.
 
 **Content**
 
@@ -248,7 +248,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
   5. Uses apt evidence: short, precise quotations or visual details that prove the point.
   6. Links to the human experience: ties the analysis to the experience or emotion in the question.
   7. Writes succinctly: no padding, repetition or drift, and not well past the suggested length. Never missed for being short.
-- **Attempt record**: per quiz, the first-try and retry text, the mark of each, every skill verdict with the marker's one-line reason, the feedback and biggest gap, the "to go further" sentence (full-mark first try only), the prompt version, the recorded mark and the flag.
+- **Attempt record**: per quiz, the first-try and retry text, the mark of each, every skill verdict with the marker's one-line reason, the feedback and biggest gap, the "to go further" sentence (full-mark first try only), the prompt version and the recorded mark.
 - **Review report**: per paper, questions kept and skipped with reasons, counts by text form and mark value, and the rubric source (school or drafted).
 
 ## Success Criteria *(mandatory)*
@@ -267,12 +267,12 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 ## Assumptions
 
 - The seven skills, `clearAfter: 2`, the model, the retry cap, the submission thresholds and the draw rule are as approved in the requirements doc (19 Nov 2026); this spec does not reopen them.
-- The unit reuses spec 007's machinery and patterns (attempt model, retry and discussion layout, tip cards, flag, offline revision loop), and spec 006's question-screen patterns; spec 007's rules carry over unless this spec says otherwise.
+- The unit reuses spec 007's machinery and patterns (attempt model, retry and discussion layout, tip cards, offline revision loop; not the flag), and spec 006's question-screen patterns; spec 007's rules carry over unless this spec says otherwise.
 - A question worth 1 mark gets no retry (the cap would be 0); the first try is recorded.
 - Retry marking failures are handled like first-try failures (FR-032), not as in spec 007 FR-019a.
 - Neither try has a self-marking path (unlike spec 007 and constitution Principle VI's general fallback), as decided for this unit; this needs a Principle VI amendment.
 - "Next day" for the daily limit follows the app's existing Sydney-day boundary.
-- The marker's calibration (model answer in the prompt, `deepseek-v4.1-flash`) holds in production as in the pilot; middle-band answers may occasionally be marked one too high, which the flag and offline re-mark exist to catch.
+- The marker's calibration (model answer in the prompt, `deepseek-v4.1-flash`) holds in production as in the pilot; middle-band answers may occasionally be marked one too high, which the offline re-mark exists to catch.
 - Content is the work of a separate content step (paper research R-001 to R-008) run after planning; the bank may grow in stages as long as the approved report precedes going live.
-- Constitution amendments are made as the plan's first task, as in spec 007. Known: Principle V (cropped visual stimulus images under the school-paper exception), Principle VI (no self-marking: wait and resubmit when the marker fails, come back tomorrow at the daily limit, on both tries). The plan identifies any others (for example Principle I for the new key fields, Principle II for the stored verdicts and flag, Principle VII for a unit-specific model).
+- Constitution amendments are made as the plan's first task, as in spec 007. Known: Principle V (cropped visual stimulus images under the school-paper exception), Principle VI (no self-marking: wait and resubmit when the marker fails, come back tomorrow at the daily limit, on both tries). The plan identifies any others (for example Principle I for the new key fields, Principle II for the stored verdicts, Principle VII for a unit-specific model).
 - This is the app's first English unit; no Section II essay, comparative questions, full papers, reading time, teacher review page or photo answers are in scope.

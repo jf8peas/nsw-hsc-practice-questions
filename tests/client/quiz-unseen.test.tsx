@@ -258,7 +258,7 @@ describe("To go further", () => {
   it("is not shown in a retry discussion, whose recorded try is below full marks", () => {
     mount({
       stage: "discussion", text, try1: tryView(1, ["technique-effect"]), try2: { ...tryView(2), goFurther: GO_FURTHER }, ending: "retried",
-      recordedMark: 2, flagged: false, discussion: { modelAnswer: MODEL, modelWords: 12 },
+      recordedMark: 2, discussion: { modelAnswer: MODEL, modelWords: 12 },
     });
     expect(screen.queryByText("To go further")).toBeNull();
   });
@@ -413,29 +413,6 @@ describe("declining the retry", () => {
     expect(screen.getByText("You skipped the retry, so your first try is recorded: 1 / 3.")).toBeTruthy();
     expect(screen.getByText(MODEL)).toBeTruthy();
     expect(document.querySelector("details.un-collapse")).toBeNull();
-  });
-});
-
-describe("the flag", () => {
-  const finalState = (): UnseenState => ({
-    stage: "discussion", text, try1: tryView(3), ending: "full_marks", recordedMark: 3, flagged: false,
-    discussion: { modelAnswer: MODEL, modelWords: 12 },
-  });
-
-  it("flags once, shows the done state, and never changes the mark", async () => {
-    responder = (url) => (url === "/api/unseen/flag" ? jsonRes({ flagged: true }) : jsonRes({}));
-    mount(finalState());
-    fireEvent.click(screen.getByRole("button", { name: "This mark seems wrong" }));
-    const done = await screen.findByRole("button", { name: "Flagged for your teacher" });
-    expect((done as HTMLButtonElement).disabled).toBe(true);
-    expect(calls.filter((c) => c.url === "/api/unseen/flag")).toHaveLength(1);
-    expect(calls.find((c) => c.url === "/api/unseen/flag")!.body).toEqual({ attemptId: ATTEMPT, attemptToken: "TOKEN-1", questionId: question.id });
-    expect(screen.getByText("3 / 3 marks")).toBeTruthy();
-  });
-
-  it("starts in the done state when it was already flagged", () => {
-    mount({ ...finalState(), flagged: true });
-    expect(screen.getByRole("button", { name: "Flagged for your teacher" })).toBeTruthy();
   });
 });
 

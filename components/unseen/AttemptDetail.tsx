@@ -32,7 +32,6 @@ export function UnseenAttemptDetailView({ detail, maxMarks }: { detail: UnseenAt
       {detail.recordedMark !== null && (
         <div className="detail-marks">
           Recorded {detail.recordedMark}/{maxMarks}
-          {detail.flagged ? " · flagged for your teacher" : ""}
         </div>
       )}
       {detail.modelAnswer && (

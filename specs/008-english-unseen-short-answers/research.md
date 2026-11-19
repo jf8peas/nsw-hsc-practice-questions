@@ -2,7 +2,7 @@
 
 Decisions for [plan.md](plan.md). Each has the decision, the reason and the alternatives rejected.
 The code read for this plan is the spec 007 implementation (`lib/paragraph/*`, `components/paragraph/*`,
-the grade, attempts, flag and draft routes, `lib/db/schema.ts`), the draw and progress code, and the
+the grade, attempts, paragraph flag and draft routes, `lib/db/schema.ts`), the draw and progress code, and the
 pilot (`resources/english-unseen/`, `scripts/pilot-unseen-marker.py`). Spec 007's rules carry over unless
 this spec says otherwise; this document only records where 008 differs or adds.
 
@@ -112,7 +112,7 @@ database never records would break "recorded mark" and the cap).
 >   written description, or the model answer before the discussion. Key material MUST come through
 >   functions exported from `lib/grading.server.ts`.**
 
-And amend the submission-routes bullet: add "**for the unseen-text unit's retry-decline and flag routes,
+And amend the submission-routes bullet: add "**for the unseen-text unit's retry-decline route,
 `attemptId`, `questionId` and the signed attempt token**" and add to the other-routes bullet "**or the
 text id of a stimulus image, which the server checks against the unit's texts**".
 
@@ -121,10 +121,9 @@ text id of a stimulus image, which the server checks against the unit's texts**"
 > - **per unseen-text question in an attempt (spec 008): the first-try and retry texts, their marks,
 >   the seven per-skill verdicts each with the marker's one-line reason, the feedback and biggest-gap
 >   sentence shown, the prompt version and model that marked each try, how the question ended (full
->   marks, retried, declined, or no retry offered), the recorded mark, and whether and when the student
->   flagged the attempt for review; stored in a phase row, kept for the attempt detail page, deleted with
+>   marks, retried, declined, or no retry offered), and the recorded mark; stored in a phase row, kept for the attempt detail page, deleted with
 >   the student like results. The student's in-progress draft text is stored in the existing draft row.
->   Verdicts, reasons and the flag never change marks or concept tracking, which always come from the
+>   Verdicts and reasons never change marks or concept tracking, which always come from the
 >   first try's verdicts.**
 
 And in the local-test-files sentence: "Answer text and per-criterion **or per-skill** results MAY be
@@ -245,7 +244,7 @@ ship with the full bank (SC-004 requires every usable question, and these are us
 about the starter bank and about keeping the frozen set honest: the holdout set is a **snapshot** in
 `resources/english-unseen/pilot-questions.json` (its own copy of text, criteria, notes and anchors), so a
 later edit to the bank's copy of a question (a corrected criteria line, a reviewed model answer) cannot
-change what the frozen set measures, and a flagged student answer on that question becomes a `field` case
+change what the frozen set measures, and a disagreement found by the re-mark on that question becomes a `field` case
 (its own set), never a holdout case. Shipping them is therefore safe once the bank holds a copy
 independent of the pilot file; leaving them out of the starter bank costs nothing because the starter
 bank only has to exercise the machinery. The two St George Girls questions also have **authored** (not
@@ -375,7 +374,6 @@ allowlist in `tests/no-key-leak.test.ts`; no route or page imports it.
 | `POST /api/grade` try 1 at full marks, or no retry offered, or try 2 marked | `result` + `discussion` (model answer) + `try1` on try 2 | criteria, notes, description |
 | `POST /api/grade` not marked (marker down, daily limit) | `notMarked: { reason, resetsAt? }` | everything else |
 | `POST /api/unseen/decline` | `result` (final) + `discussion` | criteria, notes, description |
-| `POST /api/unseen/flag` | `{ flagged }` | everything |
 | `POST /api/rewrite/draft` | `{ saved }` | everything |
 | unit page | public question counts by form, the student's own marks, the pending question's id and form | any key field |
 | attempt detail page | both tries with verdicts, feedback, biggest gap; the model answer only when the row is `final` | the model answer of an unfinished attempt; criteria, notes, description at any time |
@@ -589,13 +587,13 @@ usual one-line error. These are distinguishable from the two `notMarked` outcome
 `200`s the server chose to send.
 
 **Rate limit.** `429 rate_limited` (per-user or per-IP) returns the box with the text and the usual
-"slow down" line; nothing is recorded and no slot is taken. The draft and flag limiters are unchanged
-(`DRAFT_RATE_LIMIT`, `FLAG_RATE_LIMIT`); the decline route uses the per-user grade limiter.
+"slow down" line; nothing is recorded and no slot is taken. The draft limiter is unchanged
+(`DRAFT_RATE_LIMIT`); the decline route uses the per-user grade limiter.
 
 **Logging.** `lib/unseen/log.server.ts`, one `console.info` line per call as `lib/paragraph/log.server.ts`:
 `[unseen] outcome=… user=<sha256> question=… phase=… duration_ms=… model=…`. Outcomes: `graded`,
 `unparseable`, `model_fail`, `rate_limited`, `over_allowance`, `already_answered`, `phase_refused`,
-`answer_rejected`, `db_unavailable`, `declined`, `flagged`, `flag_repeat`. Never the text, a reason, the
+`answer_rejected`, `db_unavailable`, `declined`. Never the text, a reason, the
 feedback, the biggest gap, the model answer or any key. A test spies on `console.*` across a full run.
 
 **Rejected.** (a) Taking a slot per model call (a provider outage would exhaust a student's day in
@@ -616,14 +614,14 @@ criteria with a `d.subs` sub-structure, a 0..4 mark, a 0..3 capped second mark, 
 and a `no_retry` ending, and no self-mark. Extending it would put `max_marks`-dependent checks, an unused
 `mode`, and two unused endings into a table that two units then share, and every paragraph query would
 have to carry unseen concerns (the same argument spec 007 made against `rewrite_phases`). The repeated
-shape (text, mark, verdicts, prompt version, flag) is small enough to repeat.
+shape (text, mark, verdicts, prompt version) is small enough to repeat.
 
 **Stored per try:** `try1_text`, `try1_mark`, `try1_verdicts` (jsonb: seven `{ met, reason }` keyed by skill
 id), `try1_feedback`, `try1_biggest_gap`, `try1_prompt_version`, `try1_model`, `try1_graded_at`; the same
 five for `try2_*` (null until a retry is marked). Plus `max_marks` (a copy of the question's value at the
 time, so the checks below do not depend on content that can be edited), `status` (`try1` | `final`),
 `ending` (`full_marks` | `retried` | `declined` | `no_retry`; null until final), `recorded_mark`,
-`flagged_at`, `created_at`, `updated_at`.
+`created_at`, `updated_at`. There is no flag column: the unit has no student flag (the 2026-11-19 clarification).
 
 **The retry choice (taken, declined, pending) is derived, not stored**, so it cannot disagree with the
 rest of the row: `status = 'try1'` is "pending" (the student has seen the first result and has not
@@ -639,7 +637,6 @@ pressed "Retry" without typing is not stored (reload shows the choice again; not
 (no row) --try 1 marked below max, max > 1------------> try1
 try1     --try 2 marked (capped at max - 1)-------------> final / retried        (+ result row)
 try1     --decline--------------------------------------> final / declined       (+ result row)
-final    --flag-----------------------------------------> final, flagged_at set (once)
 ```
 
 `final` is terminal. Each arrow inserts or updates once, guarded by `status` (the paragraph unit's pattern:
@@ -665,7 +662,7 @@ quiz page). There is **no marking stage**: marking is never restored.
 | no row, draft maybe | `write` | `text`, `draft1`, `dailyLimit` |
 | row `try1`, no `draft2` | `choice` | `try1`, `dailyLimit` |
 | row `try1`, `draft2` present | `retry` | `try1`, `draft2`, `dailyLimit` |
-| row `final` | `discussion` | `try1`, `try2?`, `ending`, `recordedMark`, `flagged`, `discussion` |
+| row `final` | `discussion` | `try1`, `try2?`, `ending`, `recordedMark`, `discussion` |
 
 "Retry waiting on the daily cap" is the `retry` stage with `dailyLimit.reached`: the server saved the
 retry text as a draft when it answered `daily_limit` (R7), so the stage is `retry` with the text and Submit
@@ -700,10 +697,10 @@ tables changes. `npm run db:migrate` is already part of `vercel-build`.
 **Deletion and retention.** `unseen_phases.user_id` and the composite FK are `ON DELETE CASCADE`, and
 `scripts/delete-student.ts` and the retention job delete `users` rows, which cascade; **neither needs a code
 change** (the spec 007 reasoning, checked against `lib/db/queries/users.server.ts`). `tests/api/delete-unseen.test.ts`
-proves it with a seeded row, a draft and a flag.
+proves it with a seeded row and a draft.
 
 **Rejected.** Storing the retry choice as a column (a second source of truth); one table for paragraph and
-unseen (above); a `jsonb` blob for both tries (the checks and the "flagged" and "recorded" queries want
+unseen (above); a `jsonb` blob for both tries (the checks and the "recorded" queries want
 columns); a unique index on `(user_id, (question_ids[1]))` as spec 007 (that allows one attempt per
 question, not one open attempt, so two tabs could still open two different questions).
 
@@ -802,52 +799,51 @@ returns met or missed only; the pilot's `succinct`/`apt-evidence` were stable fo
 
 ---
 
-## R11. Flag and the offline revision loop (FR-035 to FR-038, SC-005)
+## R11. The offline revision loop (FR-035 to FR-038, SC-005)
 
-**Flag route.** `POST /api/unseen/flag`, a small copy of `app/api/paragraph/flag/route.ts` against
-`unseen_phases` (a shared helper would couple two units' routes for 40 lines; each unit's route stays
-trivially auditable). Body `{ attemptId, questionId, attemptToken }`, nothing else read. One flag **per
-attempt** (the clarification): the row's `flagged_at`, set once by a conditional update, covers both tries.
-Codes are in `contracts/api.md`. It never reads or writes a mark, result or concept outcome. Done-state
-wording "Flagged for your teacher". There is no `not_flaggable` case (no self-mark path); an unfinished
-attempt is `409 not_final`.
+**No student flag (clarification, 2026-11-19).** The unit has no "This mark seems wrong" button, no flag route,
+no `flagged_at` column and no flag-export script. A student report is a weak signal (students rarely flag a mark
+that is too generous, and a flag makes the student the reviewer of the marker). The paragraph unit's flag
+(spec 007) is unchanged. The attempt record already holds what the loop needs: both tries' text, the seven
+verdicts with reasons, the marks and the prompt version.
 
-**Export.** `scripts/unseen-flags.ts` (offline, as `paragraph-flags.ts`): `list` prints flagged attempts
-newest first with the question, marks and both tries' skill verdicts; `export <n…>` appends each chosen
-attempt to `resources/english-unseen/pilot-questions.json` as a **field** question (`set: "field"`,
-`id: "field-<question suffix>"`) whose context (text via the app's `renderTextForMarker`, criteria, notes,
-suggested length, directive) is copied from the bank key, with the model answer as an anchor case and the
-student's try as an UNLABELLED case (`needsLabel: true`, `origin: "student (flagged)"`). The case holds the
-student's **writing only**: no name, email, user id, attempt id or date. The teacher edits `expectMark` and
-`expectMissed`, clears `needsLabel`, and the case is live. `scripts/unseen-field-cases.ts` holds the pure
-export logic (tested without a database) and is on the `OFFLINE_KEY_READERS` allowlist.
+**Re-mark is the source of field cases.** `scripts/unseen-remark.ts` (below) finds the answers the marker may
+have got wrong; `--export` turns each disagreement into an UNLABELLED field case under a field question built
+from the bank key (`scripts/unseen-field-cases.ts`: the text via the app's `renderTextForMarker`, criteria,
+notes, suggested length, directive, the model answer as an anchor, `set: "field"`, `id: "field-<question suffix>"`,
+the student's try as `needsLabel: true`, `origin: "re-mark disagreement"`). The case holds the student's
+**writing only**: no name, email, user id, attempt id or date. The teacher edits `expectMark` and
+`expectMissed`, clears `needsLabel`, and the case is live. `unseen-field-cases.ts` holds the pure export logic
+(tested without a database) and is on the `OFFLINE_KEY_READERS` allowlist.
 
 **Regression.** `python scripts/pilot-unseen-marker.py --gate` marks **every** case of every set (tuning,
 holdout, field) with the prompt `lib/unseen/rubric.json` and prints three sections, each with in-range
 and within-1 agreement, the skill-catch and false-dock figures, and the echo-guard count. The existing
 `--set` option gains `field`; `--gate` is a single run over all sets (it replaces choosing sets one by
 one) and exits non-zero when tuning in-range is under 90%, holdout in-range under 80%, or any tuning or
-holdout case is more than 1 mark out (SC-005). **Field cases are reported, not gated**, because a flagged
-answer's label is a human judgement; a field regression is a finding to read (the teacher decides whether
+holdout case is more than 1 mark out (SC-005). **Field cases are reported, not gated**, because a field
+case's label is a human judgement; a field regression is a finding to read (the teacher decides whether
 the label or the prompt is wrong). A case with `needsLabel: true` is refused by the runner with a message
 (as spec 007). The report header carries `promptVersion`; every prompt edit bumps it and regenerates the
 golden file. The frozen holdout set is never used to tune (a header line in the report says "holdout: not
 for tuning").
 
 **Re-mark.** `scripts/unseen-remark.ts` (offline): reads the database read-only through `DATABASE_URL`,
-samples **try 1 answers marked at full marks or one below** (so the middle-band leniency the pilot saw is
-sampled, not only top marks), stratified half and half, `--sample 40` by default, builds the same prompt
+samples **try 1 answers from every mark band** (zero to full marks), stratified across the bands that have answers, so
+the middle-band leniency the pilot saw, and any harshness at the low bands, is sampled, not only top marks;
+`--sample 40` by default, builds the same prompt
 with the same builder, and marks each with **`REMARK_MODEL`** via OpenRouter (stay on OpenRouter: the same
 provider, key and consent as the app; the constitution already allows re-marking by the same provider).
 The script refuses to run when `REMARK_MODEL` is unset or equals `ENGLISH_ADV_GRADING_MODEL`. It never reserves a slot
 or touches `daily_ai_usage`, so it never counts against a student's cap (A5). Output: disagreements
 sorted **"too high" first** (the re-mark gave fewer marks than the app did), lower bands first within
-them, which is the "check middle-band answers marked one too high first" rule; `--export` appends each
+them, which is the "check middle-band answers marked one too high first" rule; a lower mark from the re-mark is
+listed after them (possible harshness); `--export` appends each
 disagreement as a `needsLabel` field case. Answers copied out carry no identity.
 
 **Where the pilot file lives.** `resources/english-unseen/pilot-questions.json`, gitignored (it holds
 copyrighted texts, school answers and students' writing). The prompt moves to `lib/unseen/`; the pilot file
-does not, and `/resources/` is already in `.gitignore`. `npm run unseen-flags` and `unseen-remark` are
+does not, and `/resources/` is already in `.gitignore`. `npm run unseen-remark` is
 added to `package.json`.
 
 **Consent.** No new consent sentence. The existing sentence (added by spec 007) already says answer text
@@ -855,7 +851,7 @@ and per-criterion results may be copied, without identity, into local test files
 AI provider; A4 widens the constitution's wording to "per-skill" and the README's consent paragraph gains
 the word "per-skill". The stimulus and model answer sent to the provider are not personal data.
 
-**Rejected.** A teacher review page (out of scope, FR-038); gating field cases (labels are not settled);
+**Rejected.** A student flag button (above); a teacher review page (out of scope, FR-038); gating field cases (labels are not settled);
 running the re-mark with the unit's own model (it would only agree with itself).
 
 ---
@@ -872,7 +868,7 @@ panel tests must stay untouched.
 
 | Component | Role |
 |---|---|
-| `UnseenPanel` | the state machine and all `fetch` calls (grade, decline, flag, draft) |
+| `UnseenPanel` | the state machine and all `fetch` calls (grade, decline, draft) |
 | `TextPanel` | heading, title, author, source line, then `PoemText` / `ProseText` / `VisualText`, then `Footnotes` |
 | `PoemText` | stanzas of `.un-line`s, optional line numbers (`aria-hidden`), `white-space: pre-wrap` |
 | `ProseText` | paragraphs |
@@ -885,7 +881,7 @@ panel tests must stay untouched.
 | `RetryChoice` | "Try again" and "Skip the retry and see the model answer", the cap line |
 | `RetryBox` | `AnswerBox` pre-filled with try 1, plus `TipCards` (one per skill missed on try 1, from `skills.ts`) |
 | `NotMarkedNotice` | the marker-failed status and the daily-limit status (the "waiting-on-cap" and "marker-failed" states) |
-| `Discussion` | `OutcomeSummary`, `SkillPills` ("First try" / "Fixed in retry" / "Missed"), `FinalVsModel` (the final answer beside the model answer, stacked on a phone), `SkillsAdded`, `FirstTryCollapsed` (`<details>`), `FlagButton`, Finish |
+| `Discussion` | `OutcomeSummary`, `SkillPills` ("First try" / "Fixed in retry" / "Missed"), `FinalVsModel` (the final answer beside the model answer, stacked on a phone), `SkillsAdded`, `FirstTryCollapsed` (`<details>`), Finish |
 | `UnitProgress` (server) | the unit page's "Your results" by form and the start button state |
 
 **Card states.**
@@ -912,7 +908,6 @@ panel tests must stay untouched.
 | `marking2` | 200 `notMarked` marker / limit | `retrying` | text intact; the matching notice; decline stays available |
 | `marking2` | 409 | `discussion` | stored result |
 | `marking2` | 429, 503, network error | `retrying` | text intact; the usual error |
-| `discussion` | flag | `discussion` | `POST /api/unseen/flag`; button becomes "Flagged for your teacher" |
 | `discussion` | Finish | route | `router.push(/unit/<id>)` |
 
 Invariants: the submitted text is held in React state across `marking*` and never cleared; a retry is

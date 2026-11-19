@@ -100,7 +100,7 @@ end on one attempt (the partial unique index).
 | no row, draft maybe | `write` | `text`, `draft1`, `dailyLimit?` |
 | row `try1`, no retry draft | `choice` | `text`, `try1`, `retryOffered`, `dailyLimit?` |
 | row `try1`, retry draft | `retry` | `text`, `try1`, `draft2`, `retryOffered`, `dailyLimit?` |
-| row `final` | `discussion` | `text`, `try1`, `try2?`, `ending`, `recordedMark`, `flagged`, `discussion` |
+| row `final` | `discussion` | `text`, `try1`, `try2?`, `ending`, `recordedMark`, `discussion` |
 
 `dailyLimit` is present when `LLM_DAILY_CAP > 0` and the student's used slots today (`aiUsedToday`) have
 reached it; `resetsAt` is the next Sydney midnight. The `discussion` object appears **only** for `final`
@@ -196,25 +196,8 @@ temporarily_unavailable`. For an unseen question the stale check reads `unseen_p
 a row exists; phase 2 stale once the row is `final`). `MAX_DRAFT_LEN` 6000. The route's question-type check
 accepts `rewrite`, `paragraph` and `unseen`.
 
-## POST /api/unseen/flag
-
-Request: `{ "attemptId": string, "questionId": string, "attemptToken": string }` (nothing else is read).
-
-Order: session → body (`400 invalid_request`) → attempt token (`401 invalid_attempt_token`) → question
-belongs to the token and is an `unseen` question (`404 not_found`) → per-user flag rate limit (`429
-rate_limited`, `FLAG_RATE_LIMIT`, 10 a minute) → conditional update.
-
-| Status | Body | When |
-|---|---|---|
-| `200` | `{ "flagged": true }` | first flag stored (covers the first try and any retry) |
-| `200` | `{ "flagged": true, "already": true }` | already flagged (this tab again, or another tab) |
-| `404` | `{ "error": "not_found" }` | no such attempt/question for this student |
-| `409` | `{ "error": "not_final" }` | the question is still at the retry choice or in the retry |
-| `429` | `{ "error": "rate_limited", "retryAfter": number }` | |
-| `503` | `{ "error": "temporarily_unavailable" }` | database unreadable |
-
-The route never reads or writes marks, results or concept outcomes. Done-state wording on the client:
-"Flagged for your teacher". There is no self-marked case, so there is no `not_flaggable`.
+There is no flag route: the unit has no student flag (the 2026-11-19 clarification), so `/api/unseen/flag`
+does not exist and the discussion has no flag button. The offline re-mark (research R11) is how marks are checked.
 
 ## GET /api/unseen/image/[textId]
 
@@ -271,5 +254,4 @@ first-try outcomes. The model is not asked for tips.
 
 One `console.info` line per call: `[unseen] outcome=… user=<sha256> question=… phase=… duration_ms=…
 model=…`. Outcomes: `graded`, `unparseable`, `model_fail`, `rate_limited`, `over_allowance`,
-`already_answered`, `phase_refused`, `answer_rejected`, `db_unavailable`, `declined`, `flagged`,
-`flag_repeat`. Never the answer, a reason, feedback, the biggest gap, the text, the model answer or any key.
+`already_answered`, `phase_refused`, `answer_rejected`, `db_unavailable`, `declined`. Never the answer, a reason, feedback, the biggest gap, the text, the model answer or any key.

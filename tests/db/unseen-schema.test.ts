@@ -109,15 +109,6 @@ describe("unseen_phases checks", () => {
     ).rejects.toThrow();
   });
 
-  it("allows a flag only on a final row", async () => {
-    const b = await base("un-15");
-    await expect(
-      t.db.insert(unseenPhases).values({ ...b, status: "try1", ...try1(2), flaggedAt: new Date() }),
-    ).rejects.toThrow();
-    const c = await base("un-16");
-    await t.db.insert(unseenPhases).values({ ...c, status: "final", ending: "full_marks", ...try1(4), recordedMark: 4, flaggedAt: new Date() });
-  });
-
   it("is unique per attempt and question", async () => {
     const b = await base("un-17");
     const row = { ...b, status: "try1", ...try1(2) };

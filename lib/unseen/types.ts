@@ -86,7 +86,6 @@ export interface UnseenState {
   dailyLimit?: { reached: true; resetsAt: string };
   ending?: UnseenEnding;
   recordedMark?: number;
-  flagged?: boolean;
   /** Only when stage = "discussion". */
   discussion?: UnseenDiscussion;
 }

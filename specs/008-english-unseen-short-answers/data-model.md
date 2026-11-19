@@ -129,7 +129,6 @@ export const unseenPhases = pgTable("unseen_phases", {
   try2Model: text("try2_model"),
   try2GradedAt: ts("try2_graded_at"),
   recordedMark: smallint("recorded_mark"),                 // set when final
-  flaggedAt: ts("flagged_at"),                             // once per attempt; never changes a mark
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
 }, (t) => [
@@ -150,9 +149,7 @@ export const unseenPhases = pgTable("unseen_phases", {
     or (${t.ending} in ('full_marks','declined','no_retry') and ${t.try2Mark} is null)`),
   check("unseen_phases_recorded_is_higher",
     sql`${t.recordedMark} is null or ${t.recordedMark} = greatest(${t.try1Mark}, coalesce(${t.try2Mark}, 0))`),
-  check("unseen_phases_flag_when_final", sql`${t.flaggedAt} is null or ${t.status} = 'final'`),
   index("unseen_phases_user_unit_idx").on(t.userId, t.unitId),
-  index("unseen_phases_flagged_idx").on(t.flaggedAt).where(sql`${t.flaggedAt} is not null`),
 ]);
 ```
 
@@ -246,7 +243,6 @@ interface UnseenState {
   dailyLimit?: { reached: true; resetsAt: string };   // present only when the allowance is used up
   ending?: "full_marks" | "retried" | "declined" | "no_retry";
   recordedMark?: number;
-  flagged?: boolean;
   discussion?: { modelAnswer: string; modelWords: number };   // only when stage = "discussion"
 }
 interface TryView { text: string; mark: number; skills: SkillView[]; feedback: string; biggestGap: string; goFurther: string | null; wordCount: number }   // goFurther: a first try at full marks only
@@ -286,11 +282,11 @@ never in `writing`.
   "criteria": "…", "notes": "…", "suggestedWords": 204, "anchors": ["field-fs25-q1-model"],
   "cases": [
     { "id": "field-fs25-q1-model", "origin": "model answer", "expectMark": [3, 3], "allSkillsMet": true, "answer": "…" },
-    { "id": "field-fs25-q1-17", "origin": "student (flagged)", "needsLabel": true, "expectMark": [0, 3], "expectMissed": [], "answer": "…" } ] }
+    { "id": "field-fs25-q1-17", "origin": "re-mark disagreement", "needsLabel": true, "expectMark": [0, 3], "expectMissed": [], "answer": "…" } ] }
 ```
 
 No student name, email, user id, attempt id or date is written. `needsLabel: true` cases are refused by the
-runner until the teacher edits `expectMark` and `expectMissed` and clears the flag.
+runner until the teacher edits `expectMark` and `expectMissed` and clears `needsLabel`.
 
 `resources/english-unseen/{inventory,bank,review}/` (gitignored): the content task's inputs and outputs
 (research R2).

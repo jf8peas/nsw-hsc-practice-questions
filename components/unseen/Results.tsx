@@ -204,21 +204,6 @@ export function FirstTryCollapsed({ try1, maxMarks }: { try1: TryView; maxMarks:
   );
 }
 
-export function FlagButton({ flagged, busy, error, onFlag }: { flagged: boolean; busy: boolean; error: string | null; onFlag: () => void }) {
-  return (
-    <div className="un-flag">
-      <button type="button" className="un-btn-secondary" onClick={onFlag} disabled={flagged || busy}>
-        {flagged ? "Flagged for your teacher" : "This mark seems wrong"}
-      </button>
-      {error && (
-        <p className="un-note" role="status">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
 /** The discussion (FR-021): the recorded mark and its summary lines, the pills, the answers side by side. */
 export function Discussion({
   maxMarks,
@@ -227,10 +212,6 @@ export function Discussion({
   ending,
   recorded,
   discussion,
-  flagged,
-  flagBusy,
-  flagError,
-  onFlag,
   onFinish,
   summaryRef,
 }: {
@@ -240,10 +221,6 @@ export function Discussion({
   ending: UnseenEnding;
   recorded: number;
   discussion: UnseenDiscussion;
-  flagged: boolean;
-  flagBusy: boolean;
-  flagError: string | null;
-  onFlag: () => void;
   onFinish: () => void;
   summaryRef?: Ref<HTMLDivElement>;
 }) {
@@ -272,7 +249,6 @@ export function Discussion({
       <SkillsAdded try1={try1} />
       {try2 && <FirstTryCollapsed try1={try1} maxMarks={maxMarks} />}
       <div className="un-discussion-foot">
-        <FlagButton flagged={flagged} busy={flagBusy} error={flagError} onFlag={onFlag} />
         <button type="button" className="rw-btn" onClick={onFinish}>
           Finish
         </button>

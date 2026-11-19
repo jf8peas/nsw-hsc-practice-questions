@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { Db } from "@/lib/db/index.server";
 import {
@@ -139,31 +139,4 @@ export async function finaliseUnseenDecline(
     )
     .returning();
   return rows[0] ?? null;
-}
-
-/**
- * Flag a final attempt for review (FR-035). Conditional on `flagged_at is null`, so it is stored once
- * and covers both tries. Returns whether THIS call stored it; the caller reads the row to tell "already
- * flagged" from "not final". Never touches a mark.
- */
-export async function flagUnseenPhase(
-  db: Db,
-  userId: string,
-  attemptId: string,
-  questionId: string,
-): Promise<boolean> {
-  const rows = await db
-    .update(unseenPhases)
-    .set({ flaggedAt: new Date(), updatedAt: new Date() })
-    .where(
-      and(
-        eq(unseenPhases.userId, userId),
-        eq(unseenPhases.attemptId, attemptId),
-        eq(unseenPhases.questionId, questionId),
-        eq(unseenPhases.status, "final"),
-        isNull(unseenPhases.flaggedAt),
-      ),
-    )
-    .returning({ id: unseenPhases.id });
-  return rows.length > 0;
 }

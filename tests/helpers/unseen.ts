@@ -99,12 +99,6 @@ export async function declineUnseen(started: Pick<StartedAttempt, "attemptId" | 
   return { status: res.status, body: await res.json() };
 }
 
-export async function flagUnseen(started: Pick<StartedAttempt, "attemptId" | "attemptToken">, questionId: string) {
-  const { POST } = await import("@/app/api/unseen/flag/route");
-  const res = await POST(post("/api/unseen/flag", { attemptId: started.attemptId, attemptToken: started.attemptToken, questionId }));
-  return { status: res.status, body: await res.json() };
-}
-
 export async function startUnseen() {
   const started = await startAttempt(UNSEEN_UNIT);
   return { started, questionId: started.questions?.[0]?.id as string };

@@ -124,7 +124,6 @@ export interface UnseenAttemptDetail {
   /** full_marks | retried | declined | no_retry; null while the retry choice is pending. */
   ending: string | null;
   recordedMark: number | null;
-  flagged: boolean;
   /** Only when the question is final: the student has already seen it at the discussion. */
   modelAnswer: string | null;
 }
@@ -164,7 +163,6 @@ function unseenDetailOf(row: UnseenPhaseRow): UnseenAttemptDetail {
     try2: t2 ? pick(t2) : null,
     ending: row.ending,
     recordedMark: row.recordedMark,
-    flagged: row.flaggedAt !== null,
     // the model answer is released only for a final question (constitution Principle I, 2.15.0)
     modelAnswer: row.status === "final" ? (unseenDiscussion(row.questionId)?.modelAnswer ?? null) : null,
   };
