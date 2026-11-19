@@ -6,10 +6,20 @@ import type { DescriptionCheck } from "@/lib/types";
 // blocked by `npm run validate`. Do not edit by hand.
 
 export const descriptionChecks: Record<string, DescriptionCheck> = {
-  "ab25-t2": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-6","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"35597da1fda9e3634f12fc5e48c69d471474131e93a287163955e4460f0c7117"},
-  "bk26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-6","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"bb2cc75107da539b87490916b27027eed825f0f31b41c77fce891a65e53e3880"},
-  "db26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-6","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"2fd9db239fa476ea255c68e77a8b85eefa98f93a99b040d13af97cba77e80651"},
-  "fs23-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-6","model":"deepseek/deepseek-v4.1-flash","samples":6,"descriptionHash":"0b01db143b4d4e56d20565f5521be2a9e7b317995611a2dd0775073b81f0d210"},
-  "fs26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-6","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"0375340c7d2707a9c8f8872c3b9ad382039e406b724928333c433be698a16614"},
-  "kx25-t4": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-6","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"16642f31bcf623554fc784b8c2fc6a209191544eb7a21e65349f417f2a95f47a"},
+  "ab25-t2": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"35597da1fda9e3634f12fc5e48c69d471474131e93a287163955e4460f0c7117"},
+  "bk26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"bb2cc75107da539b87490916b27027eed825f0f31b41c77fce891a65e53e3880"},
+  "ct24-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-8","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"c120e4debb71fadfe426c3842a8ad177109173c208bd68810b10e5d081075ab6"},
+  "db26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"2fd9db239fa476ea255c68e77a8b85eefa98f93a99b040d13af97cba77e80651"},
+  "fs23-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":6,"descriptionHash":"0b01db143b4d4e56d20565f5521be2a9e7b317995611a2dd0775073b81f0d210"},
+  "fs26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"0375340c7d2707a9c8f8872c3b9ad382039e406b724928333c433be698a16614"},
+  "gw25-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"f7894a3816525b0cd5ebe07904f4741e94de0454d132894a533f62fdbed36c48"},
+  "jr24-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-8","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"b1fe34d202e16ed2413bfda9a2a0b34173344a0f34fcd40d58d811d44e07c54c"},
+  "km25-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"d1718d005ac1b536a22e4d33c8f360f8e74a20bf3468e357b3c851aef605222a"},
+  "kx25-t4": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"16642f31bcf623554fc784b8c2fc6a209191544eb7a21e65349f417f2a95f47a"},
+  "nsb25-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"499b43f1cdde56da469d0755596ac65e32ff7e0867f1d149c01bf8d0b9fed8cd"},
+  "nsg24-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-8","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"13d3564983b0f7cdf202c4e76e9925e67dc7b8aac8ffd00108aad7732f6fe350"},
+  "py24-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-8","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"3caf33a22cb64b8199257af60698f59c52328cb3519811a670c0dc5bad928641"},
+  "sb24-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-8","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"e270081b82dd699657a6fe3c52d3a2c49e8ef22f64ffe00eab5741adf8362728"},
+  "sb25-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"638bc75e3529025518b15aa46803a743be815f08a7fd1a1ec484570f72375f37"},
+  "sgh24-t5": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-8","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"10ecbda606b004be242f45275d4cb355d0d5c4464540dcf334461f15b91c0e4f"},
 };

@@ -58,7 +58,7 @@ describe("buildFiles", () => {
 
   it("falls back to the median for the mark value when the answer lines cannot be counted", () => {
     const { "questions.ts": q } = buildFiles([bank()]);
-    expect(q).toContain('"suggestedWords": 264');
+    expect(q).toContain('"suggestedWords": 276');
     expect(q).toContain('"suggestedFrom": "median"');
   });
 

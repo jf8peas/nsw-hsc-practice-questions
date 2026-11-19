@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { buildReport, medianProblems, type InventoryFile, type ReportQuestion } from "../../scripts/unseen-report-lib";
 
 const q = (over: Partial<ReportQuestion>): ReportQuestion => ({
-  id: "u.a-q1", paperShort: "Alpha", paperYear: 2025, qNo: 1, maxMarks: 3, form: "poem", suggestedWords: 198, suggestedFrom: "lines",
+  id: "u.a-q1", paperShort: "Alpha", paperYear: 2025, qNo: 1, maxMarks: 3, form: "poem", suggestedWords: 192, suggestedFrom: "lines",
   modelOrigin: "school", criteriaOrigin: "school", ...over,
 });
 
@@ -47,11 +47,11 @@ describe("buildReport", () => {
 
 describe("medianProblems", () => {
   it("passes when the counted median matches MEDIAN_WORDS", () => {
-    expect(medianProblems([q({ suggestedWords: 198 }), q({ id: "x", suggestedWords: 198 })])).toEqual([]);
+    expect(medianProblems([q({ suggestedWords: 192 }), q({ id: "x", suggestedWords: 192 })])).toEqual([]);
   });
 
   it("fails when a mark value with counted data differs", () => {
-    expect(medianProblems([q({ suggestedWords: 180 })])[0]).toContain("MEDIAN_WORDS[3] is 198");
+    expect(medianProblems([q({ suggestedWords: 180 })])[0]).toContain("MEDIAN_WORDS[3] is 192");
   });
 
   it("does not check mark values with no counted data, nor questions on the median fallback", () => {

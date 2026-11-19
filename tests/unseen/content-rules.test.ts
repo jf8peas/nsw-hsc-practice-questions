@@ -127,7 +127,7 @@ describe("rule 5: the suggested length", () => {
     const q = firstQuestion(w);
     q.suggestedFrom = "median";
     q.suggestedWords = 200;
-    expect(run(w, answersOf())).toMatch(/must be the median 198 for 3 marks/);
+    expect(run(w, answersOf())).toMatch(/must be the median 192 for 3 marks/);
   });
 });
 
@@ -241,6 +241,18 @@ describe("rule 9: key text in public strings", () => {
   });
   it("allows the criteria to share the question's own wording and the model to quote the stimulus", () => {
     expect(validateUnseenRules(unitOf(), answersOf(), TODAY, () => 1000)).toEqual([]);
+  });
+  it("lets the criteria restate the whole prompt (as school criteria do) but still stops the notes and model doing so", () => {
+    const id = firstQuestion(unitOf()).id;
+    const prompt = "How does the poet use the tide to show the weight of remembering across a whole life?";
+    const q = unitOf();
+    firstQuestion(q).prompt = prompt;
+    const ok = answersOf();
+    ok[id].unseen!.criteria = `3 – Provides effective analysis of ${prompt.slice(0, -1).toLowerCase()}`;
+    expect(run(q, ok)).not.toMatch(/key text appears in public text/);
+    const bad = answersOf();
+    bad[id].unseen!.notes = `- ${prompt.toLowerCase()}`;
+    expect(run(q, bad)).toMatch(/key text appears in public text/);
   });
 });
 

@@ -108,10 +108,40 @@ describe("parseUnseenReply", () => {
     ["blank", "   "],
     ["missing", undefined],
     ["not a string", 7],
-  ])("fails a below-full reply whose biggestGap is %s, and drops its goFurther when it is fine", async (_l, value) => {
+  ])("repairs a below-full reply whose biggestGap is %s from the first missed skill's reason", async (_l, value) => {
     const { parseUnseenReply } = await marker();
-    expect(parseUnseenReply(good({ mark: 3, biggestGap: value, goFurther: "Do more." }), 4)).toBeNull();
+    const r = parseUnseenReply(good({ mark: 3, biggestGap: value, goFurther: "Do more." }), 4)!;
+    expect(r.biggestGap).toBe("No effect for the metaphor.");
+    expect(r.filled).toEqual(["biggestGap"]);
+    expect(r.goFurther).toBeNull();
     expect(parseUnseenReply(good({ mark: 3, goFurther: "Do more." }), 4)!.goFurther).toBeNull();
+  });
+
+  it("fills a missing feedback from the met skills' reasons and reports it", async () => {
+    const { parseUnseenReply } = await marker();
+    const r = parseUnseenReply(good({ feedback: undefined }), 4)!;
+    expect(r.feedback).toContain("answers-question ok");
+    expect(r.feedback).not.toContain("No effect for the metaphor.");
+    expect(r.filled).toEqual(["feedback"]);
+    const both = parseUnseenReply(good({ feedback: " ", biggestGap: null }), 4)!;
+    expect(both.filled).toEqual(["feedback", "biggestGap"]);
+    expect(parseUnseenReply(good(), 4)!.filled).toBeUndefined();
+  });
+
+  it("fills a full-mark reply's missing feedback but still needs its goFurther", async () => {
+    const { parseUnseenReply } = await marker();
+    const r = parseUnseenReply(good({ mark: 4, feedback: "", biggestGap: null, goFurther: "Go on." }), 4)!;
+    expect(r.filled).toEqual(["feedback"]);
+    expect(r.biggestGap).toBe("");
+    expect(parseUnseenReply(good({ mark: 4, feedback: "", biggestGap: null }), 4)).toBeNull();
+  });
+
+  it("cannot repair a reply with no reason to fill from", async () => {
+    const { parseUnseenReply } = await marker();
+    const none = Object.fromEntries(SKILL_IDS.map((id) => [id, { met: false }]));
+    expect(parseUnseenReply(good({ skills: none, feedback: "" }), 4)).toBeNull(); // no met reason
+    const noMissed = Object.fromEntries(SKILL_IDS.map((id) => [id, { met: true, reason: "ok" }]));
+    expect(parseUnseenReply(good({ skills: noMissed, biggestGap: "" }), 4)).toBeNull(); // below full, nothing missed
   });
 
   it("drops a goFurther on a below-full reply, and does not need one", async () => {
@@ -132,8 +162,6 @@ describe("parseUnseenReply", () => {
     ["a mark above the question's value", good({ mark: 5 })],
     ["a negative mark", good({ mark: -1 })],
     ["a mark that is a string", good({ mark: "3" })],
-    ["no feedback", good({ feedback: "  " })],
-    ["no biggest gap", JSON.stringify({ ...JSON.parse(good()), biggestGap: undefined })],
     ["a missing skill verdict", JSON.stringify({ ...JSON.parse(good()), skills: { ...skills(), succinct: undefined } })],
     ["a verdict that is not a boolean", JSON.stringify({ ...JSON.parse(good()), skills: { ...skills(), succinct: { met: "maybe" } } })],
   ])("fails on %s", async (_label, content) => {
@@ -208,6 +236,8 @@ describe("buildUnseenMessages", () => {
   it.each([
     ["examine", "DIRECTIVE VERB: examine = Inquire into."],
     ["explore", "DIRECTIVE VERB: explore = Inquire into and draw conclusions about."],
+    ["discuss", "DIRECTIVE VERB: discuss = Identify issues and provide points for and/or against."],
+    ["what", "DIRECTIVE VERB: what = Treat 'What ...'"],
   ])("knows the directive verb %s", async (verb, line) => {
     const { buildUnseenMessages } = await marker();
     expect(String(buildUnseenMessages({ ...input, verb })[1].content)).toContain(line);
@@ -256,7 +286,7 @@ describe("markWithModel", () => {
     ["an empty reply", { ok: false, reason: "empty" }],
     ["a cut-off reply", { ok: true, content: good(), finishReason: "length" }],
     ["an unparseable reply", { ok: true, content: "sorry, no JSON" }],
-    ["a reply missing a field", { ok: true, content: good({ biggestGap: "" }) }],
+    ["a reply missing a skill verdict", { ok: true, content: JSON.stringify({ ...JSON.parse(good()), skills: { ...skills(), succinct: undefined } }) }],
   ])("retries once after %s and succeeds", async (_label, first) => {
     chat.mockResolvedValueOnce(first).mockResolvedValueOnce({ ok: true, content: good() });
     const { markWithModel } = await marker();
@@ -272,6 +302,18 @@ describe("markWithModel", () => {
     expect(out?.reply.mark).toBe(4);
     expect(out?.reply.biggestGap).toBe("");
     expect(chat).toHaveBeenCalledTimes(1);
+  });
+
+  it("accepts a below-full reply with no biggestGap on the first call, fills it, and logs only the metric", async () => {
+    chat.mockResolvedValueOnce({ ok: true, content: good({ biggestGap: "" }) });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { markWithModel } = await marker();
+    const out = await markWithModel(input);
+    expect(out?.reply.biggestGap).toBe("No effect for the metaphor.");
+    expect(chat).toHaveBeenCalledTimes(1);
+    const logged = warn.mock.calls.map((c) => String(c[0])).join(" ");
+    expect(logged).toContain("reply_filled=biggestGap");
+    expect(logged).not.toContain("metaphor");
   });
 
   it("is unavailable after two failures, and never retries a third time", async () => {

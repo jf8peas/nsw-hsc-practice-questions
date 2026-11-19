@@ -183,11 +183,28 @@ def parse_reply(content: str, max_mark: int) -> tuple[dict | None, str | None]:
     # mirrors lib/unseen/marker.server.ts: feedback is always required. At full marks there is no gap to
     # name, so biggestGap may be null or empty and goFurther is required instead; below full marks
     # biggestGap is required and goFurther is dropped.
+    # a missing feedback or (below full) biggestGap is filled from the verdict reasons, as the app does
+    # (the fill is counted in r["filled"]); no reason to fill from fails the reply
+    filled = []
     feedback = r.get("feedback")
-    if not isinstance(feedback, str) or not feedback.strip():
-        return None, "no feedback"
+    feedback = feedback.strip() if isinstance(feedback, str) else ""
+    if not feedback:
+        feedback = " ".join(
+            (skills[s].get("reason") or "").strip() for s in SKILLS if skills[s].get("met") is True and (skills[s].get("reason") or "").strip()
+        ).strip()
+        if not feedback:
+            return None, "no feedback"
+        filled.append("feedback")
+    r["feedback"] = feedback
     gap = r.get("biggestGap")
     gap = gap.strip() if isinstance(gap, str) else ""
+    if mark != max_mark and not gap:
+        first = next((s for s in SKILLS if skills[s].get("met") is False and (skills[s].get("reason") or "").strip()), None)
+        if first:
+            gap = skills[first]["reason"].strip()
+            filled.append("biggestGap")
+    if filled:
+        r["filled"] = filled
     go = r.get("goFurther")
     go = go.strip() if isinstance(go, str) else ""
     if mark == max_mark:
@@ -343,6 +360,7 @@ def summarise(data: dict, records: list[dict], model: str, runs: int) -> str:
     false_docks = full_skill_checks = 0
     desc_ok = desc_total = 0
     errors = sum(1 for r in records if "error" in r)
+    filled_n = sum(1 for r in records if r.get("reply", {}).get("filled"))
     skill_miss_counter = Counter()
     case_rows = []
 
@@ -396,7 +414,7 @@ def summarise(data: dict, records: list[dict], model: str, runs: int) -> str:
     lines += [
         f"# Unseen-text marker pilot — {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}",
         "",
-        f"Model `{model}` · prompt `{PROMPT_VERSION}` · {runs} run(s) per answer · {len(records)} calls · {errors} errors",
+        f"Model `{model}` · prompt `{PROMPT_VERSION}` · {runs} run(s) per answer · {len(records)} calls · {errors} errors · {filled_n} repaired replies (feedback or biggestGap filled from the reasons)",
         "",
         "## Summary",
         "",

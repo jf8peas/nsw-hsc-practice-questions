@@ -72,6 +72,7 @@ export async function setupUnseenEnv(): Promise<UnseenEnv> {
 }
 
 export function restoreUnseenEnv() {
+  vi.unstubAllEnvs();
   if (savedKey === undefined) delete process.env.OPENROUTER_API_KEY;
   else process.env.OPENROUTER_API_KEY = savedKey;
   delete process.env.LLM_DAILY_CAP;

@@ -585,14 +585,19 @@ export function validateUnseenRules(
     // 9. key text must not appear in public strings (quotation of the question's own stimulus is fine)
     const stimulus = text && text.body.kind !== "image" ? renderStimulus(text) : "";
     const keyStrings = [key.model, key.criteria, key.notes, key.visual?.description ?? ""].filter((k) => k.trim());
-    const own: Array<{ text: string; run: number }> = [
+    const promptStrings: Array<{ text: string; run: number }> = [
       { text: q.prompt, run: PROMPT_LEAK_RUN },
       ...(q.parts ?? []).map((p) => ({ text: p.text, run: PROMPT_LEAK_RUN })),
+    ];
+    const own: Array<{ text: string; run: number }> = [
       { text: q.source ?? "", run: 40 },
       ...(text?.body.kind === "image" ? [{ text: text.body.alt, run: 40 }] : []),
     ];
     for (const k of keyStrings) {
-      for (const pub of [...own, ...publicStrings]) {
+      // the marking criteria restate the question's own wording, as school criteria do, so they are
+      // not compared with the (public) prompt; the model answer, notes and description still are
+      const against = k === key.criteria ? [...own, ...publicStrings] : [...promptStrings, ...own, ...publicStrings];
+      for (const pub of against) {
         if (pub.text && sharedRun(k, pub.text, pub.run, stimulus)) {
           errors.push(`${q.id}: key text appears in public text "${pub.text.slice(0, 40)}…"`);
           break;

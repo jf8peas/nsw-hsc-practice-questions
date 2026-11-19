@@ -125,5 +125,2455 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-analyses-not-retells"
     ],
     "source": "Fort St 2023 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg25-t1",
+    "verb": "how",
+    "prompt": "How does the speaker’s emotional shift reveal the power of human connection?",
+    "maxMarks": 2,
+    "suggestedWords": 216,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Grammar 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg25-t2",
+    "verb": "explain",
+    "prompt": "Explain how Morrison challenges young people to take ownership of their identity and shape their future.",
+    "maxMarks": 3,
+    "suggestedWords": 228,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Grammar 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg25-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg25-t3",
+    "verb": "how",
+    "prompt": "How does Keegan represent the quiet strength found in everyday human experiences?",
+    "maxMarks": 4,
+    "suggestedWords": 312,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Grammar 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg25-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how Vuong represents language as both a barrier and a bridge to identity.",
+    "maxMarks": 5,
+    "suggestedWords": 372,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Grammar 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sgr24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sgr24-t1",
+    "verb": "how",
+    "prompt": "How does Baird shape her readers’ understanding of ways we can find peace in our lives?",
+    "maxMarks": 3,
+    "suggestedWords": 216,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Grammar 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sgr24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sgr24-t2",
+    "verb": "explain",
+    "prompt": "Explain how Ottaway evokes humanity’s emotional connection with nature.",
+    "maxMarks": 3,
+    "suggestedWords": 216,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Grammar 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sgr24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sgr24-t3",
+    "verb": "how",
+    "prompt": "How does Gay challenge assumptions about common human experiences?",
+    "maxMarks": 4,
+    "suggestedWords": 312,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Grammar 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sgr24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sgr24-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how Dyer uses storytelling to represent the human experience of despair.",
+    "maxMarks": 4,
+    "suggestedWords": 312,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Grammar 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sgh24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sgh24-t3",
+    "verb": "what",
+    "prompt": "What literary devices does the writer employ to convey the experience of exclusion and inclusion?",
+    "maxMarks": 5,
+    "suggestedWords": 432,
+    "suggestedFrom": "median",
+    "paper": {
+      "school": "Sydney Girls High School",
+      "short": "Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect"
+    ],
+    "source": "Sydney Girls 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sgh24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sgh24-t4",
+    "verb": "evaluate",
+    "prompt": "Evaluate the ways the writer challenges our perceptions for the value of authenticity?",
+    "maxMarks": 5,
+    "suggestedWords": 432,
+    "suggestedFrom": "median",
+    "paper": {
+      "school": "Sydney Girls High School",
+      "short": "Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Girls 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sgh24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sgh24-t5",
+    "verb": "what",
+    "prompt": "What visual techniques are employed in order to give the responder a deeper understanding of the role of reading as a significant human experience?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "median",
+    "paper": {
+      "school": "Sydney Girls High School",
+      "short": "Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect"
+    ],
+    "source": "Sydney Girls 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sb25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sb25-t1",
+    "verb": "explain",
+    "prompt": "Explain how the image represents an experience of belonging.",
+    "maxMarks": 3,
+    "suggestedWords": 180,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Boys 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sb25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sb25-t2",
+    "verb": "how",
+    "prompt": "How does the poem reveal confronting aspects of collective human experiences?",
+    "maxMarks": 3,
+    "suggestedWords": 204,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Boys 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sb25-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sb25-t3",
+    "verb": "discuss",
+    "prompt": "Discuss how Roy uses literary devices to illustrate the inconsistent motivations of political systems.",
+    "maxMarks": 4,
+    "suggestedWords": 396,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Boys 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sb25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sb25-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how the poem captures the complexity of resilience.",
+    "maxMarks": 4,
+    "suggestedWords": 396,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Boys 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sb24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sb24-t1",
+    "verb": "how",
+    "prompt": "How does the photograph represent a collective experience?",
+    "maxMarks": 3,
+    "suggestedWords": 132,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Boys 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sb24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sb24-t2",
+    "verb": "how",
+    "prompt": "How has Gao used language to challenge racist assumptions?",
+    "maxMarks": 4,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Boys 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sb24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sb24-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how Dillard’s use of figurative language captures the experience of growing up.",
+    "maxMarks": 5,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Sydney Boys 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg24-t1",
+    "verb": "explain",
+    "prompt": "Explain how the poet constructs an insight about the human experience.",
+    "maxMarks": 3,
+    "suggestedWords": 168,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "St George Girls High School",
+      "short": "St George Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "St George Girls 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg24-t2",
+    "verb": "how",
+    "prompt": "How does this text position individuals to understand their relationship with the world?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "St George Girls High School",
+      "short": "St George Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "St George Girls 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg24-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how the author constructs perspectives about challenges faced by the individual.",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "St George Girls High School",
+      "short": "St George Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "St George Girls 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sg24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sg24-t4",
+    "verb": "explore",
+    "prompt": "Explore how this extract comments on the role of happiness in the human experience.",
+    "maxMarks": 3,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "St George Girls High School",
+      "short": "St George Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "St George Girls 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sh24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sh24-t1",
+    "verb": "in what way",
+    "prompt": "In what ways does Coelho explore how listening to others impacts an individual?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Shore",
+      "short": "Shore",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Shore 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sh24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sh24-t3",
+    "verb": "explain",
+    "prompt": "Explain how Hafda shapes the reader’s appreciation of love.",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Shore",
+      "short": "Shore",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Shore 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.sh24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "sh24-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how Clary’s voice enhances the significance of the message.",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Shore",
+      "short": "Shore",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Shore 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py25-t1",
+    "verb": "how",
+    "prompt": "How does the composer convey the struggle to find one’s identity?",
+    "maxMarks": 3,
+    "suggestedWords": 156,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Pymble 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py25-t2",
+    "verb": "evaluate",
+    "prompt": "Evaluate how the author invites us to view hope in a new way.",
+    "maxMarks": 4,
+    "suggestedWords": 216,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Pymble 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py25-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py25-t3",
+    "verb": "how",
+    "prompt": "How does the author convey ideas about the relationship between translation and shared experience?",
+    "maxMarks": 4,
+    "suggestedWords": 216,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-answers-question"
+    ],
+    "source": "Pymble 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py25-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how the composer represents the relationship between the narrator and her mother.",
+    "maxMarks": 3,
+    "suggestedWords": 180,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Pymble 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py24-t1",
+    "verb": "how",
+    "prompt": "How does the composer evoke a shared experience?",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Pymble 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py24-t2",
+    "verb": "how",
+    "prompt": "How is figurative language used in Text 2 to represent the importance of memory to human experience?",
+    "maxMarks": 3,
+    "suggestedWords": 156,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Pymble 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py24-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how the composer of Text 3 uses language form and features to convey the value of paying attention.",
+    "maxMarks": 4,
+    "suggestedWords": 216,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Pymble 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.py24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "py24-t4",
+    "verb": "evaluate",
+    "prompt": "Evaluate the effectiveness of Kinsella’s language in representing the boy’s experience as an anomaly.",
+    "maxMarks": 4,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Pymble 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg26-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg26-t1",
+    "verb": "how",
+    "prompt": "How is admiration for David Malouf’s impact on literature communicated in this extract?",
+    "maxMarks": 3,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-answers-question"
+    ],
+    "source": "North Sydney Girls 2026 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg26-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg26-t2",
+    "verb": "examine",
+    "prompt": "Examine how the extract invites readers to consider the significance of books and reading in people's lives.",
+    "maxMarks": 3,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2026 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg26-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg26-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how the poet explores the human desire to understand the world?",
+    "maxMarks": 4,
+    "suggestedWords": 264,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg26-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg26-t4",
+    "verb": "how",
+    "prompt": "How does Lohrey represent the impact of understanding past experiences?",
+    "maxMarks": 4,
+    "suggestedWords": 264,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Girls 2026 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg25-t1",
+    "verb": "how",
+    "prompt": "How does Scarlett celebrate the value of everyday connections?",
+    "maxMarks": 3,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Girls 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg25-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how Hustvedt conveys the excitement that arises from new places.",
+    "maxMarks": 3,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Girls 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg25-t5",
+    "verb": "analyse",
+    "prompt": "Analyse how Briggs explores the ways we reflect on the past to make sense of the present.",
+    "maxMarks": 5,
+    "suggestedWords": 588,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-analyses-not-retells",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg24-t1",
+    "verb": "explain",
+    "prompt": "Explain how the image represents humanity’s relationship with the environment.",
+    "maxMarks": 3,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Girls 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg24-t2",
+    "verb": "how",
+    "prompt": "How does Ping communicate the resilience of refugees?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg24-t3",
+    "verb": "how",
+    "prompt": "How does Mortlock reveal the paradoxical nature of modern communication?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg24-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how Strickland conveys the impact of disconnection.",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsb25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsb25-t1",
+    "verb": "explain",
+    "prompt": "Explain how Text 1 uses visual forms and features to spark new insights about the power of art.",
+    "maxMarks": 3,
+    "suggestedWords": 168,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Boys High School",
+      "short": "North Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Boys 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsb25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsb25-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how Davis uses poetic techniques to explore powerful emotions.",
+    "maxMarks": 5,
+    "suggestedWords": 228,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Boys High School",
+      "short": "North Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Boys 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsb25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsb25-t5",
+    "verb": "evaluate",
+    "prompt": "Evaluate how Text 5 - Non-Fiction Extract represents the power of storytelling to shape an individual's understanding of place.",
+    "maxMarks": 5,
+    "suggestedWords": 348,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Boys High School",
+      "short": "North Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Boys 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.kx25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "kx25-t1",
+    "verb": "analyse",
+    "prompt": "Analyse how Winn uses language to explore an individual’s relationship with nature?",
+    "maxMarks": 3,
+    "suggestedWords": 180,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Knox Grammar School",
+      "short": "Knox",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Knox 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.kx25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "kx25-t2",
+    "verb": "how",
+    "prompt": "How does Baird capture the human experience of awe and wonder?",
+    "maxMarks": 4,
+    "suggestedWords": 240,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Knox Grammar School",
+      "short": "Knox",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Knox 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.kx25-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "kx25-t3",
+    "verb": "how",
+    "prompt": "How does Liddle-Christie ignite new ideas about our world?",
+    "maxMarks": 4,
+    "suggestedWords": 216,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Knox Grammar School",
+      "short": "Knox",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Knox 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.kx25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "kx25-t4",
+    "verb": "how",
+    "prompt": "How does the artist represent the spirit of hope?",
+    "maxMarks": 3,
+    "suggestedWords": 168,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Knox Grammar School",
+      "short": "Knox",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Knox 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.km26-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "km26-t1",
+    "verb": "how",
+    "prompt": "How does Mudie represent the enduring nature of love?",
+    "maxMarks": 4,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Kambala 2026 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.km26-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "km26-t4",
+    "verb": "how",
+    "prompt": "How does Cheetham use the memoir form to challenge dominant cultural understandings of Australian identity?",
+    "maxMarks": 5,
+    "suggestedWords": 552,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Kambala 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.km26-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "km26-t5",
+    "verb": "evaluate",
+    "prompt": "Evaluate how Text 5 interrogates notions of beauty.",
+    "maxMarks": 6,
+    "suggestedWords": 684,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Kambala 2026 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.km25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "km25-t1",
+    "verb": "explain",
+    "prompt": "Explain how Text 1 explores human motivations.",
+    "maxMarks": 4,
+    "suggestedWords": 324,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Kambala 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.km25-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "km25-t3",
+    "verb": "analyse",
+    "prompt": "Analyse the ways in which Text 3 explores the inconsistencies in perceptions of time.",
+    "maxMarks": 5,
+    "suggestedWords": 444,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Kambala 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.km25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "km25-t4",
+    "verb": "evaluate",
+    "prompt": "Evaluate how Text 4 represents connection and disconnection.",
+    "maxMarks": 4,
+    "suggestedWords": 384,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Kambala 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr26-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr26-t1",
+    "verb": "how",
+    "prompt": "How does the letter invite the responder to see the world differently?",
+    "maxMarks": 5,
+    "suggestedWords": 444,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "James Ruse 2026 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr26-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr26-t2",
+    "verb": "how",
+    "prompt": "How does the text provide insight into the paradoxes and inconsistencies in human behaviour?",
+    "maxMarks": 5,
+    "suggestedWords": 432,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "James Ruse 2026 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr26-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr26-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how symbolism is used to represent the narrator’s conflicted feelings about his father?",
+    "maxMarks": 4,
+    "suggestedWords": 240,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "James Ruse 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr24-t1",
+    "verb": "how",
+    "prompt": "How does the cartoon challenge assumptions and ignite new ideas?",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-answers-question"
+    ],
+    "source": "James Ruse 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr24-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how the poet uses imagery to illuminate the role of perspective in the human experience.",
+    "maxMarks": 3,
+    "suggestedWords": 228,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "James Ruse 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr24-t3",
+    "verb": "how",
+    "prompt": "How do Fran Liebowitz’s views reflect the anomalies, paradoxes or inconsistencies that shape human perspectives?",
+    "maxMarks": 4,
+    "suggestedWords": 228,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "James Ruse 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr24-t4",
+    "verb": "how",
+    "prompt": "How does Roland Bull represent new experiences as both challenging and enriching?",
+    "maxMarks": 4,
+    "suggestedWords": 240,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "James Ruse 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.gw25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "gw25-t1",
+    "verb": "how",
+    "prompt": "How does the book cover for We Come With This Place visually represent the title of the book?",
+    "maxMarks": 3,
+    "suggestedWords": 180,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Girraween High School",
+      "short": "Girraween",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Girraween 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.gw25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "gw25-t2",
+    "verb": "how",
+    "prompt": "How is the human experience reflected in Foulcher’s use of visual imagery depicting the crab’s behaviour?",
+    "maxMarks": 3,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Girraween High School",
+      "short": "Girraween",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Girraween 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.gw25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "gw25-t4",
+    "verb": "how",
+    "prompt": "How does Malouf amplify the character’s experience of alienation?",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Girraween High School",
+      "short": "Girraween",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Girraween 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs26-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs26-t1",
+    "verb": "how",
+    "prompt": "How does Gonsalves represent the experience of dreaming in the image?",
+    "maxMarks": 3,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Fort St 2026 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs26-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs26-t2",
+    "verb": "how",
+    "prompt": "How does Desai shape the reader’s understanding of contrasting experiences of family life?",
+    "maxMarks": 3,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-answers-question"
+    ],
+    "source": "Fort St 2026 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs26-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs26-t3",
+    "verb": "how",
+    "prompt": "How does Araluen represent the relationship between exhaustion and disconnection?",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Fort St 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs26-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs26-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how Popova ignites new ideas about creativity and rest.",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Fort St 2026 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs24-t1",
+    "verb": "how",
+    "prompt": "How does LK Holt evoke a joyful experience?",
+    "maxMarks": 3,
+    "suggestedWords": 204,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Fort St 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs24-t2",
+    "verb": "how",
+    "prompt": "How does Tony Parsons reveal the impact of significant experiences on personal identity?",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Fort St 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs24-t3",
+    "verb": "analyse",
+    "prompt": "Analyse David Malouf’s use of language to investigate change and continuity in the human experience.",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Fort St 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.fs24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "fs24-t4",
+    "verb": "explain",
+    "prompt": "Explain how Paul Bowles uses language devices to represent the way we respond to the sky.",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-directive-verb"
+    ],
+    "source": "Fort St 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.db26-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "db26-t1",
+    "verb": "explain",
+    "prompt": "Explain how an idea about the human capacity for curiosity is represented in this image.",
+    "maxMarks": 3,
+    "suggestedWords": 204,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Danebank Anglican School for Girls",
+      "short": "Danebank",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Danebank 2026 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.db26-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "db26-t2",
+    "verb": "how",
+    "prompt": "How does the poet suggest that ‘we are creatures of constant awe’?",
+    "maxMarks": 4,
+    "suggestedWords": 264,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Danebank Anglican School for Girls",
+      "short": "Danebank",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Danebank 2026 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.db26-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "db26-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how notions of identity are explored in this text.",
+    "maxMarks": 4,
+    "suggestedWords": 264,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Danebank Anglican School for Girls",
+      "short": "Danebank",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-analyses-not-retells",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Danebank 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.db26-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "db26-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how the author contemplates the journey of reading.",
+    "maxMarks": 3,
+    "suggestedWords": 228,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Danebank Anglican School for Girls",
+      "short": "Danebank",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-analyses-not-retells",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Danebank 2026 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ct24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct24-t1",
+    "verb": "how",
+    "prompt": "How does Kustana explore our relationship with technology?",
+    "maxMarks": 3,
+    "suggestedWords": 168,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Cherrybrook Tech 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ct24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct24-t2",
+    "verb": "how",
+    "prompt": "“You must live with great seriousness.” How does Hikmet develop this idea in the poem?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Cherrybrook Tech 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ct24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct24-t3",
+    "verb": "what",
+    "prompt": "What ironies or paradoxes does this extract reveal about the writing process?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Cherrybrook Tech 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ct24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct24-t4",
+    "verb": "how",
+    "prompt": "How does Chatfield convey the value of attention?",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Cherrybrook Tech 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.cb24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "cb24-t1",
+    "verb": "explain",
+    "prompt": "Explain how the poet represents a desire to embrace the present.",
+    "maxMarks": 3,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Caringbah High School",
+      "short": "Caringbah",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Caringbah 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.cb24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "cb24-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how Text 2 reveals the importance of shared experiences.",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Caringbah High School",
+      "short": "Caringbah",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Caringbah 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.cb24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "cb24-t3",
+    "verb": "explain",
+    "prompt": "Explain how Text 3 represents nature’s impact on the human experience.",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Caringbah High School",
+      "short": "Caringbah",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Caringbah 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.cb24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "cb24-t4",
+    "verb": "how",
+    "prompt": "How does Oliver suggest what should be valued?",
+    "maxMarks": 4,
+    "suggestedWords": 264,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Caringbah High School",
+      "short": "Caringbah",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Caringbah 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk26-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk26-t1",
+    "verb": "how",
+    "prompt": "How does Rockwell explore the tensions and possibilities that arise when individuals encounter difference?",
+    "maxMarks": 3,
+    "suggestedWords": 156,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Barker 2026 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk26-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk26-t2",
+    "verb": "how",
+    "prompt": "How does Blaeser explore “the forgotten architecture of friendship” as a sustaining force of the human experience?",
+    "maxMarks": 4,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Barker 2026 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk26-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk26-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how Mateer reveals that unexpected interactions can transform an ordinary experience.",
+    "maxMarks": 4,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-analyses-not-retells",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Barker 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab25-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab25-t1",
+    "verb": "how",
+    "prompt": "How does the composer use contrast to present an unexpected perspective of connection?",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2025 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab25-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab25-t2",
+    "verb": "how",
+    "prompt": "How does the text challenge the reader to consider the experience of the nannies?",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Abbotsleigh 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab25-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab25-t3",
+    "verb": "explore",
+    "prompt": "Explore how language is used to represent the speaker’s relationship with the natural environment.",
+    "maxMarks": 4,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Abbotsleigh 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab25-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab25-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how the composer represents the au pair’s feelings of discomfort.",
+    "maxMarks": 4,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Abbotsleigh 2025 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab24-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab24-t1",
+    "verb": "how",
+    "prompt": "How does the poet represent the joy of togetherness?",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Abbotsleigh 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab24-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab24-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how the father shares his personal experience of and advice about love.",
+    "maxMarks": 4,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab24-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab24-t3",
+    "verb": "explore",
+    "prompt": "Explore how the speaker reflects on the importance of handling personal stories with care.",
+    "maxMarks": 4,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2024 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab24-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab24-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how Harold’s kindness challenges the collective attitudes in the brewery.",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2024 Trial, Q4"
   }
 ] as Question[];

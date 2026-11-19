@@ -86,6 +86,8 @@ describe("starting a quiz", () => {
     env = await setupUnseenEnv();
     await signedInStudent(env);
     // answer every question in the bank at full marks (the stubbed draw takes the first candidate)
+    // the whole bank is walked in one go, so the per-user limits are lifted for this test
+    for (const name of ["ATTEMPT_RATE_LIMIT", "GRADE_RATE_LIMIT", "GRADE_IP_RATE_LIMIT", "DRAFT_RATE_LIMIT", "LLM_DAILY_CAP"]) vi.stubEnv(name, "100000");
     for (let i = 0; i < Q.length; i++) {
       const r = await start();
       expect(r.status, `question ${i + 1}`).toBe(201);

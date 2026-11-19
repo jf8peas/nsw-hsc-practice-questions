@@ -60,7 +60,7 @@ describe("try 1 at full marks", () => {
     expect(body.result.skills.every((s: { met: boolean }) => s.met)).toBe(true);
     expect(body.result.discussion).toEqual({ modelAnswer: model(), modelWords: model().trim().split(/\s+/).length });
     const row = await phaseRow();
-    expect(row).toMatchObject({ status: "final", ending: "full_marks", recordedMark: 3, try1Mark: 3, maxMarks: 3, try1PromptVersion: "unseen-pilot-6" });
+    expect(row).toMatchObject({ status: "final", ending: "full_marks", recordedMark: 3, try1Mark: 3, maxMarks: 3, try1PromptVersion: "unseen-pilot-8" });
     expect(row.try1Verdicts["technique-effect"]).toEqual({ met: true, reason: REASON });
     expect(row.try1Feedback).toBe(FEEDBACK);
     expect(row.try1BiggestGap).toBe(GAP);

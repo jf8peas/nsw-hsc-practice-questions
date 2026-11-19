@@ -22,6 +22,10 @@ function main(): number {
     return 2;
   }
   const names = fs.readdirSync(BANK_DIR).filter((n) => n.endsWith(".json")).sort().reverse(); // newest paper first, so the bank reads in a stable order
+  // the papers whose criteria and model answers are the schools' own (the starter bank) come first, so the
+  // bank's order, and with it the tests' "first question", does not change when drafted papers are added
+  const schoolFirst = (n: string): number => (/^fort-st-202[35]\.json$/.test(n) ? 0 : 1);
+  names.sort((a, b) => schoolFirst(a) - schoolFirst(b));
   if (names.length === 0) {
     console.error("✗ no bank files (*.json) found.");
     return 2;

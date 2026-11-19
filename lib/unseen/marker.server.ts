@@ -117,6 +117,8 @@ export interface ParsedReply {
   goFurther: string | null;
   /** true or false for a visual text; null otherwise. */
   descriptionAdequate: boolean | null;
+  /** Fields the parser filled in from the verdict reasons because the reply left them out (a metric, never shown as such). */
+  filled?: Array<"feedback" | "biggestGap">;
 }
 
 /** A clear boolean, or null. Accepts true/false, "true"/"false", or an object with `met`. */
@@ -131,8 +133,11 @@ const text = (v: unknown, max: number): string => (typeof v === "string" ? v.tri
 
 /**
  * The first {...} block of the reply, as the pilot does. A missing mark, verdict or feedback makes
- * the whole reply a failure: it is never read as "missed" or as a default (FR-015). So does a
- * below-full reply with no biggestGap, and a full-mark reply with a missing or empty goFurther; a
+ * the whole reply a failure: it is never read as "missed" or as a default (FR-015). A reply with a
+ * valid mark and all seven verdicts but no feedback, or (below full marks) no biggestGap, is repaired
+ * instead: feedback is filled from the met skills' reasons and biggestGap from the first missed skill's
+ * reason, and `filled` records it. If there is no reason to fill from, the reply fails. A
+ * full-mark reply with a missing or empty goFurther also fails; a
  * full-mark reply may have a null or empty biggestGap, and a goFurther on a below-full reply is
  * dropped (biggestGap does that job). A missing reason is stored as "".
  */
@@ -159,20 +164,34 @@ export function parseUnseenReply(content: string, maxMarks: number): ParsedReply
     skills[id] = { met, reason };
   }
 
-  const feedback = text(obj.feedback, MAX_FEEDBACK);
-  if (!feedback) return null;
+  const filled: Array<"feedback" | "biggestGap"> = [];
+  let feedback = text(obj.feedback, MAX_FEEDBACK);
+  if (!feedback) {
+    feedback = SKILL_IDS.filter((id) => skills[id].met && skills[id].reason)
+      .map((id) => skills[id].reason)
+      .join(" ")
+      .slice(0, MAX_FEEDBACK)
+      .trim();
+    if (!feedback) return null;
+    filled.push("feedback");
+  }
 
   // Full marks: there is no gap to name, so biggestGap may be null or empty (it is stored as "") and a
   // goFurther is required instead. Below full marks biggestGap is required and goFurther is dropped.
   // goFurther never affects the mark: it is read after the mark.
   const full = mark === maxMarks;
-  const biggestGap = text(obj.biggestGap, MAX_GAP);
-  if (!full && !biggestGap) return null;
+  let biggestGap = text(obj.biggestGap, MAX_GAP);
+  if (!full && !biggestGap) {
+    const firstMissed = SKILL_IDS.find((id) => !skills[id].met && skills[id].reason);
+    if (!firstMissed) return null;
+    biggestGap = skills[firstMissed].reason.slice(0, MAX_GAP);
+    filled.push("biggestGap");
+  }
   const goFurther = full ? text(obj.goFurther, MAX_GO_FURTHER) : "";
   if (full && !goFurther) return null;
 
   const adequate = flag(obj.descriptionAdequate);
-  return { mark, skills, feedback, biggestGap, goFurther: goFurther || null, descriptionAdequate: adequate };
+  return { mark, skills, feedback, biggestGap, goFurther: goFurther || null, descriptionAdequate: adequate, ...(filled.length ? { filled } : {}) };
 }
 
 const squash = (s: string): string => s.replace(/\s+/g, " ").trim().toLowerCase();
@@ -236,6 +255,7 @@ export async function markWithModel(input: UnseenMarkerInput): Promise<UnseenMar
       console.error("[unseen] could not parse the marker reply");
       return null;
     }
+    if (parsed.filled?.length) console.warn(`[unseen] metric reply_filled=${parsed.filled.join(",")}`); // field names only, never text
     if (containsModelEcho(parsed, input.modelAnswer, input.stimulus)) {
       console.error("[unseen] the reply repeated the model answer");
       return null;

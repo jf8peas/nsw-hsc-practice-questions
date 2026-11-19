@@ -68,6 +68,8 @@ describe("every shipped unseen question, through the whole flow", () => {
     env = await setupUnseenEnv();
     const user = await signedInStudent(env);
     const seen = new Set<string>();
+    // the whole bank is walked in one go, so the per-user limits are lifted for this test
+    for (const name of ["ATTEMPT_RATE_LIMIT", "GRADE_RATE_LIMIT", "GRADE_IP_RATE_LIMIT", "DRAFT_RATE_LIMIT", "LLM_DAILY_CAP"]) vi.stubEnv(name, "100000");
 
     for (let n = 0; n < Q.length; n++) {
       const { started, questionId } = await startUnseen();

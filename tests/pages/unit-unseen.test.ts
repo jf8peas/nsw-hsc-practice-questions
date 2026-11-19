@@ -11,6 +11,9 @@ import { conceptOutcomes } from "@/lib/unseen/scoring";
 import type { SkillVerdicts } from "@/lib/db/schema";
 import { SKILL_IDS, skillById, type SkillId } from "@/lib/unseen/skills";
 
+import { questions as bankQuestions } from "@/content/units/y12-english-advanced-unseen-texts/questions";
+import { texts as bankTexts } from "@/content/units/y12-english-advanced-unseen-texts/texts";
+
 import { asSessionUser, setupTestEnv, type TestEnv } from "../helpers/env";
 import { seedAttempt, seedResult, seedUser } from "../helpers/fixtures";
 
@@ -26,6 +29,10 @@ afterEach(async () => {
 
 const UNIT = "y12-english-advanced-unseen-texts";
 const Q1 = `${UNIT}.fs25-q1`;
+// the shipped bank grows as papers are released, so the expected counts come from it
+const FORM_OF = new Map(bankTexts.map((t) => [t.id, t.form]));
+const POEMS = bankQuestions.filter((q) => FORM_OF.get((q as { textId: string }).textId) === "poem").length;
+const FORMS = new Set(bankQuestions.map((q) => FORM_OF.get((q as { textId: string }).textId))).size;
 
 function findAll(node: ReactNode, match: (el: ReactElement) => boolean, out: ReactElement[] = []) {
   if (Array.isArray(node)) node.forEach((n) => findAll(n, match, out));
@@ -112,10 +119,10 @@ describe("results by text form", () => {
     const html = staticOf(forms);
     expect(html).toContain("Results by text form");
     expect(html).toContain("Poem");
-    expect(html).toContain("1 of 1 answered");
+    expect(html).toContain(`1 of ${POEMS} answered`);
     expect(html).toContain("67% average");
     expect(html).toContain("Not tried yet");
-    expect((html.match(/un-form-row/g) ?? []).length).toBe(4); // poem, prose fiction, non-fiction, visual
+    expect((html.match(/un-form-row/g) ?? []).length).toBe(FORMS); // one row per form in the bank
   });
 });
 
@@ -127,7 +134,7 @@ describe("results by text form use each question's latest recorded mark", () => 
     const again = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [Q1], completedAt: new Date() });
     await seedResult(env.db, { attemptId: again.id, userId: me.id }, { unitId: UNIT, questionId: Q1, marksAwarded: 3, maxMarks: 3, gradedBy: "llm", createdAt: new Date("2026-11-09T00:00:00Z") });
     const html = staticOf(findAll(await render(), named("UnitProgress"))[0]);
-    expect(html).toContain("1 of 1 answered");
+    expect(html).toContain(`1 of ${POEMS} answered`);
     expect(html).toContain("100% average"); // not (33% + 100%) / 2
   });
 });
