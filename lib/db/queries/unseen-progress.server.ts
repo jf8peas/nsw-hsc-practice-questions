@@ -4,11 +4,11 @@ import type { Db } from "@/lib/db/index.server";
 import { getLatestIncompleteAttempt } from "@/lib/db/queries/attempts.server";
 import { listUnitResultsForProgress } from "@/lib/db/queries/results.server";
 import type { TextForm, Unit } from "@/lib/types";
-import { unseenQuestions } from "@/lib/unseen/draw";
+import { isRepeating, latestShares, unseenQuestions } from "@/lib/unseen/draw";
 import { paperLabel } from "@/lib/unseen/source";
 
 // What the unit page of the unseen-text unit needs (spec 008 FR-029, research R13): how many of the
-// bank's questions the student has answered, whether the bank is finished, and the unfinished question
+// bank's questions the student has answered, whether every question is answered (so questions repeat), and the unfinished question
 // the next quiz will offer first. Derived from results and the open attempt; nothing is stored.
 
 export interface FormResult {
@@ -22,7 +22,8 @@ export interface FormResult {
 export interface UnseenProgress {
   total: number;
   answered: number;
-  finished: boolean;
+  /** Every question has a recorded mark: the draw now repeats over the whole bank. */
+  repeating: boolean;
   pending: { questionId: string; heading: string; label: string } | null;
   byForm: FormResult[];
 }
@@ -30,7 +31,7 @@ export interface UnseenProgress {
 export async function loadUnseenProgress(db: Db, userId: string, unit: Unit): Promise<UnseenProgress> {
   const questions = unseenQuestions(unit);
   const results = await listUnitResultsForProgress(db, userId, unit.id);
-  const markOf = new Map(results.map((r) => [r.questionId, r.max > 0 ? r.marks / r.max : 0]));
+  const markOf = latestShares(results); // each question's LATEST recorded mark, so improvement shows
   const answered = questions.filter((q) => markOf.has(q.id));
 
   const textOf = (id: string) => unit.texts?.find((t) => t.id === id);
@@ -52,7 +53,7 @@ export async function loadUnseenProgress(db: Db, userId: string, unit: Unit): Pr
   return {
     total: questions.length,
     answered: answered.length,
-    finished: questions.length > 0 && answered.length === questions.length,
+    repeating: isRepeating(questions, new Set(answered.map((q) => q.id))),
     pending: pendingQuestion
       ? { questionId: pendingQuestion.id, heading: textOf(pendingQuestion.textId)?.heading ?? "", label: paperLabel(pendingQuestion.paper) }
       : null,

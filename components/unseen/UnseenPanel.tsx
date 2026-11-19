@@ -7,6 +7,7 @@ import { loadRewriteDraft, saveRewriteDraft, sendRewriteDraftBeacon } from "@/li
 import { reloadPage } from "@/lib/navigation";
 import type { UnseenQuestion } from "@/lib/types";
 import { lengthState } from "@/lib/unseen/limits";
+import { UNSEEN_REPEAT_NOTICE } from "@/lib/unseen/notices";
 import { missedSkills } from "@/lib/unseen/scoring";
 import type { SkillId } from "@/lib/unseen/skills";
 import type { NotMarked, TryView, UnseenDiscussion, UnseenEnding, UnseenGradeResult, UnseenState } from "@/lib/unseen/types";
@@ -275,6 +276,11 @@ export function UnseenPanel({
     <div className="rw-card un-card">
       <TextPanel text={state.text} />
         <div className="un-main">
+          {state.repeating && stage !== "discussion" && (
+            <p className="pg-notice un-repeat" role="status">
+              {UNSEEN_REPEAT_NOTICE}
+            </p>
+          )}
           <Steps stage={stage} first={try1?.mark} maxMarks={question.maxMarks} />
           <QuestionBlock question={question} />
 

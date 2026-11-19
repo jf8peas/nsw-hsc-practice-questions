@@ -84,12 +84,14 @@ describe("the start button", () => {
     expect(textOf(tree)).toContain("You have a question in progress: Text 1 – Poem · Fort St 2025 · Q1");
   });
 
-  it("when every question is answered: the finished message and no start button", async () => {
+  it("when every question is answered: the repeat message, and the start button stays", async () => {
     const me = await setup();
+    expect(textOf(await render())).not.toContain("Questions now repeat");
     for (const q of questions) await answered(me.id, 3, [], q.id);
     const tree = await render();
-    expect(findAll(tree, named("StartQuiz"))).toHaveLength(0);
-    expect(textOf(tree)).toContain("You've answered every question in the bank so far. New questions are added as the papers are processed.");
+    expect(findAll(tree, named("StartQuiz"))).toHaveLength(1);
+    expect(textOf(tree)).toContain("You've answered every question. Questions now repeat, starting with the ones you found hardest.");
+    expect(textOf(tree)).not.toContain("in the bank so far");
   });
 
   it("when the database cannot be read: the notice and no start button", async () => {
@@ -114,6 +116,19 @@ describe("results by text form", () => {
     expect(html).toContain("67% average");
     expect(html).toContain("Not tried yet");
     expect((html.match(/un-form-row/g) ?? []).length).toBe(4); // poem, prose fiction, non-fiction, visual
+  });
+});
+
+describe("results by text form use each question's latest recorded mark", () => {
+  it("a better repeat raises the form's average, and the answered count stays one per question", async () => {
+    const me = await setup();
+    const first = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [Q1], completedAt: new Date() });
+    await seedResult(env.db, { attemptId: first.id, userId: me.id }, { unitId: UNIT, questionId: Q1, marksAwarded: 1, maxMarks: 3, gradedBy: "llm", createdAt: new Date("2026-11-01T00:00:00Z") });
+    const again = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [Q1], completedAt: new Date() });
+    await seedResult(env.db, { attemptId: again.id, userId: me.id }, { unitId: UNIT, questionId: Q1, marksAwarded: 3, maxMarks: 3, gradedBy: "llm", createdAt: new Date("2026-11-09T00:00:00Z") });
+    const html = staticOf(findAll(await render(), named("UnitProgress"))[0]);
+    expect(html).toContain("1 of 1 answered");
+    expect(html).toContain("100% average"); // not (33% + 100%) / 2
   });
 });
 

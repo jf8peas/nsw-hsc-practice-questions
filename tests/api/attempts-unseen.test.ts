@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getAnswer } from "@/content/answers";
-import { attempts, rewriteDrafts, unseenPhases } from "@/lib/db/schema";
+import { attempts, results, rewriteDrafts, unseenPhases } from "@/lib/db/schema";
 import { UNITS } from "@/content";
 import { SKILL_IDS, skillConceptId } from "@/lib/unseen/skills";
 import { reserveAiSlot } from "@/lib/usage.server";
@@ -82,20 +82,42 @@ describe("starting a quiz", () => {
     expect(await attemptRows()).toHaveLength(1);
   });
 
-  it("reports a finished bank once every question is answered, and creates no attempt", async () => {
+  it("repeats once every question is answered: a new attempt, never the last 3 quizzes, marked like any quiz, the earlier results kept", async () => {
     env = await setupUnseenEnv();
     await signedInStudent(env);
-    // answer every question in the bank at full marks
+    // answer every question in the bank at full marks (the stubbed draw takes the first candidate)
     for (let i = 0; i < Q.length; i++) {
       const r = await start();
       expect(r.status, `question ${i + 1}`).toBe(201);
+      expect(r.body.unseenState.repeating).toBeUndefined(); // not a repeat yet
       const g = await gradeUnseen(r.body, r.body.questions[0].id, fillWords(60));
       expect(g.body.result.ending).toBe("full_marks");
     }
-    const done = await start();
-    expect(done.status).toBe(200);
-    expect(done.body).toEqual({ finished: true, total: Q.length, answered: Q.length });
     expect(await attemptRows()).toHaveLength(Q.length);
+
+    const again = await start();
+    expect(again.status).toBe(201); // no "finished" stop: the draw continues over the whole bank
+    expect(again.body.finished).toBeUndefined();
+    expect(again.body.unseenState.repeating).toBe(true);
+    expect(again.body.unseenState.stage).toBe("write");
+    const repeatId = again.body.questions[0].id as string;
+    expect(Q.slice(-3)).not.toContain(repeatId); // answered in the last 3 quizzes: never offered
+    expect(await attemptRows()).toHaveLength(Q.length + 1); // a NEW attempt
+
+    // a pending repeat is offered first, as the same attempt
+    const rejoin = await start();
+    expect(rejoin.status).toBe(200);
+    expect(rejoin.body.attemptId).toBe(again.body.attemptId);
+
+    // a repeat is a normal quiz: marked, the model answer at the discussion, a new result row
+    const g = await gradeUnseen(again.body, repeatId, fillWords(60, "[mark:1]", "[miss:technique-effect]"));
+    expect(g.body.result.retryOffered).toBe(true);
+    const done = await gradeUnseen(again.body, repeatId, fillWords(60, "[mark:2]"), { phase: 2 });
+    expect(done.body.result).toMatchObject({ ending: "retried", recordedMark: 2 });
+    expect(done.body.result.discussion.modelAnswer).toBeTruthy();
+    const rows = (await env.db.select().from(results)).filter((x) => x.questionId === repeatId);
+    expect(rows.map((x) => x.marksAwarded).sort()).toEqual([2, 3]); // the earlier full-mark result is untouched
+    expect(new Set(rows.map((x) => x.attemptId)).size).toBe(2);
   });
 
   it("answers 503 and creates nothing when the database cannot be read", async () => {

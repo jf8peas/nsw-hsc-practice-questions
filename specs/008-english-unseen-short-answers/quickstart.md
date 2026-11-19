@@ -46,7 +46,7 @@ near 0; the holdout section carries the line "not for tuning".
    in `pass` means full marks and every skill met, in `partial` means 2 and `technique-effect` missed. Pad
    the text to at least 20 words.
 3. Sign in with the dev login. The starter bank is five questions (a poem, two prose texts, a non-fiction
-   text, one visual), which is also the "tiny bank" for step 5.
+   text, one visual), which is also the small bank for the Repeats row of the failure-path table.
 4. Open the unit "Unseen texts: short answers". The exam row reads "In n days · Year 12 Advanced English
    Task 1" (7 Dec 2026).
 
@@ -103,7 +103,7 @@ layout is the same single column at every width:
 | **Daily limit, retry** | `LLM_DAILY_CAP=1`; get a below-full first try (uses the slot); try again and submit | the same limit notice on the retry box; your retry text stays; Submit disabled; "Skip the retry…" works; the next day (or `reserveAiSlot` with another date in a test) the question resumes at the retry |
 | 429 / offline | Turn off the network and submit | the box returns holding your text with the usual one-line error; nothing recorded |
 | No flag | Open a discussion | there is no "This mark seems wrong" button, and `POST /api/unseen/flag` answers 404 (the route does not exist); `unseen_phases` has no `flagged_at` column |
-| Bank finished | Answer every question of the starter bank | "You've answered every question in the bank so far. New questions are added as the papers are processed." and no start button |
+| Repeats | Answer every question of the starter bank, then press Start again | no "finished" stop: the unit page says "You've answered every question. Questions now repeat, starting with the ones you found hardest." and the button stays; the next quiz is a question you did not answer in your last 3 quizzes (with the 5-question starter bank, one of the first two you answered), the quiz shows the same line above the question, it is marked, retried and discussed as usual, a new row appears in Past attempts (the earlier attempt is unchanged), and Results by text form uses each question's latest mark |
 | Database unreadable | Break `DATABASE_URL` | the unit page shows "We can't load your questions right now. Try again in a moment." and no start button; a submit mid-quiz returns the box with your text and the usual error; nothing is marked or self-marked |
 | Skills clear | Meet a skill on a first try on two later questions | it leaves "Things I need to know" after the second; a skill met only in a retry stays |
 | Past attempt | Open a finished question from Past attempts | "Fort St 2025 · Q1 · Poem": the text, both tries with verdicts and reasons, the feedback and biggest gap (or "Make it even stronger" for a full-mark first try), and the model answer (the attempt is final); an unfinished attempt shows no model answer |

@@ -3,6 +3,7 @@ import "server-only";
 import { getQuestion } from "@/content";
 import { getConfig } from "@/lib/config.server";
 import type { Db } from "@/lib/db/index.server";
+import { hasEarlierResult } from "@/lib/db/queries/results.server";
 import { getUnseenPhase } from "@/lib/db/queries/unseen-phases.server";
 import { getRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 import type { Attempt, RewriteDraftRow, UnseenPhaseRow } from "@/lib/db/schema";
@@ -29,15 +30,17 @@ export function unseenStateFrom(
   row: UnseenPhaseRow | null,
   draft: Pick<RewriteDraftRow, "phase1Draft" | "phase2Draft"> | null,
   dailyLimit: DailyLimit | null,
+  repeating = false,
 ): UnseenState | null {
   const found = getQuestion(questionId);
   if (!found || found.question.type !== "unseen") return null;
   const text = found.unit.texts?.find((t) => t.id === (found.question as { textId: string }).textId);
   if (!text) return null;
   const limit = dailyLimit ? { dailyLimit } : {};
+  const repeat = repeating ? { repeating: true as const } : {};
 
   if (!row) {
-    return { stage: "write", text, ...(draft?.phase1Draft ? { draft1: draft.phase1Draft } : {}), ...limit };
+    return { stage: "write", text, ...(draft?.phase1Draft ? { draft1: draft.phase1Draft } : {}), ...limit, ...repeat };
   }
   const try1 = tryViewFrom(row, 1)!;
   if (row.status === "try1") {
@@ -48,6 +51,7 @@ export function unseenStateFrom(
       retryOffered: retryOffered(row.try1Mark, row.maxMarks),
       ...(draft?.phase2Draft ? { draft2: draft.phase2Draft } : {}),
       ...limit,
+      ...repeat,
     };
   }
   const discussion = unseenDiscussion(questionId);
@@ -60,6 +64,7 @@ export function unseenStateFrom(
     ending: row.ending as UnseenEnding,
     recordedMark: row.recordedMark ?? row.try1Mark,
     ...(discussion ? { discussion } : {}),
+    ...repeat,
   };
 }
 
@@ -75,10 +80,11 @@ export async function dailyLimitFor(db: Db, userId: string, now: Date = new Date
 export async function loadUnseenState(db: Db, userId: string, attempt: Attempt): Promise<UnseenState | null> {
   const questionId = attempt.questionIds[0];
   if (!questionId) return null;
-  const [row, draft, limit] = await Promise.all([
+  const [row, draft, limit, repeating] = await Promise.all([
     getUnseenPhase(db, userId, attempt.id, questionId),
     getRewriteDraft(db, userId, attempt.id, questionId),
     dailyLimitFor(db, userId),
+    hasEarlierResult(db, userId, questionId, attempt.id),
   ]);
-  return unseenStateFrom(questionId, row, draft, row?.status === "final" ? null : limit);
+  return unseenStateFrom(questionId, row, draft, row?.status === "final" ? null : limit, repeating);
 }

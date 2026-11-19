@@ -230,6 +230,20 @@ describe("marking the first try", () => {
   });
 });
 
+describe("a repeat quiz", () => {
+  const NOTICE = "You've answered every question. Questions now repeat, starting with the ones you found hardest.";
+  it("shows the repeat notice above the question, and not for a first-time question or at the discussion", () => {
+    mount(writeState({ repeating: true }));
+    expect(screen.getByText(NOTICE)).toBeTruthy();
+    cleanup();
+    mount(writeState());
+    expect(screen.queryByText(NOTICE)).toBeNull();
+    cleanup();
+    mount({ stage: "discussion", text, try1: tryView(3), ending: "full_marks", recordedMark: 3, discussion: { modelAnswer: MODEL, modelWords: 12 }, repeating: true });
+    expect(screen.queryByText(NOTICE)).toBeNull();
+  });
+});
+
 describe("Make it even stronger", () => {
   it("shows after the seven skill pills and before the answer comparison of a full-mark first try, as a green panel", async () => {
     responder = (url) => (url === "/api/grade" ? jsonRes({ result: fullResult(), saved: true, attemptCompleted: true }) : jsonRes({}));

@@ -79,9 +79,9 @@ end on one attempt (the partial unique index).
 
 | Status | Body |
 |---|---|
-| `201` | a new attempt: `{ attemptId, attemptToken, persisted: true, unitId, passMark, questions: [UnseenQuestion], answered: {}, unseenState }` |
+| `201` | a new attempt: `{ attemptId, attemptToken, persisted: true, unitId, passMark, questions: [UnseenQuestion], answered: {}, unseenState }`; `unseenState.repeating: true` marks a repeat of a question the student answered before |
 | `200` | the attempt already existed (an unfinished question, or the other tab won the race): same body plus `resumed: true` |
-| `200` | nothing left: `{ finished: true, total, answered }` (no attempt created) |
+| `200` | an empty bank only: `{ finished: true, total, answered }` (no attempt created). A bank with questions never stops: once every question is answered the draw repeats (research R9) and the response is a `201` new attempt like any other |
 | `404` | `not_found` (unknown unit) |
 | `429` | `rate_limited` with `retryAfter` |
 | `503` | `{ error: "temporarily_unavailable" }` (results cannot be read; no guess is made, constitution A2) |

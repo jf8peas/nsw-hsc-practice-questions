@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, ne, sql } from "drizzle-orm";
 
 import type { ConceptResult, ConceptResultWithUnit } from "@/lib/concepts/progress";
 import type { Db } from "@/lib/db/index.server";
@@ -133,4 +133,14 @@ export async function touchLastAnswer(db: Db, userId: string): Promise<void> {
     .update(users)
     .set({ lastAnswerAt: sql`greatest(${users.lastAnswerAt}, now())` })
     .where(eq(users.id, userId));
+}
+
+/** True when the student already has a result for this question from a DIFFERENT attempt: this quiz is a repeat. */
+export async function hasEarlierResult(db: Db, userId: string, questionId: string, attemptId: string): Promise<boolean> {
+  const rows = await db
+    .select({ id: results.id })
+    .from(results)
+    .where(and(eq(results.userId, userId), eq(results.questionId, questionId), ne(results.attemptId, attemptId)))
+    .limit(1);
+  return rows.length > 0;
 }

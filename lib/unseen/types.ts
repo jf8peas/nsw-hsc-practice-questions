@@ -86,6 +86,8 @@ export interface UnseenState {
   dailyLimit?: { reached: true; resetsAt: string };
   ending?: UnseenEnding;
   recordedMark?: number;
+  /** The student has answered this question before: this quiz is a repeat (a new attempt). */
+  repeating?: boolean;
   /** Only when stage = "discussion". */
   discussion?: UnseenDiscussion;
 }

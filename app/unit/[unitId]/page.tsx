@@ -5,6 +5,7 @@ import { AttemptHistory } from "@/components/AttemptHistory";
 import { ClampedText } from "@/components/ClampedText";
 import { ConceptPanel } from "@/components/ConceptPanel";
 import { UnitProgress } from "@/components/unseen/UnitProgress";
+import { UNSEEN_REPEAT_NOTICE } from "@/lib/unseen/notices";
 import { EssayBlock, essayButtonLabel } from "@/components/EssayBlock";
 import { Formula } from "@/components/Formula";
 import { HistoryUnavailable } from "@/components/HistoryUnavailable";
@@ -88,12 +89,13 @@ export default async function UnitPage({
               <p className="pg-notice" role="status">
                 We can&apos;t load your questions right now. Try again in a moment.
               </p>
-            ) : unseen.data.finished ? (
-              <p className="pg-notice" role="status">
-                You&apos;ve answered every question in the bank so far. New questions are added as the papers are processed.
-              </p>
             ) : (
               <>
+                {unseen.data.repeating && (
+                  <p className="pg-notice" role="status">
+                    {UNSEEN_REPEAT_NOTICE}
+                  </p>
+                )}
                 {unseen.data.pending && (
                   <p className="pg-notice" role="status">
                     You have a question in progress: {unseen.data.pending.heading} · {unseen.data.pending.label}

@@ -78,3 +78,79 @@ export function drawUnseen(
   }
   return candidates[candidates.length - 1];
 }
+
+// ---- repeats: once every question has a recorded mark (spec 008 FR-029, research R9) --------------
+
+/** What a repeat draw needs of one stored result (a quiz's recorded mark and when it was recorded). */
+export interface AnsweredResult {
+  questionId: string;
+  marks: number;
+  max: number;
+  answeredAt: Date;
+}
+
+/** A question's latest recorded mark as a share of full marks, and when it was last answered. */
+export interface LatestAnswer {
+  share: number;
+  at: number;
+}
+
+/** Results in answer order (oldest first, as the queries return them); a later result replaces an earlier one. */
+export function latestAnswers(results: readonly AnsweredResult[]): Map<string, LatestAnswer> {
+  const latest = new Map<string, LatestAnswer>();
+  for (const r of results) latest.set(r.questionId, { share: r.max > 0 ? r.marks / r.max : 0, at: r.answeredAt.getTime() });
+  return latest;
+}
+
+/** The marks the form averages use: each question's LATEST recorded mark, so improvement shows. */
+export function latestShares(results: readonly AnsweredResult[]): Map<string, number> {
+  return new Map([...latestAnswers(results)].map(([id, a]) => [id, a.share]));
+}
+
+/** True when every question of a non-empty bank has a recorded mark: the draw then repeats. */
+export function isRepeating(questions: readonly UnseenQuestion[], answered: ReadonlySet<string>): boolean {
+  return questions.length > 0 && unansweredOf(questions, answered).length === 0;
+}
+
+/** The bank questions of the student's last `n` quizzes, newest first (a question appears once). */
+export function recentQuestionIds(questions: readonly UnseenQuestion[], results: readonly AnsweredResult[], n = 3): string[] {
+  const inBank = new Set(questions.map((q) => q.id));
+  const ordered = results.filter((r) => inBank.has(r.questionId)); // answer order, oldest first
+  const ids: string[] = [];
+  for (let i = ordered.length - 1; i >= 0 && ids.length < n; i--) if (!ids.includes(ordered[i].questionId)) ids.push(ordered[i].questionId);
+  return ids;
+}
+
+/**
+ * Never offer a question answered in the last 3 quizzes, unless the bank has 3 or fewer questions: then
+ * exclude only the most recent one; with 1 question, offer it.
+ */
+export function repeatCandidates(questions: readonly UnseenQuestion[], recent: readonly string[]): UnseenQuestion[] {
+  if (questions.length <= 1) return [...questions];
+  const excluded = new Set(questions.length > 3 ? recent.slice(0, 3) : recent.slice(0, 1));
+  return questions.filter((q) => !excluded.has(q.id));
+}
+
+/** 1 (full marks) to 5 (no marks): the lower the latest mark, the likelier. */
+export function markWeight(share: number): number {
+  return 1 + Math.round(4 * (1 - Math.min(1, Math.max(0, share))));
+}
+
+/** 1 to 4 by age rank among the candidates: the longest since answered gets 4, the most recent 1 (ties by bank order). */
+export function ageWeights(candidates: readonly UnseenQuestion[], latest: ReadonlyMap<string, LatestAnswer>): Map<string, number> {
+  const ranked = candidates.map((q, i) => ({ id: q.id, at: latest.get(q.id)?.at ?? 0, i })).sort((a, b) => a.at - b.at || a.i - b.i);
+  const n = ranked.length;
+  return new Map(ranked.map((r, rank) => [r.id, n <= 1 ? 1 : 1 + Math.round((3 * (n - 1 - rank)) / (n - 1))]));
+}
+
+/** The existing weight (form times skills) times the mark weight times the age weight: an integer, 4 to 1000. */
+export function repeatWeightOf(
+  q: UnseenQuestion,
+  form: TextForm | null,
+  stats: ReadonlyMap<TextForm, FormStat>,
+  uncleared: ReadonlySet<string>,
+  latest: ReadonlyMap<string, LatestAnswer>,
+  ages: ReadonlyMap<string, number>,
+): number {
+  return weightOf(q, form, stats, uncleared) * markWeight(latest.get(q.id)?.share ?? 0) * (ages.get(q.id) ?? 1);
+}

@@ -713,8 +713,10 @@ wrapper. Order:
 
 1. **Pending first.** If the student has an incomplete attempt for this unit, resume it (a question waiting
    at the choice, the retry, a draft, or the daily-limit step). No draw.
-2. Otherwise draw one question from the **unanswered** ones (no `results` row, R8). If there are none,
-   answer `{ finished: true, total, answered }`.
+2. Otherwise, while some question is **unanswered** (no `results` row, R8), draw one of those.
+3. Once **every question has a recorded mark**, the draw **repeats** over the whole bank (below). There is no
+   finished state for a bank with questions; `{ finished: true, total, answered }` is returned only for an
+   empty bank.
 
 **Weights.** Let a *form* be the text form of a question's text. For each form `f`: `n_f` = how many of the
 student's answered questions are in `f`; `avg_f` = the mean of `marksAwarded / maxMarks` over them.
@@ -744,9 +746,35 @@ quizzes and assume a multi-question attempt).
 no-op and returns the first tab's attempt, so both end on one attempt. The loser's draw is discarded, which
 is harmless (no state).
 
-**Finished bank (FR-029).** `200 { finished: true }`; the unit page and the start button show "You've
-answered every question in the bank so far. New questions are added as the papers are processed." (no start
-button). With a tiny bank (the quickstart's) the same state appears after the last answer.
+**Repeats (FR-029, clarification 2026-11-19).** Questions repeat instead of stopping, so a student who has
+answered everything can keep practising. Decision and reasons:
+
+- **Candidates.** All bank questions except those of the student's **last 3 quizzes** (the last three
+  `results` rows for bank questions, newest first, each question once). A bank of **3 or fewer** questions
+  excludes only the most recent; a bank of **1** offers it. So there is always a candidate in a non-empty bank.
+- **Weight.** `repeatWeight(q) = weight(q) × markWeight(q) × ageWeight(q)`, all integers.
+  `weight(q)` is the existing form × skills weight, but with the form averages computed from each question's
+  **latest** recorded mark (a later result replaces an earlier one), so improvement shows.
+  `markWeight = 1 + round(4 × (1 − latestShare))`, 1 (full marks) to 5 (no marks).
+  `ageWeight` ranks the candidates by their last answer time and maps the rank linearly to 1 (most recent) to 4
+  (longest ago), ties by bank order; with one candidate it is 1. Rank, not days, keeps the test free of the clock.
+- **Same draw.** `drawUnseen` over the candidates with the same cumulative walk, so a test enumerates `r` and
+  asserts exact counts.
+- **A repeat is a new attempt.** The start inserts an attempt, and the grade, phase row, results row and
+  concept outcomes are keyed by that attempt, so nothing earlier is overwritten (`results` already has
+  `unique(attempt_id, question_id)`, not one per question). `conceptProgress` replays every result in order,
+  so a repeat's first-try verdicts add or clear skills as usual.
+- **"Answered" and the form results** use the latest result per question: the unit page's "Results by text
+  form" counts each question once and averages the latest marks.
+- **Notice.** `UnseenProgress.repeating` (every question answered) drives the unit-page notice, and
+  `unseenState.repeating` (the student has an earlier result for this question from another attempt, one
+  indexed read, `hasEarlierResult`) drives the quiz notice, shown above the question until the discussion:
+  "You've answered every question. Questions now repeat, starting with the ones you found hardest." The start
+  button stays. Past attempts list each attempt separately (they already do).
+- **Rejected.** Stopping at a finished bank (the earlier design: the student runs out of practice); days-based
+  age weights (depend on the clock and make the odds hard to enumerate); excluding only the last quiz (a student
+  could ping-pong between two questions); overwriting the earlier attempt (loses history, breaks the retry and
+  the attempt detail page); a separate "repeat mode" setting (more UI for no gain).
 
 **Database unreadable.** The unit does not start (`503 temporarily_unavailable`; A2). The unit page shows
 "We can't load your questions right now. Try again in a moment." and no start button.
@@ -962,8 +990,8 @@ text (reading the text is the task); auto-scroll on focus (jarring with the keyb
 
 1. The usual intro card (badges, title, description, exam row) with the start button. Label: **"Start a
    question"**, or **"Continue question"** when a pending attempt exists (with a line naming it:
-   "Text 2 – Poem · Fort St 2025 · Q1"), or the finished state, or the database-unavailable notice, each
-   with the exact wording above. The button calls the shared `startAttempt` (`finished` and `503` mapped
+   "Text 2 – Poem · Fort St 2025 · Q1"), or the repeat notice above the button, or the database-unavailable notice, each
+   with the exact wording above. The button calls the shared `startAttempt` (`finished` for an empty bank and `503` mapped
    to this unit's two notices through the `unit.draw` flag).
 2. **"Things I need to know"** (`ConceptPanel`): the seven skills, two pips each (R10).
 3. **"Your results"** (`UnitProgress`): one row per text form in the bank: form, answered / total,

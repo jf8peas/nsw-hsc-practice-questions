@@ -18,6 +18,7 @@
 - Q: What happens when the retry cannot be marked? → A: The same as the first try (review edit, 2026-11-19, restoring the requirements doc's decision): marker unavailable → the retry text stays locked while the app waits and retries, then the editable box returns holding it to resubmit; daily limit reached → the student is told to come back tomorrow and the question stays at the retry, offered again first. The spec 007 FR-019a ending (record the first try, discard the retry) does not apply.
 - Q: Visual texts are cropped images from the papers, which constitution Principle V forbids ("scanned, photographed or otherwise copied images MUST NOT be committed or served"). → A: Amend Principle V (review decision, 2026-11-19) to allow a visual stimulus text cropped from a school paper under the school-paper exception: credited with its source, served only to signed-in students, never a real HSC image, and removed or replaced if the app goes commercial.
 - Q: Should students be able to flag a mark ("This mark seems wrong")? → A: No (decision, 2026-11-19). The button, its route, the stored flag and the flag-export script are removed from this unit. Students rarely flag a mark that is too generous, and a flag turned a student into an unpaid reviewer of the marker. The marker is revised from an offline re-mark of a sample of real first tries in every mark band (User Story 5), not from student reports. The paragraph unit's flag (spec 007) is unchanged.
+- Q: What happens when the student has answered every question? → A: Questions repeat (decision, 2026-11-19), instead of stopping at a finished bank. Once every question has a recorded mark the draw continues over the whole bank, weighted by each question's latest recorded mark as a share of full marks (lower first), how long ago it was last answered (older first), and the text-form and uncleared-skill weights. A question answered in the student's last 3 quizzes is never offered, unless the bank has 3 or fewer questions: then only the most recent one is excluded, and a bank of 1 offers it. A repeat is a normal quiz stored as a new attempt, never overwriting the earlier one; its first-try verdicts feed "Things I need to know" as usual; results by text form use each question's latest recorded mark. Wording when repeats begin: "You've answered every question. Questions now repeat, starting with the ones you found hardest."
 
 ## Terms
 
@@ -87,13 +88,13 @@ The skills a student misses on a first try are added to "Things I need to know",
 
 ---
 
-### User Story 4 - Keep getting new questions that target my weak spots (Priority: P2)
+### User Story 4 - Keep getting questions that target my weak spots (Priority: P2)
 
-Each new quiz picks a question the student has not answered. It leans toward the text forms where their average mark is lowest, and toward questions tagged with a skill still in "Things I need to know".
+Each new quiz picks a question the student has not answered. It leans toward the text forms where their average mark is lowest, and toward questions tagged with a skill still in "Things I need to know". Once every question is answered, questions repeat instead of stopping, starting with the ones the student found hardest and answered longest ago.
 
 **Why this priority**: The unit works with one question, but practice is more useful when it targets weaknesses. It depends on a bank large enough to choose from.
 
-**Independent Test**: Answer questions of different text forms with different scores, start new quizzes many times, and confirm questions already answered never repeat and weaker forms and uncleared skills come up more often.
+**Independent Test**: Answer questions of different text forms with different scores, start new quizzes many times, and confirm questions already answered are not offered again until every question is answered, weaker forms and uncleared skills come up more often, and after that questions repeat with the lowest latest mark and the oldest answer first and never one from the last 3 quizzes.
 
 **Acceptance Scenarios**:
 
@@ -101,7 +102,9 @@ Each new quiz picks a question the student has not answered. It leans toward the
 2. **Given** a text form the student has not yet tried, **When** the next question is drawn, **Then** untried forms have top weight until each has one answer.
 3. **Given** the student's average mark (as a share of full marks) is lower for one text form, **When** questions are drawn, **Then** that form is chosen more often.
 4. **Given** a skill still in "Things I need to know", **When** questions are drawn, **Then** questions tagged with that skill get extra weight.
-5. **Given** the student has answered every question in the bank, **When** a new quiz is requested, **Then** they are told they have finished the bank.
+5. **Given** the student has answered every question in the bank, **When** a new quiz is requested, **Then** the draw continues over the whole bank, shows "You've answered every question. Questions now repeat, starting with the ones you found hardest." on the unit page and the quiz, never offers a question answered in the last 3 quizzes (a bank of 3 or fewer excludes only the most recent; a bank of 1 offers it), and weights questions by lower latest mark, older last answer, text form and uncleared skills.
+6. **Given** a repeat quiz, **When** it is answered, **Then** it is a normal quiz (marked, one capped retry, the model answer at the discussion, first-try verdicts feeding "Things I need to know"), it is stored as a new attempt without overwriting the earlier one, and results by text form use each question's latest recorded mark.
+7. **Given** a question left at the retry choice or waiting on the retry, **When** a new quiz is requested, **Then** that pending question is offered first, repeat or not.
 
 ---
 
@@ -202,9 +205,9 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 
 **Question order**
 
-- **FR-027**: Each new quiz MUST pick a question the student has not answered. A question is answered only when its recorded mark exists: a full-mark first try, a marked retry, or a declined retry. A question left after a first try below full marks, or with a retry that could not yet be marked (FR-032), is not answered: the next quiz offers it again, resumed at the retry choice or the retry with the saved text, before any new question is drawn. The draw MUST be weighted toward the text forms where the student's average mark (as a share of full marks) is lowest. Text forms not yet tried MUST get top weight until each has one answer.
+- **FR-027**: Each new quiz MUST pick a question the student has not answered, until every question has been answered. A question is answered only when its recorded mark exists: a full-mark first try, a marked retry, or a declined retry. A question left after a first try below full marks, or with a retry that could not yet be marked (FR-032), is not answered: the next quiz offers it again, resumed at the retry choice or the retry with the saved text, before any new question is drawn (this holds for a repeat too). The draw MUST be weighted toward the text forms where the student's average mark (as a share of full marks, using each question's latest recorded mark) is lowest. Text forms not yet tried MUST get top weight until each has one answer.
 - **FR-028**: Each question MUST carry 1–3 skill tags. Questions tagged with a skill still in "Things I need to know" MUST get extra weight. (The marker still judges all seven skills on every answer.)
-- **FR-029**: When the student has answered every question in the bank, the unit MUST say so instead of starting a quiz.
+- **FR-029**: When every question has a recorded mark, the unit MUST NOT stop: the draw continues over the whole bank. Each question's weight is the existing text-form and uncleared-skill weight, multiplied by a weight for its latest recorded mark as a share of full marks (lower first) and a weight for how long ago it was last answered (older first). A question answered in the student's last 3 quizzes MUST NOT be offered, unless the bank has 3 or fewer questions: then only the most recent question is excluded, and a bank of 1 is offered. A pending question is still offered first. A repeat MUST be a normal quiz (FR-012 to FR-026), stored as a new attempt that never overwrites an earlier one, with its first-try verdicts feeding "Things I need to know" as usual; past attempts list each attempt separately. When repeats begin, the unit page and the quiz MUST show "You've answered every question. Questions now repeat, starting with the ones you found hardest."
 
 **When marking can't happen**
 
@@ -262,7 +265,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 - **SC-005**: On the pilot's labelled sets the marker keeps its recorded results: at least 90% of tuning answers and at least 80% of held-out answers marked within the labelled range, and no more than 1 mark away on any case, checked on every prompt change.
 - **SC-006**: The model answer, marking criteria, marking notes and visual descriptions appear in no response, page or static file before the discussion, checked across every shipped question.
 - **SC-007**: Every screen works at 390 px with no sideways scrolling, with all touch targets at least 44 px and text meeting 4.5:1 contrast.
-- **SC-008**: Across repeated draws, no question the student has already answered is offered again until the bank is finished, and the text forms with the lowest average mark are drawn more often.
+- **SC-008**: Across repeated draws, no question the student has already answered is offered again until every question is answered; after that, no question from the last 3 quizzes is offered (small banks as FR-029), questions with a lower latest mark and an older last answer are drawn more often, and the text forms with the lowest average mark are drawn more often.
 
 ## Assumptions
 

@@ -183,7 +183,15 @@ and the retention job need no change (proved by `tests/api/delete-unseen.test.ts
 answeredIds(results): Set<string>                         // a results row exists in this unit
 formStats(unit, results): Map<TextForm, { n: number; avg: number }>   // avg = mean(marks / max) over answered questions
 weight(q, stats, uncleared: ReadonlySet<SkillId>): number // formWeight × (2 + skillCount)
-drawUnseen(unit, results, uncleared, rand: RandomInt): UnseenQuestion | null   // null: bank finished
+drawUnseen(candidates, weightOf, rand: RandomInt): UnseenQuestion | null          // null only for an empty bank
+
+// repeats, once every question has a recorded mark (FR-029)
+latestAnswers(results): Map<questionId, { share: number; at: number }>   // the LATEST result per question
+recentQuestionIds(questions, results, 3): string[]                      // the last 3 quizzes, newest first
+repeatCandidates(questions, recent): UnseenQuestion[]                   // bank > 3: minus the last 3; 2..3: minus the most recent; 1: it
+markWeight(share) = 1 + round(4 * (1 - share))                           // 1 (full marks) to 5
+ageWeights(candidates, latest): Map<id, 1..4>                            // by rank: longest since answered = 4
+repeatWeightOf(q, form, stats, uncleared, latest, ages) = weight(q) * markWeight * ageWeight
 ```
 
 ```
@@ -243,6 +251,7 @@ interface UnseenState {
   dailyLimit?: { reached: true; resetsAt: string };   // present only when the allowance is used up
   ending?: "full_marks" | "retried" | "declined" | "no_retry";
   recordedMark?: number;
+  repeating?: boolean;                      // true when the student answered this question before (a repeat quiz)
   discussion?: { modelAnswer: string; modelWords: number };   // only when stage = "discussion"
 }
 interface TryView { text: string; mark: number; skills: SkillView[]; feedback: string; biggestGap: string; goFurther: string | null; wordCount: number }   // goFurther: a first try at full marks only
