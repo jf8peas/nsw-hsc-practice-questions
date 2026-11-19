@@ -53,9 +53,21 @@ export function getConfig(
 
 const DEFAULT_CONCEPT_MODEL = "deepseek/deepseek-chat";
 
+/** The model the Advanced English unseen-text unit marks with (spec 008). */
+export const DEFAULT_ENGLISH_ADV_MODEL = "deepseek/deepseek-v4.1-flash";
+
 function modelOrNull(value: string | undefined): string | null {
   const v = value?.trim();
   return v ? v : null;
+}
+
+/**
+ * The unseen-text unit's marking model (`ENGLISH_ADV_GRADING_MODEL`, spec 008 FR-012). It never
+ * reads `GRADING_MODEL`: the pilot showed the app's default model one mark harsh on full-mark
+ * school answers. Blank counts as unset. Never throws.
+ */
+export function getEnglishAdvModel(env: Record<string, string | undefined> = process.env): string {
+  return modelOrNull(env.ENGLISH_ADV_GRADING_MODEL) ?? DEFAULT_ENGLISH_ADV_MODEL;
 }
 
 /** The concept pipeline's models. Never throws. */

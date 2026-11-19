@@ -147,3 +147,30 @@ export async function getLatestIncompleteAttempt(
     .limit(1);
   return rows[0] ?? null;
 }
+
+/**
+ * Start (or rejoin) the student's one OPEN attempt in the unseen-text unit (spec 008, research R8).
+ * The question was drawn at random, so two tabs can draw different questions; the partial unique
+ * index `attempts_unseen_incomplete_unique` (one open attempt per student in this unit) makes the
+ * second insert conflict, and both tabs end on the first tab's attempt.
+ */
+export async function createUnseenAttempt(
+  db: Db,
+  input: { id: string; userId: string; unitId: string; questionId: string },
+): Promise<{ attempt: Attempt; created: boolean }> {
+  const inserted = await db
+    .insert(attempts)
+    .values({
+      id: input.id,
+      userId: input.userId,
+      unitId: input.unitId,
+      questionIds: [input.questionId],
+      mcOptionOrder: {},
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (inserted[0]) return { attempt: inserted[0], created: true };
+  const existing = await getLatestIncompleteAttempt(db, input.userId, input.unitId);
+  if (!existing) throw new Error("unseen attempt vanished after a conflict");
+  return { attempt: existing, created: false };
+}

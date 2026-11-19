@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AttemptHistory } from "@/components/AttemptHistory";
 import { ClampedText } from "@/components/ClampedText";
 import { ConceptPanel } from "@/components/ConceptPanel";
+import { UnitProgress } from "@/components/unseen/UnitProgress";
 import { EssayBlock, essayButtonLabel } from "@/components/EssayBlock";
 import { Formula } from "@/components/Formula";
 import { HistoryUnavailable } from "@/components/HistoryUnavailable";
@@ -16,6 +17,7 @@ import { requirePageUser } from "@/lib/auth.server";
 import { loadConceptContentViewForPage, loadUnitConceptProgress } from "@/lib/db/queries/concepts.server";
 import { load, loadUnitHistory } from "@/lib/db/queries/history.server";
 import { loadEssayProgressFor } from "@/lib/db/queries/sequence.server";
+import { loadUnseenProgress } from "@/lib/db/queries/unseen-progress.server";
 
 export default async function UnitPage({
   params,
@@ -45,7 +47,13 @@ export default async function UnitPage({
       ? ({ status: "unavailable" } as const)
       : await load((db) => loadEssayProgressFor(db, user.id, unit))
     : null;
-  const resume = !unit.sequence && history.status === "ok" ? history.data.resume : null;
+  // the unseen-text unit (spec 008) offers an unfinished question first, so it has no "Continue attempt"
+  const unseen = unit.draw
+    ? degraded
+      ? ({ status: "unavailable" } as const)
+      : await load((db) => loadUnseenProgress(db, user.id, unit))
+    : null;
+  const resume = !unit.sequence && !unit.draw && history.status === "ok" ? history.data.resume : null;
 
   const exams = examsForUnit(unit.id);
 
@@ -75,7 +83,26 @@ export default async function UnitPage({
         })}
 
         <div className="start-actions">
-          {essay ? (
+          {unseen ? (
+            unseen.status === "unavailable" ? (
+              <p className="pg-notice" role="status">
+                We can&apos;t load your questions right now. Try again in a moment.
+              </p>
+            ) : unseen.data.finished ? (
+              <p className="pg-notice" role="status">
+                You&apos;ve answered every question in the bank so far. New questions are added as the papers are processed.
+              </p>
+            ) : (
+              <>
+                {unseen.data.pending && (
+                  <p className="pg-notice" role="status">
+                    You have a question in progress: {unseen.data.pending.heading} · {unseen.data.pending.label}
+                  </p>
+                )}
+                <StartQuiz unitId={unit.id} label={unseen.data.pending ? "Continue question" : "Start a question"} />
+              </>
+            )
+          ) : essay ? (
             essay.status === "unavailable" ? (
               <p className="pg-notice" role="status">
                 We can&apos;t load your place in the essay right now. Try again in a moment.
@@ -109,6 +136,8 @@ export default async function UnitPage({
 
       {/* 2. The student's concepts to review, below Start/Continue and above the history. */}
       <ConceptPanel unit={unit} progress={conceptProgress} view={conceptView} />
+
+      {unseen?.status === "ok" && <UnitProgress byForm={unseen.data.byForm} />}
 
       {/* 3 and 4. Results, then past attempts. */}
       {history.status === "ok" ? (

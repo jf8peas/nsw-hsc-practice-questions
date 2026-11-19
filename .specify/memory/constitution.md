@@ -1,5 +1,22 @@
 <!--
 Sync Impact Report
+- Version change: 2.14.0 → 2.15.0 (MINOR: materially expanded guidance in Principles I, II, V, VI and VII to allow the Advanced English unseen-text unit's cropped visual stimulus images and stimulus texts, its key schedule, its stored attempt, its no-self-marking behaviour and its own marking model).
+- Reason (amendment log): the unseen-text unit (spec 008) shows one unseen text (a poem, prose, or a visual cropped from a school paper) with one question, marks the answer with an LLM against the school's band descriptors and seven skills, and offers one capped retry. A visual stimulus cannot be redrawn in code without changing the text the student analyses, so a cropped school-paper image is allowed under the school-paper exception, served only to signed-in students. Self-marking an interpretive English answer is not a fair mark, so the unit never self-marks: a marker failure returns the editable box with the text, and the daily limit holds the question at its step until the next Sydney day. The unit's draw and resume need the database, so it cannot start without it. Marking criteria, notes, the model answer and a visual's written description are server-only key material; the model answer is released at the discussion only. Each try's verdicts, reasons, feedback, biggest gap, prompt version and the flag are stored so the marker can be revised from real use. The unit marks with its own model, which the pilot showed is needed for school full-mark answers.
+- Modified principles:
+  - I. The Answer Key Never Reaches the Browser: unseen-text release schedule; the decline and flag routes' fields; the image route's text id.
+  - II. Signed-In Students, Minimal Personal Data: unseen phase row (both tries' texts, marks, seven verdicts and reasons, feedback, biggest gap, prompt version and model, ending, recorded mark, flag); per-skill results may be copied without identity into local test files.
+  - V. Syllabus Fidelity and Original Content: a cropped visual stimulus from a school paper is allowed under the school-paper exception, behind sign-in, never from a real HSC paper, removed or replaced before the app goes commercial; the exception covers stimulus texts and school guidelines.
+  - VI. Grading Is Fair, Explainable and Degrades Gracefully: the unseen-text unit is never self-marked on either try; wait, then return the box; the daily limit holds the question; it needs the database.
+  - VII. Cost and Abuse Controls on Paid Paths: `ENGLISH_ADV_GRADING_MODEL` is server-only; one slot per marked try, refunded on failure; `REMARK_MODEL` also serves the unseen-text re-mark.
+- Added sections: none
+- Removed sections: none
+- Quality Gates: constitution check gains unseen-text key leakage and image-route access; testing bullets gain the unseen unit's marker-failure and daily-limit behaviour.
+- Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ no change needed
+  - .specify/templates/spec-template.md ✅ no change needed
+  - .specify/templates/tasks-template.md ✅ no change needed
+  - specs/008-english-unseen-short-answers/* ✅ created with the amendment in mind
+- Follow-up TODOs: the school consent wording gains the word "per-skill" (README, task T072).
 - Version change: 2.13.0 → 2.14.0 (MINOR: materially expanded guidance in Principles I, II, VI and VII to allow the paragraph-writing unit's staged release of its essay key, its stored per-criterion verdicts and flag, its sequential draw and capped-correction ending, and the offline re-mark model).
 - Reason (amendment log): the paragraph-writing unit (spec 007) teaches a Band 6 body paragraph one part at a time. Before phase 1 is marked the student needs the brief, the guidance lines and the model text of the EARLIER parts of the essay; after phase 1 the per-criterion verdicts; at the discussion the current model part. Later parts' model text and the marking notes must never reach the browser. Each marked phase's verdicts, the marker's one-line reasons, the prompt version and a once-only flag must be stored so the marker can be revised from real use. Part tips clear after 2 correct first tries. The unit's draw is the next part of one essay, so it cannot start without reading results; and a correction that cannot be marked keeps the first-try mark instead of self-marking.
 - Modified principles:
@@ -89,13 +106,15 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   `questionId`, `answer`, a `phase` number (1 or 2), an opaque `attemptId` together with the
   server-issued signed attempt token; for a self-mark, a binary `correct` flag or per-criterion
   tick flags together with the server-issued signed self-mark token; for the paragraph unit's
-  flag route, `attemptId`, `questionId` and the signed attempt token; and, for a save retry, the
-  server-issued signed result receipt. The transcribe route (`POST /api/transcribe`) MAY accept 1-3 images and an optional note;
+  flag route, `attemptId`, `questionId` and the signed attempt token; for the unseen-text unit's
+  retry-decline and flag routes, `attemptId`, `questionId` and the signed attempt token; and, for a
+  save retry, the server-issued signed result receipt. The transcribe route (`POST /api/transcribe`) MAY accept 1-3 images and an optional note;
   `/api/grade` MAY accept the signed transcription token. The vision prompt gets no model answer or rubric.
 - The client MUST NOT send a user id, marks, max marks or grading method. The only exception is
   the binary self-mark flag, which the server accepts only with a valid token.
 - Other routes MAY take from the client only resource identifiers that the server re-checks: a
-  unit id, concept id, version id, or the kind of concept item (summary or illustration). They
+  unit id, concept id, version id, the kind of concept item (summary or illustration), or the text
+  id of an unseen-text unit's stimulus image, which the server checks against the unit's texts. They
   MUST NOT accept a user id, marks, max marks, grading method or answer, and the server MUST
   authorise every such request from the session (Principle IX for teacher routes).
 - Before acting on any request, the server MUST verify that every `attemptId` belongs to the
@@ -130,6 +149,16 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   moment, including on reload, resume or the attempt detail page: the model text of LATER parts,
   the marking notes, or any model text in a tip. Earlier parts' model text MUST come through
   functions exported from `lib/grading.server.ts`.
+- [DECISION] The unseen-text short-answer unit (spec 008) MAY send part of its key to the browser
+  at defined moments, and only then. Before the first try is marked: nothing from the key (the
+  stimulus text, the question, its marks and its source are public content). After a try is
+  marked: the per-skill verdicts, the marker's one-line reasons, its feedback and its biggest-gap
+  sentence (never model-answer text; the server rejects a marker reply that repeats a long run of
+  the model answer). At the discussion (the first try at full marks, a question with no retry, a
+  marked retry, or a declined retry): the model answer. Never, at any moment, including reload,
+  resume and the attempt detail page of an unfinished question: the marking criteria, the marking
+  notes, a visual text's written description, or the model answer before the discussion. Key
+  material MUST come through functions exported from `lib/grading.server.ts`.
 
 Rationale: a practice tool whose answers can be read from the page source is worthless. The
 `server-only` import makes the build fail if client code ever pulls the key in.
@@ -167,13 +196,21 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     recorded mark, and whether and when the student flagged the mark for review; stored in a phase
     row, kept for the attempt detail page, deleted with the student like results. The student's
     in-progress draft text is stored in the existing draft row. Verdicts, reasons and the flag
-    never change marks or concept tracking, which always come from the phase 1 outcomes.
+    never change marks or concept tracking, which always come from the phase 1 outcomes;
+  - per unseen-text question in an attempt (spec 008): the first-try and retry texts, their marks,
+    the seven per-skill verdicts each with the marker's one-line reason, the feedback and
+    biggest-gap sentence shown, the prompt version and model that marked each try, how the
+    question ended (full marks, retried, declined, or no retry offered), the recorded mark, and
+    whether and when the student flagged the attempt for review; stored in a phase row, kept for
+    the attempt detail page, deleted with the student like results. The student's in-progress
+    draft text is stored in the existing draft row. Verdicts, reasons and the flag never change
+    marks or concept tracking, which always come from the first try's verdicts.
   It MUST NOT store profile photos, Google tokens beyond what the session needs, or any other
   personal data without amending this constitution. Photos for transcription are never stored or logged;
   only the transcription (the "answer submitted") is stored. Answer photos are sent to an AI provider
   that may use them for training; school consent must state this and tell students to keep personal or
   sensitive information out of photos. Minimal observability metrics (hashed userId, questionId, outcome,
-  duration_ms, model) are allowed in logs (FR-026). Answer text and per-criterion results MAY be
+  duration_ms, model) are allowed in logs (FR-026). Answer text and per-criterion or per-skill results MAY be
   copied, without any student identifier, into local test files outside the repository
   (`/resources/`) to test and improve the marker, and re-marked by the same AI provider; school
   consent must state this.
@@ -258,8 +295,22 @@ Automated checks do not drift.
 - Real HSC questions (from NESA past papers or exams) MUST NEVER be included, whether copied,
   lightly reworded or recreated, so that past HSC papers stay unseen for full practice exams.
 - Every diagram MUST be redrawn in code (for example a per-unit `diagram.ts`). Scanned,
-  photographed or otherwise copied images MUST NOT be committed or served. This rule covers question
-  content, not student answers (photo answers are permitted).
+  photographed or otherwise copied images MUST NOT be committed or served, with one exception.
+  [DECISION] While the app is non-commercial, a visual stimulus text of an unseen-text unit (spec
+  008) MAY be an image cropped from a school trial or half-yearly paper, under the school-paper
+  exception above. It MUST show its credit (school, year, paper type, question number) with the
+  question; it MUST be committed only under that unit's own `images/` folder and served only to a
+  signed-in student through an authenticated route, never from a public path and never listed or
+  guessable without a session; it MUST NOT come from a real HSC paper; and before the app goes
+  commercial it MUST be removed, or replaced by an original or properly licensed image, together
+  with its question. This rule covers question content, not student answers (photo answers are
+  permitted).
+- [DECISION] The school-paper exception also covers the stimulus text printed with a copied
+  question (a poem, extract or article, with its title, author and source line as the paper prints
+  them) and the school's marking guidelines and sample answers where they are used as the
+  question's rubric and model answer (server-only, Principle I). The same duty applies before the
+  app goes commercial: the question is removed, or its text is replaced by an original or licensed
+  text.
 - Other copyrighted past papers and source material stay in `/resources/` (gitignored) and MUST
   NOT be committed or reproduced, apart from the school-paper exception above.
 
@@ -267,7 +318,8 @@ Rationale: students are practising for a specific exam, and the repo is not a ve
 redistributing copyrighted papers. School papers are used only for private, non-commercial
 practice, with credit, and on the condition that this stops if the app becomes commercial; HSC
 papers are kept out entirely so students can still sit them cold as a real test. Redrawing
-diagrams in code keeps them accurate, accessible and free of scanned third-party artwork.
+diagrams in code keeps them accurate, accessible and free of scanned third-party artwork (the one exception
+is a cropped visual stimulus under the school-paper exception).
 [DECISION]: the "documented sources" rule is stated as mandatory here. Current units follow it,
 but the README does not yet say so.
 
@@ -277,20 +329,38 @@ but the README does not yet say so.
   than exact wording. Partial credit is allowed.
 - The grader MUST return `marksAwarded`, `feedback`, `rubricHits` and `rubricMisses`.
 - Any LLM failure (no key, bad key, timeout, unparseable output after one retry) MUST fall back
-  to student self-marking (`needsSelfMark`). It MUST NOT show an error or award a wrong mark.
+  to student self-marking (`needsSelfMark`), except in the units that say otherwise below. It MUST
+  NOT show an error or award a wrong mark.
   For photo answers: an unreadable photo or one that does not answer the question prompts a retake
   and is never given 0 marks. A question may be read at most 3 times; after that the student types
   the answer or self-marks. The AI slot is refunded on illegible, not-an-answer, or model failure;
   it is not refunded when the student reads and then leaves without marking.
 - [DECISION] When a student is over the LLM daily cap, short answers fall back to self-marking
   (`needsSelfMark`), exactly like an LLM failure.
-- [DECISION] A unit whose draw is sequential (spec 007) cannot choose its next question without
+- [DECISION] A unit whose draw is sequential (spec 007) or depends on stored progress (spec 008)
+  cannot choose its next question without
   reading the student's results. If the database cannot be read, such a unit does not start a
   quiz: it shows a notice and asks the student to try again; it MUST NOT guess a question.
 - [DECISION] On a correction (phase 2) of the paragraph-writing unit, a daily-cap or LLM failure
   ends the question with the first-try mark and the discussion; the correction is never
   self-marked and no error is shown. At phase 1 the self-marking fallback applies as for other
   units.
+- [DECISION] The unseen-text short-answer unit (spec 008) is never self-marked, on either of its
+  two tries, and a try that cannot be marked does not end the question. If the marker fails (no
+  key, a failed call, or an empty, cut-off, unparseable or incomplete reply after one retry), the
+  student's answer stays locked on screen while the app retries; if marking still fails, the
+  editable box returns holding the text with a plain notice that it could not be marked just now,
+  no mark is invented, and the AI slot is refunded. If the student is over the daily cap, the app
+  tells them they have reached today's marking limit and to come back tomorrow; the answer stays
+  in the box, Submit stays disabled until the next Sydney day, and the question waits at that step
+  and is offered again first. These notices are plain status messages, not errors, and nothing
+  else is shown. A student may still decline the retry, which records the first try's mark.
+- [DECISION] The unseen-text unit cannot start, resume, mark or save a quiz without the database:
+  it draws from the student's results, offers an unfinished question first, reserves a daily-cap
+  slot and stores each try. If the database cannot be read, the unit shows a notice and asks the
+  student to try again; it MUST NOT guess the next question or a resumed step, MUST NOT mark an
+  answer it cannot save, and MUST NOT self-mark. This overrides the weighting rule and the
+  unreadable-database rule below for this unit, as the sequential-unit bullet does for spec 007.
 - [DECISION] MC grading MUST be instant and server-side. It requires sign-in like everything
   else, but has no daily cap.
 - [DECISION] Results MUST be saved for both MC and short answers. If saving fails, the student
@@ -342,9 +412,13 @@ block practice.
   toward the concept-generation cap.
 - `VISION_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. Photo reads count
   against `LLM_DAILY_CAP` (one slot per question, no separate cap).
+- `ENGLISH_ADV_GRADING_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. It is
+  the model the unseen-text unit marks with (default `deepseek/deepseek-v4.1-flash`); it never
+  falls back to `GRADING_MODEL`. Each marked try counts one slot against `LLM_DAILY_CAP`,
+  refunded if the marker fails.
 - `REMARK_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. It is read only by
-  `scripts/**` for the offline re-mark of full-mark paragraph answers, which does not count
-  against `LLM_DAILY_CAP`.
+  `scripts/**` for the offline re-mark of full-mark paragraph and unseen-text answers, which does
+  not count against `LLM_DAILY_CAP`.
 - In production, missing auth or database config MUST fail closed (refuse to serve), never fall
   back to open access. In local development only, a documented dev-login MAY stand in for Google,
   and results MAY be stored in a local or branch database. Without `OPENROUTER_API_KEY`, short
@@ -412,6 +486,9 @@ Every feature plan MUST satisfy:
   - illustrations are rendered only through `<img>`;
   - concept generation enforces its own cap;
   - the paragraph unit's later-part model text and marking notes never leave the server;
+  - the unseen-text unit's marking criteria, marking notes, model answer (before the discussion)
+    and visual descriptions never leave the server, and its stimulus images are served only
+    through the authenticated route;
   - every question copied from a school paper shows its source (school, year, paper type,
     question number), no real HSC question is included, and no diagram is a scanned image.
 - Testing: authorization and cost-control logic MUST ship with automated tests covering:
@@ -423,6 +500,9 @@ Every feature plan MUST satisfy:
   - concept counts follow the rule: a wrong answer sets the count to the concept's clear-after
     number (3, or 2 for part tips), a correct answer takes 1 away, and the concept clears at 0;
   - the paragraph unit's capped-correction ending keeps the first-try mark and shows no error;
+  - the unseen-text unit's marker failure returns the editable box with no mark and no self-mark,
+    its daily-limit state disables Submit until the next Sydney day on both tries, and a skill's
+    concept count clears after 2 first tries;
   - the regenerate route rejects non-allowlisted emails;
   - an item that fails review twice is never shown to students.
   Other logic MAY have tests but is not required to.
@@ -449,4 +529,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.14.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-05
+**Version**: 2.15.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-19

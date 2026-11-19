@@ -1,0 +1,44 @@
+[
+  {
+    "id": "answers-question",
+    "name": "Answers every part of the question",
+    "tip": "Unpack every idea the question names and answer all of it, not just the part you find easiest.",
+    "description": "Covers every idea the question names, including qualifiers such as complex or diverse."
+  },
+  {
+    "id": "directive-verb",
+    "name": "Follows the directive verb",
+    "tip": "Do what the verb asks: explain gives how and why, analyse shows how parts make meaning, assess judges.",
+    "description": "Does the task the directive verb sets: explain, analyse, assess or evaluate."
+  },
+  {
+    "id": "analyses-not-retells",
+    "name": "Analyses, doesn't retell",
+    "tip": "Interpret what the text means; don't recount what happens in it.",
+    "description": "Interprets what the text means rather than recounting what happens in it."
+  },
+  {
+    "id": "technique-effect",
+    "name": "Explains a technique's effect",
+    "tip": "Name the technique precisely, then show how it shapes meaning: technique, example, effect.",
+    "description": "Names techniques with accurate metalanguage and shows how each shapes meaning."
+  },
+  {
+    "id": "apt-evidence",
+    "name": "Uses apt evidence",
+    "tip": "Quote short, precise words or visual details that prove your point.",
+    "description": "Uses short, precise quotations or visual details that prove the point."
+  },
+  {
+    "id": "human-experience",
+    "name": "Links to the human experience",
+    "tip": "Tie each point back to the human experience or emotion the question names.",
+    "description": "Ties the analysis to the experience or emotion the question names."
+  },
+  {
+    "id": "succinct",
+    "name": "Writes succinctly",
+    "tip": "Scale your answer to the marks: a clear claim, two or three analysed techniques, no padding.",
+    "description": "Writes without padding, repetition or drift, and not well past the suggested length."
+  }
+]

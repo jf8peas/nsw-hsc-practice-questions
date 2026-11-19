@@ -14,6 +14,7 @@ import { listRewritePhases } from "@/lib/db/queries/rewrite-phases.server";
 import { getAnsweredMarks } from "@/lib/db/queries/results.server";
 import type { AttemptPayload } from "@/lib/drafts";
 import { loadParagraphState } from "@/lib/paragraph/state.server";
+import { loadUnseenState } from "@/lib/unseen/state.server";
 import { signAttemptToken } from "@/lib/tokens.server";
 
 export default async function QuizPage({
@@ -76,8 +77,11 @@ export default async function QuizPage({
       }
       // spec 007: a paragraph attempt resumes in the stage its stored rows say (never a marking state)
       const paragraphState = unit.sequence ? await dbCall((db) => loadParagraphState(db, user.id, row)) : null;
+      // spec 008: an unseen-text attempt resumes at the step its stored rows say (never a marking state)
+      const unseenState = unit.draw ? await dbCall((db) => loadUnseenState(db, user.id, row)) : null;
       payload = {
         ...(paragraphState ? { paragraphState } : {}),
+        ...(unseenState ? { unseenState } : {}),
         attemptToken: signAttemptToken({
           uid: user.id,
           attemptId: row.id,

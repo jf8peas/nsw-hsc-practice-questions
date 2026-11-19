@@ -1,0 +1,34 @@
+{
+  "note": "Synthetic input for the prompt golden test (spec 008). The poem, criteria, notes and answers are invented, so no copyrighted text is committed. The app (tests/unseen/prompt.test.ts) and scripts/pilot-unseen-marker.py --check must both render exactly tests/fixtures/unseen-prompt.golden.txt from it.",
+  "question": {
+    "id": "fixture-q1",
+    "anchors": ["fixture-q1-model"],
+    "source": "Invented School, 2026 Trial HSC, English Advanced Paper 1, Question 1",
+    "marks": 3,
+    "questionHeading": "Text 1 – Poem",
+    "question": "Analyse how the poet explores the nature of waiting.",
+    "directive": "analyse",
+    "textForm": "poem",
+    "visual": false,
+    "text": "Platform\nA. Invented\n\nThe clock leans on its own slow hands,\nthe bench keeps all our names.\n\nSomewhere a train is thinking\nof arriving.",
+    "criteria": "3 – Provides effective analysis of how the poet explores waiting, supported by evidence.\n2 – Provides sound analysis, with some evidence.\n1 – Provides limited analysis.",
+    "notes": "- Personification of the clock slows time and makes waiting feel heavy.\n- The train 'thinking of arriving' keeps arrival uncertain.",
+    "suggestedWords": 204,
+    "cases": [
+      {
+        "id": "fixture-q1-model",
+        "origin": "model answer",
+        "expectMark": [3, 3],
+        "allSkillsMet": true,
+        "answer": "The poet presents waiting as a suspended, almost physical state. Personifying the clock as leaning 'on its own slow hands' stretches time, so the reader feels the weight of the delay, while the bench that 'keeps all our names' shows how waiting makes strangers share a quiet, anonymous human experience."
+      },
+      {
+        "id": "fixture-q1-student",
+        "origin": "authored",
+        "expectMark": [2, 2],
+        "expectMissed": ["technique-effect"],
+        "answer": "The poem is about waiting at a platform. It talks about a clock and a bench and a train. {criteria} The train is thinking of arriving which shows waiting is hard and people feel bored while they wait there."
+      }
+    ]
+  }
+}

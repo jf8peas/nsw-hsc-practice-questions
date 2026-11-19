@@ -70,7 +70,9 @@ export function ConceptPanel({
   const states = progress.status === "ok" ? progress.data : [];
   // spec 007: the paragraph unit calls these "Things I need to know" (writing tips); a part tip clears
   // after 2 correct first tries, an all-parts tip after 3 (`clearAfter`)
-  const tips = Boolean(unit.sequence);
+  // spec 008: the unseen-text unit lists its seven skills the same way (clear after 2 first tries)
+  const skills = Boolean(unit.draw);
+  const tips = Boolean(unit.sequence) || skills;
   const clearOf = (conceptId: string) => concepts.get(conceptId)?.clearAfter ?? TO_CLEAR;
   const needsContent = states.some((s) => !content.get(s.conceptId)?.summary);
 
@@ -81,7 +83,9 @@ export function ConceptPanel({
         title={tips ? "Things I need to know" : "Concepts to review"}
         aside={states.length > 0 ? <span className="rd-pill review">{states.length} to review</span> : undefined}
         sub={
-          states.length > 0 && tips
+          states.length > 0 && skills
+            ? "Skills you missed on a first try. A skill clears after 2 first tries that show it."
+            : states.length > 0 && tips
             ? "Writing tips you missed on a first try. A part tip clears after 2 correct first tries at that part; an all-parts tip after 3."
             : states.length > 0
             ? `Ideas you have missed in this quiz. Answer each one correctly ${TO_CLEAR} times in a row to clear it; your next attempts include extra questions on them.`
@@ -95,7 +99,9 @@ export function ConceptPanel({
         </div>
       ) : states.length === 0 ? (
         <div className="section-empty">
-          {tips
+          {skills
+            ? "All clear — nothing to review right now. Any skill you miss on a first try will show up here."
+            : tips
             ? "All clear — nothing to review right now. Any writing tip you miss on a first try will show up here."
             : "All clear — nothing to review right now. Any concept you miss in a quiz will show up here."}
         </div>

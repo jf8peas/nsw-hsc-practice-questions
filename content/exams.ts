@@ -17,6 +17,12 @@ export const EXAMS: Exam[] = [
     date: "2026-12-01",
     unitIds: ["y12-economics-paragraph-writing"],
   },
+  {
+    id: "y12-eng-at1-2026",
+    title: "Year 12 Advanced English Task 1",
+    date: "2026-12-07",
+    unitIds: ["y12-english-advanced-unseen-texts"],
+  },
 ];
 
 export function upcomingExams(now: Date = new Date()): Exam[] {

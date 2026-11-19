@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SectionHead } from "@/components/SectionHead";
 import { getQuestion } from "@/content";
 import { PARTS, partKeyOf } from "@/lib/paragraph/parts";
+import { formLabel, paperLabel } from "@/lib/unseen/source";
 import { formatWhen } from "@/lib/format";
 import type { UnitHistory } from "@/lib/db/queries/history.server";
 
@@ -14,7 +15,14 @@ import type { UnitHistory } from "@/lib/db/queries/history.server";
 /** A paragraph attempt (spec 007) is named for its essay and part: "Essay 3 · Mechanism". */
 function attemptName(questionId: string | null | undefined): string | null {
   const found = questionId ? getQuestion(questionId) : undefined;
-  if (!found || found.question.type !== "paragraph") return null;
+  if (!found) return null;
+  if (found.question.type === "unseen") {
+    // an unseen-text attempt (spec 008) is named for its paper and text form: "Fort St 2025 · Q1 · Poem"
+    const q = found.question;
+    const text = found.unit.texts?.find((t) => t.id === q.textId);
+    return `${paperLabel(q.paper)}${text ? ` · ${formLabel(text.form)}` : ""}`;
+  }
+  if (found.question.type !== "paragraph") return null;
   return `Essay ${found.question.essayNo} · ${PARTS[partKeyOf(found.question.part)].short}`;
 }
 

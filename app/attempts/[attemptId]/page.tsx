@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 
 import { Formula } from "@/components/Formula";
 import { ParagraphAttemptDetailView } from "@/components/paragraph/AttemptDetail";
+import { TextPanel } from "@/components/unseen/Text";
+import { UnseenAttemptDetailView } from "@/components/unseen/AttemptDetail";
+import { paperLabel } from "@/lib/unseen/source";
 import { HistoryUnavailable } from "@/components/HistoryUnavailable";
 import { Shell } from "@/components/Shell";
 import { getQuestion, getUnit } from "@/content";
@@ -76,6 +79,17 @@ export default async function AttemptDetailPage({
                 Essay {q.essayNo} · {PARTS[partKeyOf(q.part)].name}
               </div>
             )}
+            {q?.type === "unseen" && (
+              <>
+                <div className="pg-label">{paperLabel(q.paper)}</div>
+                {found?.unit.texts?.find((t) => t.id === q.textId) && (
+                  <details className="un-collapse">
+                    <summary>The text</summary>
+                    <TextPanel text={found.unit.texts.find((t) => t.id === q.textId)!} />
+                  </details>
+                )}
+              </>
+            )}
             <div className="detail-q">
               {q ? (
                 q.formula ? (
@@ -90,9 +104,10 @@ export default async function AttemptDetailPage({
               )}
             </div>
 
+            {!item.answered && item.unseen && q?.type === "unseen" && <UnseenAttemptDetailView detail={item.unseen} maxMarks={q.maxMarks} />}
             {item.answered ? (
               <>
-                {!item.paragraph && <div className="detail-answer">{item.answer}</div>}
+                {!item.paragraph && !item.unseen && <div className="detail-answer">{item.answer}</div>}
                 <div className="detail-marks">
                   {item.marks} / {item.max} marks
                   {item.gradedBy === "self" && " · self-marked"}
@@ -111,7 +126,8 @@ export default async function AttemptDetailPage({
                 {item.paragraph && q?.type === "paragraph" && (
                   <ParagraphAttemptDetailView detail={item.paragraph} partNo={q.part} />
                 )}
-                {!item.paragraph && item.feedback && <p className="detail-feedback">{item.feedback}</p>}
+                {item.unseen && q?.type === "unseen" && <UnseenAttemptDetailView detail={item.unseen} maxMarks={q.maxMarks} />}
+                {!item.paragraph && !item.unseen && item.feedback && <p className="detail-feedback">{item.feedback}</p>}
                 {(() => {
                   // shown as the key reads now: nothing is stored per result (spec 002 FR-041)
                   const why =

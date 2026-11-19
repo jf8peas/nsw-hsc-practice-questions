@@ -22,6 +22,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import type { SkillId } from "../unseen/skills";
+
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: "date" });
 
 /**
@@ -80,6 +82,11 @@ export const attempts = pgTable(
     uniqueIndex("attempts_paragraph_part_unique")
       .on(t.userId, sql`(${t.questionIds}[1])`)
       .where(sql`${t.unitId} = 'y12-economics-paragraph-writing'`),
+    // spec 008: one OPEN attempt per student in the unseen-text unit, so two tabs starting at once
+    // (each with its own random draw) end up on the same attempt (research R8).
+    uniqueIndex("attempts_unseen_incomplete_unique")
+      .on(t.userId)
+      .where(sql`${t.unitId} = 'y12-english-advanced-unseen-texts' and ${t.completedAt} is null`),
   ],
 );
 
@@ -267,6 +274,104 @@ export const paragraphPhases = pgTable(
   ],
 );
 
+/** spec 008: one skill's verdict with the marker's one-line reason. */
+export interface SkillVerdict {
+  met: boolean;
+  /** The marker's one line; "" when it gave none. */
+  reason: string;
+}
+export type SkillVerdicts = Record<SkillId, SkillVerdict>;
+
+/**
+ * spec 008: one row per question in an unseen-text attempt. Both tries' text and marks, the seven
+ * per-skill verdicts with the marker's reasons, the feedback and biggest-gap sentences, the prompt
+ * version and model that marked each try, how the question ended, and the once-only flag. Created
+ * when the first try is marked, kept for the attempt detail page, deleted with the student. A
+ * `results` row is created only when the question is final. Verdicts, reasons and the flag never
+ * change marks or concept tracking.
+ */
+export const unseenPhases = pgTable(
+  "unseen_phases",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    attemptId: uuid("attempt_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    unitId: text("unit_id").notNull(),
+    questionId: text("question_id").notNull(),
+    /** The question's mark value when it was marked. */
+    maxMarks: smallint("max_marks").notNull(),
+    /** try1 | final */
+    status: text("status").notNull(),
+    /** full_marks | retried | declined | no_retry; null until final */
+    ending: text("ending"),
+    try1Text: text("try1_text").notNull(),
+    try1Mark: smallint("try1_mark").notNull(),
+    try1Verdicts: jsonb("try1_verdicts").$type<SkillVerdicts>().notNull(),
+    try1Feedback: text("try1_feedback").notNull(),
+    try1BiggestGap: text("try1_biggest_gap").notNull(),
+    try1PromptVersion: text("try1_prompt_version").notNull(),
+    try1Model: text("try1_model").notNull(),
+    try1GradedAt: ts("try1_graded_at").notNull().defaultNow(),
+    try2Text: text("try2_text"),
+    try2Mark: smallint("try2_mark"),
+    try2Verdicts: jsonb("try2_verdicts").$type<SkillVerdicts>(),
+    try2Feedback: text("try2_feedback"),
+    try2BiggestGap: text("try2_biggest_gap"),
+    try2PromptVersion: text("try2_prompt_version"),
+    try2Model: text("try2_model"),
+    try2GradedAt: ts("try2_graded_at"),
+    recordedMark: smallint("recorded_mark"),
+    /** Set once, when the student presses "This mark seems wrong". Never changes a mark. */
+    flaggedAt: ts("flagged_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "unseen_phases_attempt_owner_fk",
+      columns: [t.attemptId, t.userId],
+      foreignColumns: [attempts.id, attempts.userId],
+    }).onDelete("cascade"),
+    unique("unseen_phases_attempt_question_unique").on(t.attemptId, t.questionId),
+    check("unseen_phases_status", sql`${t.status} in ('try1', 'final')`),
+    check(
+      "unseen_phases_ending",
+      sql`${t.ending} is null or ${t.ending} in ('full_marks', 'retried', 'declined', 'no_retry')`,
+    ),
+    check("unseen_phases_max", sql`${t.maxMarks} >= 1 and ${t.maxMarks} <= 6`),
+    check("unseen_phases_try1_mark", sql`${t.try1Mark} >= 0 and ${t.try1Mark} <= ${t.maxMarks}`),
+    check(
+      "unseen_phases_try2_mark",
+      sql`${t.try2Mark} is null or (${t.try2Mark} >= 0 and ${t.try2Mark} <= ${t.maxMarks} - 1)`,
+    ),
+    check(
+      "unseen_phases_try2_shape",
+      sql`(${t.try2Text} is null) = (${t.try2Mark} is null) and (${t.try2Text} is null) = (${t.try2Verdicts} is null)`,
+    ),
+    check(
+      "unseen_phases_final_shape",
+      sql`${t.status} <> 'final' or (${t.recordedMark} is not null and ${t.ending} is not null)`,
+    ),
+    check(
+      "unseen_phases_ending_shape",
+      sql`${t.ending} is null
+        or (${t.ending} = 'retried' and ${t.try2Mark} is not null)
+        or (${t.ending} in ('full_marks', 'declined', 'no_retry') and ${t.try2Mark} is null)`,
+    ),
+    check(
+      "unseen_phases_recorded_is_higher",
+      sql`${t.recordedMark} is null or ${t.recordedMark} = greatest(${t.try1Mark}, coalesce(${t.try2Mark}, 0))`,
+    ),
+    check("unseen_phases_flag_when_final", sql`${t.flaggedAt} is null or ${t.status} = 'final'`),
+    index("unseen_phases_user_unit_idx").on(t.userId, t.unitId),
+    index("unseen_phases_flagged_idx")
+      .on(t.flaggedAt)
+      .where(sql`${t.flaggedAt} is not null`),
+  ],
+);
+
 /**
  * spec 006: one row per question in a writing-practice attempt holding the student's in-progress
  * draft text per phase, so a resume on another device restores what the student had typed
@@ -449,6 +554,8 @@ export type NewResultRow = typeof results.$inferInsert;
 export type RewritePhaseRow = typeof rewritePhases.$inferSelect;
 export type ParagraphPhaseRow = typeof paragraphPhases.$inferSelect;
 export type NewParagraphPhaseRow = typeof paragraphPhases.$inferInsert;
+export type UnseenPhaseRow = typeof unseenPhases.$inferSelect;
+export type NewUnseenPhaseRow = typeof unseenPhases.$inferInsert;
 export type NewRewritePhaseRow = typeof rewritePhases.$inferInsert;
 export type RewriteDraftRow = typeof rewriteDrafts.$inferSelect;
 export type NewRewriteDraftRow = typeof rewriteDrafts.$inferInsert;

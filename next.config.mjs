@@ -8,6 +8,8 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/api/units/[unitId]/concepts/ensure": ["./assets/fonts/**"],
     "/api/admin/concepts/regenerate": ["./assets/fonts/**"],
+    // the cropped visual stimuli of the unseen-text unit (spec 008) ship with the one route that serves them
+    "/api/unseen/image/[textId]": ["./content/units/y12-english-advanced-unseen-texts/images/**"],
   },
 };
 

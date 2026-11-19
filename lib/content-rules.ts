@@ -7,7 +7,13 @@
 
 import { GLOSSARY } from "@/content/glossary";
 import { LIMITS, PART_ORDER, TIPS, conceptIdsForPart, tipConceptId } from "@/lib/paragraph/parts";
-import type { AnswerSet, BriefField, EssayKey, ParagraphQuestion, PartNo, Unit } from "@/lib/types";
+import { createHash } from "node:crypto";
+
+import type { AnswerSet, BriefField, EssayKey, ParagraphQuestion, PartNo, Unit, UnseenQuestion, UnseenText } from "@/lib/types";
+import { MEDIAN_WORDS } from "@/lib/unseen/limits";
+import rubric from "@/lib/unseen/rubric.json";
+import { SKILL_IDS, skillConceptId } from "@/lib/unseen/skills";
+import { sourceOf } from "@/lib/unseen/source";
 import { countWords } from "@/lib/wordcount";
 
 export const MAX_CONCEPT_DESCRIPTION = 120;
@@ -119,7 +125,7 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
       if (explanations !== undefined) errors.push(`${q.id}: short questions cannot have wrongExplanations`);
       continue;
     }
-    if (q.type === "rewrite" || q.type === "paragraph") continue; // no options to explain (spec 005, 007)
+    if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen") continue; // no options to explain (spec 005, 007, 008)
 
     const correct = a.correctText ?? (typeof a.correctIndex === "number" ? q.options[a.correctIndex] : undefined);
     if (explanations !== undefined) {
@@ -410,6 +416,185 @@ export function validateParagraphRules(unit: Unit, answers: AnswerSet, today: Da
         const hit = publicTexts.find((p) => s + p.run <= k.length && p.text.includes(k.slice(s, s + p.run)));
         if (hit !== undefined) {
           errors.push(`${label}: public text contains a run of key text ("${k.slice(s, s + 30)}…"): model parts, notes and the brief stay server-side`);
+          break;
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+// ---- unseen-text rules (spec 008 FR-046, research R2) -------------------------------------------
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const isPastIsoDate = (value: string | undefined, today: Date): boolean =>
+  typeof value === "string" && ISO_DATE.test(value) && !Number.isNaN(Date.parse(value)) && value <= today.toISOString().slice(0, 10);
+
+const squash = (v: string): string => v.replace(/\s+/g, " ").trim().toLowerCase();
+
+/** True when `run` characters of `key` (checked every 5) appear in `publicText` outside the question's own stimulus. */
+function sharedRun(key: string, publicText: string, run: number, stimulus: string): boolean {
+  const k = squash(key);
+  const p = squash(publicText);
+  const own = squash(stimulus);
+  for (let i = 0; i + run <= k.length; i += 5) {
+    const w = k.slice(i, i + run);
+    if (p.includes(w) && !(own && own.includes(w))) return true;
+  }
+  return false;
+}
+
+/** The images folder's size limit (research R3). */
+export const MAX_IMAGE_BYTES = 300 * 1024;
+
+/** The public stimulus as one string, so quotation of it is not mistaken for a leak. */
+function renderStimulus(text: UnseenText): string {
+  const body =
+    text.body.kind === "poem" ? text.body.stanzas.flat().join("\n") : text.body.kind === "prose" ? text.body.paragraphs.join("\n") : "";
+  return [text.title, text.author, body, ...(text.footnotes ?? []).map((f) => f.text)].join("\n");
+}
+
+/**
+ * Unseen-text rules (spec 008 FR-046): every shipped question has a source in the school-paper
+ * format, a resolvable text with an HSC check date, 1 to 3 skill tags, a mark value and verb, a
+ * suggested length, the school's criteria with a band line per mark, a model answer a student could
+ * submit, drafted material marked reviewed, and, for a visual text, an image within the size limit, a
+ * neutral alt, a description and a passed, current description check. No key text appears in a public
+ * string unless it is quotation of the question's own stimulus. `imageSizeOf` returns the size in bytes
+ * of a text's image file, or null when there is none (the validator script supplies the file system).
+ */
+export function validateUnseenRules(
+  unit: Unit,
+  answers: AnswerSet,
+  today: Date = new Date(),
+  imageSizeOf: (imageName: string) => number | null = () => null,
+): string[] {
+  const errors: string[] = [];
+  const questions = unit.questions.filter((q): q is UnseenQuestion => q.type === "unseen");
+  if (questions.length === 0) return errors;
+
+  // the seven skills as concepts, clearing after 2
+  const concepts = new Map((unit.concepts ?? []).map((c) => [c.id, c]));
+  for (const id of SKILL_IDS) {
+    const c = concepts.get(skillConceptId(id));
+    if (!c) errors.push(`${unit.id}: missing skill concept ${skillConceptId(id)}`);
+    else if (c.clearAfter !== 2) errors.push(`${c.id}: clearAfter must be 2`);
+  }
+  if (concepts.size !== SKILL_IDS.length) errors.push(`${unit.id}: expected the 7 skills as concepts, found ${concepts.size}`);
+  if (!unit.draw) errors.push(`${unit.id}: an unseen-text unit must declare draw: { kind: "unseen-weighted" }`);
+
+  const texts = new Map<string, UnseenText>();
+  for (const t of unit.texts ?? []) {
+    if (texts.has(t.id)) errors.push(`${unit.id}: duplicate text id ${t.id}`);
+    texts.set(t.id, t);
+  }
+  const used = new Set(questions.map((q) => q.textId));
+  for (const t of texts.values()) if (!used.has(t.id)) errors.push(`${t.id}: no question points at this text`);
+
+  const publicStrings: Array<{ text: string; run: number }> = [
+    { text: unit.description, run: 40 },
+    ...(unit.guide?.items.map((i) => ({ text: i.text, run: 40 })) ?? []),
+    ...(unit.concepts ?? []).map((c) => ({ text: c.description, run: 40 })),
+  ];
+  const directiveVerbs = (rubric as { directiveVerbs: Record<string, string> }).directiveVerbs;
+  const validTags = new Set(SKILL_IDS.map(skillConceptId));
+
+  for (const q of questions) {
+    const key = answers[q.id]?.unseen;
+    const text = texts.get(q.textId);
+
+    // 1. source
+    if (!q.paper) errors.push(`${q.id}: no paper fields (school, year, exam, question number)`);
+    else {
+      if (![1, 2, 3, 4].includes(q.paper.qNo)) errors.push(`${q.id}: paper.qNo must be 1 to 4`);
+      if (q.paper.year < 2023 || q.paper.year > 2026) errors.push(`${q.id}: paper.year ${q.paper.year} is outside 2023 to 2026`);
+      if (q.paper.exam !== "Trial" && q.paper.exam !== "Half-yearly") errors.push(`${q.id}: paper.exam must be Trial or Half-yearly`);
+      if (q.source !== sourceOf(q.paper)) errors.push(`${q.id}: source "${q.source}" must be "${sourceOf(q.paper)}"`);
+    }
+
+    // 2. the text
+    if (!text) errors.push(`${q.id}: text ${q.textId} not found`);
+    else {
+      if (!isPastIsoDate(text.hscChecked, today)) errors.push(`${text.id}: hscChecked must be a past ISO date (the text was compared with the NESA HSC papers)`);
+      if ((text.form === "visual") !== (text.body.kind === "image")) errors.push(`${text.id}: form "${text.form}" does not match its body kind "${text.body.kind}"`);
+      // the paper does not always give a title (an extract or an image has only its heading and author)
+      if (!text.heading.trim()) errors.push(`${text.id}: the heading as on the paper is required`);
+    }
+
+    // 3. skill tags
+    const tags = q.concepts ?? [];
+    if (tags.length < 1 || tags.length > 3) errors.push(`${q.id}: needs 1 to 3 skill tags, has ${tags.length}`);
+    if (new Set(tags).size !== tags.length) errors.push(`${q.id}: repeated skill tag`);
+    for (const t of tags) if (!validTags.has(t)) errors.push(`${q.id}: concepts has "${t}", which is not one of the seven skills`);
+
+    // 4. marks, parts, verb, outcome
+    if (!Number.isInteger(q.maxMarks) || q.maxMarks < 1 || q.maxMarks > 6) errors.push(`${q.id}: maxMarks must be a whole number from 1 to 6`);
+    if (q.parts && q.parts.reduce((n, p) => n + p.marks, 0) !== q.maxMarks) errors.push(`${q.id}: parts marks do not add up to maxMarks ${q.maxMarks}`);
+    if (!(q.verb in directiveVerbs)) errors.push(`${q.id}: verb "${q.verb}" has no definition in lib/unseen/rubric.json directiveVerbs`);
+    if (!["EAV-12-01", "EAV-12-02", "EAV-12-04"].includes(q.outcome)) errors.push(`${q.id}: outcome must be EAV-12-01, EAV-12-02 or EAV-12-04`);
+
+    // 5. suggested length
+    if (!Number.isInteger(q.suggestedWords) || q.suggestedWords <= 0) errors.push(`${q.id}: suggestedWords must be set`);
+    else if (q.suggestedFrom === "lines" && q.suggestedWords % 12 !== 0) errors.push(`${q.id}: suggestedWords ${q.suggestedWords} must be answer lines × 12`);
+    else if (q.suggestedFrom === "median" && q.suggestedWords !== MEDIAN_WORDS[q.maxMarks]) {
+      errors.push(`${q.id}: suggestedWords ${q.suggestedWords} must be the median ${MEDIAN_WORDS[q.maxMarks]} for ${q.maxMarks} marks`);
+    }
+
+    // 6 and 7. the key
+    if (!key) {
+      errors.push(`${q.id}: no unseen answer key`);
+      continue;
+    }
+    if (!key.criteria.trim()) errors.push(`${q.id}: criteria are empty`);
+    else {
+      const bands = new Set([...key.criteria.matchAll(/^\s*(\d+)\s*[–-]/gm)].map((m) => Number(m[1])));
+      for (let m = q.maxMarks; m >= 1; m--) if (!bands.has(m)) errors.push(`${q.id}: criteria have no band line for ${m} mark${m === 1 ? "" : "s"}`);
+    }
+    if (!key.notes.trim()) errors.push(`${q.id}: notes are empty (use "None provided by the school.")`);
+    const modelWords = countWords(key.model);
+    const submittable = Math.floor((q.suggestedWords * 12) / 10);
+    if (modelWords < 40) errors.push(`${q.id}: the model answer has ${modelWords} words; at least 40`);
+    else if (Number.isInteger(q.suggestedWords) && modelWords > submittable) {
+      errors.push(`${q.id}: the model answer has ${modelWords} words, more than a student could submit (${submittable})`);
+    }
+    if (key.modelOrigin === "drafted" || key.criteriaOrigin === "drafted") {
+      if (!isPastIsoDate(key.reviewedOn, today)) errors.push(`${q.id}: drafted criteria or model answer need a reviewedOn date before the question ships`);
+    }
+
+    // 8. a visual text
+    if (text?.body.kind === "image") {
+      const body = text.body;
+      const size = imageSizeOf(body.image);
+      if (size === null) errors.push(`${text.id}: no image file for "${body.image}" in the unit's images folder`);
+      else if (size > MAX_IMAGE_BYTES) errors.push(`${text.id}: the image is ${Math.round(size / 1024)} KB; at most ${MAX_IMAGE_BYTES / 1024} KB`);
+      if (!body.alt.trim() || body.alt.length > 250) errors.push(`${text.id}: alt must be a short neutral label (1 to 250 characters)`);
+      const visual = key.visual;
+      if (!visual || !visual.description.trim()) errors.push(`${text.id}: no written description for the marker`);
+      else {
+        if (sharedRun(visual.description, body.alt, 40, "")) errors.push(`${text.id}: alt shares a 40-character run with the description (alt must not be the description)`);
+        const check = visual.check;
+        if (!check) errors.push(`${q.id}: the description check has not been run (npm run check-unseen-descriptions)`);
+        else {
+          if (!check.adequate) errors.push(`${q.id}: the description check failed: the description is not enough to mark from`);
+          const hash = createHash("sha256").update(visual.description, "utf8").digest("hex");
+          if (check.descriptionHash !== hash) errors.push(`${q.id}: the description changed since its check passed; rerun npm run check-unseen-descriptions`);
+        }
+      }
+    }
+
+    // 9. key text must not appear in public strings (quotation of the question's own stimulus is fine)
+    const stimulus = text && text.body.kind !== "image" ? renderStimulus(text) : "";
+    const keyStrings = [key.model, key.criteria, key.notes, key.visual?.description ?? ""].filter((k) => k.trim());
+    const own: Array<{ text: string; run: number }> = [
+      { text: q.prompt, run: PROMPT_LEAK_RUN },
+      ...(q.parts ?? []).map((p) => ({ text: p.text, run: PROMPT_LEAK_RUN })),
+      { text: q.source ?? "", run: 40 },
+      ...(text?.body.kind === "image" ? [{ text: text.body.alt, run: 40 }] : []),
+    ];
+    for (const k of keyStrings) {
+      for (const pub of [...own, ...publicStrings]) {
+        if (pub.text && sharedRun(k, pub.text, pub.run, stimulus)) {
+          errors.push(`${q.id}: key text appears in public text "${pub.text.slice(0, 40)}…"`);
           break;
         }
       }

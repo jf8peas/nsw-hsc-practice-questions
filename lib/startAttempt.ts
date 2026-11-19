@@ -4,6 +4,8 @@
 
 import { saveAttemptPayload } from "@/lib/drafts";
 import type { EssayBar, ParagraphState } from "@/lib/paragraph/types";
+import { UNIT_ID as UNSEEN_UNIT_ID } from "@/lib/unseen/skills";
+import type { UnseenState } from "@/lib/unseen/types";
 import type { Question } from "@/lib/types";
 
 export type StartResult =
@@ -21,6 +23,22 @@ interface StartResponse {
   /** spec 007: the essay bar and the question state, for a sequential unit. */
   essay?: EssayBar;
   paragraphState?: ParagraphState;
+  /** spec 008: the question state for an unseen-text unit. */
+  unseenState?: UnseenState;
+}
+
+/** The notices a sequential or progress-dependent unit shows when it cannot start a quiz (constitution Principle VI). */
+function unitNotices(unitId: string): { unavailable: string; finished: string } {
+  if (unitId === UNSEEN_UNIT_ID) {
+    return {
+      unavailable: "We can't load your questions right now. Try again in a moment.",
+      finished: "You've answered every question in the bank so far. New questions are added as the papers are processed.",
+    };
+  }
+  return {
+    unavailable: "We can't load your place in the essay right now. Try again in a moment.",
+    finished: "You've finished every essay so far. New essays are added as they're written.",
+  };
 }
 
 export async function startAttempt(unitId: string): Promise<StartResult> {
@@ -43,14 +61,14 @@ export async function startAttempt(unitId: string): Promise<StartResult> {
     return { ok: false, error: `You're starting quizzes too fast.${wait}` };
   }
   if (res.status === 503) {
-    // a sequential unit cannot find the student's place without their results (constitution VI)
-    return { ok: false, error: "We can't load your place in the essay right now. Try again in a moment." };
+    // a sequential or progress-dependent unit cannot find the student's place without their results (constitution VI)
+    return { ok: false, error: unitNotices(unitId).unavailable };
   }
   if (!res.ok) return { ok: false, error: "Could not start the quiz. Please try again." };
 
   const data: StartResponse | { finished: true } = await res.json();
   if ("finished" in data) {
-    return { ok: false, finished: true, error: "You've finished every essay so far. New essays are added as they're written." };
+    return { ok: false, finished: true, error: unitNotices(unitId).finished };
   }
   saveAttemptPayload(data.attemptId, {
     attemptToken: data.attemptToken,
@@ -60,6 +78,7 @@ export async function startAttempt(unitId: string): Promise<StartResult> {
     answered: data.answered ?? {},
     ...(data.essay ? { essay: data.essay } : {}),
     ...(data.paragraphState ? { paragraphState: data.paragraphState } : {}),
+    ...(data.unseenState ? { unseenState: data.unseenState } : {}),
   });
   return { ok: true, attemptId: data.attemptId, persisted: data.persisted };
 }

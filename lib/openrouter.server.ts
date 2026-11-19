@@ -50,7 +50,7 @@ export interface ChatParams {
 }
 
 export type ChatResult =
-  | { ok: true; content: string }
+  | { ok: true; content: string; /** The provider's `finish_reason`, e.g. "length" for a cut-off reply (spec 008). */ finishReason?: string }
   | { ok: false; reason: "unconfigured" | "network" | "http" | "empty"; status?: number; detail?: string };
 
 /**
@@ -94,11 +94,12 @@ export async function chatCompletion(p: ChatParams): Promise<ChatResult> {
   } catch {
     return { ok: false, reason: "empty", detail: "reply was not JSON" };
   }
-  const content = (data as { choices?: Array<{ message?: { content?: unknown } }> })?.choices?.[0]?.message?.content;
+  const choice = (data as { choices?: Array<{ message?: { content?: unknown }; finish_reason?: unknown }> })?.choices?.[0];
+  const content = choice?.message?.content;
   if (typeof content !== "string" || !content.trim()) {
     return { ok: false, reason: "empty", detail: JSON.stringify(data).slice(0, 300) };
   }
-  return { ok: true, content };
+  return { ok: true, content, ...(typeof choice?.finish_reason === "string" ? { finishReason: choice.finish_reason } : {}) };
 }
 
 // ---- short-answer grading -------------------------------------------------------

@@ -43,6 +43,10 @@ import { concepts as y12EconSentenceConcepts, retired as y12EconSentenceRetired 
 import { meta as y12EconParagraphMeta } from "./units/y12-economics-paragraph-writing/meta";
 import { questions as y12EconParagraphQuestions } from "./units/y12-economics-paragraph-writing/questions";
 import { concepts as y12EconParagraphConcepts, retired as y12EconParagraphRetired } from "./units/y12-economics-paragraph-writing/concepts";
+import { meta as y12EnglishUnseenMeta } from "./units/y12-english-advanced-unseen-texts/meta";
+import { questions as y12EnglishUnseenQuestions } from "./units/y12-english-advanced-unseen-texts/questions";
+import { texts as y12EnglishUnseenTexts } from "./units/y12-english-advanced-unseen-texts/texts";
+import { concepts as y12EnglishUnseenConcepts, retired as y12EnglishUnseenRetired } from "./units/y12-english-advanced-unseen-texts/concepts";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -111,6 +115,13 @@ export const UNITS: Unit[] = [
     questions: y12EconParagraphQuestions,
     concepts: y12EconParagraphConcepts,
     retired: y12EconParagraphRetired,
+  },
+  {
+    ...y12EnglishUnseenMeta,
+    questions: y12EnglishUnseenQuestions,
+    texts: y12EnglishUnseenTexts,
+    concepts: y12EnglishUnseenConcepts,
+    retired: y12EnglishUnseenRetired,
   },
 ];
 

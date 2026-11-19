@@ -3,12 +3,16 @@ import "server-only";
 import { and, desc, eq, sql } from "drizzle-orm";
 
 import { listParagraphPhases } from "./paragraph-phases.server";
+import { listUnseenPhases } from "./unseen-phases.server";
 import { listRewritePhases } from "./rewrite-phases.server";
 
 import { getQuestion } from "@/content";
 import { finalizeIfComplete } from "@/lib/attempts/complete.server";
 import { DbUnavailableError, dbCall, type Db } from "@/lib/db/index.server";
-import { attempts, results, type ParagraphVerdicts } from "@/lib/db/schema";
+import { attempts, results, type ParagraphVerdicts, type UnseenPhaseRow } from "@/lib/db/schema";
+import { unseenDiscussion } from "@/lib/grading.server";
+import type { SkillView } from "@/lib/unseen/types";
+import { tryViewFrom } from "@/lib/unseen/views";
 import { attemptPercent, bestLatest, trend, type Trend } from "@/lib/stats";
 
 import { getAttemptForUser } from "./attempts.server";
@@ -84,6 +88,8 @@ export interface AttemptItem {
   phase2Marks?: number | null;
   /** `paragraph` only (spec 007 FR-036): both tries with their per-criterion verdicts and reasons. */
   paragraph?: ParagraphAttemptDetail | null;
+  /** `unseen` only (spec 008). */
+  unseen?: UnseenAttemptDetail | null;
 }
 
 export interface ParagraphAttemptPhase {
@@ -102,6 +108,25 @@ export interface ParagraphAttemptDetail {
   flagged: boolean;
 }
 
+/** `unseen` only (spec 008): both tries with their seven verdicts, and the model answer ONLY once final. */
+export interface UnseenAttemptTry {
+  text: string;
+  mark: number;
+  skills: SkillView[];
+  feedback: string;
+  biggestGap: string;
+}
+export interface UnseenAttemptDetail {
+  try1: UnseenAttemptTry;
+  try2: UnseenAttemptTry | null;
+  /** full_marks | retried | declined | no_retry; null while the retry choice is pending. */
+  ending: string | null;
+  recordedMark: number | null;
+  flagged: boolean;
+  /** Only when the question is final: the student has already seen it at the discussion. */
+  modelAnswer: string | null;
+}
+
 export interface AttemptDetail {
   attempt: AttemptSummary;
   items: AttemptItem[];
@@ -118,6 +143,27 @@ function paragraphPhaseOf(
     mark,
     criteria: (["a", "b", "c", "d"] as const).map((key) => ({ key, met: verdicts[key].met, reason: verdicts[key].reason })),
     feedback: feedback ?? "",
+  };
+}
+
+function unseenDetailOf(row: UnseenPhaseRow): UnseenAttemptDetail {
+  const t1 = tryViewFrom(row, 1)!;
+  const t2 = tryViewFrom(row, 2);
+  const pick = (t: NonNullable<typeof t1>): UnseenAttemptTry => ({
+    text: t.text,
+    mark: t.mark,
+    skills: t.skills,
+    feedback: t.feedback,
+    biggestGap: t.biggestGap,
+  });
+  return {
+    try1: pick(t1),
+    try2: t2 ? pick(t2) : null,
+    ending: row.ending,
+    recordedMark: row.recordedMark,
+    flagged: row.flaggedAt !== null,
+    // the model answer is released only for a final question (constitution Principle I, 2.15.0)
+    modelAnswer: row.status === "final" ? (unseenDiscussion(row.questionId)?.modelAnswer ?? null) : null,
   };
 }
 
@@ -219,6 +265,8 @@ export async function attemptDetail(
   const phaseByQuestion = new Map(phaseRows.map((p) => [p.questionId, p]));
   const paragraphRows = await listParagraphPhases(db, userId, row.id);
   const paragraphByQuestion = new Map(paragraphRows.map((p) => [p.questionId, p]));
+  const unseenRows = await listUnseenPhases(db, userId, row.id);
+  const unseenByQuestion = new Map(unseenRows.map((p) => [p.questionId, p]));
 
   const marks = rows.reduce((s, r) => s + r.marksAwarded, 0);
   const max = rows.reduce((s, r) => s + r.maxMarks, 0);
@@ -226,6 +274,7 @@ export async function attemptDetail(
     const r = byQuestion.get(questionId);
     const ph = phaseByQuestion.get(questionId);
     const pg = paragraphByQuestion.get(questionId);
+    const un = unseenByQuestion.get(questionId);
     return {
       questionId,
       retired: getQuestion(questionId) === undefined,
@@ -254,6 +303,7 @@ export async function attemptDetail(
             flagged: pg.flaggedAt !== null,
           }
         : null,
+      unseen: un ? unseenDetailOf(un) : null,
     };
   });
   return {

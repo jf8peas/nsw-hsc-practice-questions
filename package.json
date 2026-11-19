@@ -20,7 +20,12 @@
     "paragraph-remark": "tsx --conditions=react-server scripts/paragraph-remark.ts",
     "concept:approve": "tsx --conditions=react-server scripts/approve-concept.ts",
     "fake-openrouter": "tsx scripts/fake-openrouter.ts",
-    "vercel-build": "npm run db:migrate && npm run build"
+    "vercel-build": "npm run db:migrate && npm run build",
+    "check-unseen-descriptions": "tsx --conditions=react-server scripts/check-unseen-descriptions.ts",
+    "unseen-report": "tsx --conditions=react-server scripts/unseen-report.ts",
+    "unseen-flags": "tsx --conditions=react-server scripts/unseen-flags.ts",
+    "unseen-remark": "tsx --conditions=react-server scripts/unseen-remark.ts",
+    "unseen-build-bank": "tsx --conditions=react-server scripts/unseen-build-bank.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

@@ -7,6 +7,7 @@ import { getAttemptForUser } from "@/lib/db/queries/attempts.server";
 import { upsertRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 import { getParagraphPhase } from "@/lib/db/queries/paragraph-phases.server";
 import { getRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
+import { getUnseenPhase } from "@/lib/db/queries/unseen-phases.server";
 import { checkDraftRateLimit } from "@/lib/ratelimit.server";
 import { verifyAttemptToken } from "@/lib/tokens.server";
 
@@ -56,9 +57,9 @@ export async function POST(req: Request) {
   const token = verified.payload;
   if (!token.questionIds.includes(questionId)) return bad("not_found", 404);
   const found = getQuestion(questionId);
-  // serves the sentence unit (spec 006) and the paragraph unit (spec 007)
-  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph")) return bad("not_found", 404);
-  const isParagraph = found.question.type === "paragraph";
+  // serves the sentence unit (spec 006), the paragraph unit (spec 007) and the unseen-text unit (spec 008)
+  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph" && found.question.type !== "unseen")) return bad("not_found", 404);
+  const kind = found.question.type;
 
   // A dedicated per-user limiter, separate from the grading limits (research R5.2).
   const perUser = await checkDraftRateLimit(user.id);
@@ -80,9 +81,12 @@ export async function POST(req: Request) {
     }
     // Stale check: a phase row exists for phase 1 (already graded), or the phase row is final for
     // phase 2 (the question is final) — write nothing.
-    const phaseRow = isParagraph
-      ? await dbCall((db) => getParagraphPhase(db, user.id, attemptId, questionId))
-      : await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
+    const phaseRow =
+      kind === "paragraph"
+        ? await dbCall((db) => getParagraphPhase(db, user.id, attemptId, questionId))
+        : kind === "unseen"
+          ? await dbCall((db) => getUnseenPhase(db, user.id, attemptId, questionId))
+          : await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
     if (phaseRow && (phase === 1 || phaseRow.status === "final")) {
       return json({ saved: false });
     }

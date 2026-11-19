@@ -5,6 +5,7 @@
  *   FAKE_REVIEW=pass|fail|fail-once|down npx tsx scripts/fake-openrouter.ts
  *   FAKE_VISION=pass|fail|illegible|not-answer npx tsx scripts/fake-openrouter.ts
  *   FAKE_PARAGRAPH=pass|partial|fail|malformed|down|slow npx tsx scripts/fake-openrouter.ts
+ *   FAKE_UNSEEN=pass|partial|fail|down|empty|cutoff|missing|malformed|echo|slow npx tsx scripts/fake-openrouter.ts
  *
  * then in .env.local:
  *   OPENROUTER_API_KEY=local-test
@@ -31,6 +32,21 @@
  *   malformed  every reply is prose, not JSON (the app retries once, then the marker is unavailable)
  *   slow       as pass, but each reply takes 12 seconds (to watch the marking status steps)
  *
+ *   FAKE_UNSEEN (spec 008, the unseen-text marker). Directives in the student's answer choose the
+ *   reply: [mark:2] sets the mark (clamped to the question's value) and [miss:technique-effect,apt-evidence]
+ *   lists the skills marked missed; [desc:false] makes a visual text's description inadequate. With no
+ *   directive: no missed skill and full marks, unless the mode is partial (mark 2, technique-effect missed).
+ *   pass       as above
+ *   partial    no directive means mark 2 and technique-effect missed
+ *   fail       every request answers HTTP 500
+ *   down       every request answers HTTP 503
+ *   empty      the reply content is empty
+ *   cutoff     the reply stops mid-JSON with finish_reason "length"
+ *   missing    the reply has no biggestGap
+ *   malformed  the reply is prose, not JSON
+ *   echo       the feedback repeats the example (model) answer, which the app must reject
+ *   slow       as pass, but each reply takes 12 seconds (to watch the marking status steps)
+ *
  * Generators always answer. Each request is logged with its purpose and model. Development
  * tool only: it is never imported by the app.
  */
@@ -50,6 +66,13 @@ if (!["pass", "fail", "illegible", "not-answer"].includes(VISION_MODE)) {
 const REWRITE_MODE = (process.env.FAKE_REWRITE ?? "pass") as "pass" | "partial" | "fail" | "down";
 if (!["pass", "partial", "fail", "down"].includes(REWRITE_MODE)) {
   console.error(`FAKE_REWRITE must be pass, partial, fail or down (got "${REWRITE_MODE}")`);
+  process.exit(1);
+}
+
+const UNSEEN_MODE = (process.env.FAKE_UNSEEN ?? "pass") as
+  | "pass" | "partial" | "fail" | "down" | "empty" | "cutoff" | "missing" | "malformed" | "echo" | "slow";
+if (!["pass", "partial", "fail", "down", "empty", "cutoff", "missing", "malformed", "echo", "slow"].includes(UNSEEN_MODE)) {
+  console.error(`FAKE_UNSEEN must be pass, partial, fail, down, empty, cutoff, missing, malformed, echo or slow (got "${UNSEEN_MODE}")`);
   process.exit(1);
 }
 
@@ -74,8 +97,57 @@ function lineOf(text: string, label: string): string {
   return text.split("\n").find((l) => l.startsWith(label))?.slice(label.length).trim() ?? "";
 }
 
-function reply(content: string, status = 200) {
-  return { status, body: JSON.stringify({ choices: [{ message: { content } }] }) };
+function reply(content: string, status = 200, finishReason?: string) {
+  return {
+    status,
+    body: JSON.stringify({ choices: [{ message: { content }, ...(finishReason ? { finish_reason: finishReason } : {}) }] }),
+  };
+}
+
+const SKILLS = [
+  "answers-question",
+  "directive-verb",
+  "analyses-not-retells",
+  "technique-effect",
+  "apt-evidence",
+  "human-experience",
+  "succinct",
+];
+
+/** The unseen-text marker's reply (spec 008): mark and missed skills from directives in the answer. */
+function unseenReply(user: string) {
+  const max = Number(/QUESTION \((\d+) marks?\)/.exec(user)?.[1] ?? "3");
+  const answer = /<<<ANSWER\n([\s\S]*?)\nANSWER>>>/.exec(user)?.[1] ?? "";
+  const example = /<<<EXAMPLE\n([\s\S]*?)\nEXAMPLE>>>/.exec(user)?.[1] ?? "";
+  const markDirective = /\[mark:(\d+)\]/.exec(answer)?.[1];
+  const missDirective = /\[miss:([a-z,-]*)\]/.exec(answer)?.[1];
+  const missed = new Set(
+    missDirective !== undefined
+      ? missDirective.split(",").filter(Boolean)
+      : UNSEEN_MODE === "partial" && markDirective === undefined
+        ? ["technique-effect"]
+        : [],
+  );
+  const mark =
+    markDirective !== undefined
+      ? Math.min(Number(markDirective), max)
+      : UNSEEN_MODE === "partial"
+        ? Math.min(2, max)
+        : missed.size > 0
+          ? Math.max(0, max - 1)
+          : max;
+  const visual = /VISUAL TEXT/.test(user);
+  const body: Record<string, unknown> = {
+    mark,
+    skills: Object.fromEntries(
+      SKILLS.map((id) => [id, { met: !missed.has(id), reason: missed.has(id) ? `Fake: ${id} is not shown.` : `Fake: ${id} is shown.` }]),
+    ),
+    feedback: UNSEEN_MODE === "echo" ? `Fake marker: a full-mark answer reads like this: ${example}` : "Fake unseen marker: a clear reading, supported by evidence.",
+    biggestGap: "Fake: explain the effect of each technique you name.",
+    descriptionAdequate: visual ? !/\[desc:false\]/.test(answer) : null,
+  };
+  if (UNSEEN_MODE === "missing") delete body.biggestGap;
+  return reply(JSON.stringify(body));
 }
 
 /** The paragraph marker's reply (spec 007): verdicts from a [met:...] directive in the student's text. */
@@ -124,6 +196,16 @@ function handle(body: { model?: string; messages?: Array<{ role: string; content
     return reply(
       JSON.stringify({ transcription: "F = ma", legible: true, answersQuestion: true, notes: "" }),
     );
+  }
+
+  // Unseen-text marking (spec 008): the system prompt starts "You are an experienced NSW HSC English Advanced marker".
+  if (/experienced NSW HSC English Advanced marker/.test(system)) {
+    if (UNSEEN_MODE === "fail") return reply("", 500);
+    if (UNSEEN_MODE === "down") return reply("", 503);
+    if (UNSEEN_MODE === "empty") return reply("");
+    if (UNSEEN_MODE === "cutoff") return reply('{"mark": 2, "skills": {"answers-question": {"met": tr', 200, "length");
+    if (UNSEEN_MODE === "malformed") return reply("I am sorry, I cannot give JSON today.");
+    return unseenReply(user);
   }
 
   // Paragraph marking (spec 007): the system prompt starts "You are marking one part of a body paragraph".
@@ -208,7 +290,9 @@ createServer((req, res) => {
   req.on("end", () => {
     try {
       const out = handle(JSON.parse(raw));
-      const delay = PARAGRAPH_MODE === "slow" && /one part of a body paragraph/.test(raw) ? 12_000 : 0;
+      const slowParagraph = PARAGRAPH_MODE === "slow" && /one part of a body paragraph/.test(raw);
+      const slowUnseen = UNSEEN_MODE === "slow" && /experienced NSW HSC English Advanced marker/.test(raw);
+      const delay = slowParagraph || slowUnseen ? 12_000 : 0;
       setTimeout(() => res.writeHead(out.status, { "content-type": "application/json" }).end(out.body), delay);
     } catch (error) {
       console.error("[fake] bad request", error);

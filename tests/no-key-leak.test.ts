@@ -34,6 +34,12 @@ const BANNED_KEYS = [
   "modelPart",
   "modelSoFar",
   "laterSlots",
+  // spec 008: the unseen-text key (criteria, notes, model answer, a visual's description and its check)
+  "criteria",
+  "visualDescription",
+  "descriptionCheck",
+  "descriptionHash",
+  "unseenKey",
   // spec 006: the display-only grading data must never appear in the attempt-start payload
   // (it is delivered only with a phase's grade, or on resume after grading)
   "creditedSpans",
@@ -47,7 +53,7 @@ const BANNED_KEYS = [
  * Offline teacher tasks (spec 007 R8) that read the paragraph essay key to build test cases and to
  * re-mark. They run on a teacher's machine, never at request time and never in a bundle.
  */
-const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts"]);
+const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts", "scripts/check-unseen-descriptions.ts", "scripts/unseen-report.ts", "scripts/unseen-field-cases.ts", "scripts/unseen-flags.ts", "scripts/unseen-remark.ts"]);
 
 describe("POST /api/attempts exposes no answer key, for every unit", () => {
   for (const unit of UNITS) {

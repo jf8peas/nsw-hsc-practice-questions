@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { configProblems } from "@/lib/config";
-import { getConceptModels, getConfig } from "@/lib/config.server";
+import { getConceptModels, getConfig, getEnglishAdvModel } from "@/lib/config.server";
 
 const FULL = {
   AUTH_SECRET: "s",
@@ -41,6 +41,21 @@ describe("getConceptModels", () => {
       getConceptModels({ CONCEPT_MODEL: " vendor/gen ", ILLUSTRATION_MODEL: "  ", REVIEW_MODEL: "vendor/rev" }),
     ).toEqual({ generator: "vendor/gen", illustration: null, reviewer: "vendor/rev" });
     expect(getConceptModels({ CONCEPT_MODEL: "   " }).generator).toBe("deepseek/deepseek-chat");
+  });
+});
+
+describe("getEnglishAdvModel", () => {
+  it("defaults to deepseek-v4.1-flash when unset or blank", () => {
+    expect(getEnglishAdvModel({})).toBe("deepseek/deepseek-v4.1-flash");
+    expect(getEnglishAdvModel({ ENGLISH_ADV_GRADING_MODEL: "   " })).toBe("deepseek/deepseek-v4.1-flash");
+  });
+
+  it("uses the configured model, trimmed", () => {
+    expect(getEnglishAdvModel({ ENGLISH_ADV_GRADING_MODEL: " vendor/english " })).toBe("vendor/english");
+  });
+
+  it("never falls back to GRADING_MODEL", () => {
+    expect(getEnglishAdvModel({ GRADING_MODEL: "vendor/other" })).toBe("deepseek/deepseek-v4.1-flash");
   });
 });
 

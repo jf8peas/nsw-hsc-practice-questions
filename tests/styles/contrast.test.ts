@@ -88,3 +88,25 @@ describe("known risks stay avoided", () => {
     expect(colorLines).toEqual([]);
   });
 });
+
+// The unseen-text unit's un-* classes (spec 008 FR-047): the pairs they put together, 4.5:1 for text.
+const UNSEEN_TEXT: Array<[string, string, string]> = [
+  ["ink-900", "surface-50", "the text panel and the result card"],
+  ["ink-700", "surface-50", "author, source line, line numbers, notes, skill reasons"],
+  ["ink-900", "white", "question, answer, dialog"],
+  ["ink-700", "white", "results by text form, helper lines"],
+  ["ink-900", "blue-50", "tip cards, notices, Fixed in retry pill name"],
+  ["blue-700", "blue-50", "Fixed in retry pill"],
+  ["ink-900", "success-50", "First try pill"],
+  ["ink-900", "surface-100", "pills"],
+  ["ink-700", "surface-100", "a disabled secondary button"],
+  ["ink-900", "danger-50", "error box"],
+];
+
+describe("text pairs used by the unseen-text unit meet 4.5:1", () => {
+  for (const [fg, bg, use] of UNSEEN_TEXT) {
+    it(`${fg} on ${bg} (${use})`, () => {
+      expect(ratio(fg, bg)).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+});

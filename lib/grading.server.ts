@@ -18,9 +18,12 @@ import { PARTS, partKeyOf } from "@/lib/paragraph/parts";
 import { buildVerdicts, markOf, phase2Mark } from "@/lib/paragraph/scoring";
 import type { ParagraphDiscussion, ParagraphQuestionView } from "@/lib/paragraph/types";
 import { rewriteScore } from "@/lib/rewrite-scoring";
-import type { Answer, ParagraphQuestion, PartNo } from "@/lib/types";
+import type { Answer, ParagraphQuestion, PartNo, UnseenKey, UnseenQuestion, UnseenText } from "@/lib/types";
+import { formForPrompt, markWithModel as markUnseenWithModel, renderTextForMarker } from "@/lib/unseen/marker.server";
+import { cappedMark } from "@/lib/unseen/scoring";
+import type { UnseenDiscussion } from "@/lib/unseen/types";
 import { countWords } from "@/lib/wordcount";
-import type { ParagraphVerdicts } from "@/lib/db/schema";
+import type { ParagraphVerdicts, SkillVerdicts } from "@/lib/db/schema";
 
 export interface GradeOptions {
   /** MC only: optionOrder[displayIndex] = original option index (from the attempt). */
@@ -668,4 +671,85 @@ export async function markParagraph(
 export function paragraphPartOf(questionId: string): { part: PartNo; unitId: string } | null {
   const k = paragraphKey(questionId);
   return k ? { part: k.part, unitId: k.unitId } : null;
+}
+
+// ---- unseen-text short answers (spec 008) ----------------------------------------------------------
+//
+// The ONLY readers of an unseen-text question's key. What each export may release (constitution
+// Principle I, 2.15.0):
+//   markUnseen        sends the criteria, notes, model answer and (for a visual text) its written
+//                     description to the model provider and returns verdicts only; nothing from the key
+//                     is in its return value.
+//   unseenDiscussion  the model answer, for the discussion of a FINAL attempt only. The caller must
+//                     check the phase row is final; this function never decides that.
+// The criteria, notes and description are never returned by any function.
+
+function unseenKeyOf(questionId: string): { question: UnseenQuestion; text: UnseenText; key: UnseenKey } | null {
+  const found = getQuestion(questionId);
+  const key = getAnswer(questionId)?.unseen;
+  if (!found || found.question.type !== "unseen" || !key) return null;
+  const question = found.question;
+  const text = found.unit.texts?.find((t) => t.id === question.textId);
+  if (!text) return null;
+  return { question, text, key };
+}
+
+export interface UnseenMarked {
+  verdicts: SkillVerdicts;
+  /** 0..maxMarks at the first try; 0..maxMarks-1 at the retry (the cap is applied here). */
+  mark: number;
+  feedback: string;
+  biggestGap: string;
+  wordCount: number;
+  promptVersion: string;
+  model: string;
+}
+
+/**
+ * Mark one unseen-text answer. Returns null when the marker is unavailable (the caller returns the
+ * editable box and never invents a mark or self-marks). The retry cap is applied in code.
+ */
+export async function markUnseen(
+  questionId: string,
+  answer: string,
+  phase: 1 | 2,
+  options: { skipLlm?: boolean } = {},
+): Promise<UnseenMarked | null> {
+  const k = unseenKeyOf(questionId);
+  if (!k || options.skipLlm) return null;
+  const { question, text, key } = k;
+  const visual = text.body.kind === "image";
+  const stimulus = visual ? "" : renderTextForMarker(text);
+  const out = await markUnseenWithModel({
+    maxMarks: question.maxMarks,
+    questionHeading: text.heading,
+    question: [question.prompt, ...(question.parts ?? []).map((p) => `(${p.label}) ${p.text}`)].join("\n"),
+    verb: question.verb,
+    textForm: formForPrompt(text.form),
+    visual,
+    text: visual ? (key.visual?.description ?? "") : stimulus,
+    criteria: key.criteria,
+    notes: key.notes,
+    suggestedWords: question.suggestedWords,
+    modelAnswer: key.model,
+    stimulus,
+    answer,
+  });
+  if (!out) return null;
+  return {
+    verdicts: out.reply.skills,
+    mark: phase === 2 ? cappedMark(out.reply.mark, question.maxMarks) : out.reply.mark,
+    feedback: out.reply.feedback,
+    biggestGap: out.reply.biggestGap,
+    wordCount: countWords(answer),
+    promptVersion: out.promptVersion,
+    model: out.model,
+  };
+}
+
+/** The model answer for the discussion of a final attempt (never the criteria, notes or description). */
+export function unseenDiscussion(questionId: string): UnseenDiscussion | null {
+  const k = unseenKeyOf(questionId);
+  if (!k) return null;
+  return { modelAnswer: k.key.model, modelWords: countWords(k.key.model) };
 }

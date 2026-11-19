@@ -83,6 +83,12 @@ export interface UnitMeta {
    * Public metadata: it holds no answers.
    */
   sequence?: { kind: "essay-parts"; parts: 5 };
+  /**
+   * Set on a unit whose quiz is one weighted-random unanswered question (the Advanced English
+   * unseen-text unit, spec 008), not a random subset and not a fixed order. Public metadata: it
+   * holds no answers.
+   */
+  draw?: { kind: "unseen-weighted" };
   /** Formulas tested by this unit, shown on the unit page below Start quiz. */
   formulas?: FormulaRef[];
   /** A structured "how to" panel shown on the unit page below Start quiz. */
@@ -164,14 +170,85 @@ export interface ParagraphQuestion extends BaseQuestion {
   maxMarks: 4;
 }
 
+/** The form of an unseen text (spec 008). A closed union: the draw weights by form. */
+export type TextForm =
+  | "poem"
+  | "prose-fiction"
+  | "non-fiction"
+  | "personal-essay"
+  | "visual"
+  | "drama"
+  | "speech";
+
+/**
+ * One unseen stimulus text, stored once and pointed at by its questions (spec 008, data-model §1).
+ * PUBLIC: it is shown to the student. A visual text's written description for the marker is key
+ * material and lives in the server-only answer set, never here.
+ */
+export interface UnseenText {
+  /** Unit-local id, e.g. "fs25-t1". Never reused. */
+  id: string;
+  form: TextForm;
+  /** As on the paper: "Text 1 – Poem". */
+  heading: string;
+  title: string;
+  author: string;
+  /** The paper's credit line for the text. */
+  sourceLine: string;
+  body:
+    | { kind: "poem"; stanzas: string[][]; lineNumbers?: { every: number } }
+    | { kind: "prose"; paragraphs: string[] }
+    /** `image` is the text id; the image is served by the authenticated route. `alt` is a neutral label. */
+    | { kind: "image"; image: string; alt: string };
+  /** The paper's glossary lines. */
+  footnotes?: Array<{ mark: string; text: string }>;
+  /** ISO date the text was compared with the NESA HSC papers (Principle V: never a real HSC text). */
+  hscChecked: string;
+}
+
+/** The paper a school-paper question came from (Principle V's four source items). */
+export interface UnseenPaper {
+  school: string;
+  /** Short label for history names, e.g. "Fort St". */
+  short: string;
+  year: number;
+  exam: "Trial" | "Half-yearly";
+  qNo: 1 | 2 | 3 | 4;
+}
+
+/**
+ * An unseen-text short-answer question (spec 008): one Section I question on exactly one text. The
+ * criteria, marking notes and model answer are the answer key (SERVER ONLY).
+ */
+export interface UnseenQuestion extends BaseQuestion {
+  type: "unseen";
+  group: "unseen";
+  /** Resolves in the unit's texts. */
+  textId: string;
+  /** The directive verb, lower case, a key of the rubric's directive verbs. */
+  verb: string;
+  /** (a), (b) on the same text, shown together; `maxMarks` is their sum when present. */
+  parts?: Array<{ label: string; text: string; marks: number }>;
+  maxMarks: number;
+  /** Answer lines × 12 words, or the median for the mark value. */
+  suggestedWords: number;
+  suggestedFrom: "lines" | "median";
+  paper: UnseenPaper;
+  outcome: "EAV-12-01" | "EAV-12-02" | "EAV-12-04";
+  /** The 1 to 3 skill concept ids; a tag is not an answer. */
+  concepts: string[];
+}
+
 /** Public question — no answer key. Safe to ship to the browser. */
-export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion;
+export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion | UnseenQuestion;
 
 /** A full unit as consumed by the UI: metadata + public questions. */
 export interface Unit extends UnitMeta {
   questions: Question[];
   /** From `concepts.ts`, for units that have adopted concepts. */
   concepts?: Concept[];
+  /** The unseen texts of an unseen-text unit (spec 008). Public. */
+  texts?: UnseenText[];
   /**
    * Questions removed from the unit, by id. The value is the concept the question belonged
    * to, an array of concepts for a removed rewrite question (spec 005), or `null` when it
@@ -234,6 +311,40 @@ export interface Answer {
   markingNotes?: string;
   /** `paragraph` only (spec 007): the essay's key and which of its five parts this question is. */
   paragraph?: { essay: EssayKey; part: 1 | 2 | 3 | 4 | 5 };
+  /** `unseen` only (spec 008): the question's key. SERVER ONLY. */
+  unseen?: UnseenKey;
+}
+
+/** The answer key of one unseen-text question (spec 008, data-model §1). SERVER ONLY. */
+export interface UnseenKey {
+  /** The school's band descriptors, one "N – …" line per mark. */
+  criteria: string;
+  /** Features a student could discuss; "None provided by the school." is allowed. */
+  notes: string;
+  /** The example full-mark answer: given to the marker, shown at the discussion. */
+  model: string;
+  modelOrigin: "school" | "drafted";
+  criteriaOrigin: "school" | "drafted";
+  /** ISO date; required when either origin is "drafted" (FR-042). */
+  reviewedOn?: string;
+  /** Present iff the question's text is an image. */
+  visual?: {
+    /** The marker's written description. Never sent to a browser. */
+    description: string;
+    /** Absent until scripts/check-unseen-descriptions.ts has run: validation blocks the question. */
+    check?: DescriptionCheck;
+  };
+}
+
+/** The pre-release check that a visual text's description is enough to mark from (FR-017). */
+export interface DescriptionCheck {
+  adequate: boolean;
+  checkedAt: string;
+  promptVersion: string;
+  model: string;
+  samples: number;
+  /** sha256 of `description`: editing the description invalidates the pass. */
+  descriptionHash: string;
 }
 
 // ---- paragraph-writing key (spec 007). SERVER ONLY content: see content/units/y12-economics-paragraph-writing/essays.ts

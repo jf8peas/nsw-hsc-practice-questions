@@ -5,7 +5,7 @@
  * meta.ts, questions.ts and answers.ts, and every question id is
  * "<unit.id>.<something>".
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { UNITS } from "../content/index";
@@ -16,6 +16,7 @@ import {
   validateConceptRules,
   validateExplanationRules,
   validateParagraphRules,
+  validateUnseenRules,
   validateRewriteRules,
   validateShippedIds,
   type ShippedIds,
@@ -23,6 +24,12 @@ import {
 import type { AnswerSet } from "../lib/types";
 
 const UNITS_DIR = join(process.cwd(), "content", "units");
+
+/** The size in bytes of a text's image file in the unit's images folder, or null when it is not there. */
+function imageSize(unitId: string, name: string): number | null {
+  const file = join(UNITS_DIR, unitId, "images", `${name}.webp`);
+  return existsSync(file) ? statSync(file).size : null;
+}
 const SHIPPED_FILE = join(process.cwd(), "content", "shipped-ids.json");
 const UPDATE_SHIPPED = process.argv.includes("--update-shipped");
 const errors: string[] = [];
@@ -89,6 +96,7 @@ async function main() {
     for (const m of validateExplanationRules(unit, answers)) err(m);
     for (const m of validateRewriteRules(unit, answers)) err(m);
     for (const m of validateParagraphRules(unit, answers)) err(m);
+    for (const m of validateUnseenRules(unit, answers, new Date(), (name) => imageSize(unit.id, name))) err(m);
 
     for (const q of unit.questions) {
       if (!q.id.startsWith(`${unit.id}.`)) {
@@ -112,8 +120,9 @@ async function main() {
         err(`${q.id}: no entry in answers.ts`);
         continue;
       }
-      if (q.type === "paragraph") {
-        // the essay key is checked by the paragraph rules (spec 007 FR-039); no rubric or model answer
+      if (q.type === "paragraph" || q.type === "unseen") {
+        // the essay key is checked by the paragraph rules (spec 007 FR-039) and the unseen-text key by the
+        // unseen rules (spec 008 FR-046); no rubric or model answer here
       } else if (!a.rubric || a.rubric.length === 0) {
         err(`${q.id}: rubric must have at least one point`);
       } else if (q.type === "short" && a.rubric.length !== q.maxMarks) {
@@ -136,7 +145,7 @@ async function main() {
         if (new Set(q.options).size !== q.options.length) {
           err(`${q.id}: mc has duplicate option text`);
         }
-      } else if (q.type === "rewrite" || q.type === "paragraph") {
+      } else if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen") {
         // model sentences, target terms and essay keys are checked by their own rules (FR-008, spec 007)
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);
