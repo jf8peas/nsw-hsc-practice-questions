@@ -42,7 +42,7 @@
  *   down       every request answers HTTP 503
  *   empty      the reply content is empty
  *   cutoff     the reply stops mid-JSON with finish_reason "length"
- *   missing    the reply has no biggestGap
+ *   missing    the reply lacks the field it must carry (goFurther at full marks, biggestGap below)
  *   missing-go-further  a full-mark reply has no goFurther (the app retries it like any missing field)
  *   malformed  the reply is prose, not JSON
  *   echo       the feedback repeats the example (model) answer, which the app must reject
@@ -144,11 +144,13 @@ function unseenReply(user: string) {
       SKILLS.map((id) => [id, { met: !missed.has(id), reason: missed.has(id) ? `Fake: ${id} is not shown.` : `Fake: ${id} is shown.` }]),
     ),
     feedback: UNSEEN_MODE === "echo" ? `Fake marker: a full-mark answer reads like this: ${example}` : "Fake unseen marker: a clear reading, supported by evidence.",
-    biggestGap: "Fake: explain the effect of each technique you name.",
+    // a full-mark reply has no gap to name (the real marker sends null); goFurther does the job
+    biggestGap: mark === max ? null : "Fake: explain the effect of each technique you name.",
     goFurther: mark === max ? "Fake: end on what the text suggests about the experience rather than restating your argument." : null,
     descriptionAdequate: visual ? !/\[desc:false\]/.test(answer) : null,
   };
-  if (UNSEEN_MODE === "missing") delete body.biggestGap;
+  // the field the reply must carry: goFurther at full marks, biggestGap below them
+  if (UNSEEN_MODE === "missing") delete body[mark === max ? "goFurther" : "biggestGap"];
   if (UNSEEN_MODE === "missing-go-further") delete body.goFurther;
   return reply(JSON.stringify(body));
 }

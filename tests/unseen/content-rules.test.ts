@@ -127,7 +127,7 @@ describe("rule 5: the suggested length", () => {
     const q = firstQuestion(w);
     q.suggestedFrom = "median";
     q.suggestedWords = 200;
-    expect(run(w, answersOf())).toMatch(/must be the median 204 for 3 marks/);
+    expect(run(w, answersOf())).toMatch(/must be the median 198 for 3 marks/);
   });
 });
 

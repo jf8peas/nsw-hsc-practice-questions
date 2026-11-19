@@ -264,7 +264,14 @@ only what that task writes into:
   qNo, marks, texts: ["Text 1"], forms: ["poem"], decision: "kept" | "skipped", reason }] }`. One file
   per paper; every Section I question appears, kept or skipped with a reason from a fixed list
   (`two_or_more_texts`, `not_q1_to_q4`, `text_illegible`, `text_missing`, `hsc_text`, `visual_not_describable`,
-  `scan_needs_ocr`).
+  `scan_needs_ocr`, `reserved_holdout`). `reserved_holdout` is used for every question of the two papers
+  that make up the marker's frozen holdout set (Cheltenham Girls 2023, St George Girls 2025): their inventory
+  files list every question as skipped for this reason and they are never written to the bank, so the
+  frozen set stays unseen by the prompt and by the shipped bank (an HSC-style rule of the pilot, not a
+  quality judgement about the questions).
+- `resources/english-unseen/hsc-texts.json` (gitignored): the Section I texts of the NESA HSC English
+  Advanced and Standard Paper 1 papers 2019 to 2025 with their sources, built once and reused by every
+  batch; a bank text's author and title are checked against it before `hscChecked` is set.
 - `resources/english-unseen/bank/<school>-<year>.json` (gitignored): the kept questions' verbatim material
   (text with layout, criteria, notes, model, origins, answer-line count, tags). This is the content task's
   output and the generator's input.
@@ -272,10 +279,15 @@ only what that task writes into:
   `keys.ts` and `descriptions.ts` deterministically (sorted, stable formatting), so the 37-paper extraction
   becomes reviewable committed TypeScript and re-running it is idempotent. It refuses a text with an
   unresolved `hscChecked`, writes `suggestedFrom: "median"` where `answerLines` is null, and never writes
-  `description-checks.ts` (R3 owns that).
+  `description-checks.ts` (R3 owns that). Questions whose criteria or model answer are drafted and have no
+  `reviewedOn` date are **pending review**: by default the generator keeps them (and texts only they use) out
+  of the unit, so `npm run validate`, the tests and the build stay green while a batch awaits approval;
+  `-- --include-pending` writes them for a preview (validation then fails by design). Setting `reviewedOn` in
+  the bank file and rerunning ships them.
 - `scripts/unseen-report.ts` (new): the review report (R-008), written to
   `resources/english-unseen/review/report.md`: per paper kept and skipped (with the reasons), counts by text
-  form and by mark value, and the rubric source per question (school or drafted, reviewed or not). The
+  form and by mark value, and the rubric source per question (school or drafted, reviewed or not). It reads
+  `bank/*.json`, so questions pending review are counted. The
   format is fixed so the approval is a checkbox per section; the approval itself is a teacher task.
 
 **Median fallback (FR-011).** `MEDIAN_WORDS` in `lib/unseen/limits.ts` is `{ 1: 72, 2: 144, 3: 204, 4:
@@ -415,7 +427,7 @@ returning the model answer with the first try's result "to save a request" (brea
 
 - `lib/unseen/rubric.json` (server-only; `{ promptVersion, directiveVerbs, systemPrompt, userTemplate }`).
   At port it is `resources/english-unseen/rubric.json` with the `skills` array removed: **byte-identical
-  prompt text, `promptVersion: "unseen-pilot-4"`** (now `unseen-pilot-5`, which adds `goFurther`). The old file in `resources/` is deleted (the three
+  prompt text, `promptVersion: "unseen-pilot-4"`** (now `unseen-pilot-6`: `unseen-pilot-5` added `goFurther`). The old file in `resources/` is deleted (the three
   `rubric.pilot-N.json` history files stay as records) so there is one source of truth.
 - `lib/unseen/skills.json` (public; `[{ id, name, tip, description }]`, the seven skills). The `skills`
   array moves out of the prompt file because the prompt file is server-only and the tips must reach the
@@ -453,7 +465,7 @@ fires, or the mark equals `maxMarks` and `goFurther` is missing, null, blank or 
 the feedback and the biggest gap. Strings are trimmed and capped (reason 300, feedback 600, biggest gap 300,
 go further 300 characters).
 
-**"Make it even stronger" (the `goFurther` field, prompt `unseen-pilot-5`).** A full-mark answer has no biggest gap, so the student would learn
+**"Make it even stronger" (the `goFurther` field, prompt `unseen-pilot-5`; `unseen-pilot-6` makes `biggestGap` null at full marks).** A full-mark answer has no biggest gap, so the student would learn
 nothing about how to lift it. The reply gains `goFurther`: when the mark equals the question's full marks, one
 sentence naming the single most useful step that would make this answer stronger still, specific to this text
 and this answer; otherwise null. The system prompt says it is advice beyond the top band, not a reason to

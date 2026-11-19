@@ -111,6 +111,7 @@ export interface ParsedReply {
   mark: number;
   skills: SkillVerdicts;
   feedback: string;
+  /** The one thing to fix; "" at full marks, where there is no gap (goFurther does the job). */
   biggestGap: string;
   /** One sentence of advice beyond the top band: set only when the mark is full marks, else null (FR-018). */
   goFurther: string | null;
@@ -129,10 +130,11 @@ function flag(v: unknown): boolean | null {
 const text = (v: unknown, max: number): string => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
 /**
- * The first {...} block of the reply, as the pilot does. A missing mark, verdict, feedback or
- * biggest gap makes the whole reply a failure: it is never read as "missed" or as a default
- * (FR-015); so does a full-mark reply with a missing or empty goFurther. A goFurther on a below-full
- * reply is dropped (biggestGap already does that job). A missing reason is stored as "".
+ * The first {...} block of the reply, as the pilot does. A missing mark, verdict or feedback makes
+ * the whole reply a failure: it is never read as "missed" or as a default (FR-015). So does a
+ * below-full reply with no biggestGap, and a full-mark reply with a missing or empty goFurther; a
+ * full-mark reply may have a null or empty biggestGap, and a goFurther on a below-full reply is
+ * dropped (biggestGap does that job). A missing reason is stored as "".
  */
 export function parseUnseenReply(content: string, maxMarks: number): ParsedReply | null {
   const start = content.indexOf("{");
@@ -158,12 +160,16 @@ export function parseUnseenReply(content: string, maxMarks: number): ParsedReply
   }
 
   const feedback = text(obj.feedback, MAX_FEEDBACK);
-  const biggestGap = text(obj.biggestGap, MAX_GAP);
-  if (!feedback || !biggestGap) return null;
+  if (!feedback) return null;
 
-  // goFurther never affects the mark: it is read after the mark and only kept for full marks
-  const goFurther = mark === maxMarks ? text(obj.goFurther, MAX_GO_FURTHER) : "";
-  if (mark === maxMarks && !goFurther) return null;
+  // Full marks: there is no gap to name, so biggestGap may be null or empty (it is stored as "") and a
+  // goFurther is required instead. Below full marks biggestGap is required and goFurther is dropped.
+  // goFurther never affects the mark: it is read after the mark.
+  const full = mark === maxMarks;
+  const biggestGap = text(obj.biggestGap, MAX_GAP);
+  if (!full && !biggestGap) return null;
+  const goFurther = full ? text(obj.goFurther, MAX_GO_FURTHER) : "";
+  if (full && !goFurther) return null;
 
   const adequate = flag(obj.descriptionAdequate);
   return { mark, skills, feedback, biggestGap, goFurther: goFurther || null, descriptionAdequate: adequate };

@@ -1,6 +1,7 @@
 // Writes the unseen-text unit's bank files from the content task's bank JSON (spec 008, research R2).
 //
-//   npm run unseen-build-bank
+//   npm run unseen-build-bank                      (questions pending review stay out of the unit)
+//   npm run unseen-build-bank -- --include-pending   (preview: writes them too; `npm run validate` then fails by design)
 //
 // Reads resources/english-unseen/bank/*.json (gitignored: verbatim school-paper material) and writes
 // texts.ts, questions.ts, keys.ts and descriptions.ts into content/units/y12-english-advanced-unseen-texts/.
@@ -10,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { UNIT_ID, buildFiles, type BankFile } from "./unseen-build-bank-lib";
+import { UNIT_ID, buildFiles, withoutPending, type BankFile } from "./unseen-build-bank-lib";
 
 const BANK_DIR = path.resolve(process.cwd(), "resources", "english-unseen", "bank");
 const UNIT_DIR = path.resolve(process.cwd(), "content", "units", UNIT_ID);
@@ -25,7 +26,14 @@ function main(): number {
     console.error("✗ no bank files (*.json) found.");
     return 2;
   }
-  const banks = names.map((n) => JSON.parse(fs.readFileSync(path.join(BANK_DIR, n), "utf8")) as BankFile);
+  const all = names.map((n) => JSON.parse(fs.readFileSync(path.join(BANK_DIR, n), "utf8")) as BankFile);
+  const includePending = process.argv.includes("--include-pending");
+  const { banks, pending } = includePending ? { banks: all, pending: [] as string[] } : withoutPending(all);
+  if (pending.length > 0) console.log(`  ${pending.length} question(s) pending review stay out of the unit (drafted, no reviewedOn): ${pending.join(", ")}`);
+  if (banks.length === 0) {
+    console.error("✗ every question is pending review; nothing to write.");
+    return 1;
+  }
   let files;
   try {
     files = buildFiles(banks);
@@ -45,7 +53,7 @@ function main(): number {
     }
   }
   const questionCount = banks.reduce((n, b) => n + b.questions.length, 0);
-  console.log(`✓ ${questionCount} question(s) from ${names.length} bank file(s); ${changed} file(s) changed.`);
+  console.log(`✓ ${questionCount} question(s) from ${banks.length} bank file(s); ${changed} file(s) changed.`);
   return 0;
 }
 

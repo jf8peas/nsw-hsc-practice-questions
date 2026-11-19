@@ -234,7 +234,7 @@ Reply (the first `{…}` block is parsed; one retry on failure; failure twice, o
     "succinct":             { "met": true,  "reason": "…" }
   },
   "feedback": "<two or three sentences: what earned the mark>",
-  "biggestGap": "<one sentence>",
+  "biggestGap": "<one sentence below full marks; null at full marks>",
   "goFurther": "<one sentence at full marks; null below full marks>",
   "descriptionAdequate": true
 }
@@ -242,8 +242,10 @@ Reply (the first `{…}` block is parsed; one retry on failure; failure twice, o
 
 A reply is a failure, retried like a failed call, when: it is empty; the provider reports
 `finish_reason: "length"`; it does not parse; `mark` is not an integer in `0..maxMarks`; any of the seven
-`met` values is missing or is not a boolean (or `"true"`/`"false"`); `feedback` or `biggestGap` is missing
-or blank; the mark equals `maxMarks` and `goFurther` is missing, null or blank (a `goFurther` on a below-full reply is dropped); or `feedback`, `biggestGap`, `goFurther` or any `reason` shares a 60-character run with the model answer that
+`met` values is missing or is not a boolean (or `"true"`/`"false"`); `feedback` is missing or blank; the mark is
+below `maxMarks` and `biggestGap` is missing, null or blank; the mark equals `maxMarks` and `goFurther` is missing,
+null or blank (a `goFurther` on a below-full reply is dropped; a full-mark reply's `biggestGap` may be null or
+blank and is stored as ""); or `feedback`, `biggestGap`, `goFurther` or any `reason` shares a 60-character run with the model answer that
 is not also in the stimulus text. A missing `reason` is stored as "". Strings are trimmed and capped
 (reason 300, feedback 600, biggest gap 300, go further 300). `descriptionAdequate` is `true`/`false` for a visual text and
 `null` otherwise; the app ignores it at request time and the description-check script reads it. The server

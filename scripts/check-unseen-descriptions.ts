@@ -70,7 +70,8 @@ async function main(): Promise<number> {
           criteria: key.criteria,
           notes: key.notes,
           suggestedWords: q.suggestedWords,
-          modelAnswer: key.model,
+          // not circular: the answer under test is the model answer, so the marker is given no example
+          modelAnswer: "",
           stimulus: "",
           answer,
         });

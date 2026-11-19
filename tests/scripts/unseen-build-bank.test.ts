@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { buildFiles, type BankFile } from "../../scripts/unseen-build-bank-lib";
+import { buildFiles, withoutPending, type BankFile } from "../../scripts/unseen-build-bank-lib";
 
 const UNIT = "y12-english-advanced-unseen-texts";
 
@@ -58,7 +58,7 @@ describe("buildFiles", () => {
 
   it("falls back to the median for the mark value when the answer lines cannot be counted", () => {
     const { "questions.ts": q } = buildFiles([bank()]);
-    expect(q).toContain('"suggestedWords": 288');
+    expect(q).toContain('"suggestedWords": 264');
     expect(q).toContain('"suggestedFrom": "median"');
   });
 
@@ -104,5 +104,29 @@ describe("buildFiles", () => {
     const noDesc = bank();
     noDesc.texts[1].description = " ";
     expect(() => buildFiles([noDesc])).toThrow(/no description for the marker/);
+  });
+});
+
+describe("withoutPending", () => {
+  it("keeps unreviewed drafted questions, and the texts only they use, out of the unit", () => {
+    const b = bank();
+    b.questions[1].key.reviewedOn = undefined;
+    const { banks, pending } = withoutPending([b]);
+    expect(pending).toEqual(["inv26-q2"]);
+    expect(banks[0].questions.map((q) => q.slug)).toEqual(["inv26-q1"]);
+    expect(banks[0].texts.map((t) => t.id)).toEqual(["inv26-t1"]);
+  });
+
+  it("keeps a drafted question once it has a reviewedOn date, and school material always", () => {
+    const { banks, pending } = withoutPending([bank()]);
+    expect(pending).toEqual([]);
+    expect(banks[0].questions).toHaveLength(2);
+  });
+
+  it("drops a bank file whose questions are all pending", () => {
+    const b = bank();
+    b.questions = [b.questions[1]];
+    b.questions[0].key.reviewedOn = undefined;
+    expect(withoutPending([b]).banks).toEqual([]);
   });
 });

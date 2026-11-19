@@ -12,6 +12,7 @@ export const SKIP_REASONS = [
   "hsc_text",
   "visual_not_describable",
   "scan_needs_ocr",
+  "reserved_holdout",
 ] as const;
 
 export interface InventoryFile {

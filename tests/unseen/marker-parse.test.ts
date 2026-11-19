@@ -83,6 +83,37 @@ describe("parseUnseenReply", () => {
     expect(parseUnseenReply(good({ mark: 4, goFurther: value }), 4)).toBeNull();
   });
 
+  it.each([
+    ["null", null],
+    ["empty", ""],
+    ["blank", "   "],
+    ["missing", undefined],
+  ])("accepts a full-mark reply whose biggestGap is %s, and stores it as an empty string", async (_l, value) => {
+    const { parseUnseenReply } = await marker();
+    const r = parseUnseenReply(good({ mark: 4, biggestGap: value, goFurther: "End on the mirror image." }), 4)!;
+    expect(r).not.toBeNull();
+    expect(r.mark).toBe(4);
+    expect(r.biggestGap).toBe("");
+    expect(r.goFurther).toBe("End on the mirror image.");
+  });
+
+  it("keeps a full-mark reply's biggestGap when the model sends one", async () => {
+    const { parseUnseenReply } = await marker();
+    expect(parseUnseenReply(good({ mark: 4, goFurther: "Do more." }), 4)!.biggestGap).toContain("metaphor");
+  });
+
+  it.each([
+    ["null", null],
+    ["empty", ""],
+    ["blank", "   "],
+    ["missing", undefined],
+    ["not a string", 7],
+  ])("fails a below-full reply whose biggestGap is %s, and drops its goFurther when it is fine", async (_l, value) => {
+    const { parseUnseenReply } = await marker();
+    expect(parseUnseenReply(good({ mark: 3, biggestGap: value, goFurther: "Do more." }), 4)).toBeNull();
+    expect(parseUnseenReply(good({ mark: 3, goFurther: "Do more." }), 4)!.goFurther).toBeNull();
+  });
+
   it("drops a goFurther on a below-full reply, and does not need one", async () => {
     const { parseUnseenReply } = await marker();
     expect(parseUnseenReply(good({ mark: 3, goFurther: "Do more." }), 4)!.goFurther).toBeNull();
@@ -167,6 +198,27 @@ describe("buildUnseenMessages", () => {
     expect(String(buildUnseenMessages({ ...input, visual: true })[1].content)).toContain("VISUAL TEXT");
   });
 
+  it("gives the example as 'None available.' when no model answer is passed (the circularity-free check)", async () => {
+    const { buildUnseenMessages } = await marker();
+    const user = String(buildUnseenMessages({ ...input, modelAnswer: "" })[1].content);
+    expect(user).toContain("None available.");
+    expect(user).not.toContain(input.modelAnswer);
+  });
+
+  it.each([
+    ["examine", "DIRECTIVE VERB: examine = Inquire into."],
+    ["explore", "DIRECTIVE VERB: explore = Inquire into and draw conclusions about."],
+  ])("knows the directive verb %s", async (verb, line) => {
+    const { buildUnseenMessages } = await marker();
+    expect(String(buildUnseenMessages({ ...input, verb })[1].content)).toContain(line);
+  });
+
+  it("tells the marker that biggestGap is null on full marks", async () => {
+    const { rubric } = await marker();
+    expect(rubric.systemPrompt).toMatch(/set biggestGap to null/);
+    expect(rubric.systemPrompt).toMatch(/biggestGap is null and goFurther does the job/);
+  });
+
   it("does not re-expand braces in the student's answer", async () => {
     const { buildUnseenMessages } = await marker();
     const user = String(buildUnseenMessages({ ...input, answer: "My {criteria} and {answer} words" })[1].content);
@@ -211,6 +263,15 @@ describe("markWithModel", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     expect((await markWithModel(input))?.reply.mark).toBe(3);
     expect(chat).toHaveBeenCalledTimes(2);
+  });
+
+  it("accepts a full-mark reply with a null biggestGap on the first call, with no retry", async () => {
+    chat.mockResolvedValueOnce({ ok: true, content: good({ mark: 4, biggestGap: null, goFurther: "End on the mirror image." }) });
+    const { markWithModel } = await marker();
+    const out = await markWithModel({ ...input, maxMarks: 4 });
+    expect(out?.reply.mark).toBe(4);
+    expect(out?.reply.biggestGap).toBe("");
+    expect(chat).toHaveBeenCalledTimes(1);
   });
 
   it("is unavailable after two failures, and never retries a third time", async () => {

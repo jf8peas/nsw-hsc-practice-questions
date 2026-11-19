@@ -180,14 +180,25 @@ def parse_reply(content: str, max_mark: int) -> tuple[dict | None, str | None]:
     missing = [s for s in SKILLS if not isinstance(skills.get(s, {}).get("met"), bool)]
     if missing:
         return None, f"missing skill verdicts: {', '.join(missing)}"
-    # goFurther mirrors lib/unseen/marker.server.ts: required (non-empty) at full marks, dropped below them
+    # mirrors lib/unseen/marker.server.ts: feedback is always required. At full marks there is no gap to
+    # name, so biggestGap may be null or empty and goFurther is required instead; below full marks
+    # biggestGap is required and goFurther is dropped.
+    feedback = r.get("feedback")
+    if not isinstance(feedback, str) or not feedback.strip():
+        return None, "no feedback"
+    gap = r.get("biggestGap")
+    gap = gap.strip() if isinstance(gap, str) else ""
     go = r.get("goFurther")
     go = go.strip() if isinstance(go, str) else ""
     if mark == max_mark:
         if not go:
             return None, "full-mark reply has no goFurther"
         r["goFurther"] = go
+        r["biggestGap"] = gap
     else:
+        if not gap:
+            return None, "below-full reply has no biggestGap"
+        r["biggestGap"] = gap
         r["goFurther"] = None
     return r, None
 
@@ -210,7 +221,7 @@ def reply_echoes_anchor(q: dict, c: dict, reply: dict) -> bool:
     model = _squash(by_id[anchor_id]["answer"])
     stimulus = _squash(c.get("textOverride") or q["text"])
     out = " ".join(
-        [reply.get("feedback", ""), reply.get("biggestGap", ""), reply.get("goFurther") or ""]
+        [reply.get("feedback") or "", reply.get("biggestGap") or "", reply.get("goFurther") or ""]
         + [v.get("reason", "") for v in (reply.get("skills") or {}).values() if isinstance(v, dict)]
     )
     out = _squash(out)
@@ -421,7 +432,7 @@ def summarise(data: dict, records: list[dict], model: str, runs: int) -> str:
         r = recs[0]["reply"]
         lines.append(f"**{c['id']}** — mark {r['mark']}/{q['marks']}")
         lines.append(f"- Feedback: {r.get('feedback', '')}")
-        lines.append(f"- Biggest gap: {r.get('biggestGap', '')}")
+        lines.append(f"- Biggest gap: {r.get('biggestGap') or ''}")
         if r.get("goFurther"):
             lines.append(f"- To go further: {r['goFurther']}")
         for s in SKILLS:

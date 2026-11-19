@@ -40,6 +40,31 @@ export interface BankQuestion {
   };
 }
 
+
+/**
+ * A question whose criteria or model answer was drafted or generated and has no `reviewedOn` date is
+ * pending review (FR-042): content validation refuses to ship it, so by default the generator keeps it
+ * out of the unit (it stays in the bank file and in the review report) until a teacher has approved it.
+ */
+export const isPending = (q: BankQuestion): boolean =>
+  (q.key.modelOrigin === "drafted" || q.key.criteriaOrigin === "drafted") && !q.key.reviewedOn;
+
+/** The bank files without their pending questions, and without texts only a pending question used. */
+export function withoutPending(banks: BankFile[]): { banks: BankFile[]; pending: string[] } {
+  const pending: string[] = [];
+  const kept: BankFile[] = [];
+  for (const bank of banks) {
+    const questions = bank.questions.filter((q) => {
+      if (isPending(q)) pending.push(q.slug);
+      return !isPending(q);
+    });
+    if (questions.length === 0) continue;
+    const used = new Set(questions.map((q) => q.textId));
+    kept.push({ ...bank, texts: bank.texts.filter((t) => used.has(t.id)), questions });
+  }
+  return { banks: kept, pending };
+}
+
 export interface GeneratedFiles {
   "texts.ts": string;
   "questions.ts": string;

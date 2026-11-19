@@ -30,7 +30,7 @@ python scripts/pilot-unseen-marker.py --check          # offline: data, word cou
 python scripts/pilot-unseen-marker.py --runs 3 --gate  # EVERY case, all sets; prints tuning, holdout and field separately; exits non-zero under 90 % tuning / 80 % holdout or any case more than 1 mark out
 ```
 
-Expected: the report header shows the prompt version from `lib/unseen/rubric.json` (`unseen-pilot-5` at
+Expected: the report header shows the prompt version from `lib/unseen/rubric.json` (`unseen-pilot-6` at
 launch); the same prompt text is what the app sends (the golden test); tuning about 23/24 and holdout about
 19/20 in range, all within 1 (the pilot's recorded results); the "echoes the model answer" count is 0 or
 near 0; the holdout section carries the line "not for tuning".

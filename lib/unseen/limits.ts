@@ -7,11 +7,12 @@ export const MIN_WORDS = 20;
 
 /**
  * The suggested length for a question whose answer lines cannot be counted: the median for its mark
- * value across the papers whose lines can be counted (FR-011). 3 and 4 marks are observed (17 and 24
- * lines at 12 words a line); 1, 2, 5 and 6 are extrapolated at 72 words a mark until counted data
- * exists. scripts/unseen-report.ts fails when a value that has counted data differs from this table.
+ * value across the papers whose lines can be counted (FR-011). The 2 to 6 mark values are the medians the
+ * review report counts over the bank (2 marks: 1 question, 3: 16, 4: 20, 5: 4, 6: 1, so 2 and 6 rest on one
+ * paper each); 1 mark is extrapolated at 72 words until counted data exists. scripts/unseen-report.ts
+ * fails when a value that has counted data differs from this table.
  */
-export const MEDIAN_WORDS: Record<number, number> = { 1: 72, 2: 144, 3: 204, 4: 288, 5: 360, 6: 432 };
+export const MEDIAN_WORDS: Record<number, number> = { 1: 72, 2: 216, 3: 198, 4: 264, 5: 438, 6: 684 };
 
 export interface Limits {
   min: number;

@@ -41,15 +41,15 @@ describe("lengthNote", () => {
 });
 
 describe("MEDIAN_WORDS", () => {
-  it("has a positive multiple of 12 for every mark value 1 to 6, rising with the marks", () => {
-    let last = 0;
+  it("has a positive whole number for every mark value 1 to 6 (a median of an even count can fall between two line counts)", () => {
     for (const marks of [1, 2, 3, 4, 5, 6]) {
       const words = MEDIAN_WORDS[marks];
-      expect(words, `marks ${marks}`).toBeGreaterThan(last);
-      expect(words % 12).toBe(0);
-      last = words;
+      expect(words, `marks ${marks}`).toBeGreaterThan(0);
+      expect(Number.isInteger(words)).toBe(true);
     }
-    expect(MEDIAN_WORDS[3]).toBe(204);
-    expect(MEDIAN_WORDS[4]).toBe(288);
+  });
+
+  it("holds the medians the review report counts over the bank (2 and 6 marks rest on one paper each)", () => {
+    expect(MEDIAN_WORDS).toEqual({ 1: 72, 2: 216, 3: 198, 4: 264, 5: 438, 6: 684 });
   });
 });
