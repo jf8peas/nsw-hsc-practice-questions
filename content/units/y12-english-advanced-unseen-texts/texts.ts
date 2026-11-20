@@ -2723,6 +2723,116 @@ export const texts: UnseenText[] = [
     "hscChecked": "2026-11-19"
   },
   {
+    "id": "ct23-t1",
+    "form": "visual",
+    "heading": "Text 1 – Digital artwork",
+    "title": "Year of the Tiger",
+    "author": "Hafiiz Karim",
+    "sourceLine": "Year of the Tiger, appropriated from Renoir’s Luncheon of the Boating Party, by Hafiiz Karim. As printed in the Cherrybrook Technology High School 2023 Trial (AP4) stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "ct23-t1",
+      "alt": "Text 1 – Digital artwork: a woman standing in a painted luncheon scene"
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ct23-t2",
+    "form": "poem",
+    "heading": "Text 2 – Poem",
+    "title": "The Solitary Reaper",
+    "author": "William Wordsworth",
+    "sourceLine": "As printed in the Cherrybrook Technology High School 2023 Trial (AP4) stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "Behold her, single in the field,",
+          "Yon solitary Highland Lass!",
+          "Reaping and singing by herself;",
+          "Stop here, or gently pass!",
+          "Alone she cuts and binds the grain,",
+          "And sings a melancholy strain;",
+          "O listen! for the Vale profound",
+          "Is overflowing with the sound."
+        ],
+        [
+          "No Nightingale did ever chaunt",
+          "More welcome notes to weary bands",
+          "Of travellers in some shady haunt,",
+          "Among Arabian sands:",
+          "A voice so thrilling ne'er was heard",
+          "In spring-time from the Cuckoo-bird,",
+          "Breaking the silence of the seas",
+          "Among the farthest Hebrides."
+        ],
+        [
+          "Will no one tell me what she sings?—",
+          "Perhaps the plaintive numbers flow",
+          "For old, unhappy, far-off things,",
+          "And battles long ago:",
+          "Or is it some more humble lay,",
+          "Familiar matter of to-day?",
+          "Some natural sorrow, loss, or pain,",
+          "That has been, and may be again?"
+        ],
+        [
+          "Whate'er the theme, the Maiden sang",
+          "As if her song could have no ending;",
+          "I saw her singing at her work,",
+          "And o'er the sickle bending;—",
+          "I listened, motionless and still;",
+          "And, as I mounted up the hill,",
+          "The music in my heart I bore,",
+          "Long after it was heard no more."
+        ]
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ct23-t3",
+    "form": "non-fiction",
+    "heading": "Text 3 – Feature article",
+    "title": "A.I. Can’t Write My Cat Story Because It Hasn’t Felt What I Feel",
+    "author": "David Means",
+    "sourceLine": "David Means, The New York Times, 26 March 2023. As printed in the Cherrybrook Technology High School 2023 Trial (AP4) stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "For a few years, I’ve been trying to write a story about a cat. A.I. will not be able to write this, partly because the story is still inside my imagination and on a few rough pages that were originally drafted in Boston, on sheets of notebook paper, as I sat in my daughter’s apartment on a hot summer day.",
+        "If I have it published (who knows, it’s a strange story), perhaps some machine will suck it into a system, break down my style, my usage, the themes I like to touch upon — loss and despair, love and hope — wide-ranging themes that, like all themes, arrive out of my own unique human concerns and have fueled me through six story collections.",
+        "But for now, this story I haven’t yet finished is inside my imagination, safe and sound, and no machine can make it or conjure it because no machine has been in my head as I wandered the streets of South Chicago, or stopped in the parking lot of a supermarket called Treasure Island to examine a pile of snow, left over from a long winter, honeycombed and covered with dirt and grime, which is the image that closes the rough draft of my story; no machine stood with me in front of the Obama house, on the corner of 1118 Hyde Park Boulevard, and watched a Secret Service agent as he approached, another image that sparked the plot of my story, and certainly no machine was with me watching a cat named Baudelaire, my daughter’s cat, as he played on a particular Chicago afternoon, in a particular moment years ago, clutching a piece of string — yet another image that spoke to me through the retrospect of memory.",
+        "No machine — and I use that phrase because A.I. is a machine, and no matter how complicated, or even organic, its still-binary, open-and-shut gates may be — looked through my eyes as I took the train to my hometown in Michigan, gazing out over the old steel mills of Gary, Ind., making note of images with intent, storing and twisting them in relation to the pain I felt that moment, riding back to my hometown in Michigan, to my father’s interment ceremony, an experience that reminded me that I, too, will die someday, and the art I create will be all I leave behind.",
+        "Memory is filtered and turned around, examined and changed through time, and no machine has felt the pain that sits at the center of the story I’m struggling to create, a story that involves the complexity of race and love and desire that fueled me to imagine the first draft, and that now fuels me as I put it under intense scrutiny, every line, locating what the structure might reveal to me, the secret that I didn’t even know I was exposing when I first imagined it, the surprises that appear as I revise and cover my tracks, pulling down scaffolding that was built to support the original impulse, and in doing so, hopefully, lucking upon something profound, something readers will recognize in themselves as being uniquely human and, in the end, deeply mysterious. A.I. will never feel the sense of mortality that forms around an unfinished draft, the illogic and contradictions of the human condition, and the cosmic unification of pain and joy that fuels the artistic impulse to keep working on a piece until it is finished and uniquely my own. Artistic creation is something that, in the best moments, with a mixture of craft and care and release, flows beyond the self and whatever it is that the artist originally intended.",
+        "As I write these words on a bitter cold morning in March, with a cold front sweeping down and bringing what might be the only Arctic plunge of the year, I’m assured by the fact that only I will experience this moment as I sit at the kitchen table writing this essay, and that A.I. will never hear these words appear as the voice between my ears. Originality lies in the conception before the work is published, or exhibited. The truth of art is that the piece released into the world — and taken into the system, turned into data, words — is simply the final product of a complicated, often illogical process and, in some ways, is the least important aspect of the endeavor. I have to believe that at some intuitive level the reader feels this and knows it! They feel the life of the artist around the work.",
+        "A.I. will do what it does, just as the automobile replaced the horse and buggy, but we artists will do what we do, which is to readjust and find new ways to lay claim to our humanity. On the margins, where art lives, humans will continue to carve and paint and hear voices and daydream, pulling out of unique lives unique work — just as this morning, as I finish writing this, I prepare to go down into my office and work on my cat story, examining my scenes, rewriting sentences and trying to see what I’m doing, aware that the world has not yet seen what I’m creating, which no A.I. can replicate because, right now, as I sit here, as far as the world is concerned, it does not exist."
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ct23-t4",
+    "form": "prose-fiction",
+    "heading": "Text 4 – Prose fiction extract",
+    "title": "The Museum of Modern Love",
+    "author": "Heather Rose",
+    "sourceLine": "Heather Rose, extract from The Museum of Modern Love. As printed in the Cherrybrook Technology High School 2023 Trial (AP4) stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "The Museum of Modern Love is inspired by the artist Marina Abramović and her performance art piece The Artist is Present. The exhibition involved Abramović sitting for 75 days at the Museum of Modern Art in Manhattan, New York, with members of the public invited to sit silently with the artist for a duration of their choosing.",
+        "At home, Jane Miller watched Marina Abramović on the webcam.",
+        "‘Today is the day,’ she kept thinking. ‘Today is the day.’",
+        "And she ignored the washing she’d done for her daughter that needed bringing in, and the ants that were invading a light switch on the wall, and the emails she needed to reply to, and watched. She understood that her fate and Marina’s were somehow linked. When Marina stood up, Jane too must stand up. There had been this time of mourning and the mourning would live forever in her. Karl was as much a piece of her as her liver or pancreas. Grief was as tangible as rain. Millions of people were suffering from it at any one time. It’ll pass, people said, but it didn’t really.",
+        "Grief was a threshold thing that lived at the heart of the inevitable. She sensed that when Marina stood up, she, Jane, would take her place one step back from the inevitable. She would walk across Spain. She would carry her grief and her love and her observations of a life of fifty-five years. Here at home her children and their children would be among their own inevitabilities. And maybe this was art, she thought, having spent years trying to define it and pin it to the line like a shirt on a windy day. There you are, art! You capture moments at the heart of life. A boy waiting for the eggs to poach. A crowd listening to music in a park or walking in the rain or bathing in the Seine. Liberty leading the people and the guns of the firing squad raised against the men at the wall. The bloom of waterlilies and the anguish of a scream, the red square that lived in every heart, a rhythm of colour across a wheat field, stars wheeling through a night sky.",
+        "She was watching Marina Abramović in her white dress on this final day of her enduring love. For hadn’t it been that for Abramović? An act of love that said, This is all I have been, this is what I have become in travelling the places of my soul and my nation, my family and my ancestral blood. This is what I have learned. It is all about connection. If we do it with the merest amount of intention and candour and fearlessness, this is the biggest love we can feel. It’s more than love but we don’t have a bigger word. It was Kant’s thing, Jane thought. The thing that is, but is also inexplicable, until you see that it just is.",
+        "She knew once she would have tried to call it God, but that had caused so many problems in the world, trying to say what God was or is. She thought there ought to be another word and she decided she had a few hundred miles to think on that in Spain under a wide sky on a pilgrimage. And she laughed aloud, because to ruminate on the name of the thought that was God on a long walk seemed fitting. She and Karl would go a long way on that together. She continued to gaze at the woman in the white dress. She sat and watched in honour of this woman sitting. She watched as the final hours of The Artist is Present passed by, sitter after sitter in a gaze with the woman across the table. Jane felt she had witnessed a thing of inexplicable beauty among humans who had been drawn to this art and had found the reflection of a great mystery. What are we? How should we live?"
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
     "id": "cb24-t1",
     "form": "poem",
     "heading": "Text 1 – Poem",
@@ -2906,6 +3016,203 @@ export const texts: UnseenText[] = [
         "The next thing Iain knew, they'd quickly, wordlessly, hoisted the mattress up onto the car's roof. Then Iain was watching the man busy securing it with one very long length of rope which he looped several times over the mattress. They hadn't yet exchanged proper sentences, only those phrases that are sufficient to communicate direction, distance and action. Certainly, those phrases were enough for Iain to hear by the man's German accent that he was Austrian, and from Vienna.",
         "After firmly shaking Iain's hand to thank him for his assistance, the burly, red-faced man confirmed his origins. Iain then asked him what an Austrian – a Viennese, moreover! – was doing in Inglewood, on the lonesome continent of Australia, and the man then took the opportunity to give a rapid account of his life and adventures. What Iain would recall of the man's account was, roughly, this: He was a butcher who had a tremendous love of travel. That love had taken him from Vienna, across the Middle East and India, and then on to Australia. Immediately on arrival Perth he had decided to make it his home. That was now many years, many decades, ago. He'd travelled all that way in a white Mercedes which he still owned. He intended, all going well to next undertake an expedition through the whole of South America, starting in Mexico and ending in Tierra del Fuego.",
         "After watching that butcher formerly-of-Vienna slowly drive away, the man's one arm holding the shuddering mattress against the roof of his battered white Volkswagen. Iain continued along on his usual morning walk, every so often, a child's swing has been suspended from a tree branch, something Iain always regarded as a sign of settled, familial happiness. On that day Iain was heartened, too, by this meeting, if only briefly, with someone who could easily have been the hero of a very old-fashioned adventure novel."
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "bk23-t1",
+    "form": "poem",
+    "heading": "Text 1 — Poem",
+    "title": "Wild Geese",
+    "author": "Mary Oliver",
+    "sourceLine": "Mary Oliver. As printed in the Barker College 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "You do not have to be good.",
+          "You do not have to walk on your knees",
+          "for a hundred miles through the desert, repenting.",
+          "You only have to let the soft animal of your body",
+          "love what it loves.",
+          "Tell me about despair, yours, and I will tell you mine.",
+          "Meanwhile the world goes on.",
+          "Meanwhile the sun and the clear pebbles of the rain",
+          "are moving across the landscapes,",
+          "over the prairies and the deep trees,",
+          "the mountains and the rivers.",
+          "Meanwhile the wild geese, high in the clean blue air,",
+          "are heading home again.",
+          "Whoever you are, no matter how lonely,",
+          "the world offers itself to your imagination,",
+          "calls to you like the wild geese, harsh and exciting–",
+          "over and over announcing your place",
+          "in the family of things."
+        ]
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "bk23-t2",
+    "form": "prose-fiction",
+    "heading": "Text 2 — Prose fiction extract",
+    "title": "Pemulwuy: The Rainbow Warrior",
+    "author": "Eric Willmot",
+    "sourceLine": "Eric Willmot, Pemulwuy: The Rainbow Warrior. As printed in the Barker College 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "At first sight they appeared like small clouds on the horizon. Only a short time ago one had come close to the shore. It was obviously a boat, and extraordinarily large. It had a crew of many people and seemed to be driven only by the wind. This strange object had disappeared along the coast in the direction of the summer.",
+        "The sea thing must have returned and come to rest in a narrow tidal inlet that joined Lake Awaba to the sea. This was a special place for Kiraban, a site belonging to his father, and he always visited it alone.",
+        "Kiraban was quietly amazed to see so many fires come to life on the ship as the darkness settled. It must be very large, he thought. Awabakal people sometimes carried fire pots or torches to keep away the mosquitoes and sandflies when fishing in rivers and creeks. But so many fires, he thought, must be very difficult to manage. Kiraban felt urged to run immediately and tell his companions. He feared, though, that the thing might return again to the sea and make him a liar. He decided to wait until dawn.",
+        "During the night he dozed off to sleep and the spirit of the site moved his mind to dream of a place where the aliens lived. He saw himself walk among them and imagined that he could converse with them. He awoke and sang of his dream. During the long night he heard odd, mournful clanging noises.",
+        "At first light he was awakened by a new and active sound. He saw a small, canoe-like vessel being propelled by paddles to the shore. Kiraban quickly fitted a spear to his spear-thrower and flexed the assembly. He moved quietly to a hidden place, close to where the boat would land. The boat was really quite large by Awabakal standards and very solidly built. As it touched the shore, a group of aliens alighted and secured it by a long rope.",
+        "These were indeed strange people. Solidly built and heavily clothed in remarkable materials. How strange they were, Kiraban thought, to wear such a lot of clothes in the summer. The most remarkable thing about them was the extraordinary lack of colour in their skin. Their faces appeared pink or like the colour of the flesh of fish.",
+        "This was all too much for Kiraban. They had now marked the earth and his vision was secure. Kiraban fled like a young bird to report this fantastic event and ensure that it was witnessed.",
+        "It was some time before noon when Kiraban and three of his companions returned to a vantage point close to the landing site. Tracks in the sand indicated that the aliens had been scouting about. They all seemed now to have returned to the landing site and were busy doing something on the sandy shore. Kiraban’s group watched for a time in total silence, and then assembled to discuss the event. Kiraban told them of his dream and all seemed suitably impressed. Before they could explore the full implications of the dream, however, the group was disturbed and bewildered by the familiar sound of a chant from their land coming from the alien group. They all moved closer and were able to observe a man sitting a short distance away from the others, singing and tapping two stones together. They peered carefully at the figure. Like the others he was heavily clothed, but to their great surprise his skin was black: he was no alien."
+      ]
+    },
+    "footnotes": [
+      {
+        "mark": "",
+        "text": "Awabakal: an Indigenous Australian tribe from the coastal area of what is known as the Hunter Region of NSW."
+      }
+    ],
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "bk23-t3",
+    "form": "non-fiction",
+    "heading": "Text 3 — Feature article extract",
+    "title": "Why daily doses of nature in the city matter for people and the planet",
+    "author": "Anne Cleary",
+    "sourceLine": "Anne Cleary, The Conversation, 30 November 2018. As printed in the Barker College 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "The environmental movement is shifting away from focusing solely on raising awareness about environmental issues. Many environmental agencies and organisations now also aim to connect people with nature, and our new research suggests daily doses of urban nature may be the key to this for the majority who live in cities.",
+        "Looking beyond the park",
+        "What is less clear is how to enhance an individual’s nature connection – that is feeling that they are a part of nature. Over half of all people globally, and nine out of ten people in Australia, live in urban environments. This reduces their opportunities to experience and connect with nature.",
+        "Our new study may offer some answers. A survey of Brisbane residents showed that people who experienced nature during childhood or had regular contact with nature in their home and suburb were more likely to report feeling connected with nature.",
+        "The study used a broad definition of urban nature to include all the plants and animals that live in a city. When looking to connect urban residents with local nature we need to take a broad view and look “beyond the park”. All aspects of nature in the city offer a potential opportunity for people to experience nature and develop their sense of connection to it.",
+        "The study also looked at the relationship between childhood and adult nature experiences. Results suggest that people who lack childhood experience of nature can still come to have a high sense of nature connection by experiencing nature as an adult.",
+        "There have been focused efforts on connecting children to nature, such as the Forest Schools and Nature Play programs. Equal effort should be given to promoting adult nature experiences and nature connection, particularly for people who lack such experiences.",
+        "The benefits of nature experience",
+        "We still have much to discover about how an individual’s nature connection is shaped. We need a better understanding of how people from diverse cultural and social contexts experience and connect to different types of nature. That said, we are starting to understand the important role that frequent local experiences of nature may play.",
+        "In addition to boosting people’s sense of nature connection, daily doses of urban nature deliver the benefits of improved physical, mental and social wellbeing. A growing evidence base is showing that exposure to nature, particularly in urban environments, can lead to healthier and happier city dwellers.",
+        "Robert Dunn and colleagues have already advocated for the importance of urban nature experiences as a way to bolster city residents’ support for conservation. They described the “pigeon paradox” whereby experiencing urban nature, which is often of low ecological value – such as interactions with non-native species – may have wider environmental benefits through people behaving in more environmentally conscious ways. They proposed that the future of conservation depended on city residents’ ability to experience urban nature.",
+        "As new evidence emerges, we need to build on this thinking. It would seem that the future of our very connection to nature, our wellbeing and conservation depend on urban people’s ability to experience urban nature."
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "bk23-t4",
+    "form": "personal-essay",
+    "heading": "Text 4 — Memoir extract",
+    "title": "Lost and Found",
+    "author": "Kathryn Schulz",
+    "sourceLine": "Kathryn Schulz, Lost and Found. As printed in the Barker College 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "It is a cliché about writers that we come from unhappy families – that we turn to language and stories to either escape from or give voice to our misery. This was not my experience. I came from a happy family, where language and stories were a shared and omnipresent pleasure. One of my earliest memories consists of my father materialising in the doorway of the room where I was playing – all of five foot six, but seeming to my startled eyes like a benevolent and thrilling giant – holding a Norton anthology of poetry in one hand and waving the other aloft like Merlin while reciting “Kubla Khan.” I have a similarly vivid recollection of him entertaining my sister and me a few years later with the prologue of The Canterbury Tales, declaimed out loud in rousing Middle English. My mother had given up early on the project of convincing him not to rile us up at bedtime; it was his job to read aloud to us each night, and he accomplished the task with extravagant gestures, dramatic voices, much thumping of the knees on which we were perched, and an exhilarating disregard for the text on the page."
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "as23-t1",
+    "form": "speech",
+    "heading": "Text 1—Online Video Advertisement (Transcript)",
+    "title": "StoryFile: What’s Your Story?",
+    "author": "William Shatner",
+    "sourceLine": "William Shatner, “William Shatner Introduces StoryFile Life – a new way to preserve family history”, StoryFile, YouTube, 16 October 2021. As printed in the Ascham 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "TECH-SAVVY STAR TREK HERO WILLIAM SHATNER HAS RECORDED HIS LIFE HISTORY WITH STORYFILE LIFE, A BRAND NEW CONVERSATIONAL VIDEO TECHNOLOGY.",
+        "Today you are here. But one day, you'll be an ancestor to a kid who wants to know where they came from. Their roots. That's you.",
+        "Now imagine hundreds of years from now. They could reach into the past to talk with you. And you could talk back. That’s possible.",
+        "With StoryFile Life, you could record yourself on your desktop computer and mobile devices. And within moments, artificial intelligence transforms your video responses into real-time interactive conversation.",
+        "[Music]",
+        "This is the real you. No avatars. Your authentic self. For all time.",
+        "It’s our responsibility to pass the torch down through the ages so that the future generations can carry our legacy forward.",
+        "Everyone has a story to tell. Now share your story file with your friends and family or the world.",
+        "No time like the present. So let’s begin."
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "as23-t2",
+    "form": "prose-fiction",
+    "heading": "Text 2—Prose fiction extract",
+    "title": "Limberlost",
+    "author": "Robbie Arnott",
+    "sourceLine": "Robbie Arnott, edited extract from Limberlost. As printed in the Ascham 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "It was believed a whale had gone mad at the mouth of the river. Several fishing boats had been destroyed in acts of violence so extraordinary they were deemed inhuman. Each attack had come at dusk, while the boats were passing the heads on their way back to port—the same area where plumes of spray were supposedly erupting from the water. Transport ships reported powerful, mournful vibrations ringing through their hulls. Gulls flew strangely; cormorants seemed skittish. Ocean swimmers’ strokes were thrown out of rhythm by a high, ancient melody that rose through the brine. A fluked tail had been seen troubling the waves.",
+        "Ned was five when all this happened. In later years he struggled to remember the incidents clearly, but at the time it was all anyone was talking about. The animal had been harpooned far down south, someone’s uncle said, and after fleeing north was now visiting vengeance on any ship it encountered. Another version of that story claimed the harpoon had lodged in the whale’s brain, turning it feral and vicious. Another was that the whalers had missed the beast but not its pod, and the creature had been driven insane after witnessing the slaughter of its family.",
+        "There were other theories too, ones that didn’t include whaling, ideas of lunar imbalances and divine judgement, although they weren’t paid much attention. Most held the southern whalers responsible for fouling the animal’s mind.",
+        "There was talk of writing letters, demanding reparations, getting the council involved.",
+        "‘It’s nonsense,’ Ned’s father told his children. He’d caught them whispering about the wrecks at the dinner table, unaware he’d returned from the orchard.",
+        "‘There is no whale,’ he said. ‘No monster. Fishermen do three things: they drink too much, and they make things up.’",
+        "He took off his coat and hung it on a hook by the door.",
+        "‘What’s the third thing,’ asked Ned’s eldest brother, Bill.",
+        "Their father levered himself into his chair. ‘Occasionally they catch fish.’",
+        "But their father’s words did not convince them; the story of the mad whale had sunk too deep into their minds. Ned’s sister, Maggie, was old enough to restrain herself from contributing to the gossip, but Bill and Toby, their middle brother, talked about it constantly.",
+        "Ned heard everything, and their conversations filled him with obsessive dread. All day he thought of the smashed ketches and skiffs, of an unseen giant with a blade snagged in its brain. At night his dreams were flooded with blood-foamed water. For a week he woke sweating and screaming until, when his exhausted father demanded to know the cause of his turmoil, he revealed that his nightmares were of the murderous, hellsent whale."
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "as23-t3",
+    "form": "non-fiction",
+    "heading": "Text 3—Feature article extract",
+    "title": "Please, make it stop. Disney’s live-action remakes are ruining childhoods",
+    "author": "Nick Bhasin",
+    "sourceLine": "Nick Bhasin, edited extract from the Sydney Morning Herald, 23 May 2023. As printed in the Ascham 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "This isn’t easy to admit, but when I was a teenager, before I discovered how cruel and unforgiving life could be, I collected Disney character figurines.",
+        "That’s right.",
+        "They were gorgeous little porcelain totems to movies that I loved – especially Aladdin, The Little Mermaid, The Lion King and Beauty and the Beast. A Whole New World in Aladdin was the most romantic song I’d ever heard. That French chef stereotype in The Little Mermaid cracked me up.",
+        "Was 16 a little old to be collecting Disney figurines? I don’t know.",
+        "Was I the coolest kid in high school? Hard to say. Probably.",
+        "But what I do know is that, aside from some insensitivities that don’t play in 2023, those movies hold up. They’re still fun and funny and heartwarming.",
+        "The remakes, however, are the exact opposite. The insensitivities are gone, which is nice, but so is any storytelling element that might evoke a human emotion (other than fear and rage).",
+        "I am talking about The Little Mermaid, which comes out this week and features Halle Bailey as Ariel. As far as I can tell from the trailer, she’s got a great voice and will nail the songs. But look at Sebastian the crab. Look at Flounder the fish. Look at how they massacred my boys.",
+        "Real life crabs are not aesthetically pleasing. They look like monsters. And they appear to have stuck a pin in Flounder and sucked all the cute cuddliness out of him.",
+        "At first, the live-action Disney remakes seemed innocent. The movies were okay. But then they became dangerous.",
+        "There were some fun elements in all of them, but, largely, they were hollowed out carcasses of the originals. All the joy and magic had been unceremoniously beaten out of them by cynicism and greed.",
+        "And we were right to be afraid. Our very childhoods were disappearing. We were being erased.",
+        "Exhausted and unable to withstand the pain, we were left to wonder if there was any magic left in the world. If all the love and laughter had been choked out of us. The remakes had come for our childhoods. No one was safe.",
+        "Rewatching some of the original movies and their remakes confirmed my suspicions – that the remakes are a collective graveyard for joy.",
+        "At their very worst, these movies represent the end of culture, of decency, of integrity, of dignity, indeed, of any universal human value you can point to. It’s over. Close the shop. Save the family photos and the passports. Everything is on fire. The porcelain figurines have melted. They’re tiny stumps now, brittle, misshapen reminders of a youth and vitality that may never have existed.",
+        "And my question is this: why is this happening? Why?!"
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "as23-t4",
+    "form": "prose-fiction",
+    "heading": "Text 4—Prose fiction extract",
+    "title": "Birnam Wood",
+    "author": "Eleanor Catton",
+    "sourceLine": "Eleanor Catton, Birnam Wood. As printed in the Ascham 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Lemoine returned to the farmhouse, deciding as he bumped his way across the fields that he would bring his bodyguard on board. He couldn’t carry out his plan alone. Anyway, the bodyguard was desperate to see some action; he’d been chafing at the bit for months. And he was good. Lemoine opened his laptop, transferred a stack of cash into the guard’s account, showed him the balance, and promised him ten times that amount when the job was done. The guy didn’t even hesitate. ‘What do you need?’ he said.",
+        "‘I’d rather pay a fine than a fee,’ Lemoine had said the night before. This was a maxim that he had held through his entire career; what he might have added was that in most situations, he usually avoided even being fined. He knew that once the rare-earth elements were in his hands, no government of any country in the world was really going to care how he had gotten them – and that included New Zealand. Sure, there might be a bit of knuckle-rapping, a few warm words. Tribunals might be formed, activists might strut about, legislation might be passed, politicians might be voted in and out, et cetera; but so long as there was a phone in everybody’s pocket, so long as there was a screen in front of every face, so long as there were batteries and satellites and cameras and GPS, so long as there was avarice, so long as there was loneliness and envy and ambition and boredom and addiction, he, Lemoine, would be untouchable. The value of the minerals was just too great. What they made possible was just too vast. Too important. Too desirable. And nothing would incriminate Lemoine. He would even be hailed as a liberator: the man who bravely faced down China and secured technological independence for the West."
       ]
     },
     "hscChecked": "2026-11-19"
@@ -3169,6 +3476,124 @@ export const texts: UnseenText[] = [
         "‘Then why is Mr Napier always watching? As if he’s waiting for me to make a mistake? Why must they all laugh?’ Their boss was a mystery to Harold. He didn’t know if the rumours were true but only the previous week, Mr Napier fired a secretary for touching his desk. ‘I’m sure he thinks you are a very good accountant.’ He held out his palm for her.",
         "‘Would you like to come out of the stationery cupboard now?’"
       ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ab23-t1",
+    "form": "visual",
+    "heading": "Text 1 – Illustration",
+    "title": "The Shape of Ideas",
+    "author": "Grant Snider",
+    "sourceLine": "As printed in the Abbotsleigh 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "ab23-t1",
+      "alt": "Text 1 – Illustration: a grid of twelve comic panels"
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ab23-t2",
+    "form": "poem",
+    "heading": "Text 2 – Poem",
+    "title": "Dawn service",
+    "author": "Cate Kennedy",
+    "sourceLine": "As printed in the Abbotsleigh 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "Five a.m., and a hungry lamb wail from the cot",
+          "as the murmuring clock radio says it’s Anzac Day.",
+          "The world belongs to war veterans and breastfeeding mothers,",
+          "all rising for the dawn service."
+        ],
+        [
+          "All of us in shared testimony to the same belief,",
+          "our minute’s silence to what stays unacknowledged,",
+          "all the unfathomable, exhausted sacrifice",
+          "of our mutely bowed heads."
+        ],
+        [
+          "The baby’s eyes, absorbed and concentrating,",
+          "stare over my shoulder as if there’s something",
+          "of huge, ungraspable portent on the horizon –",
+          "men coming over battlements, say,",
+          "a rising sun cold as steel,",
+          "a glint of bayonets above the cliffs."
+        ],
+        [
+          "A tiny frown creases her forehead",
+          "and her hand jerks up and comes to rest",
+          "against her face.",
+          "We sit there milk-drunk, humming, somnolent,",
+          "the breaking dawn scudding like a prow towards the shore",
+          "and onwards, boys, to glory -"
+        ],
+        [
+          "because there she lies, the quiet hard-won miracle of her",
+          "gazing past me at something beyond my vision",
+          "my perfect little opus."
+        ],
+        [
+          "There is no trumpet playing the last post, no drums.",
+          "Just her curving cheek,",
+          "unsullied and fragile and full of promise,",
+          "her slight but determined breathing",
+          "as she pulls all nourishment into herself,",
+          "and that small hand raising itself softly, insistently,",
+          "like an envoy stepping out into no-man’s land",
+          "calling for peace."
+        ]
+      ]
+    },
+    "footnotes": [
+      {
+        "mark": "",
+        "text": "portent: a sign, omen or warning of a terrible future event"
+      },
+      {
+        "mark": "",
+        "text": "somnolent: sleepy or drowsy"
+      },
+      {
+        "mark": "",
+        "text": "prow: the pointed front part of a ship"
+      }
+    ],
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ab23-t3",
+    "form": "non-fiction",
+    "heading": "Text 3 – Discursive extract",
+    "title": "On Travel",
+    "author": "Tony Wheeler",
+    "sourceLine": "Tony Wheeler, from On Travel (the section headed Home). As printed in the Abbotsleigh 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "‘No one realises how beautiful it is to travel until he comes home and rests his head on his old, familiar pillow.’ (Lin Yutang, writer and philosopher)",
+        "‘Holiday home’ has to be a modern oxymoron – a holiday is something we do when we leave home, isn’t it? Yet some of the very best travel doesn’t involve much travel at all, it’s simply going somewhere and putting down temporary roots. If the travel experience improves when we slow down, then surely the best travel of all is the slowest of all, simply going somewhere and going native? Certainly some of the best – and bestselling – travel books are about that attempt to establish another home, perhaps somewhere comfortably familiar, but with a better climate and more interesting food. Even dealing with the builders – who display all the same undesirable habits as the ones back home – is more interesting when it’s done in French, Italian or Indonesian.",
+        "Or there’s the attempt to make a home somewhere utterly, scarily different from the familiar one – an Antarctic exile at one extreme, a tropical castaway at the other. Two of my favourite travel tales encompass exactly those extremes. In 1961, Duncan Carse was dropped off with 12 tonnes of supplies on a remote beach on the island of South Georgia to enjoy a spell as an Antarctic Robinson Crusoe. Three months later a freak wave crashed Carse, fast asleep at the time, his hut and most of his supplies into the sea. Remarkably he managed to crawl ashore and salvage enough equipment to survive the frigid winter until a passing sealing ship rescued him four months later.",
+        "Tom Neale was a much more traditional castaway, spending 16 years in three separate spells on the out-of-the-way island of Suwarrow in the Cook Islands. His book An Island to Oneself has made his island a pilgrimage spot for Pacific yachties. Tom Hanks also made an island into a pilgrimage spot with the movie Castaway. Even as castaways, we seem to want the comforts of home. Weather apart, Carse was doing okay until the unexpected wave swept his supplies away. Island life for Tom Neale was much more organised than for Tom Hanks. Like Carse, Neale wasn’t shipwrecked, his castaway spell was carefully planned and well provisioned. We’re fascinated by Robinson Crusoe in part because he managed to turn his isolated hideaway into a reasonable facsimile of home.",
+        "The things that make home so comfortable and familiar are often exactly what we’re trying to cast off when we travel. The pleasure of a tent is that it’s not home; it may have few of the comforts of home, but it also contains few of the responsibilities. So long as you’ve taken the ‘travel light’ lesson to heart, the zen of travel is exactly that – it can be a zen existence, stripped back to essentials. Sometimes we simply need to leave home, to get kicked out of that comfortable nest, just like fledgling birds."
+      ]
+    },
+    "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ab23-t4",
+    "form": "visual",
+    "heading": "Text 4 – Prose fiction extracts",
+    "title": "Extremely Loud and Incredibly Close",
+    "author": "Jonathan Safran Foer",
+    "sourceLine": "Pages 283 and 284 of Extremely Loud and Incredibly Close. As printed in the Abbotsleigh 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "ab23-t4",
+      "alt": "Text 4 – Prose fiction extracts: two facing book pages, one of text and one of black"
     },
     "hscChecked": "2026-11-19"
   }

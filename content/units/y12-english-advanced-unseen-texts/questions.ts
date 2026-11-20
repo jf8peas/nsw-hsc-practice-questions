@@ -334,7 +334,7 @@ export const questions: Question[] = [
     "verb": "what",
     "prompt": "What literary devices does the writer employ to convey the experience of exclusion and inclusion?",
     "maxMarks": 5,
-    "suggestedWords": 432,
+    "suggestedWords": 402,
     "suggestedFrom": "median",
     "paper": {
       "school": "Sydney Girls High School",
@@ -359,7 +359,7 @@ export const questions: Question[] = [
     "verb": "evaluate",
     "prompt": "Evaluate the ways the writer challenges our perceptions for the value of authenticity?",
     "maxMarks": 5,
-    "suggestedWords": 432,
+    "suggestedWords": 402,
     "suggestedFrom": "median",
     "paper": {
       "school": "Sydney Girls High School",
@@ -2202,6 +2202,106 @@ export const questions: Question[] = [
     "source": "Cherrybrook Tech 2024 Trial, Q4"
   },
   {
+    "id": "y12-english-advanced-unseen-texts.ct23-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct23-t1",
+    "verb": "explain",
+    "prompt": "Explain how Hafiiz Karim has represented a human experience in this artwork.",
+    "maxMarks": 3,
+    "suggestedWords": 180,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Cherrybrook Tech 2023 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ct23-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct23-t2",
+    "verb": "how",
+    "prompt": "How does William Wordsworth evoke sympathy for the solitary reaper?",
+    "maxMarks": 3,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Cherrybrook Tech 2023 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ct23-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct23-t3",
+    "verb": "how effectively",
+    "prompt": "How effectively does David Means represent the relationship between the creation of art and AI?",
+    "maxMarks": 5,
+    "suggestedWords": 300,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Cherrybrook Tech 2023 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ct23-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ct23-t4",
+    "verb": "in what way",
+    "prompt": "In what ways does Heather Rose convey the experience of loss?",
+    "maxMarks": 4,
+    "suggestedWords": 300,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Cherrybrook Tech 2023 Trial, Q4"
+  },
+  {
     "id": "y12-english-advanced-unseen-texts.cb24-q1",
     "type": "unseen",
     "group": "unseen",
@@ -2375,6 +2475,206 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-apt-evidence"
     ],
     "source": "Barker 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk23-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk23-t1",
+    "verb": "how",
+    "prompt": "How has Oliver explored the complexity of our relationship with nature?",
+    "maxMarks": 3,
+    "suggestedWords": 156,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Barker 2023 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk23-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk23-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how Willmot represents human behaviour when faced with the unknown.",
+    "maxMarks": 4,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Barker 2023 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk23-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk23-t3",
+    "verb": "evaluate",
+    "prompt": "Evaluate how Cleary allows us to reconsider the nature of urban life.",
+    "maxMarks": 4,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Barker 2023 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk23-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk23-t4",
+    "verb": "analyse",
+    "prompt": "Analyse how Schulz challenges our assumptions about writers.",
+    "maxMarks": 3,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Barker 2023 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.as23-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "as23-t1",
+    "verb": "explain",
+    "prompt": "Explain how William Shatner uses language to persuade the reader to share their story.",
+    "maxMarks": 3,
+    "suggestedWords": 204,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Ascham School",
+      "short": "Ascham",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-answers-question"
+    ],
+    "source": "Ascham 2023 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.as23-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "as23-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how Robbie Arnott uses literary devices to represent the power of storytelling.",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Ascham School",
+      "short": "Ascham",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Ascham 2023 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.as23-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "as23-t3",
+    "verb": "how",
+    "prompt": "How does Nick Bhasin use humour to convey the value of childhood stories?",
+    "maxMarks": 3,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Ascham School",
+      "short": "Ascham",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-answers-question"
+    ],
+    "source": "Ascham 2023 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.as23-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "as23-t4",
+    "verb": "evaluate",
+    "prompt": "Evaluate Eleanor Catton’s use of narrative voice in shaping the character of Robert Lemoine.",
+    "maxMarks": 4,
+    "suggestedWords": 288,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Ascham School",
+      "short": "Ascham",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Ascham 2023 Trial, Q4"
   },
   {
     "id": "y12-english-advanced-unseen-texts.ab25-q1",
@@ -2575,5 +2875,105 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-apt-evidence"
     ],
     "source": "Abbotsleigh 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab23-q1",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab23-t1",
+    "verb": "how",
+    "prompt": "How does the composer use visual devices to communicate an idea about imagination?",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-answers-question"
+    ],
+    "source": "Abbotsleigh 2023 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab23-q2",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab23-t2",
+    "verb": "analyse",
+    "prompt": "Analyse how the contrast between life and death is represented by the poet.",
+    "maxMarks": 4,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2023 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab23-q3",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab23-t3",
+    "verb": "analyse",
+    "prompt": "Analyse how the author uses language devices to explore a unique perspective of travel.",
+    "maxMarks": 3,
+    "suggestedWords": 144,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2023 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab23-q4",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab23-t4",
+    "verb": "explain",
+    "prompt": "Explain how the image supports the speaker’s emotions in the written extract.",
+    "maxMarks": 4,
+    "suggestedWords": 192,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2023 Trial, Q4"
   }
 ] as Question[];

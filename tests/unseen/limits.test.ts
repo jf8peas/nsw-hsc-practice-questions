@@ -50,6 +50,6 @@ describe("MEDIAN_WORDS", () => {
   });
 
   it("holds the medians the review report counts over the bank (2 and 6 marks rest on one paper each)", () => {
-    expect(MEDIAN_WORDS).toEqual({ 1: 72, 2: 216, 3: 192, 4: 276, 5: 432, 6: 684 });
+    expect(MEDIAN_WORDS).toEqual({ 1: 72, 2: 216, 3: 192, 4: 276, 5: 402, 6: 684 });
   });
 });

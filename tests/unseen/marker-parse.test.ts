@@ -238,6 +238,7 @@ describe("buildUnseenMessages", () => {
     ["explore", "DIRECTIVE VERB: explore = Inquire into and draw conclusions about."],
     ["discuss", "DIRECTIVE VERB: discuss = Identify issues and provide points for and/or against."],
     ["what", "DIRECTIVE VERB: what = Treat 'What ...'"],
+    ["how effectively", "DIRECTIVE VERB: how effectively = Treat 'How effectively ...' as a request to evaluate"],
   ])("knows the directive verb %s", async (verb, line) => {
     const { buildUnseenMessages } = await marker();
     expect(String(buildUnseenMessages({ ...input, verb })[1].content)).toContain(line);

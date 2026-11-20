@@ -6,8 +6,11 @@ import type { DescriptionCheck } from "@/lib/types";
 // blocked by `npm run validate`. Do not edit by hand.
 
 export const descriptionChecks: Record<string, DescriptionCheck> = {
+  "ab23-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-9","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"ff978e800783171da42f0407b31248904794852fba360e7c8a848a2d89c4fd8f"},
+  "ab23-t4": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-9","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"b742d8c2101692e6a74a860a5b681d2f9a245443103d017b1d9a9293f2f136f1"},
   "ab25-t2": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"35597da1fda9e3634f12fc5e48c69d471474131e93a287163955e4460f0c7117"},
   "bk26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"bb2cc75107da539b87490916b27027eed825f0f31b41c77fce891a65e53e3880"},
+  "ct23-t1": {"adequate":true,"checkedAt":"2026-11-20","promptVersion":"unseen-pilot-9","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"355c543f963250fc894fb8b6274c8feae0d239a7f37037a6ad5e926b16aaacf1"},
   "ct24-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-8","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"c120e4debb71fadfe426c3842a8ad177109173c208bd68810b10e5d081075ab6"},
   "db26-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":1,"descriptionHash":"2fd9db239fa476ea255c68e77a8b85eefa98f93a99b040d13af97cba77e80651"},
   "fs23-t1": {"adequate":true,"checkedAt":"2026-11-19","promptVersion":"unseen-pilot-7","model":"deepseek/deepseek-v4.1-flash","samples":6,"descriptionHash":"0b01db143b4d4e56d20565f5521be2a9e7b317995611a2dd0775073b81f0d210"},

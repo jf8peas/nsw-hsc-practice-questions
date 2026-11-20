@@ -427,7 +427,7 @@ returning the model answer with the first try's result "to save a request" (brea
 
 - `lib/unseen/rubric.json` (server-only; `{ promptVersion, directiveVerbs, systemPrompt, userTemplate }`).
   At port it is `resources/english-unseen/rubric.json` with the `skills` array removed: **byte-identical
-  prompt text, `promptVersion: "unseen-pilot-4"`** (now `unseen-pilot-8`: `unseen-pilot-5` added `goFurther`, `-6` made `biggestGap` null at full marks, `-7` added the verb `discuss`, `-8` added the verb `what`). The old file in `resources/` is deleted (the three
+  prompt text, `promptVersion: "unseen-pilot-4"`** (now `unseen-pilot-9`: `unseen-pilot-5` added `goFurther`, `-6` made `biggestGap` null at full marks, `-7` added the verb `discuss`, `-8` added the verb `what`, `-9` added `how effectively`). The old file in `resources/` is deleted (the three
   `rubric.pilot-N.json` history files stay as records) so there is one source of truth.
 - `lib/unseen/skills.json` (public; `[{ id, name, tip, description }]`, the seven skills). The `skills`
   array moves out of the prompt file because the prompt file is server-only and the tips must reach the
