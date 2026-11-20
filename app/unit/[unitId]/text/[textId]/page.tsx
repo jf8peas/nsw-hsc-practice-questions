@@ -6,7 +6,7 @@ import { TextPanel } from "@/components/unseen/Text";
 import { getUnit } from "@/content";
 import { requirePageUser } from "@/lib/auth.server";
 import { load } from "@/lib/db/queries/history.server";
-import { hasStartedText } from "@/lib/db/queries/unseen-progress.server";
+import { attemptUsesText, hasStartedText } from "@/lib/db/queries/unseen-progress.server";
 
 // The text of an unseen-text question on its own page, opened in a new tab from the quiz so the student can
 // put it beside the answer (spec 008 FR-006, research R12). It shows ONLY the public text: heading, title,
@@ -18,6 +18,7 @@ import { hasStartedText } from "@/lib/db/queries/unseen-progress.server";
 // the page never reveals whether a text exists.
 
 const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function publicText(unitId: string, textId: string) {
   if (!ID_RE.test(textId)) return null;
@@ -36,7 +37,13 @@ export async function generateMetadata({ params }: { params: Promise<{ unitId: s
   return { title: text.title ? `${text.heading} – ${text.title}` : text.heading, robots: { index: false } };
 }
 
-export default async function TextPage({ params }: { params: Promise<{ unitId: string; textId: string }> }) {
+export default async function TextPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ unitId: string; textId: string }>;
+  searchParams?: Promise<{ attempt?: string | string[] }>;
+}) {
   const { user, degraded } = await requirePageUser();
   const { unitId, textId } = await params;
   const unit = getUnit(unitId);
@@ -46,10 +53,20 @@ export default async function TextPage({ params }: { params: Promise<{ unitId: s
   const started = await load((db) => hasStartedText(db, user.id, unit, textId));
   if (started.status === "unavailable") return <TextUnavailable />;
   if (!started.data) notFound();
+  // Highlights are kept per attempt: the quiz puts its attempt id in the link. Without a valid one (the id is not
+  // this student's, or does not hold a question on this text) the text still shows, with highlighting off.
+  const raw = (await searchParams)?.attempt;
+  const attemptId = typeof raw === "string" && UUID_RE.test(raw) ? raw : null;
+  const linked = attemptId ? await load((db) => attemptUsesText(db, user.id, unit, attemptId, textId)) : null;
+  const attemptOk = Boolean(attemptId && linked?.status === "ok" && linked.data);
   return (
     <Shell>
       <div className="un-textpage">
-        <TextPanel text={text} />
+        <TextPanel
+          text={text}
+          highlight={attemptOk && attemptId ? { userId: user.id, attemptId } : null}
+          highlightNote="Highlighting is off here: open this text from its quiz (the link there carries your attempt)."
+        />
       </div>
     </Shell>
   );

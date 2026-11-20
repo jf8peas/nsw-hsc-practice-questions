@@ -2783,6 +2783,7 @@ input {
 /* the open-the-text-in-a-new-tab icon beside a text's heading (spec 008 FR-006) */
 .un-text-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
 .un-text-top .un-heading { margin: 0; }
+.un-text-tools { display: flex; align-items: center; gap: 4px; }
 .un-open { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 auto; border-radius: var(--rd-r-md); color: var(--rd-blue-600); }
 .un-open:hover { background: var(--rd-surface-100); }
 .un-open:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: 2px; }
@@ -2798,3 +2799,17 @@ input {
   .un-textpage { max-width: none; }
   .un-textpage .un-image { max-width: 100%; page-break-inside: avoid; }
 }
+
+/* text highlighting (spec 008 FR-006a) */
+.un-hl-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 auto; border: 1px solid transparent; border-radius: var(--rd-r-md); background: transparent; color: var(--rd-blue-600); cursor: pointer; }
+.un-hl-toggle:hover:not(:disabled) { background: var(--rd-surface-100); }
+.un-hl-toggle.on { background: var(--rd-highlight-bg); color: var(--rd-ink-900); border-color: var(--rd-ink-700); }
+.un-hl-toggle:disabled { color: var(--rd-ink-700); opacity: .55; cursor: default; }
+.un-hl-toggle:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: 2px; }
+.un-hl-status { margin: 0 0 6px; font-size: var(--rd-fs-sm); font-weight: 600; color: var(--rd-ink-900); }
+.un-hl-note { margin: 0 0 6px; font-size: var(--rd-fs-sm); color: var(--rd-ink-700); }
+mark.un-hl { background: var(--rd-highlight-bg); color: var(--rd-ink-900); padding: 0; border-radius: 2px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+mark.un-hl-on { cursor: pointer; }
+mark.un-hl-on:hover { outline: 1px solid var(--rd-ink-700); }
+mark.un-hl-on:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: 1px; }
+@media print { .un-hl-toggle, .un-hl-status, .un-hl-note { display: none !important; } }

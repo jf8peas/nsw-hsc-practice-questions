@@ -281,6 +281,21 @@ is reachable only from a server response that carried `discussion`; no state off
 self-mark; "Skip the retry" is available in `result`, `retrying` (including with the limit notice) and
 never in `writing`.
 
+### 4.3 Highlights (browser only, never sent to the server; spec 008 FR-006a)
+
+```ts
+interface HlRange { id: string; block: number; start: number; end: number }   // lib/unseen/highlights.ts
+// block: body blocks first (a poem's line index across stanzas, or the prose paragraph index), then the footnotes
+//        (bodyCount + footnote index); start/end are character offsets in that block's string, end exclusive.
+// id: the connected highlight; a highlight across blocks is one HlRange per block with one id.
+// localStorage key: `unseen-hl:v1:<userId>:<attemptId>:<textId>`
+// value: { items: HlRange[]; finalAt?: number }   // finalAt: first time the attempt was seen final; swept 30 days later
+```
+
+Normalised on save (sorted, same-id ranges that meet are merged, clipped to the block length). Shared with other open
+views of the attempt through `BroadcastChannel("unseen-highlights")` (`{ key, items }`) and the window `storage` event.
+The text-only page is addressed `/unit/<unit>/text/<text>?attempt=<attemptId>`.
+
 ## 6. Offline files (not in the database)
 
 `resources/english-unseen/pilot-questions.json` (gitignored), existing shape, with `set` of `"tuning"`,

@@ -889,6 +889,7 @@ export function Quiz({
           attemptId={attemptId}
           attemptToken={attemptToken}
           unitId={unitId}
+          uid={uid}
           question={current}
           state={payload.unseenState}
           onFinish={() => router.push(`/unit/${unitId}`)}

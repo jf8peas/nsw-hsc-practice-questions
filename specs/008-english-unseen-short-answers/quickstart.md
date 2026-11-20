@@ -87,6 +87,21 @@ layout is the same single column at every width:
 | 4 | Click the open-in-a-new-tab icon beside the heading; drag that tab to a second monitor (or tile the two windows) | the text opens alone in a new tab; with the quiz and the text side by side you can read the text while you type, and compare them without scrolling; the icon is the same at every width and stage (also after submitting, in the retry and in the discussion) and a keyboard user reaches it with a visible focus ring |
 | 5 | Copy that tab's address, change the text id to one you have not started (for example another paper's text), and open it; also open it signed out | a 404 page for a text you have not started (it must look the same as an id that does not exist); signed out you are sent to sign in. Print the text tab: no header, Zoom button or icon |
 
+### 2c. Highlighting
+
+| Step | Do | Expect |
+|---|---|---|
+| 1 | In the quiz, press the highlighter beside the open-in-a-new-tab icon | it shows pressed with a filled icon and a "Highlighting on" line; the answer box keeps focus if it had it, and typing there works as before |
+| 2 | Open the text in a new tab from the icon and drag it to a second monitor; select a few words in the quiz | the highlight appears in the other window at once, snapped to whole words, with no reload (the tab's own toggle is separate: turn it on there to add highlights from that side) |
+| 3 | Select two overlapping passages | they become one highlight |
+| 4 | Make two separate highlights, then click one | only that highlight goes; the other stays |
+| 5 | Select from the end of one paragraph (or poem line) into the next, then click either part | both parts are one highlight and go together |
+| 6 | Turn highlighting off | selecting selects, clicking does nothing, the highlights stay visible; the heading, title, author, source line and answer box can never be highlighted |
+| 7 | Finish, then start the same question again (a repeat) | the text has no highlights; the earlier attempt's text tab still shows its own |
+| 8 | On a phone: turn it on and long-press a word, then drag the handles and lift | after a moment the words are highlighted (whole words) and the selection clears; tapping a highlight removes it |
+| 9 | Open the text tab without the quiz's link (remove `?attempt=` from the address) | the text shows, the highlighter is disabled and a one-line note says to open it from the quiz |
+| 10 | Print the text tab | highlights print; the toggle, the icon and the header do not |
+
 ## 3. Failure and resume checks
 
 | Check | Do | Expect |

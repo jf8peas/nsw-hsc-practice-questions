@@ -96,7 +96,7 @@ describe("unseen attempt detail", () => {
     const tree = await Page({ params: Promise.resolve({ attemptId: attempt.id }) });
     const panel = findAll(tree, (el) => typeof el.type === "function" && (el.type as { name?: string }).name === "TextPanel")[0];
     const html = renderToStaticMarkup(createElement(panel.type as never, panel.props as never));
-    expect(html).toMatch(new RegExp(`href="/unit/${UNIT}/text/fs25-t1"`));
+    expect(html).toContain(`href="/unit/${UNIT}/text/fs25-t1?attempt=${attempt.id}"`);
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener"');
     expect(html).toContain('aria-label="Open Text 1 – Poem in a new tab"');

@@ -47,6 +47,7 @@ export function UnseenPanel({
   attemptId,
   attemptToken,
   unitId,
+  uid,
   question,
   state,
   onFinish,
@@ -54,6 +55,8 @@ export function UnseenPanel({
   attemptId: string;
   attemptToken: string;
   unitId: string;
+  /** The signed-in student, so highlights are kept per student on this device. */
+  uid: string;
   question: UnseenQuestion;
   state: UnseenState;
   onFinish: () => void;
@@ -274,7 +277,11 @@ export function UnseenPanel({
 
   return (
     <div className="rw-card un-card">
-      <TextPanel text={state.text} openHref={`/unit/${unitId}/text/${state.text.id}`} />
+      <TextPanel
+        text={state.text}
+        openHref={`/unit/${unitId}/text/${state.text.id}?attempt=${attemptId}`}
+        highlight={{ userId: uid, attemptId, final: stage === "discussion" }}
+      />
         <div className="un-main">
           {state.repeating && stage !== "discussion" && (
             <p className="pg-notice un-repeat" role="status">

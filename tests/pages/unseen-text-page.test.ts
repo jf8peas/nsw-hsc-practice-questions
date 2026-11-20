@@ -47,9 +47,9 @@ async function setup() {
   env.signedInAs(asSessionUser(me));
   return me;
 }
-const page = async (textId: string) => {
+const page = async (textId: string, attempt?: string) => {
   const Page = (await import("@/app/unit/[unitId]/text/[textId]/page")).default;
-  return Page({ params: Promise.resolve({ unitId: UNIT, textId }) });
+  return Page({ params: Promise.resolve({ unitId: UNIT, textId }), searchParams: Promise.resolve(attempt === undefined ? {} : { attempt }) });
 };
 /** The TextPanel the page renders, as the browser would first see it (the Shell and its menu are not under test). */
 async function panelHtml(textId: string) {
@@ -150,5 +150,46 @@ describe("the text page carries no key field", () => {
         for (let i = 0; i + 50 <= secret.length; i += 25) expect(serialised, `${textId} key run`).not.toContain(secret.slice(i, i + 50));
       }
     }
+  });
+});
+
+describe("the text page: highlighting is tied to the attempt in the link (spec 008 FR-006a)", () => {
+  const panelProps = async (textId: string, attempt?: string) => {
+    const tree = await page(textId, attempt);
+    return findAll(tree, named("TextPanel"))[0].props as { highlight: { userId: string; attemptId: string } | null; highlightNote?: string };
+  };
+
+  it("a link carrying the student's own attempt on this text turns highlighting on for that attempt", async () => {
+    const me = await setup();
+    const a = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [POEM_Q] });
+    const props = await panelProps("fs25-t1", a.id);
+    expect(props.highlight).toEqual({ userId: me.id, attemptId: a.id });
+  });
+
+  it("no attempt id, a malformed one, another student's, or one without this text leaves the text shown with highlighting off and a note", async () => {
+    const me = await setup();
+    const other = await seedUser(env.db);
+    const mine = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [POEM_Q] });
+    const theirs = await seedAttempt(env.db, other.id, { unitId: UNIT, questionIds: [POEM_Q] });
+    const wrongText = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [PROSE_Q], completedAt: new Date() });
+    for (const attempt of [undefined, "not-an-id", theirs.id, wrongText.id, "00000000-0000-4000-8000-000000000000"]) {
+      const props = await panelProps("fs25-t1", attempt);
+      expect(props.highlight, String(attempt)).toBeNull();
+      expect(props.highlightNote).toMatch(/Highlighting is off here/);
+    }
+    expect(mine.id).toBeTruthy();
+  });
+
+  it("the access rule is unchanged: a valid attempt id does not open a text the student has not started", async () => {
+    const me = await setup();
+    const a = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [POEM_Q] });
+    await expect(page("fs25-t2", a.id)).rejects.toThrow("NOT_FOUND");
+  });
+
+  it("highlight data never comes from the server: the page passes ids only, no ranges", async () => {
+    const me = await setup();
+    const a = await seedAttempt(env.db, me.id, { unitId: UNIT, questionIds: [POEM_Q] });
+    const props = await panelProps("fs25-t1", a.id);
+    expect(Object.keys(props.highlight!).sort()).toEqual(["attemptId", "userId"]);
   });
 });

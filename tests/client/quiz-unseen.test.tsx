@@ -140,13 +140,43 @@ describe("the question screen", () => {
   ])("shows the open-in-a-new-tab link beside the heading at the %s stage", (_stage, state) => {
     const { container } = mount(state());
     const link = screen.getByRole("link", { name: `Open ${text.heading} in a new tab` }) as HTMLAnchorElement;
-    expect(link.getAttribute("href")).toBe(`/unit/${UNIT}/text/${text.id}`);
+    expect(link.getAttribute("href")).toBe(`/unit/${UNIT}/text/${text.id}?attempt=${ATTEMPT}`); // the attempt id keeps highlights per attempt
     expect(link.getAttribute("target")).toBe("_blank");
     expect(link.getAttribute("rel")).toContain("noopener");
     expect(link.getAttribute("title")).toBe(`Open ${text.heading} in a new tab`);
     expect(link.querySelector("svg")!.getAttribute("aria-hidden")).toBe("true");
     expect(link.closest(".un-text-top")).toBeTruthy(); // beside the heading
     expect(container.querySelectorAll(".un-open")).toHaveLength(1);
+  });
+});
+
+describe("highlighting in the quiz (spec 008 FR-006a)", () => {
+  it("has the Highlight toggle in the text heading at every stage, off by default", () => {
+    for (const state of [writeState(), choiceState(), { stage: "discussion", text, try1: tryView(3), ending: "full_marks", recordedMark: 3, discussion: { modelAnswer: MODEL, modelWords: 12 } } as UnseenState]) {
+      mount(state);
+      const btn = screen.getByRole("button", { name: "Highlight" });
+      expect(btn.getAttribute("aria-pressed")).toBe("false");
+      expect(btn.closest(".un-text-top")).toBeTruthy();
+      cleanup();
+    }
+  });
+
+  it("turning highlighting on leaves focus in the answer box, and typing there works and highlights nothing", () => {
+    mount();
+    box().focus();
+    expect(fireEvent.mouseDown(screen.getByRole("button", { name: "Highlight" }))).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Highlight" }));
+    expect(document.activeElement).toBe(box());
+    type("some words typed while highlighting is on");
+    expect(box().value).toBe("some words typed while highlighting is on");
+    expect(document.querySelectorAll("mark.un-hl")).toHaveLength(0);
+  });
+
+  it("keeps the answer box and the question outside the highlightable text", () => {
+    const { container } = mount();
+    const body = container.querySelector(".un-text-body")!;
+    expect(body.contains(box())).toBe(false);
+    expect(body.contains(container.querySelector(".un-q"))).toBe(false);
   });
 });
 

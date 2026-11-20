@@ -79,3 +79,19 @@ export async function hasStartedText(db: Db, userId: string, unit: Unit, textId:
     .limit(1);
   return rows.length > 0;
 }
+
+/**
+ * Whether this attempt belongs to this student and holds a question that uses this text. The text-only tab
+ * takes the attempt id from its link to keep highlights per attempt (spec 008 FR-006a); a link that does not
+ * match turns highlighting off for that tab and nothing else.
+ */
+export async function attemptUsesText(db: Db, userId: string, unit: Unit, attemptId: string, textId: string): Promise<boolean> {
+  const ids = unseenQuestions(unit).filter((q) => q.textId === textId).map((q) => q.id);
+  if (ids.length === 0) return false;
+  const rows = await db
+    .select({ id: attempts.id })
+    .from(attempts)
+    .where(and(eq(attempts.id, attemptId), eq(attempts.userId, userId), eq(attempts.unitId, unit.id), sql`${attempts.questionIds} && ARRAY[${sql.join(ids.map((i) => sql`${i}`), sql`, `)}]::text[]`))
+    .limit(1);
+  return rows.length > 0;
+}
