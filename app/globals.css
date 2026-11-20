@@ -2788,8 +2788,8 @@ input {
 .un-open:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: 2px; }
 
 /* the text on its own page (/unit/<unit>/text/<text>): only the text, readable and printable */
-.un-textpage { max-width: 70ch; margin: 0 auto; }
-.un-textpage .un-prose, .un-textpage .un-poem, .un-textpage .un-footnotes { max-width: 70ch; }
+/* Same width as the text panel in the quiz: the page's column, with the prose capped as there (68ch). */
+.un-textpage { max-width: none; }
 .un-textpage .un-visual { max-width: none; }
 .un-textpage .un-image { width: 100%; height: auto; }
 @media print {
