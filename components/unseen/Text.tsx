@@ -99,10 +99,28 @@ export function VisualText({ image, alt }: { image: string; alt: string }) {
   );
 }
 
-export function TextPanel({ text }: { text: UnseenText }) {
+/** Opens the text on its own page in a new tab, so it can sit beside the answer (FR-006, research R12). */
+export function OpenTextLink({ href, heading }: { href: string; heading: string }) {
+  const label = `Open ${heading} in a new tab`;
+  return (
+    <a className="un-open" href={href} target="_blank" rel="noopener" aria-label={label} title={label}>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 4h6v6" />
+        <path d="M20 4l-9 9" />
+        <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+      </svg>
+    </a>
+  );
+}
+
+/** `openHref` adds the open-in-a-new-tab icon beside the heading; the text's own page leaves it out. */
+export function TextPanel({ text, openHref }: { text: UnseenText; openHref?: string }) {
   return (
     <article className="un-text" aria-labelledby={`un-title-${text.id}`}>
-      {text.title && <p className="un-heading">{text.heading}</p>}
+      <div className="un-text-top">
+        {text.title ? <p className="un-heading">{text.heading}</p> : <span />}
+        {openHref && <OpenTextLink href={openHref} heading={text.heading} />}
+      </div>
       <h2 id={`un-title-${text.id}`} className="un-title">
         {text.title || text.heading}
       </h2>
@@ -117,19 +135,5 @@ export function TextPanel({ text }: { text: UnseenText }) {
       )}
       {text.footnotes && text.footnotes.length > 0 && <Footnotes notes={text.footnotes} />}
     </article>
-  );
-}
-
-/** The text's short label from its heading: "Text 1 – Image" gives "Text 1". */
-export function shortLabel(heading: string): string {
-  return heading.split(/\s[–—-]\s/)[0].trim() || heading;
-}
-
-/** The text in a sheet at every width, so it stays reachable while the student writes (FR-006). Titled with the full heading. */
-export function TextSheet({ text, open, onClose }: { text: UnseenText; open: boolean; onClose: () => void }) {
-  return (
-    <Dialog open={open} onClose={onClose} label={text.heading} className="un-sheet">
-      <TextPanel text={text} />
-    </Dialog>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
-// A native <dialog> wrapper shared by the image zoom and the phone's text sheet (spec 008, research
+// A native <dialog> wrapper shared by the image zoom (spec 008, research
 // R12): showModal (so the page behind is inert), Esc closes it, a labelled Close button at least 44 px
 // tall, and focus returns to whatever opened it. No animation, so nothing to switch off under
 // prefers-reduced-motion.

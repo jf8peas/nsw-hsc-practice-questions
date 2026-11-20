@@ -10,6 +10,10 @@
 
 ## Clarifications
 
+### Session 2026-11-20
+
+- Change (text in a new tab): the "View Text" button and its sheet are removed. The text panel has an open-in-a-new-tab icon beside its heading (`aria-label` "Open <full heading> in a new tab", at least 44 px, visible focus ring) that opens `/unit/<unit>/text/<text>`, a page showing only the text (heading, title, author, source line, body, footnotes) with the question, answer box and key absent. A student can drag that tab to a second monitor and read it beside the answer. FR-006 and User Story 1 scenario 5 are reworded; research R12, R3 and R4, `contracts/api.md` and the quickstart are updated.
+
 ### Session 2026-11-19
 
 - Fix before release (full-mark parsing): at full marks there is no biggest gap, so the marker returns `biggestGap: null` and a required `goFurther` instead; the parser no longer rejects that reply (it had made full-mark markings retry and end as `marker_unavailable`). Below full marks `biggestGap` stays required and `goFurther` is dropped. Prompt `unseen-pilot-6` also adds the directive verbs `examine` and `explore`; `unseen-pilot-7` adds `discuss` (NESA: "Identify issues and provide points for and/or against.") for Sydney Boys 2025 Q3; `unseen-pilot-8` adds `what` ("What ... does the text reveal" questions: identify the features asked for and explain how each works; NESA's glossary has no entry for `what`) for Cherrybrook Tech 2024 Q3 and Sydney Girls 2024 Q2 and Q4. `unseen-pilot-9` adds `how effectively` (an evaluative "How effectively does ..." question; NESA's glossary has no entry, so it is read as NESA's `evaluate`: "Make a judgement based on criteria; determine the value of.") for Cherrybrook Tech 2023 Q3.
@@ -48,7 +52,7 @@ A Year 12 Advanced English student opens the unit and gets one quiz: an unseen t
 2. **Given** a poem, **When** it is shown, **Then** its line and stanza breaks and any line numbers from the paper are kept; **and given** a prose text, **Then** its paragraphs are kept; **and** any glossary footnotes from the paper are shown.
 3. **Given** a visual text, **When** the quiz opens, **Then** the student sees an image cropped from the paper which they can zoom, and the written description used for marking is not shown to them.
 4. **Given** a question with parts (a) and (b) on the same text, **When** the quiz opens, **Then** both parts appear together and are marked together as one question.
-5. **Given** a student on a phone, **When** they open a quiz, **Then** the text and the question stack, and the text stays reachable while they write.
+5. **Given** a student on a phone, **When** they open a quiz, **Then** the text and the question stack, and the text stays reachable while they write by opening it in its own browser tab (an icon beside the text's heading), so it can be read beside the answer or on a second screen.
 6. **Given** a student takes as long as they like, **When** they read or write, **Then** no timer, reading-time lock or auto-submit ever appears.
 7. **Given** an answer is submitted, **When** marking finishes, **Then** the mark, the feedback (two or three sentences on what earned the mark), the biggest gap (one sentence) and seven skill verdicts are shown within one minute.
 
@@ -172,7 +176,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 - **FR-003**: Poems MUST keep their line and stanza breaks and line numbers where the paper has them. Prose MUST keep its paragraphs. Glossary footnotes from the paper MUST be kept.
 - **FR-004**: Visual texts MUST be shown as an image cropped from the paper which the student can zoom. Each visual text MUST have a written description for the marker. The description MUST NOT reach the browser. Serving the cropped image needs the Principle V amendment recorded under Clarifications.
 - **FR-005**: Below the text the quiz MUST show the question, its mark value, the question's source (school, year, exam, question number, as other units quote sources), and an answer box with a word meter and the suggested length.
-- **FR-006**: On a phone the text and the question MUST stack, and the text MUST stay reachable while the student writes.
+- **FR-006**: On a phone the text and the question MUST stack, and the text MUST stay reachable while the student writes: an icon link beside the text's heading, at every screen size and at every stage (write, retry, discussion) and on the attempt detail page, opens the text alone in a new tab (`/unit/<unit>/text/<text>`). That page requires sign-in and shows a text only to a student who has an attempt on a question that uses it (anything else is a 404); it carries only public text fields.
 - **FR-007**: A question with parts on the same text MUST be one quiz: all parts appear together and are marked together.
 
 **Answering**

@@ -199,6 +199,22 @@ accepts `rewrite`, `paragraph` and `unseen`.
 There is no flag route: the unit has no student flag (the 2026-11-19 clarification), so `/api/unseen/flag`
 does not exist and the discussion has no flag button. The offline re-mark (research R11) is how marks are checked.
 
+## GET /unit/[unitId]/text/[textId] (a page, not an API route)
+
+The text alone, opened in a new tab from the icon beside a text's heading (FR-006, research R12). HTML, public
+fields only: heading, title, author, source line, the body (poem, prose, or an `<img src="/api/unseen/image/<textId>">`
+with the zoom dialog) and the footnotes; never the question, an answer box, a description, criteria, notes or a model answer.
+
+| Status | When |
+|---|---|
+| `200` | signed in, and the student has an attempt (finished or not) on a question of the unit that uses `textId` |
+| redirect to `/signin` | no session |
+| `404` | `unitId` or `textId` is unknown or malformed, or the student has no attempt on a question using the text (one answer for all of these, so it never reveals whether a text exists) |
+| notice page | the database cannot be read, so access cannot be checked (the text is not shown) |
+
+The tab title is "<heading> – <title>" (the heading alone for an untitled visual) once access is confirmed, and a
+neutral "Text" otherwise; the page is `noindex`.
+
 ## GET /api/unseen/image/[textId]
 
 Path parameter only; no query, no body. The cropped visual stimulus for a text of the unit (constitution

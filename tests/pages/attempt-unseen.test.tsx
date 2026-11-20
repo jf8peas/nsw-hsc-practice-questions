@@ -90,6 +90,18 @@ describe("unseen attempt detail", () => {
     expect(html).not.toContain("flagged");
   });
 
+  it("has the open-in-a-new-tab link beside the text's heading, to the text's own page", async () => {
+    const attempt = await seeded({ final: true });
+    const Page = (await import("@/app/attempts/[attemptId]/page")).default;
+    const tree = await Page({ params: Promise.resolve({ attemptId: attempt.id }) });
+    const panel = findAll(tree, (el) => typeof el.type === "function" && (el.type as { name?: string }).name === "TextPanel")[0];
+    const html = renderToStaticMarkup(createElement(panel.type as never, panel.props as never));
+    expect(html).toMatch(new RegExp(`href="/unit/${UNIT}/text/fs25-t1"`));
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener"');
+    expect(html).toContain('aria-label="Open Text 1 – Poem in a new tab"');
+  });
+
   it("shows \"Make it even stronger\" for a full-mark first try and never for a below-full one", async () => {
     const full = await render((await seeded({ final: true, full: true })).id);
     expect(full).toContain("Make it even stronger");

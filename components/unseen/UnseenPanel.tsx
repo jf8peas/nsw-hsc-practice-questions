@@ -15,7 +15,7 @@ import type { NotMarked, TryView, UnseenDiscussion, UnseenEnding, UnseenGradeRes
 import { countWords } from "@/lib/wordcount";
 
 import { DeclineButton, Discussion, FirstTryCollapsed, ResultCard, RetryChoice, TipCards } from "./Results";
-import { TextPanel, TextSheet } from "./Text";
+import { TextPanel } from "./Text";
 import { AnswerBox, LockedAnswer, MarkingFooter, NotMarkedNotice, QuestionBlock } from "./Writing";
 
 // The unseen-text question card (spec 008, data-model.md §5, research R12): writing, marking the first
@@ -46,6 +46,7 @@ const tryFrom = (r: UnseenGradeResult, text: string): TryView => ({
 export function UnseenPanel({
   attemptId,
   attemptToken,
+  unitId,
   question,
   state,
   onFinish,
@@ -83,7 +84,6 @@ export function UnseenPanel({
   const [error, setError] = useState<string | null>(null);
   const [markingStep, setMarkingStep] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   const text1Ref = useRef(text1);
   const text2Ref = useRef(text2);
@@ -274,7 +274,7 @@ export function UnseenPanel({
 
   return (
     <div className="rw-card un-card">
-      <TextPanel text={state.text} />
+      <TextPanel text={state.text} openHref={`/unit/${unitId}/text/${state.text.id}`} />
         <div className="un-main">
           {state.repeating && stage !== "discussion" && (
             <p className="pg-notice un-repeat" role="status">
@@ -295,8 +295,6 @@ export function UnseenPanel({
                 onChange={(t) => changeText(1, t)}
                 onBlur={() => blurBeacon(1)}
                 onSubmit={() => void submit(1)}
-                onShowText={() => setSheetOpen(true)}
-                textHeading={state.text.heading}
                 suggestedWords={suggested}
                 limitReached={limitReached}
               />
@@ -332,8 +330,6 @@ export function UnseenPanel({
                 onChange={(t) => changeText(2, t)}
                 onBlur={() => blurBeacon(2)}
                 onSubmit={() => void submit(2)}
-                onShowText={() => setSheetOpen(true)}
-                textHeading={state.text.heading}
                 suggestedWords={suggested}
                 textareaRef={retryRef}
                 limitReached={limitReached}
@@ -364,7 +360,6 @@ export function UnseenPanel({
             />
           )}
         </div>
-      <TextSheet text={state.text} open={sheetOpen} onClose={() => setSheetOpen(false)} />
     </div>
   );
 }

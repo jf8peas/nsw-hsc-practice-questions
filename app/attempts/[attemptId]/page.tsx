@@ -85,7 +85,7 @@ export default async function AttemptDetailPage({
                 {found?.unit.texts?.find((t) => t.id === q.textId) && (
                   <details className="un-collapse">
                     <summary>The text</summary>
-                    <TextPanel text={found.unit.texts.find((t) => t.id === q.textId)!} />
+                    <TextPanel text={found.unit.texts.find((t) => t.id === q.textId)!} openHref={`/unit/${found.unit.id}/text/${q.textId}`} />
                   </details>
                 )}
               </>

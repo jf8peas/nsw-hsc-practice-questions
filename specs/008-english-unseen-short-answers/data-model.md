@@ -247,6 +247,7 @@ interface UnseenState {
   try1?: TryView;                           // stage choice | retry | discussion
   try2?: TryView;                           // stage discussion after a marked retry
   draft2?: string;                          // stage retry
+  // the text panel has an open-in-a-new-tab link to /unit/<unit>/text/<text> at every stage (no UI state of its own; spec 008 FR-006)
   retryOffered?: boolean;                   // stage choice | retry
   dailyLimit?: { reached: true; resetsAt: string };   // present only when the allowance is used up
   ending?: "full_marks" | "retried" | "declined" | "no_retry";

@@ -331,6 +331,10 @@ under 6 MB. The validator checks the first limit it can (file size) and the repo
 total. If the bank ever passes about 40 visual texts the storage decision is revisited (a plain note in the
 report, not a gate).
 
+**The text in its own tab (R12).** The same authenticated image route serves the image on the text page
+(`/unit/<unit>/text/<text>`), which also needs sign-in and an attempt on a question using the text; the image
+route itself is unchanged (it checks sign-in only, as before) and still never carries the description.
+
 **Zoom and alt text.**
 
 - The inline image is `<img src="/api/unseen/image/<id>" alt="<alt>" loading="eager">` at the column width
@@ -370,6 +374,14 @@ the marker catches thin descriptions the author did not).
 ---
 
 ## R4. What reaches the browser, when (FR-022, SC-006, Principle I)
+
+
+**Addendum (2026-11-20): the text page.** `/unit/<unit>/text/<text>` is one more response that carries
+unit content, and it carries only the public text record (heading, title, author, source line, body,
+footnotes). It requires sign-in, renders only for a student with an attempt on a question that uses the text
+(one 404 for every other case, including unknown and malformed ids), imports no key module, and is covered by
+`tests/pages/unseen-text-page.test.ts` and an import check in `tests/no-key-leak.test.ts`. The model answer,
+criteria, notes and description never appear in it.
 
 **Decision.** The key is read in one place, `lib/grading.server.ts`, which exports two functions for this
 unit: `markUnseen` (sends the criteria, notes, model answer and the visual description to the model
@@ -909,11 +921,11 @@ panel tests must stay untouched.
 | Component | Role |
 |---|---|
 | `UnseenPanel` | the state machine and all `fetch` calls (grade, decline, draft) |
-| `TextPanel` | heading, title, author, source line, then `PoemText` / `ProseText` / `VisualText`, then `Footnotes` |
+| `TextPanel` | heading (with `OpenTextLink`), title, author, source line, then `PoemText` / `ProseText` / `VisualText`, then `Footnotes` |
 | `PoemText` | stanzas of `.un-line`s, optional line numbers (`aria-hidden`), `white-space: pre-wrap` |
 | `ProseText` | paragraphs |
 | `VisualText` | `<img>` from the authenticated route, "Zoom" button, `ZoomDialog` |
-| `TextSheet` | a "View …" button in the answer footer, at every width (label "View " + the text's short label from its heading, e.g. "View Text 1"; `aria-label` "View " + the full heading, e.g. "View Text 1 – Image"), that opens the text in a `<dialog>` titled with the full heading, so the text is reachable while writing (FR-006); its close button stays "Close" |
+| `OpenTextLink` | an inline-SVG open-in-a-new-window icon beside the text's heading (inside `TextPanel`, when `openHref` is given): an `<a href="/unit/<unit>/text/<text>" target="_blank" rel="noopener">` with `aria-label` and `title` "Open <full heading> in a new tab", a 44 px target and a visible focus ring; shown at every width and stage and on the attempt detail page |
 | `QuestionBlock` | the question (with parts), "N marks", the source credit |
 | `AnswerBox` | the textarea, word meter, limit notes, Submit; props for `locked`, `limit`, `notice` |
 | `LockedAnswer` | the locked text during marking (reuses the paragraph unit's look, own class) |
@@ -958,13 +970,11 @@ server response that carried `discussion`; no state offers a third try; no state
 then the question block, then the answer box. The text is a full inline panel (not collapsed, so the student
 reads it where they expect it). Prose, poems and footnotes are capped at a comfortable reading width
 (`max-width: 68ch`); an image uses the full card width, so it is shown large, and the Zoom dialog is still
-there for detail. In the answer box footer a **"View …"** button (44 px), shown at every width, opens
-`TextSheet`. Its label is "View " + the short label from the text's heading (the part before the dash:
-"Text 1 – Image" gives "View Text 1"), and its `aria-label` is "View " + the full heading ("View Text 1 – Image").
-The sheet's title is the full heading and its close button stays "Close". It opens the sheet so the text stays reachable while the textarea is in view (on a phone, with the keyboard up),
-without losing the typed text or the scroll position. There is no two-column layout, no 900 px breakpoint
-for the card and no sticky text column. `TextSheet` and `ZoomDialog` share one `<dialog>` wrapper with a labelled
-"Close" button, `Esc`, focus return, and `prefers-reduced-motion` handled by having no animation at all.
+there for detail. Beside the text's heading an **open-in-a-new-tab icon** (`OpenTextLink`, 44 px, shown at every width and at the write, retry and discussion stages, and on the attempt detail page) opens the text on its own page, so on a phone the text is one tap from the answer and on a desktop the tab can be dragged to a second monitor and read beside the answer. (This replaces the earlier "View Text" button and its sheet: a dialog covered the answer, and a new tab keeps both visible.) There is no two-column layout, no 900 px breakpoint for the card and no sticky text column. `ZoomDialog` keeps the `<dialog>` wrapper with a labelled "Close" button, `Esc`, focus return, and `prefers-reduced-motion` handled by having no animation at all.
+
+**The text page** (decision: the route `app/unit/[unitId]/text/[textId]/page.tsx`, because text ids are unit-local, so the unit id is part of the address; the same route works for any future unit with texts). A server component that renders `TextPanel` without `openHref`: the heading, title, author, source line, then the poem (stanzas and line numbers), prose or the zoomable image (still `/api/unseen/image/<textId>`), then the footnotes, inside the small app header (`Shell`) and nothing else: no question, answer box or navigation. The tab title is "<heading> – <title>" (the heading alone for an untitled visual) and the page is `noindex`. Prose, poems and footnotes keep the 68ch reading width, images use the full width, it reads at 390 px, and `@media print` hides the header, the Zoom button and the icon so it prints cleanly.
+
+**Access (Principles I and II).** `requirePageUser` redirects a signed-out request to sign-in. The text renders only if `hasStartedText` finds an attempt (finished or not) by this student on a question of the unit that uses the text; otherwise, and for an unknown or malformed text id, the page answers the same `notFound()`, so it never reveals whether a text exists. It is built only from the unit's public text records (`getUnit`): it imports no key module and the tab title for a text the student may not open is the neutral "Text". If the database cannot be read the page shows a short "can't be loaded" notice (it cannot check access) rather than the text.
 
 **Timed status steps** are the paragraph unit's pattern: three steps ("Reading your answer", "Comparing it
 with the criteria", "Writing your feedback"), the second ticks at 1.5 s, the third at 8 s, and a fourth
@@ -990,7 +1000,7 @@ takes focus when it appears; the dialogs trap focus natively and return it on cl
 **Rejected.** Generalising `components/paragraph/*` (it would touch the paragraph unit and its tests for
 the two pieces that overlap); a two-column card with a sticky text column from 900 px (the first design:
 it squeezes an image into half the card, makes a long poem scroll inside its own column, and needs a second
-layout to test and keep right, while one column reads the same on every screen and the "View …" button already
+layout to test and keep right, while one column reads the same on every screen and the open-in-a-new-tab icon already
 keeps the text reachable); a modal for the text as the only view (it hides the question); collapsing the
 text (reading the text is the task); auto-scroll on focus (jarring with the keyboard open).
 
@@ -1033,8 +1043,8 @@ tokens only (no colour literals).
 
 New classes: `un-main` (the question and answer column below the text, `gap`), `un-text` (heading, title, author, source line), `un-poem` / `un-stanza` / `un-line` (a hanging
 indent so wrapped lines are distinguishable from new lines, line numbers in a fixed 3 ch gutter), `un-prose`,
-`un-footnotes`, `un-image` and `un-zoom` (the dialog scroll container driven by `--un-zoom`), `un-sheet`
-(the bottom-sheet dialog), `un-q` (question block), `un-meter` (the word meter states: short, ok, warn,
+`un-footnotes`, `un-image` and `un-zoom` (the dialog scroll container driven by `--un-zoom`), `un-text-top` and
+`un-open` (the heading row and the open-in-a-new-tab icon) with `un-textpage` (the text's own page), `un-q` (question block), `un-meter` (the word meter states: short, ok, warn,
 over, each with text and an icon as well as colour), `un-result`, `un-skill` (a verdict row), `un-compare`
 (two columns from 900 px, stacked below), `un-notice` (status notices, not alerts).
 

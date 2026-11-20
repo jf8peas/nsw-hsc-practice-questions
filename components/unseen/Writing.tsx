@@ -7,7 +7,6 @@ import { lengthNote, lengthState, limitsFor } from "@/lib/unseen/limits";
 import type { NotMarked } from "@/lib/unseen/types";
 import { countWords } from "@/lib/wordcount";
 
-import { shortLabel } from "./Text";
 
 // The writing surfaces of the unseen-text unit (spec 008): the question, the answer box with its
 // meter and length rules, the locked block while marking, and the two plain notices for a try that
@@ -93,8 +92,6 @@ export function AnswerBox({
   onChange,
   onBlur,
   onSubmit,
-  onShowText,
-  textHeading = "",
   suggestedWords,
   textareaRef,
   limitReached,
@@ -106,10 +103,6 @@ export function AnswerBox({
   onChange: (text: string) => void;
   onBlur: () => void;
   onSubmit: () => void;
-  /** Opens the text sheet; the button reads "View " + the text's short label. */
-  onShowText?: () => void;
-  /** The text's full heading, e.g. "Text 1 – Image". */
-  textHeading?: string;
   suggestedWords: number;
   textareaRef?: Ref<HTMLTextAreaElement>;
   /** The day's allowance is used up: Submit stays disabled until the next day (FR-031). */
@@ -139,11 +132,6 @@ export function AnswerBox({
       <div className="answer-bar un-answer-bar">
         <WordMeter words={words} suggested={suggestedWords} />
         <div className="un-actions">
-          {onShowText && (
-            <button type="button" className="un-btn-secondary" onClick={onShowText} aria-label={`View ${textHeading}`}>
-              View {shortLabel(textHeading)}
-            </button>
-          )}
           <button type="button" className="rw-btn" onClick={onSubmit} disabled={blocked}>
             Submit for marking
           </button>

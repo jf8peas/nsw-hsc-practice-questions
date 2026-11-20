@@ -253,3 +253,15 @@ describe("paragraph unit: through the routes (start at part 3, then grade under 
     }
   });
 });
+
+describe("the unseen text's own page (spec 008 FR-006) reads no key module", () => {
+  it("imports only public content (the unit's texts through getUnit), the session and the attempt lookup", () => {
+    const src = fs.readFileSync(path.resolve(__dirname, "../app/unit/[unitId]/text/[textId]/page.tsx"), "utf8");
+    const imports = [...src.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]);
+    for (const spec of imports) {
+      expect(spec, spec).not.toMatch(/content\/answers|\/answers$|\/keys$|\/descriptions$|description-checks|grading\.server|marker\.server|images\.server/);
+    }
+    const code = src.replace(/\/\/.*$/gm, ""); // comments may name the key; code may not
+    expect(code).not.toMatch(/keys|descriptions|criteria|modelAnswer/);
+  });
+});

@@ -125,20 +125,28 @@ describe("the question screen", () => {
     expect(container.querySelector(".un-card")!.children[0].classList.contains("un-text")).toBe(true);
   });
 
-  it("offers a View button, at every width, labelled with the short label and named with the full heading, that opens the text in a dialog titled with the heading", () => {
+  it("has no View button and no text sheet; the text opens in a new tab from an icon link", () => {
     mount();
-    const short = text.heading.split(/\s[–—-]\s/)[0].trim();
-    const btn = screen.getByRole("button", { name: `View ${text.heading}` });
-    expect(btn.textContent).toBe(`View ${short}`);
-    expect(screen.queryByRole("button", { name: "Text" })).toBeNull();
-    fireEvent.click(btn);
-    const sheet = document.querySelector("dialog.un-sheet") as HTMLDialogElement;
-    expect(sheet.hasAttribute("open")).toBe(true);
-    expect(sheet.getAttribute("aria-label")).toBe(text.heading);
-    expect(sheet.querySelector(".un-dialog-title")!.textContent).toBe(text.heading);
-    expect(within(sheet).getByRole("heading", { name: text.title })).toBeTruthy();
-    fireEvent.click(within(sheet).getByRole("button", { name: "Close" }));
-    expect(sheet.hasAttribute("open")).toBe(false);
+    expect(screen.queryByRole("button", { name: /^View / })).toBeNull();
+    expect(document.querySelector("dialog.un-sheet")).toBeNull();
+    expect(screen.getByRole("link", { name: `Open ${text.heading} in a new tab` })).toBeTruthy();
+  });
+
+  it.each([
+    ["write", () => writeState()],
+    ["retry choice", () => choiceState()],
+    ["retry", () => ({ stage: "retry", text, try1: tryView(1, ["technique-effect"]), draft2: "my retry so far" }) as UnseenState],
+    ["discussion", () => ({ stage: "discussion", text, try1: tryView(3), ending: "full_marks", recordedMark: 3, discussion: { modelAnswer: MODEL, modelWords: 12 } }) as UnseenState],
+  ])("shows the open-in-a-new-tab link beside the heading at the %s stage", (_stage, state) => {
+    const { container } = mount(state());
+    const link = screen.getByRole("link", { name: `Open ${text.heading} in a new tab` }) as HTMLAnchorElement;
+    expect(link.getAttribute("href")).toBe(`/unit/${UNIT}/text/${text.id}`);
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toContain("noopener");
+    expect(link.getAttribute("title")).toBe(`Open ${text.heading} in a new tab`);
+    expect(link.querySelector("svg")!.getAttribute("aria-hidden")).toBe("true");
+    expect(link.closest(".un-text-top")).toBeTruthy(); // beside the heading
+    expect(container.querySelectorAll(".un-open")).toHaveLength(1);
   });
 });
 

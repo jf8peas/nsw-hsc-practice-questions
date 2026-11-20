@@ -1,6 +1,9 @@
 import "server-only";
 
+import { and, eq, sql } from "drizzle-orm";
+
 import type { Db } from "@/lib/db/index.server";
+import { attempts } from "@/lib/db/schema";
 import { getLatestIncompleteAttempt } from "@/lib/db/queries/attempts.server";
 import { listUnitResultsForProgress } from "@/lib/db/queries/results.server";
 import type { TextForm, Unit } from "@/lib/types";
@@ -59,4 +62,20 @@ export async function loadUnseenProgress(db: Db, userId: string, unit: Unit): Pr
       : null,
     byForm,
   };
+}
+
+/**
+ * Whether this student has an attempt, finished or not, on a question that uses this text. The text's own
+ * page (spec 008 FR-006, research R12) shows a text only to a student who has started it, so a text id can
+ * neither be probed nor read ahead of its question.
+ */
+export async function hasStartedText(db: Db, userId: string, unit: Unit, textId: string): Promise<boolean> {
+  const ids = unseenQuestions(unit).filter((q) => q.textId === textId).map((q) => q.id);
+  if (ids.length === 0) return false;
+  const rows = await db
+    .select({ id: attempts.id })
+    .from(attempts)
+    .where(and(eq(attempts.userId, userId), eq(attempts.unitId, unit.id), sql`${attempts.questionIds} && ARRAY[${sql.join(ids.map((i) => sql`${i}`), sql`, `)}]::text[]`))
+    .limit(1);
+  return rows.length > 0;
 }
