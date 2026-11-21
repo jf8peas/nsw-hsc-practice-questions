@@ -31,7 +31,6 @@ import {
   CriterionResults,
   FinalBeside,
   FirstTryCollapsed,
-  FlagButton,
   ModelParagraph,
   ResultSummary,
   TipCards,
@@ -96,9 +95,6 @@ export function ParagraphPanel({
   const [recorded, setRecorded] = useState<number>(state.recordedMark ?? 0);
   const [discussion, setDiscussion] = useState<ParagraphDiscussion | undefined>(state.discussion);
   const [mode, setMode] = useState<"marker" | "self_mark">(state.mode ?? "marker");
-  const [flagged, setFlagged] = useState<boolean>(state.flagged ?? false);
-  const [flagBusy, setFlagBusy] = useState(false);
-  const [flagError, setFlagError] = useState<string | null>(null);
   const [selfToken, setSelfToken] = useState<string>("");
   const [ticks, setTicks] = useState<Ticks>({ a: false, b: false, c: false, d: false });
   const [saving, setSaving] = useState(false);
@@ -258,24 +254,6 @@ export function ParagraphPanel({
     setSaving(false);
   }
 
-  async function flag() {
-    if (flagged || flagBusy) return;
-    setFlagBusy(true);
-    setFlagError(null);
-    try {
-      const res = await fetch("/api/paragraph/flag", {
-        method: "POST",
-        headers: json,
-        body: JSON.stringify({ attemptId, attemptToken, questionId }),
-      });
-      if (res.ok) setFlagged(true);
-      else setFlagError("Could not flag that just now. Try again in a moment.");
-    } catch {
-      setFlagError(OFFLINE_ERROR);
-    }
-    setFlagBusy(false);
-  }
-
   // ---- shared pieces --------------------------------------------------------------------------
   const partName = view.partName;
   const progressBar = <EssayProgressBar essayNo={view.essayNo} part={view.part} parts={view.parts} />;
@@ -410,7 +388,6 @@ export function ParagraphPanel({
             noPills={ending === "no_correction"}
           />
           {ending === "no_correction" && <TipCards partNo={view.part} criteria={phase1.criteria} heading="Work on these next" />}
-          {mode === "marker" && <FlagButton flagged={flagged} busy={flagBusy} error={flagError} onFlag={() => void flag()} />}
           <FinalBeside
             partNo={view.part}
             label={phase2 ? "YOUR CORRECTION" : "YOUR PART"}

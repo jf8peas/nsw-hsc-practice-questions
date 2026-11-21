@@ -220,46 +220,95 @@ export function ModelSoFar({
   earlier,
   partNo,
   partName,
+  inline = false,
 }: {
   earlier: ParagraphQuestionView["earlier"];
   partNo: number;
   partName: string;
+  /** Already inside a collapsed row: show both blocks as plain sections instead of nesting toggles. */
+  inline?: boolean;
 }) {
   const hasYours = earlier.some((e) => e.yours);
-  return (
-    <section className="pg-section" aria-labelledby="pg-model-title">
-      <div className="pg-section-head">
-        <h3 id="pg-model-title" className="pg-h3">The paragraph so far</h3>
-        <span className="pg-help">Your part continues from here</span>
-      </div>
-      {hasYours && (
-        <details className="pg-collapse" open>
-          <summary>Your paragraph so far</summary>
+  const chev = (
+    <svg className="pg-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  );
+  if (inline) {
+    return (
+      <>
+        {hasYours && (
+          <section className="pg-section" aria-labelledby="pg-yours-title">
+            <h3 id="pg-yours-title" className="pg-h3">Your paragraph so far</h3>
+            <div className="pg-model">
+              {earlier.map((e) => (
+                <div key={e.part} className="pg-model-part">
+                  <div className="pg-label">{e.label}</div>
+                  <p>{e.yours ?? "(no answer saved)"}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+        <section className="pg-section" aria-labelledby="pg-model-title">
+          <h3 id="pg-model-title" className="pg-h3">The model paragraph so far</h3>
           <div className="pg-model">
             {earlier.map((e) => (
               <div key={e.part} className="pg-model-part">
                 <div className="pg-label">{e.label}</div>
-                <p>{e.yours ?? "(no answer saved)"}</p>
+                <p>{e.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+        <div className="pg-slot">
+          {partNo} · {partName} — you write this below
+        </div>
+      </>
+    );
+  }
+  return (
+    <>
+      {hasYours && (
+        <section className="pg-section" aria-labelledby="pg-yours-title">
+          <details className="pg-brief-details" open>
+            <summary className="pg-brief-summary">
+              {chev}
+              <h3 id="pg-yours-title" className="pg-h3">Your paragraph so far</h3>
+              <span className="pg-help">Your part continues from here</span>
+            </summary>
+            <div className="pg-model">
+              {earlier.map((e) => (
+                <div key={e.part} className="pg-model-part">
+                  <div className="pg-label">{e.label}</div>
+                  <p>{e.yours ?? "(no answer saved)"}</p>
+                </div>
+              ))}
+            </div>
+          </details>
+        </section>
+      )}
+      <section className="pg-section" aria-labelledby="pg-model-title">
+        <details className="pg-brief-details" open={!hasYours}>
+          <summary className="pg-brief-summary">
+            {chev}
+            <h3 id="pg-model-title" className="pg-h3">The model paragraph so far</h3>
+            {!hasYours && <span className="pg-help">Your part continues from here</span>}
+          </summary>
+          <div className="pg-model">
+            {earlier.map((e) => (
+              <div key={e.part} className="pg-model-part">
+                <div className="pg-label">{e.label}</div>
+                <p>{e.text}</p>
               </div>
             ))}
           </div>
         </details>
-      )}
-      <details className="pg-collapse" open={!hasYours}>
-        <summary>The model paragraph so far</summary>
-        <div className="pg-model">
-          {earlier.map((e) => (
-            <div key={e.part} className="pg-model-part">
-              <div className="pg-label">{e.label}</div>
-              <p>{e.text}</p>
-            </div>
-          ))}
-        </div>
-      </details>
+      </section>
       <div className="pg-slot">
         {partNo} · {partName} — you write this below
       </div>
-    </section>
+    </>
   );
 }
 
@@ -269,7 +318,7 @@ export function BriefAndModelCollapsed({ view, children }: { view: ParagraphQues
     <details className="pg-collapse">
       <summary>The brief and the model paragraph so far</summary>
       <BriefTable brief={view.brief} uses={view.uses} />
-      <ModelSoFar earlier={view.earlier} partNo={view.part} partName={view.partName} />
+      <ModelSoFar earlier={view.earlier} partNo={view.part} partName={view.partName} inline />
       {children}
     </details>
   );

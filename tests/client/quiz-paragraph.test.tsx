@@ -2,7 +2,7 @@
 //
 // The browser side of the paragraph unit (spec 007): the question screen, the locked marking state
 // with the text never cleared, the result + tip cards + pre-filled correction, the discussion
-// variants (full marks, corrected, FR-019a, self-mark), the flag, focus, and resume.
+// variants (full marks, corrected, FR-019a, self-mark), focus, and resume.
 
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -255,16 +255,6 @@ describe("the discussion", () => {
     await waitFor(() => expect(screen.getByText("Your recorded mark is 3 / 4 (your better try).")).toBeTruthy());
   });
 
-  it("the flag stores once and the button shows the done state", async () => {
-    await toDiscussion();
-    responder = () => json({ flagged: true });
-    fireEvent.click(screen.getByRole("button", { name: /This mark seems wrong/ }));
-    await waitFor(() => expect(screen.getByRole("button", { name: /Flagged for your teacher/ })).toBeTruthy());
-    expect((screen.getByRole("button", { name: /Flagged for your teacher/ }) as HTMLButtonElement).disabled).toBe(true);
-    const flagCall = calls.find((c) => c.url === "/api/paragraph/flag")!;
-    expect(Object.keys(flagCall.body).sort()).toEqual(["attemptId", "attemptToken", "questionId"]);
-  });
-
   it("Finish returns to the unit page", async () => {
     await toDiscussion();
     fireEvent.click(screen.getByRole("button", { name: /Finish/ }));
@@ -312,7 +302,6 @@ describe("FR-019a: the correction could not be marked", () => {
     expect(screen.queryByText("Fix these in your correction")).toBeNull();
     expect(screen.queryByRole("textbox")).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByRole("button", { name: /This mark seems wrong/ })).toBeTruthy();
   });
 });
 
@@ -361,10 +350,9 @@ describe("resume", () => {
   it("opens the discussion for a final part", () => {
     const d = paragraphDiscussion(Q3)!;
     mount(Q3, {
-      stage: "discussion", view: paragraphQuestionView(Q3)!, ending: "full_marks", recordedMark: 4, mode: "marker", flagged: true, discussion: d,
+      stage: "discussion", view: paragraphQuestionView(Q3)!, ending: "full_marks", recordedMark: 4, mode: "marker", discussion: d,
       phase1: { text: "Good text", mark: 4, criteria: crit("abcd"), feedback: "Great.", wordCount: 2 },
     });
     expect(screen.getByText("Full marks on your first try.")).toBeTruthy();
-    expect((screen.getByRole("button", { name: /Flagged for your teacher/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

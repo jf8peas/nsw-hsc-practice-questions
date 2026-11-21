@@ -2536,11 +2536,6 @@ input {
 .pg-tip-text { margin: 0; font-family: var(--rd-font-display); font-weight: 700; font-size: var(--rd-fs-lg); color: var(--rd-ink-900); }
 .pg-tip-apply { margin: 0; font-size: var(--rd-fs-md); line-height: 1.5; color: var(--rd-ink-700); }
 
-/* flag */
-.pg-flag { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-.pg-flag-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; }
-.pg-flag-error { margin: 0; font-size: var(--rd-fs-sm); color: var(--rd-ink-900); }
-
 /* the model paragraph with this part highlighted and later parts as chips */
 .pg-key { display: inline-flex; align-items: center; gap: 6px; font-size: var(--rd-fs-sm); color: var(--rd-mute-600); }
 .pg-key-swatch { width: 12px; height: 12px; border-radius: var(--rd-r-xs); background: var(--rd-blue-100); border: 1px solid var(--rd-blue-300); }

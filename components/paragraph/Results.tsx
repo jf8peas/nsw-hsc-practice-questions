@@ -8,7 +8,7 @@ import type { PartNo } from "@/lib/types";
 import { CheckIcon } from "./Frame";
 
 // The result surfaces (spec 007): the first-try result, the tip cards, the recorded-mark summary,
-// the per-criterion pills, the flag button, the final text beside the model, the model paragraph
+// the per-criterion pills, the final text beside the model, the model paragraph
 // with later parts as labelled slots, and the tips added to "Things I need to know".
 
 function MetIcon({ met }: { met: boolean }) {
@@ -200,30 +200,6 @@ export function CriterionPills({
         })}
       </ul>
     </section>
-  );
-}
-
-export function FlagButton({ flagged, busy, error, onFlag }: { flagged: boolean; busy: boolean; error?: string | null; onFlag: () => void }) {
-  return (
-    <div className="pg-flag">
-      <p className="pg-help">Think the marker got a criterion wrong? Flag it and your teacher will look at it.</p>
-      <button type="button" className="rd-btn pg-flag-btn" onClick={onFlag} disabled={flagged || busy} aria-live="polite">
-        {flagged ? (
-          <>
-            <CheckIcon size={16} />
-            Flagged for your teacher
-          </>
-        ) : (
-          <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M5 21V4M5 4h11l-2 4 2 4H5" />
-            </svg>
-            This mark seems wrong
-          </>
-        )}
-      </button>
-      {error && <p className="pg-flag-error" role="alert">{error}</p>}
-    </div>
   );
 }
 

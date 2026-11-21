@@ -111,13 +111,11 @@ describe("discussion", () => {
     mount(corrected());
     hasExact(
       "Your correction, criterion by criterion", "First try", "Fixed in correction",
-      "Think the marker got a criterion wrong? Flag it and your teacher will look at it.",
       "YOUR CORRECTION", "MODEL EVIDENCE & APPLICATION", "The model paragraph", "This part",
       "4 · EVALUATION — NEXT QUIZ", "5 · LINK — QUIZ AFTER", "Added to Things I need to know",
       "Missed on your first try, so they count even though you fixed them",
       "Next quiz: Part 4 of 5, Evaluation & Limitation",
     );
-    expect(screen.getByRole("button", { name: /This mark seems wrong/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Finish/ })).toBeTruthy();
     has("Full marks for a correction — every criterion met.", "A correction can earn at most 3. Meet all four on the first try next time for the full 4.");
     expect(screen.getByLabelText("Steps").textContent).toContain("Correct · 3/3");
@@ -134,11 +132,6 @@ describe("discussion", () => {
     cleanup();
     mount({ ...full, ending: "self_mark", recordedMark: 3, mode: "self_mark", phase1: { text: "t", mark: 3, criteria: crit("abc").map((c) => ({ ...c, reason: "" })), feedback: "", wordCount: 1 } });
     has("You marked 3 / 4.", "Compare your text with the model part.");
-  });
-
-  it("the flag button reads 'Flagged for your teacher' once flagged", () => {
-    mount({ ...corrected(), flagged: true });
-    expect(screen.getByRole("button", { name: /Flagged for your teacher/ })).toBeTruthy();
   });
 
   it("the footer names the next essay after the Link", () => {

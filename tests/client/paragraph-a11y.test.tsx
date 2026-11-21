@@ -97,7 +97,6 @@ describe("verdicts and statuses are never colour alone", () => {
 describe("targets, motion and width (read from the stylesheet)", () => {
   it("interactive rows are at least 44 px tall and buttons 48 px", () => {
     expect(rule(".pg-collapse > summary")).toMatch(/min-height:\s*44px/);
-    expect(rule(".pg-flag-btn")).toMatch(/min-height:\s*44px/);
     expect(rule(".pg-tick")).toMatch(/min-height:\s*44px/);
     expect(rule(".pg-criteria-pills > li")).toMatch(/min-height:\s*44px/);
     expect(rwRule(".rw-btn")).toMatch(/height:\s*48px/);

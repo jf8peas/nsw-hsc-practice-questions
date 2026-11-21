@@ -116,13 +116,4 @@ describe("POST /api/results/self-mark (paragraph)", () => {
     expect(r.body.error).toBe("phase_refused");
     expect((await phaseRow(questionId)).phase1Mark).toBe(2);
   });
-
-  it("a self-marked part cannot be flagged (there is no marker mark to dispute)", async () => {
-    const { req } = await atSelfMark();
-    await selfMark({ ...req, ticks: { a: true, b: true, c: true, d: true } });
-    const { POST } = await import("@/app/api/paragraph/flag/route");
-    const res = await POST(post("/api/paragraph/flag", { attemptId: req.attemptId, attemptToken: req.attemptToken, questionId: req.questionId }));
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("not_flaggable");
-  });
 });
