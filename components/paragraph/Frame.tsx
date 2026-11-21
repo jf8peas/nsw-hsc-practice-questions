@@ -225,22 +225,39 @@ export function ModelSoFar({
   partNo: number;
   partName: string;
 }) {
+  const hasYours = earlier.some((e) => e.yours);
   return (
     <section className="pg-section" aria-labelledby="pg-model-title">
       <div className="pg-section-head">
-        <h3 id="pg-model-title" className="pg-h3">The model paragraph so far</h3>
+        <h3 id="pg-model-title" className="pg-h3">The paragraph so far</h3>
         <span className="pg-help">Your part continues from here</span>
       </div>
-      <div className="pg-model">
-        {earlier.map((e) => (
-          <div key={e.part} className="pg-model-part">
-            <div className="pg-label">{e.label}</div>
-            <p>{e.text}</p>
+      {hasYours && (
+        <details className="pg-collapse" open>
+          <summary>Your paragraph so far</summary>
+          <div className="pg-model">
+            {earlier.map((e) => (
+              <div key={e.part} className="pg-model-part">
+                <div className="pg-label">{e.label}</div>
+                <p>{e.yours ?? "(no answer saved)"}</p>
+              </div>
+            ))}
           </div>
-        ))}
-        <div className="pg-slot">
-          {partNo} · {partName} — you write this below
+        </details>
+      )}
+      <details className="pg-collapse" open={!hasYours}>
+        <summary>The model paragraph so far</summary>
+        <div className="pg-model">
+          {earlier.map((e) => (
+            <div key={e.part} className="pg-model-part">
+              <div className="pg-label">{e.label}</div>
+              <p>{e.text}</p>
+            </div>
+          ))}
         </div>
+      </details>
+      <div className="pg-slot">
+        {partNo} · {partName} — you write this below
       </div>
     </section>
   );

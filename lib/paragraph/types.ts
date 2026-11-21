@@ -40,7 +40,8 @@ export interface ParagraphQuestionView {
     limitation: string[];
   };
   uses: BriefField[];
-  earlier: Array<{ part: PartNo; label: string; text: string }>;
+  /** `text` is the model's; `yours` is the student's own final text for that part, when saved. */
+  earlier: Array<{ part: PartNo; label: string; text: string; yours?: string }>;
   parts: EssayPartDot[];
 }
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import type { Db } from "@/lib/db/index.server";
 import {
@@ -37,6 +37,22 @@ export async function getParagraphPhase(
     )
     .limit(1);
   return rows[0] ?? null;
+}
+
+/** The student's latest phase row for each of these questions (scoped to `userId`), for the earlier parts of an essay. */
+export async function listParagraphPhasesForQuestions(
+  db: Db,
+  userId: string,
+  questionIds: string[],
+): Promise<ParagraphPhaseRow[]> {
+  if (questionIds.length === 0) return [];
+  const rows = await db
+    .select()
+    .from(paragraphPhases)
+    .where(and(eq(paragraphPhases.userId, userId), inArray(paragraphPhases.questionId, questionIds)))
+    .orderBy(desc(paragraphPhases.createdAt));
+  const seen = new Set<string>();
+  return rows.filter((r) => (seen.has(r.questionId) ? false : (seen.add(r.questionId), true)));
 }
 
 /** Every phase row of one attempt (scoped to `userId`), for the attempt detail page. */

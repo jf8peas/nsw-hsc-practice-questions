@@ -3,7 +3,7 @@ import "server-only";
 import { paragraphDiscussion, paragraphQuestionView } from "@/lib/grading.server";
 import type { Db } from "@/lib/db/index.server";
 import { getRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
-import { getParagraphPhase } from "@/lib/db/queries/paragraph-phases.server";
+import { getParagraphPhase, listParagraphPhasesForQuestions } from "@/lib/db/queries/paragraph-phases.server";
 import type { Attempt, ParagraphPhaseRow, ParagraphVerdicts, RewriteDraftRow } from "@/lib/db/schema";
 import type { EssayProgress } from "@/lib/attempts/sequence.server";
 import type {
@@ -72,7 +72,19 @@ export async function loadParagraphState(db: Db, userId: string, attempt: Attemp
     getParagraphPhase(db, userId, attempt.id, questionId),
     getRewriteDraft(db, userId, attempt.id, questionId),
   ]);
-  return paragraphStateFrom(questionId, row, draft);
+  const state = paragraphStateFrom(questionId, row, draft);
+  if (!state || state.view.earlier.length === 0) return state;
+  // The student's own final text for each earlier part (the correction if there was one), shown
+  // beside the model text. The marker still gets the model text only.
+  const base = questionId.replace(/\d+$/, "");
+  const ids = state.view.earlier.map((e) => `${base}${e.part}`);
+  const rows = await listParagraphPhasesForQuestions(db, userId, ids);
+  const mine = new Map(rows.map((r) => [r.questionId, r.phase2Text ?? r.phase1Text]));
+  const earlier = state.view.earlier.map((e) => {
+    const yours = mine.get(`${base}${e.part}`);
+    return yours ? { ...e, yours } : e;
+  });
+  return { ...state, view: { ...state.view, earlier } };
 }
 
 /** The essay bar for the unit page and the quiz header, from the derived progress. */
