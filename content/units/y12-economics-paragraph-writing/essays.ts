@@ -123,7 +123,7 @@ export const essays: EssayKey[] = [
       evaluationPhrase: "income inequality widened",
     },
     // Every figure checked against the sources in docs/y12-economics-paragraph-writing-research.md.
-    figuresVerified: "2026-11-16",
+    figuresVerified: "2026-11-22",
   },
   {
     essayId: "e04",
@@ -147,11 +147,11 @@ export const essays: EssayKey[] = [
       ],
       facts: [
         "China had almost no high-speed rail in 2008; by the end of 2024 its network was about 48,000 km.",
-        "Railway investment was expected to exceed 800 billion yuan in 2024.",
+        "Railway investment reached 850.6 billion yuan in 2024.",
         "Real estate and infrastructure construction have consistently exceeded 30% of GDP in recent years (IMF working paper).",
       ],
       limitation: [
-        "IMF: local government financing companies were projected to owe 66 trillion yuan by the end of 2023, on top of 40 trillion yuan owed directly by local governments.",
+        "IMF: local government financing companies were projected to owe 66 trillion yuan by the end of 2023, on top of about 40 trillion yuan owed directly by local governments (Ministry of Finance).",
         "The growth returns to new building appear to be falling in some regions (IMF working paper).",
         "IEA: China produced 35% of the world's energy-related CO2 emissions in 2023, mostly from coal.",
       ],
@@ -161,7 +161,7 @@ export const essays: EssayKey[] = [
     models: {
       1: "Although state-led infrastructure investment has had a significant positive effect on China's economic growth and living standards, its effectiveness has been increasingly limited by rising local government debt and environmental costs.",
       2: "Large-scale public spending on railways and transport immediately raised investment (I), a component of aggregate demand, creating construction jobs and orders for steel and cement, so real GDP rose. Once completed, faster and cheaper transport lowered firms' costs and integrated regional markets, raising productivity and shifting aggregate supply rightward, thereby sustaining growth. Consequently, improved access to jobs, markets and services raised household incomes and living standards, promoting economic development.",
-      3: "The scale of this investment is clear: China moved from almost no high-speed rail in 2008 to a network of about 48,000 km by the end of 2024, with railway investment expected to exceed 800 billion yuan in 2024 alone. Real estate and infrastructure construction have consistently exceeded 30% of GDP in recent years, showing that infrastructure-led investment has been a central source of aggregate demand and growth.",
+      3: "The scale of this investment is clear: China moved from almost no high-speed rail in 2008 to a network of about 48,000 km by the end of 2024, with railway investment of 850.6 billion yuan in 2024 alone. Real estate and infrastructure construction have consistently exceeded 30% of GDP in recent years, showing that infrastructure-led investment has been a central source of aggregate demand and growth.",
       4: "However, the strategy's effectiveness is increasingly constrained by its sustainability. Because projects were funded largely by borrowing, the IMF projected local government financing companies to owe 66 trillion yuan by the end of 2023, and falling returns to new building make this debt harder to service. Moreover, construction-led growth relies on coal-powered heavy industry, so China produced 35% of global energy-related CO2 emissions in 2023. These costs significantly qualify, though do not negate, the growth gains.",
       5: "Therefore, infrastructure investment has significantly promoted China's economic growth and development, though its effectiveness has been increasingly limited by unsustainable local government debt and high carbon emissions.",
     },
@@ -185,7 +185,7 @@ export const essays: EssayKey[] = [
       evaluationPhrase: "harder to service",
     },
     // Every figure checked against the sources in docs/y12-economics-paragraph-writing-research.md.
-    figuresVerified: "2026-11-16",
+    figuresVerified: "2026-11-22",
   },
   {
     essayId: "e05",
@@ -208,14 +208,14 @@ export const essays: EssayKey[] = [
         "Families can afford food, schooling and health care, so poverty falls",
       ],
       facts: [
-        "World Bank: Nepal received about US$9.6 billion in remittances in 2023, slightly over 25% of GDP.",
+        "World Bank: Nepal received about US$11 billion in remittances in 2023, over a quarter of GDP.",
         "76.8% of households received remittances in 2022/23 (Nepal Living Standards Survey IV).",
         "The national poverty rate fell from 25.16% in 2010/11 to 20.27% in 2022/23 (Nepal Living Standards Survey IV).",
         "World Bank: without remittances, an estimated 2.6 million more people would have been in poverty.",
       ],
       limitation: [
-        "Around 90% of remittances are used for daily consumption, not investment.",
-        "Youth unemployment was 22.7% in 2022/23, which pushes young and skilled workers to emigrate (World Bank).",
+        "72.4% of the remittances households receive go on daily consumption and a further 15.8% on repaying loans, leaving little for investment (Nepal Living Standards Survey IV).",
+        "Youth unemployment was 22.7% in 2022/23 (Nepal Living Standards Survey IV), which pushes young and skilled workers to emigrate.",
         "Remittance income depends on jobs and demand for workers in other countries.",
       ],
     },
@@ -224,8 +224,8 @@ export const essays: EssayKey[] = [
     models: {
       1: "While labour migration and remittances have had a significant positive impact on Nepal's household incomes and poverty reduction, their contribution to sustained development has been limited by a growing dependence on jobs abroad.",
       2: "Because few well-paid jobs exist at home, Nepali workers migrate to labour markets such as Qatar, Malaysia and the UAE, where higher wages allow them to send remittances home. Consequently, household disposable income rises, increasing consumption (C), the largest component of aggregate demand, so real GDP grows, led by consumption and services. The inflow of foreign currency also finances imports. As a result, families can afford food, schooling and health care, reducing poverty and improving development.",
-      3: "Remittances have become central to Nepal's economy: the World Bank estimates inflows of about US$9.6 billion in 2023, slightly over 25% of GDP, and 76.8% of households received them in 2022/23. This income has supported development, as the national poverty rate fell from 25.16% in 2010/11 to 20.27% in 2022/23, and without remittances an estimated 2.6 million more people would have been in poverty.",
-      4: "However, this strategy has created a damaging dependence on jobs abroad. Because around 90% of remittances fund daily consumption rather than investment, they raise living standards without building Nepal's productive capacity, so few jobs are created at home. Consequently, with youth unemployment at 22.7% in 2022/23, young and skilled workers continue to emigrate, while household incomes remain exposed to falling demand for workers in other countries. This significantly limits, though does not erase, the development gains.",
+      3: "Remittances have become central to Nepal's economy: the World Bank estimates inflows of about US$11 billion in 2023, over a quarter of GDP, and 76.8% of households received them in 2022/23. This income has supported development, as the national poverty rate fell from 25.16% in 2010/11 to 20.27% in 2022/23, and without remittances an estimated 2.6 million more people would have been in poverty.",
+      4: "However, this strategy has created a damaging dependence on jobs abroad. Because 72.4% of remittances fund daily consumption and 15.8% repay loans, leaving little for investment, they raise living standards without building Nepal's productive capacity, so few jobs are created at home. Consequently, with youth unemployment at 22.7% in 2022/23, young and skilled workers continue to emigrate, while household incomes remain exposed to falling demand for workers in other countries. This significantly limits, though does not erase, the development gains.",
       5: "Therefore, globalisation through labour migration has had a significant positive impact on Nepal's economic growth and poverty reduction, though its contribution to sustained development has been substantially limited by dependence on jobs abroad.",
     },
     commentary: {
@@ -248,7 +248,7 @@ export const essays: EssayKey[] = [
       evaluationPhrase: "without building Nepal's productive capacity",
     },
     // Every figure checked against the sources in docs/y12-economics-paragraph-writing-research.md.
-    figuresVerified: "2026-11-16",
+    figuresVerified: "2026-11-22",
   },
   {
     essayId: "e06",
@@ -272,8 +272,8 @@ export const essays: EssayKey[] = [
       ],
       facts: [
         "Nepal's hydropower potential is estimated at up to 83,000 MW, of which about 43,000 MW is technically feasible.",
-        "Nepal's generation capacity was about 3,240 MW in 2024.",
-        "India first approved 39 MW of electricity imports from Nepal in October 2021; exports reached around 1,000 MW in 2024.",
+        "Nepal's generation capacity was about 3,160 MW in 2024.",
+        "India first approved 39 MW of electricity imports from Nepal in November 2021; by 2024 it had approved nearly 1,000 MW of exports.",
         "In January 2024 Nepal and India agreed a target of up to 10,000 MW of exports to India over 10 years.",
       ],
       limitation: [
@@ -287,8 +287,8 @@ export const essays: EssayKey[] = [
     models: {
       1: "While hydropower development has been increasingly effective in turning Nepal into an electricity exporter and attracting investment, its contribution to economic growth and development has so far been limited by long construction lags and seasonal exports.",
       2: "Opening hydropower to private and foreign investors and signing power trade agreements reduced the risk of building plants, attracting investment (I) that immediately raised aggregate demand and construction employment. Consequently, generation capacity expanded beyond domestic wet-season demand, so surplus electricity could be exported, increasing net exports (X - M) and earning foreign currency. In addition, more reliable and cheaper power lowered local firms' costs, shifting aggregate supply rightward. As a result, real GDP grew and wider access to electricity improved living standards.",
-      3: "Nepal's shift from importer to exporter is clear: India first approved 39 MW of electricity imports from Nepal in October 2021, and by 2024 exports had reached around 1,000 MW, showing that generation capacity of about 3,240 MW now produces an exportable surplus. The January 2024 agreement targeting up to 10,000 MW of exports to India over 10 years confirms the growing potential of electricity exports to raise net exports and growth.",
-      4: "However, these gains have been slow to materialise. Because hydropower plants and cross-border transmission lines take years to build, 141 private projects of about 4,063 MW were still under construction in 2024, leaving current capacity of about 3,240 MW far below the 43,000 MW that is technically feasible. Moreover, exports occur mainly in the wet season, and Nepal still imports electricity in the dry season when river flows fall. These lags significantly limit, though do not negate, the strategy's contribution so far.",
+      3: "Nepal's shift from importer to exporter is clear: India first approved 39 MW of electricity imports from Nepal in November 2021, and by 2024 approved exports had reached nearly 1,000 MW, showing that generation capacity of about 3,160 MW now produces an exportable surplus. The January 2024 agreement targeting up to 10,000 MW of exports to India over 10 years confirms the growing potential of electricity exports to raise net exports and growth.",
+      4: "However, these gains have been slow to materialise. Because hydropower plants and cross-border transmission lines take years to build, 141 private projects of about 4,063 MW were still under construction in 2024, leaving current capacity of about 3,160 MW far below the 43,000 MW that is technically feasible. Moreover, exports occur mainly in the wet season, and Nepal still imports electricity in the dry season when river flows fall. These lags significantly limit, though do not negate, the strategy's contribution so far.",
       5: "Therefore, hydropower development has been an increasingly effective strategy for Nepal's economic growth and development, though its benefits have so far been significantly limited by long construction lags and seasonal exports.",
     },
     commentary: {
@@ -301,7 +301,7 @@ export const essays: EssayKey[] = [
     markingNotes: {
       1: "'Evaluate' needs a judgement of effectiveness with a word of degree ('increasingly', 'partly', 'highly'). Accept 'hydropower development', 'electricity exports' or 'energy trade with India' as the strategy, and growth, investment or development as the outcome. The counterpoint must be time lags: slow construction and/or small, seasonal exports.",
       2: "Accept AD/AS or the AD equation as the model. Required links: (1) opening to investors or power trade deals -> investment in plants; (2) investment -> aggregate demand or construction jobs; (3) more generation -> surplus electricity exported -> net exports (X - M); (4) real GDP grows or better access to electricity improves living standards (either is enough). Optional: cheaper power for local firms (aggregate supply). Key reasons: (i) agreements and openness lower the risk for investors; (ii) investment and exports are components of aggregate demand; (iii) surplus generation in the wet season makes exports possible.",
-      3: "Rounded figures are acceptable if correct. The export figures (39 MW in 2021, around 1,000 MW in 2024) must be tied to the growth of generation or to net exports (criterion c); the 10,000 MW agreement shows future potential.",
+      3: "Rounded figures are acceptable if correct. The export figures (39 MW in 2021, nearly 1,000 MW approved by 2024) must be tied to the growth of generation or to net exports (criterion c); the 10,000 MW agreement shows future potential.",
       4: "The limitation must be time lags, as framed in the model topic sentence: long construction times for plants and transmission lines, and/or exports that are small and seasonal. Dependence on India or environmental damage is a different limitation (criterion a fails).",
       5: "The judgement must answer 'evaluate' (how effective). Growth and development should both appear to echo the question.",
     },
@@ -311,7 +311,7 @@ export const essays: EssayKey[] = [
       evaluationPhrase: "slow to materialise",
     },
     // Every figure checked against the sources in docs/y12-economics-paragraph-writing-research.md.
-    figuresVerified: "2026-11-16",
+    figuresVerified: "2026-11-22",
   },
   {
     essayId: "e07",
@@ -375,7 +375,7 @@ export const essays: EssayKey[] = [
       evaluationPhrase: "could not produce competitive goods",
     },
     // Every figure checked against the sources in docs/y12-economics-paragraph-writing-research.md.
-    figuresVerified: "2026-11-16",
+    figuresVerified: "2026-11-22",
   },
   {
     essayId: "e08",
@@ -399,12 +399,12 @@ export const essays: EssayKey[] = [
       ],
       facts: [
         "World Bank: extreme poverty in China fell from 88% of the population in 1981 to 0.7% in 2015.",
-        "World Bank: Nepal received about US$9.6 billion in remittances in 2023, slightly over 25% of GDP.",
+        "World Bank: Nepal received about US$11 billion in remittances in 2023, over a quarter of GDP.",
         "Nepal's national poverty rate fell from 25.16% in 2010/11 to 20.27% in 2022/23 (Nepal Living Standards Survey IV).",
       ],
       limitation: [
         "Rural and remote regions have poorer roads, electricity and access to markets, so they gain less (World Bank on Nepal's poorest provinces).",
-        "In China, urban residents' disposable income was 2.57 times rural residents' in 2021 (National Bureau of Statistics).",
+        "In China, urban residents' disposable income was 2.50 times rural residents' in 2021 (National Bureau of Statistics).",
         "In Nepal in 2022/23, poverty was 34.16% in Sudurpaschim province but 11.88% in Gandaki province, and higher in rural areas (24.66%) than urban areas (18.34%).",
       ],
     },
@@ -413,8 +413,8 @@ export const essays: EssayKey[] = [
     models: {
       1: "Although globalisation has significantly improved economic development in both China and Nepal by reducing poverty, its benefits have been unevenly distributed, favouring cities and richer regions over rural and remote areas.",
       2: "Integration with world markets raises foreign income through different channels: China's manufacturers earn export revenue by selling low-cost goods abroad, while Nepali workers earn higher wages in foreign labour markets and send remittances home. Consequently, household disposable incomes rise, increasing consumption and, in China, net exports (X - M), thereby lifting aggregate demand and real GDP. As a result, families can afford better food, health care and schooling, reducing poverty and raising living standards, which improves economic development.",
-      3: "The development gains are substantial in both economies. In China, export-led integration helped cut extreme poverty from 88% of the population in 1981 to 0.7% in 2015, according to the World Bank. In Nepal, remittances worth about US$9.6 billion in 2023, slightly over 25% of GDP, supported a fall in the national poverty rate from 25.16% in 2010/11 to 20.27% in 2022/23.",
-      4: "However, these gains have been unevenly distributed. Because rural and remote regions have poorer roads, electricity and access to markets, they share less in the income that global integration generates. In China, urban disposable incomes were 2.57 times rural incomes in 2021, while in Nepal poverty reached 34.16% in Sudurpaschim but only 11.88% in Gandaki province in 2022/23. This inequality significantly qualifies, though does not outweigh, globalisation's contribution to development in both economies.",
+      3: "The development gains are substantial in both economies. In China, export-led integration helped cut extreme poverty from 88% of the population in 1981 to 0.7% in 2015, according to the World Bank. In Nepal, remittances worth about US$11 billion in 2023, over a quarter of GDP, supported a fall in the national poverty rate from 25.16% in 2010/11 to 20.27% in 2022/23.",
+      4: "However, these gains have been unevenly distributed. Because rural and remote regions have poorer roads, electricity and access to markets, they share less in the income that global integration generates. In China, urban disposable incomes were 2.50 times rural incomes in 2021, while in Nepal poverty reached 34.16% in Sudurpaschim but only 11.88% in Gandaki province in 2022/23. This inequality significantly qualifies, though does not outweigh, globalisation's contribution to development in both economies.",
       5: "Therefore, globalisation has had a significant positive impact on economic development in both China and Nepal, though its benefits have been substantially limited by an uneven distribution between urban and rural regions.",
     },
     commentary: {
@@ -437,6 +437,6 @@ export const essays: EssayKey[] = [
       evaluationPhrase: "share less in the income",
     },
     // Every figure checked against the sources in docs/y12-economics-paragraph-writing-research.md.
-    figuresVerified: "2026-11-16",
+    figuresVerified: "2026-11-22",
   },
 ];
