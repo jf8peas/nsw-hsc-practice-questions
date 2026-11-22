@@ -11,7 +11,7 @@ import { MAX_IMAGE_BYTES, validateUnseenRules } from "@/lib/content-rules";
 import type { AnswerSet, Unit, UnseenQuestion, UnseenText } from "@/lib/types";
 
 const UNIT_ID = "y12-english-advanced-unseen-texts";
-const TODAY = new Date("2026-11-20T00:00:00Z");
+const TODAY = new Date();
 
 const unitOf = (): Unit => structuredClone(UNITS.find((u) => u.id === UNIT_ID)!);
 const answersOf = (): AnswerSet => structuredClone(realAnswers);

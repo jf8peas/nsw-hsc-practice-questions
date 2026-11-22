@@ -18,7 +18,7 @@ import { COMPARATIVE_SKILL_IDS, comparativeSkillConceptId } from "@/lib/unseen/s
 import { MEDIAN_WORDS } from "@/lib/unseen/limits";
 
 const CMP = "y12-english-advanced-comparative-texts";
-const TODAY = new Date("2026-11-20T00:00:00Z");
+const TODAY = new Date();
 const verbs = { compare: "Show how things are similar or different.", evaluate: "Make a judgement based on criteria." };
 
 const written = storeTexts.filter((t) => t.body.kind !== "image" && t.hscChecked);
