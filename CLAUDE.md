@@ -5,7 +5,7 @@ the project is put together and `.specify/memory/constitution.md` for the rules 
 respect (it overrides other docs).
 
 <!-- SPECKIT START -->
-Current feature plan: [specs/009-english-comparative-short-answers/plan.md](specs/009-english-comparative-short-answers/plan.md)
+Current feature plan: [specs/010-economics-essay-writing/plan.md](specs/010-economics-essay-writing/plan.md)
 (spec, research, data model and quickstart live beside it).
 <!-- SPECKIT END -->
 

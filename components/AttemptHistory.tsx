@@ -26,6 +26,11 @@ function attemptName(questionId: string | null | undefined): string | null {
     // a comparative attempt (spec 009) is named for its paper: "Abbotsleigh 2024 · Q5 · Compare"
     return `${paperLabel(found.question.paper)} · Compare`;
   }
+  if (found.question.type === "essay") {
+    // an essay attempt (spec 010) is named for its essay and economy: "Essay 3 · Nepal"
+    const economy = { china: "China", nepal: "Nepal", both: "China and Nepal" }[found.question.economy];
+    return `Essay ${found.question.id.split(".e").pop()} · ${economy}`;
+  }
   if (found.question.type !== "paragraph") return null;
   return `Essay ${found.question.essayNo} · ${PARTS[partKeyOf(found.question.part)].short}`;
 }

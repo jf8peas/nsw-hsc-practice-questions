@@ -11,7 +11,7 @@ import type { Question } from "@/lib/types";
 
 export type StartResult =
   | { ok: true; attemptId: string; persisted: boolean }
-  | { ok: false; error: string; unauthenticated?: boolean; finished?: boolean };
+  | { ok: false; error: string; unauthenticated?: boolean; finished?: boolean; openEssay?: string };
 
 interface StartResponse {
   attemptId: string;
@@ -28,10 +28,18 @@ interface StartResponse {
   unseenState?: UnseenState;
   /** spec 009: the question state for a comparative attempt. */
   comparativeState?: ComparativeState;
+  /** spec 010: the stage and state of an essay attempt. */
+  essayState?: import("@/lib/essay/types").EssayState;
 }
 
 /** The notices a sequential or progress-dependent unit shows when it cannot start a quiz (constitution Principle VI). */
 function unitNotices(unitId: string): { unavailable: string; finished: string } {
+  if (unitId === "y12-economics-essay-writing") {
+    return {
+      unavailable: "We can't load your essays right now. Try again in a moment.",
+      finished: "You've finished every essay so far. New essays are added as they're checked.",
+    };
+  }
   if (unitId === UNSEEN_UNIT_ID || unitId === COMPARATIVE_UNIT_ID) {
     return {
       unavailable: "We can't load your questions right now. Try again in a moment.",
@@ -44,13 +52,14 @@ function unitNotices(unitId: string): { unavailable: string; finished: string } 
   };
 }
 
-export async function startAttempt(unitId: string): Promise<StartResult> {
+/** Start (or resume) an attempt. The essay-writing unit (spec 010) also takes the essay the student picked. */
+export async function startAttempt(unitId: string, questionId?: string): Promise<StartResult> {
   let res: Response;
   try {
     res = await fetch("/api/attempts", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ unitId }),
+      body: JSON.stringify(questionId === undefined ? { unitId } : { unitId, questionId }),
     });
   } catch {
     return { ok: false, error: "Could not reach the server. Check your connection and try again." };
@@ -62,6 +71,17 @@ export async function startAttempt(unitId: string): Promise<StartResult> {
     const body = await res.json().catch(() => ({}));
     const wait = typeof body.retryAfter === "number" ? ` Try again in about ${body.retryAfter}s.` : "";
     return { ok: false, error: `You're starting quizzes too fast.${wait}` };
+  }
+  if (res.status === 409) {
+    // spec 010: another essay is already open; the student is sent to it (never a second attempt)
+    const body = await res.json().catch(() => ({}));
+    if (body?.error === "attempt_open") {
+      return { ok: false, error: "Finish or discard your open essay before starting another.", openEssay: typeof body.questionId === "string" ? body.questionId : undefined };
+    }
+  }
+  if (res.status === 404 && unitId === "y12-economics-essay-writing") {
+    const body = await res.json().catch(() => ({}));
+    if (body?.error === "no_open_attempt") return { ok: false, error: "You have no essay in progress. Pick an essay to start." };
   }
   if (res.status === 503) {
     // a sequential or progress-dependent unit cannot find the student's place without their results (constitution VI)
@@ -83,6 +103,7 @@ export async function startAttempt(unitId: string): Promise<StartResult> {
     ...(data.paragraphState ? { paragraphState: data.paragraphState } : {}),
     ...(data.unseenState ? { unseenState: data.unseenState } : {}),
     ...(data.comparativeState ? { comparativeState: data.comparativeState } : {}),
+    ...(data.essayState ? { essayState: data.essayState } : {}),
   });
   return { ok: true, attemptId: data.attemptId, persisted: data.persisted };
 }

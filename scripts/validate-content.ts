@@ -22,8 +22,9 @@ import {
   type ShippedIds,
 } from "../lib/content-rules";
 import { validateComparativeRules } from "../lib/content-rules-comparative";
+import { validateEssayRules } from "../lib/content-rules-essay";
 import comparativeRubric from "../lib/comparative/rubric.json";
-import type { AnswerSet } from "../lib/types";
+import type { AnswerSet, Unit } from "../lib/types";
 
 const UNITS_DIR = join(process.cwd(), "content", "units");
 
@@ -101,6 +102,7 @@ async function main() {
     for (const m of validateExplanationRules(unit, answers)) err(m);
     for (const m of validateRewriteRules(unit, answers)) err(m);
     for (const m of validateParagraphRules(unit, answers)) err(m);
+    for (const m of validateEssayRules(unit, answers, UNITS)) err(m);
     for (const m of validateUnseenRules(unit, answers, new Date(), (name) => imageSize(unit.id, name))) err(m);
     // the comparative unit's images live in the shared text store, which is spec 008's unit folder
     for (const m of validateComparativeRules(unit, answers, comparativeVerbs, UNITS, new Date(), (name) => imageSize("y12-english-advanced-unseen-texts", name))) err(m);
@@ -123,11 +125,13 @@ async function main() {
       }
 
       const a = answers[q.id];
+      // an essay that is not live has no key yet (spec 010); validateEssayRules checks a live essay's key
+      if (q.type === "essay" && !q.live && !a) continue;
       if (!a) {
         err(`${q.id}: no entry in answers.ts`);
         continue;
       }
-      if (q.type === "paragraph" || q.type === "unseen" || q.type === "comparative") {
+      if (q.type === "paragraph" || q.type === "unseen" || q.type === "comparative" || q.type === "essay") {
         // the essay key is checked by the paragraph rules (spec 007 FR-039) and the unseen-text key by the
         // unseen rules (spec 008 FR-046); no rubric or model answer here
       } else if (!a.rubric || a.rubric.length === 0) {
@@ -210,6 +214,18 @@ async function main() {
         err(`Exam "${exam.id}" references unknown unit "${uid}"`);
       }
     }
+  }
+
+  // The essay unit (spec 010) is registered only once an essay is live, but its content is checked either way.
+  const essayUnitId = "y12-economics-essay-writing";
+  if (!UNITS.some((u) => u.id === essayUnitId)) {
+    const { meta } = await import("../content/units/y12-economics-essay-writing/meta");
+    const { questions } = await import("../content/units/y12-economics-essay-writing/questions");
+    const { concepts, retired } = await import("../content/units/y12-economics-essay-writing/concepts");
+    const { answers } = (await import(`../content/units/${essayUnitId}/answers`)) as { answers: AnswerSet };
+    const unlisted = { ...meta, questions, concepts, retired } as Unit;
+    for (const m of validateConceptRules(unlisted)) err(m);
+    for (const m of validateEssayRules(unlisted, answers, UNITS)) err(m);
   }
 
   if (errors.length) {

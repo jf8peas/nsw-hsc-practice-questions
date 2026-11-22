@@ -174,3 +174,30 @@ export async function createUnseenAttempt(
   if (!existing) throw new Error("unseen attempt vanished after a conflict");
   return { attempt: existing, created: false };
 }
+
+/**
+ * Start (or rejoin) the student's one OPEN attempt in the Economics essay-writing unit (spec 010,
+ * research R10). The essay is chosen by the student; the partial unique index
+ * `attempts_essay_incomplete_unique` makes a second insert conflict, so two tabs starting at once end
+ * on the same attempt. The caller checks whether the open attempt is for the essay it wanted.
+ */
+export async function createEssayAttempt(
+  db: Db,
+  input: { id: string; userId: string; unitId: string; questionId: string },
+): Promise<{ attempt: Attempt; created: boolean }> {
+  const inserted = await db
+    .insert(attempts)
+    .values({
+      id: input.id,
+      userId: input.userId,
+      unitId: input.unitId,
+      questionIds: [input.questionId],
+      mcOptionOrder: {},
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (inserted[0]) return { attempt: inserted[0], created: true };
+  const existing = await getLatestIncompleteAttempt(db, input.userId, input.unitId);
+  if (!existing) throw new Error("essay attempt vanished after a conflict");
+  return { attempt: existing, created: false };
+}

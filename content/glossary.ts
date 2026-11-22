@@ -1,4 +1,4 @@
-// PUBLIC — NESA glossary of key words for the directive verbs the paragraph unit uses (spec 007).
+// PUBLIC — NESA glossary of key words for the directive verbs the paragraph and essay units use (specs 007, 010).
 // Shared, not essay data. Keys are lower case.
 
 export const GLOSSARY: Record<string, string> = {
@@ -6,6 +6,7 @@ export const GLOSSARY: Record<string, string> = {
   assess: "make a judgement of value, quality, outcomes, results or size.",
   discuss: "identify issues and provide points for and/or against.",
   evaluate: "make a judgement based on criteria; determine the value of.",
+  explain: "relate cause and effect; make the relationships between things evident; provide why and/or how.",
 };
 
 export function verbDefinition(verb: string): string | undefined {

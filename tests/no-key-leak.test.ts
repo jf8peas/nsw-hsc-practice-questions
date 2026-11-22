@@ -34,6 +34,9 @@ const BANNED_KEYS = [
   "modelPart",
   "modelSoFar",
   "laterSlots",
+  // spec 010: the essay key (the model essay is released only in the student's own finished result)
+  "schoolCriteria",
+  "essayKey",
   // spec 008: the unseen-text key (criteria, notes, model answer, a visual's description and its check)
   "criteria",
   "visualDescription",

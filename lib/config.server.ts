@@ -70,6 +70,22 @@ export function getEnglishAdvModel(env: Record<string, string | undefined> = pro
   return modelOrNull(env.ENGLISH_ADV_GRADING_MODEL) ?? DEFAULT_ENGLISH_ADV_MODEL;
 }
 
+/** The default model for the Economics essay-writing unit's marker and plan review (spec 010; the marker check may change it). */
+export const DEFAULT_ESSAY_MODEL = "deepseek/deepseek-v4.1-flash";
+
+/**
+ * The essay unit's marking model (`ESSAY_GRADING_MODEL`, spec 010). It never reads `GRADING_MODEL` or
+ * `ENGLISH_ADV_GRADING_MODEL`. Blank counts as unset. Never throws.
+ */
+export function getEssayGradingModel(env: Record<string, string | undefined> = process.env): string {
+  return modelOrNull(env.ESSAY_GRADING_MODEL) ?? DEFAULT_ESSAY_MODEL;
+}
+
+/** The essay unit's optional plan-review model (`ESSAY_REVIEW_MODEL`, spec 010). Never falls back to another unit's model. */
+export function getEssayReviewModel(env: Record<string, string | undefined> = process.env): string {
+  return modelOrNull(env.ESSAY_REVIEW_MODEL) ?? DEFAULT_ESSAY_MODEL;
+}
+
 /** The concept pipeline's models. Never throws. */
 export function getConceptModels(env: Record<string, string | undefined> = process.env): ConceptModels {
   return {

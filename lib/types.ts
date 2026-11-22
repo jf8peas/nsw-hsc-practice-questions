@@ -90,6 +90,16 @@ export interface UnitMeta {
    */
   draw?: { kind: "unseen-weighted" | "comparative-weighted" };
   /**
+   * Set on the Economics essay-writing unit (spec 010): a quiz is one whole essay the student picks
+   * (scaffold, optional plan review, 600-800 words, marked out of 20). Public metadata.
+   */
+  flow?: "essay";
+  /**
+   * Spec 010: a correct use of a concept in the SAME question that last set it does not clear it;
+   * only a different question does. Public metadata.
+   */
+  conceptsClearOnOtherQuestions?: boolean;
+  /**
    * Units whose skill progress this unit shares (spec 009 FR-022): one count per shared concept
    * id, replayed from the results of this unit and every unit listed here. Public metadata.
    */
@@ -173,6 +183,25 @@ export interface ParagraphQuestion extends BaseQuestion {
   /** The model economy, e.g. "Vietnam". */
   economy: string;
   maxMarks: 4;
+}
+
+/**
+ * A whole-essay question (spec 010). `prompt` is the essay question in full. The marking notes, the
+ * school's criteria, the band 1 model essay and the concept tags are the answer key (SERVER ONLY).
+ * Worth 20 marks.
+ */
+export interface EssayQuestion extends BaseQuestion {
+  type: "essay";
+  group: "essay";
+  maxMarks: 20;
+  /** The directive verb, lower case, a key of content/glossary.ts. */
+  verb: string;
+  /** The economy the student must write about; "both" means one emerging and one developing economy. */
+  economy: "china" | "nepal" | "both";
+  /** Position in the offered order (1 to 6). */
+  offer: 1 | 2 | 3 | 4 | 5 | 6;
+  /** False until the essay has passed review and the marker check; a non-live essay is never offered. */
+  live: boolean;
 }
 
 /** The form of an unseen text (spec 008). A closed union: the draw weights by form. */
@@ -280,7 +309,7 @@ export interface ComparativeQuestion extends BaseQuestion {
 }
 
 /** Public question — no answer key. Safe to ship to the browser. */
-export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion | UnseenQuestion | ComparativeQuestion;
+export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion | UnseenQuestion | ComparativeQuestion | EssayQuestion;
 
 /** A full unit as consumed by the UI: metadata + public questions. */
 export interface Unit extends UnitMeta {
@@ -355,6 +384,20 @@ export interface Answer {
   unseen?: UnseenKey;
   /** `comparative` only (spec 009): the question's key. SERVER ONLY. */
   comparative?: ComparativeKey;
+  /** `essay` only (spec 010): the essay's key. SERVER ONLY. */
+  essay?: EssayQuestionKey;
+}
+
+/** The answer key of one whole-essay question (spec 010, data-model §1). SERVER ONLY. */
+export interface EssayQuestionKey {
+  /** What a strong answer to this question is likely to cover. */
+  markingNotes: string;
+  /** The school's own marking criteria, verbatim, for a school-trial essay; null for an original one. */
+  schoolCriteria: string | null;
+  /** A band 1 model essay, 600 to 800 words. */
+  modelEssay: string;
+  /** Concept ids (keys of the unit's concept list) a strong answer uses. */
+  concepts: string[];
 }
 
 /** The answer key of one unseen-text question (spec 008, data-model §1). SERVER ONLY. */

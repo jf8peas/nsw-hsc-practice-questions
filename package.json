@@ -24,7 +24,8 @@
     "check-unseen-descriptions": "tsx --conditions=react-server scripts/check-unseen-descriptions.ts",
     "unseen-report": "tsx --conditions=react-server scripts/unseen-report.ts",
     "unseen-remark": "tsx --conditions=react-server scripts/unseen-remark.ts",
-    "unseen-build-bank": "tsx --conditions=react-server scripts/unseen-build-bank.ts"
+    "unseen-build-bank": "tsx --conditions=react-server scripts/unseen-build-bank.ts",
+    "essay-build-answers": "tsx scripts/essay-build-answers.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

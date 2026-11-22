@@ -27,6 +27,10 @@ import { COMPARATIVE_SKILL_IDS } from "@/lib/unseen/skills";
 import { cappedMark } from "@/lib/unseen/scoring";
 import type { UnseenDiscussion } from "@/lib/unseen/types";
 import { countWords } from "@/lib/wordcount";
+import { markEssayWithModel, type ParsedEssayReply } from "@/lib/essay/marker.server";
+import { finalMark } from "@/lib/essay/scoring";
+import type { PublicEssay } from "@/lib/essay/types";
+import type { EssayQuestion, EssayQuestionKey } from "@/lib/types";
 import type { ParagraphVerdicts } from "@/lib/db/schema";
 
 export interface GradeOptions {
@@ -856,4 +860,76 @@ export function comparativeDiscussion(questionId: string): ComparativeDiscussion
     modelWords: countWords(k.key.model),
     ...(k.question.choice ? { pairing: [...k.key.pairing] } : {}),
   };
+}
+
+
+// ---- essays (spec 010) ---------------------------------------------------------------------------------
+//
+// The ONLY readers of an essay question's key. What each export may release (constitution Principle I, 2.17.0):
+//   essayPublicView   the public question, its verb's definition and its source: no key field.
+//   markEssay         sends the marking notes and the school's criteria to the model provider and returns the
+//                     validated reply and the final mark; nothing from the key is in its return value.
+//   essayModelEssay   the band 1 model essay, for the student's OWN FINISHED result only. The caller must check
+//                     the phase row is finished and belongs to the session user; this function never decides that.
+// The marking notes, the school's criteria and the concept tags are never returned by any function.
+
+function essayKeyOf(questionId: string): { question: EssayQuestion; key: EssayQuestionKey } | null {
+  const found = getQuestion(questionId);
+  const key = getAnswer(questionId)?.essay;
+  if (!found || found.question.type !== "essay" || !key) return null;
+  return { question: found.question, key };
+}
+
+/** The public question (any essay, live or not) with its verb's definition. No key. */
+export function essayPublicView(questionId: string): PublicEssay | null {
+  const found = getQuestion(questionId);
+  if (!found || found.question.type !== "essay") return null;
+  const q = found.question;
+  return {
+    id: q.id,
+    prompt: q.prompt,
+    verb: q.verb,
+    verbDefinition: verbDefinition(q.verb) ?? "",
+    economy: q.economy,
+    offer: q.offer,
+    ...(q.source ? { source: q.source } : {}),
+  };
+}
+
+/** Whether an essay exists and is live (only a live essay may be started). */
+export function essayIsLive(questionId: string): boolean {
+  const found = getQuestion(questionId);
+  return !!found && found.question.type === "essay" && found.question.live;
+}
+
+export interface EssayMarked {
+  reply: ParsedEssayReply;
+  model: string;
+  promptVersion: string;
+  rawMark: number;
+  /** The mark after clamping into its band and the one-economy cap. */
+  finalMark: number;
+  capped: boolean;
+}
+
+/** Marks an essay. Null when the marker is unavailable (no key, errors, or a bad reply twice). */
+export async function markEssay(questionId: string, essay: string): Promise<EssayMarked | null> {
+  const k = essayKeyOf(questionId);
+  if (!k) return null;
+  const out = await markEssayWithModel({
+    question: k.question.prompt,
+    verb: k.question.verb,
+    economy: k.question.economy,
+    markingNotes: k.key.markingNotes,
+    schoolCriteria: k.key.schoolCriteria,
+    essay,
+  });
+  if (!out) return null;
+  const { final, capped } = finalMark(out.reply.mark, out.reply.band, k.question.economy, out.reply.covers);
+  return { reply: out.reply, model: out.model, promptVersion: out.promptVersion, rawMark: out.reply.mark, finalMark: final, capped };
+}
+
+/** The band 1 model essay: only for the student's own finished result (see above). */
+export function essayModelEssay(questionId: string): string | null {
+  return essayKeyOf(questionId)?.key.modelEssay ?? null;
 }

@@ -9,6 +9,7 @@ import { PhotoAnswerPanel, type PhotoFile } from "@/components/PhotoAnswerPanel"
 import { ReadBackPanel } from "@/components/ReadBackPanel";
 import { ParagraphPanel } from "@/components/paragraph/ParagraphPanel";
 import { UnseenPanel } from "@/components/unseen/UnseenPanel";
+import { EssayPanel } from "@/components/essay/EssayPanel";
 import { RewritePanel } from "@/components/rewrite/RewritePanel";
 import {
   clearDraft,
@@ -76,7 +77,7 @@ export function Quiz({
 
   // a paragraph attempt (spec 007) is one question that ends in its own discussion screen, never in
   // the quiz results screen, even when the part already has a result
-  const isParagraphAttempt = (p: AttemptPayload | null | undefined) => Boolean(p?.paragraphState || p?.unseenState || p?.comparativeState); // one question that ends in its own discussion (specs 007, 008)
+  const isParagraphAttempt = (p: AttemptPayload | null | undefined) => Boolean(p?.paragraphState || p?.unseenState || p?.comparativeState || p?.essayState); // one question that ends in its own discussion (specs 007, 008)
   const [i, setI] = useState(() =>
     initial && !isParagraphAttempt(initial) ? firstUnanswered(initial.questions, initial.answered) : 0,
   );
@@ -879,6 +880,21 @@ export function Quiz({
 
   // ---- quiz view ------------------------------------------------------------
   if (!current) return null;
+
+  // spec 010: one whole essay: the plan, the essay box and the result are one panel that keeps its own stage
+  if (current.type === "essay" && payload?.essayState) {
+    return (
+      <>
+        {banners}
+        <EssayPanel
+          attemptId={attemptId}
+          attemptToken={attemptToken}
+          state={payload.essayState}
+          onFinish={() => router.push(`/unit/${unitId}`)}
+        />
+      </>
+    );
+  }
 
   // spec 008: one unseen text and one question; the panel draws the text, the question and every state
   if (current.type === "unseen" && payload?.unseenState) {

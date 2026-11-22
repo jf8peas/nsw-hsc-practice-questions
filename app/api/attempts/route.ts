@@ -12,6 +12,8 @@ import { checkAttemptRateLimit } from "@/lib/ratelimit.server";
 import { startSequential } from "@/lib/paragraph/start.server";
 import { startComparative } from "@/lib/comparative/start.server";
 import { startUnseen } from "@/lib/unseen/start.server";
+import { startEssay } from "@/lib/essay/start.server";
+import { getQuestion } from "@/content";
 import { signAttemptToken } from "@/lib/tokens.server";
 
 export const runtime = "nodejs";
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
   }
   const user = session.user;
 
-  let body: { unitId?: unknown };
+  let body: { unitId?: unknown; questionId?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -50,6 +52,49 @@ export async function POST(req: Request) {
         status: 429,
         headers: rl.retryAfter ? { "retry-after": String(rl.retryAfter) } : undefined,
       },
+    );
+  }
+
+  // The essay-writing unit (spec 010): the student picks an essay (`questionId`, re-checked against the live essays) or
+  // resumes the one open attempt. It cannot choose or resume without the database, so an unreadable database is a 503
+  // (constitution Principle VI); it never starts degraded and never guesses.
+  if (unit.flow === "essay") {
+    if (session.kind !== "user") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    const wanted = typeof body.questionId === "string" ? body.questionId : undefined;
+    if (body.questionId !== undefined && wanted === undefined) {
+      return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+    }
+    const started = await startEssay(user.id, wanted);
+    if (started.kind === "unavailable") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    if (started.kind === "not_found") return NextResponse.json({ error: "not_found" }, { status: 404 });
+    if (started.kind === "no_open_attempt") return NextResponse.json({ error: "no_open_attempt" }, { status: 404 });
+    if (started.kind === "attempt_open") {
+      return NextResponse.json({ error: "attempt_open", questionId: started.questionId }, { status: 409 });
+    }
+    const attemptToken = signAttemptToken({
+      uid: user.id,
+      attemptId: started.attempt.id,
+      unitId: unit.id,
+      questionIds: [started.essay.id],
+      mcOptionOrder: {},
+    });
+    return NextResponse.json(
+      {
+        attemptId: started.attempt.id,
+        attemptToken,
+        persisted: true,
+        unitId: unit.id,
+        passMark: unit.quiz?.passMark ?? DEFAULT_PASS_MARK,
+        questions: [getQuestion(started.essay.id)!.question],
+        answered: {},
+        essayState: started.essayState,
+        ...(started.created ? {} : { resumed: true }),
+      },
+      { status: started.created ? 201 : 200 },
     );
   }
 

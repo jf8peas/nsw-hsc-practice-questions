@@ -57,11 +57,14 @@ export function ConceptPanel({
   unit,
   progress,
   view,
+  details,
 }: {
   unit: Unit;
   progress: Loaded<ConceptState[]>;
   /** Approved content for the listed concepts. Absent or unavailable means descriptions only. */
   view?: Loaded<ConceptContentView>;
+  /** spec 010: the one-line "what was missing" for a concept, from the student's latest essay that listed it. */
+  details?: Record<string, string>;
 }) {
   if (!unit.conceptsReady) return null;
   const concepts = new Map(conceptsOf(unit).map((c) => [c.id, c]));
@@ -72,7 +75,8 @@ export function ConceptPanel({
   // after 2 correct first tries, an all-parts tip after 3 (`clearAfter`)
   // spec 008: the unseen-text unit lists its seven skills the same way (clear after 2 first tries)
   const skills = Boolean(unit.draw);
-  const tips = Boolean(unit.sequence) || skills;
+  const essayUnit = unit.flow === "essay";
+  const tips = Boolean(unit.sequence) || skills || essayUnit;
   const clearOf = (conceptId: string) => concepts.get(conceptId)?.clearAfter ?? TO_CLEAR;
   const needsContent = states.some((s) => !content.get(s.conceptId)?.summary);
 
@@ -83,7 +87,9 @@ export function ConceptPanel({
         title={tips ? "Things I need to know" : "Concepts to review"}
         aside={states.length > 0 ? <span className="rd-pill review">{states.length} to review</span> : undefined}
         sub={
-          states.length > 0 && skills
+          states.length > 0 && essayUnit
+            ? "Ideas an essay got wrong, missed or only named. An idea clears after 2 later essays use it correctly; redoing the same essay does not clear it."
+            : states.length > 0 && skills
             ? "Skills you missed on a first try. A skill clears after 2 first tries that show it."
             : states.length > 0 && tips
             ? "Writing tips you missed on a first try. A part tip clears after 2 correct first tries at that part; an all-parts tip after 3."
@@ -101,6 +107,8 @@ export function ConceptPanel({
         <div className="section-empty">
           {skills
             ? "All clear — nothing to review right now. Any skill you miss on a first try will show up here."
+            : essayUnit
+            ? "All clear — nothing to review right now. Ideas a marked essay misses will show up here."
             : tips
             ? "All clear — nothing to review right now. Any writing tip you miss on a first try will show up here."
             : "All clear — nothing to review right now. Any concept you miss in a quiz will show up here."}
@@ -115,6 +123,7 @@ export function ConceptPanel({
               return (
                 <li key={state.conceptId} className="concept-item">
                   <span className="concept-desc">{description}</span>
+                  {details?.[state.conceptId] && <span className="concept-detail">{details[state.conceptId]}</span>}
                   <ConceptProgress count={state.count} clearAfter={clearOf(state.conceptId)} />
                 </li>
               );
@@ -124,6 +133,7 @@ export function ConceptPanel({
                 <details className="concept-details">
                   <summary>
                     <span className="concept-desc">{description}</span>
+                    {details?.[state.conceptId] && <span className="concept-detail">{details[state.conceptId]}</span>}
                     <span className="concept-end">
                       <ConceptProgress count={state.count} clearAfter={clearOf(state.conceptId)} />
                       <span className="concept-chev" aria-hidden="true" />

@@ -62,24 +62,27 @@ export function conceptProgress(unit: Unit, results: readonly ConceptResult[]): 
   );
 
   const startOf = new Map((unit.concepts ?? []).map((c) => [c.id, c.clearAfter ?? MAX_COUNT] as const));
-  const state = new Map<string, { count: number; lastMissedAt: Date | null }>();
-  const apply = (concept: string, correct: boolean, at: Date) => {
-    const current = state.get(concept) ?? { count: 0, lastMissedAt: null };
+  const state = new Map<string, { count: number; lastMissedAt: Date | null; raisedBy: string | null }>();
+  // spec 010: a correct use in the same question that last set a concept does not clear it
+  const otherQuestionsOnly = unit.conceptsClearOnOtherQuestions === true;
+  const apply = (concept: string, correct: boolean, at: Date, questionId: string) => {
+    const current = state.get(concept) ?? { count: 0, lastMissedAt: null, raisedBy: null };
     if (correct) {
-      current.count = Math.max(0, current.count - 1);
+      if (!(otherQuestionsOnly && current.raisedBy === questionId)) current.count = Math.max(0, current.count - 1);
     } else {
       current.count = startOf.get(concept) ?? MAX_COUNT;
       current.lastMissedAt = at;
+      current.raisedBy = questionId;
     }
     state.set(concept, current);
   };
   for (const r of ordered) {
     if (r.conceptOutcomes && r.conceptOutcomes.length > 0) {
       // rewrite result (spec 005): per-term outcomes from phase 1, applied in order
-      for (const o of r.conceptOutcomes) apply(o.conceptId, o.correct, r.answeredAt);
+      for (const o of r.conceptOutcomes) apply(o.conceptId, o.correct, r.answeredAt, r.questionId);
       continue;
     }
-    for (const c of conceptsOf(r.questionId)) apply(c, r.marks >= r.max, r.answeredAt);
+    for (const c of conceptsOf(r.questionId)) apply(c, r.marks >= r.max, r.answeredAt, r.questionId);
   }
 
   const out: ConceptState[] = [];

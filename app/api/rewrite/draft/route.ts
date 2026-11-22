@@ -8,12 +8,15 @@ import { upsertRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 import { getParagraphPhase } from "@/lib/db/queries/paragraph-phases.server";
 import { getRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
 import { getUnseenPhase } from "@/lib/db/queries/unseen-phases.server";
+import { getEssayPhase } from "@/lib/db/queries/essay-phases.server";
 import { checkDraftRateLimit } from "@/lib/ratelimit.server";
 import { verifyAttemptToken } from "@/lib/tokens.server";
 
 export const runtime = "nodejs";
 
 const MAX_DRAFT_LEN = 6000;
+/** An 800-word economics essay can run to about 6000 characters, so the essay unit's drafts get more room (spec 010). */
+const MAX_ESSAY_DRAFT_LEN = 8000;
 
 const json = (body: unknown, status = 200, headers?: Record<string, string>) =>
   NextResponse.json(body, { status, headers });
@@ -46,8 +49,8 @@ export async function POST(req: Request) {
   const questionId = typeof body.questionId === "string" ? body.questionId : "";
   const phase: 1 | 2 | null =
     body.phase === 1 || body.phase === "1" ? 1 : body.phase === 2 || body.phase === "2" ? 2 : null;
-  const draft = typeof body.draft === "string" ? body.draft.slice(0, MAX_DRAFT_LEN) : null;
-  if (!attemptId || !questionId || phase === null || draft === null || typeof body.attemptToken !== "string") {
+  const rawDraft = typeof body.draft === "string" ? body.draft : null;
+  if (!attemptId || !questionId || phase === null || rawDraft === null || typeof body.attemptToken !== "string") {
     return bad("invalid_request");
   }
 
@@ -58,8 +61,11 @@ export async function POST(req: Request) {
   if (!token.questionIds.includes(questionId)) return bad("not_found", 404);
   const found = getQuestion(questionId);
   // serves the sentence unit (spec 006), the paragraph unit (spec 007), the unseen-text unit (spec 008) and the comparative unit (spec 009)
-  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph" && found.question.type !== "unseen" && found.question.type !== "comparative")) return bad("not_found", 404);
+  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph" && found.question.type !== "unseen" && found.question.type !== "comparative" && found.question.type !== "essay")) return bad("not_found", 404);
   const kind = found.question.type;
+  // the essay unit (spec 010) has one try: its draft is phase 1 only
+  if (kind === "essay" && phase !== 1) return bad("invalid_request");
+  const draft = rawDraft.slice(0, kind === "essay" ? MAX_ESSAY_DRAFT_LEN : MAX_DRAFT_LEN);
 
   // A dedicated per-user limiter, separate from the grading limits (research R5.2).
   const perUser = await checkDraftRateLimit(user.id);
@@ -81,6 +87,14 @@ export async function POST(req: Request) {
     }
     // Stale check: a phase row exists for phase 1 (already graded), or the phase row is final for
     // phase 2 (the question is final) — write nothing.
+    // essay (spec 010): the draft belongs to the essay page, so nothing is written while the plan is still editable or
+    // once the essay is finished
+    if (kind === "essay") {
+      const essayRow = await dbCall((db) => getEssayPhase(db, user.id, attemptId, questionId));
+      if (!essayRow || essayRow.status !== "writing") return json({ saved: false });
+      await dbCall((db) => upsertRewriteDraft(db, user.id, attemptId, token.unitId, questionId, 1, draft));
+      return json({ saved: true });
+    }
     const phaseRow =
       kind === "paragraph"
         ? await dbCall((db) => getParagraphPhase(db, user.id, attemptId, questionId))

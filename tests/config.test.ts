@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { configProblems } from "@/lib/config";
-import { getConceptModels, getConfig, getEnglishAdvModel } from "@/lib/config.server";
+import { getConceptModels, getConfig, getEnglishAdvModel, getEssayGradingModel, getEssayReviewModel } from "@/lib/config.server";
 
 const FULL = {
   AUTH_SECRET: "s",
@@ -102,5 +102,24 @@ describe("getConfig", () => {
   it("importing the modules with no env set does not throw", async () => {
     await expect(import("@/lib/config")).resolves.toBeTruthy();
     await expect(import("@/lib/config.server")).resolves.toBeTruthy();
+  });
+});
+
+describe("essay models (spec 010)", () => {
+  it("default to deepseek-v4.1-flash when unset or blank", () => {
+    expect(getEssayGradingModel({})).toBe("deepseek/deepseek-v4.1-flash");
+    expect(getEssayGradingModel({ ESSAY_GRADING_MODEL: "  " })).toBe("deepseek/deepseek-v4.1-flash");
+    expect(getEssayReviewModel({})).toBe("deepseek/deepseek-v4.1-flash");
+  });
+
+  it("use the configured model, trimmed, and are independent of each other", () => {
+    expect(getEssayGradingModel({ ESSAY_GRADING_MODEL: " vendor/mark ", ESSAY_REVIEW_MODEL: "vendor/review" })).toBe("vendor/mark");
+    expect(getEssayReviewModel({ ESSAY_GRADING_MODEL: "vendor/mark", ESSAY_REVIEW_MODEL: " vendor/review " })).toBe("vendor/review");
+  });
+
+  it("never fall back to another unit's model", () => {
+    const env = { GRADING_MODEL: "vendor/a", ENGLISH_ADV_GRADING_MODEL: "vendor/b" };
+    expect(getEssayGradingModel(env)).toBe("deepseek/deepseek-v4.1-flash");
+    expect(getEssayReviewModel(env)).toBe("deepseek/deepseek-v4.1-flash");
   });
 });

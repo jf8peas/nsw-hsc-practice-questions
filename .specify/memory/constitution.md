@@ -1,5 +1,11 @@
 <!--
 Sync Impact Report
+- Version change: 2.16.0 -> 2.17.0 (MINOR: guidance in Principles I, II, VI and VII and the Quality Gates extended to the Economics essay-writing unit, spec 010).
+- Reason (amendment log): the essay unit (spec 010) has a student plan a whole extended response, optionally get feedback on the plan, write 600-800 words and be marked out of 20 in the school's AT1 bands. Like the English units it is one question per attempt, one try, never self-marked, and needs the database. It stores the student's own plan, review and essay. The marking notes, the school's criteria and the band 1 model essay are server-only key material; the model essay is released only with the student's own finished result. Two new model settings serve the marker and the plan review. A gap is cleared only by later essays, not by a redo of the essay that raised it. A marker check on labelled essays gates each unit that is marked by a pilot-tested prompt. The scaffold and essay routes are answer-submission routes.
+- Modified principles: I (essay unit release schedule and request fields); II (essay phase row; the derived concept rule's "different essay" clause); VI (the essay unit never self-marked; the plan review's failure); VII (ESSAY_GRADING_MODEL, ESSAY_REVIEW_MODEL); Quality Gates (leakage, testing and the marker check).
+- Templates requiring updates: none (plan, spec and tasks templates name no unit).
+
+Previous report (2.16.0):
 - Version change: 2.15.1 → 2.16.0 (MINOR: guidance in Principles I, II, V, VI and VII and the Quality Gates extended to a second Advanced English unit, the comparative short-answer unit, and one new student-chosen field, the pick of texts).
 - Reason (amendment log): the comparative unit (spec 009) is spec 008 with two texts per question. It reuses 008's stimulus texts and cropped images, marker pipeline, no-self-marking rule and model setting, so the wording that named "the unseen-text unit" now names both units. A choice question lets the student choose which allowed texts to write about; the choice is a list of text ids from the question's own public allowed set, re-checked by the server, stored with the attempt so the marker can be revised from real use. Nine skill verdicts replace seven in this unit. A unit's concept list may name concept ids defined by another unit it shares progress with (spec 009 FR-022). Nothing new is released earlier than in 008: the key is still server-only and the model answer is released at the discussion only.
 - Modified principles: I (the comparative unit's release schedule; the pick on the pick-save route, an answer-submission route, and on the grade route; the image route's id checked against the shared text store); II (the comparative phase row, nine verdicts and the pick); V (the cropped-image exception covers the shared store); VI (both units never self-marked; both need the database); VII (the model setting also serves the comparative unit); Quality Gates (leakage and testing bullets).
@@ -119,7 +125,7 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   server-issued signed attempt token; for a self-mark, a binary `correct` flag or per-criterion
   tick flags together with the server-issued signed self-mark token; for the paragraph unit's
   flag route, `attemptId`, `questionId` and the signed attempt token; for the unseen-text unit's
-  retry-decline route, `attemptId`, `questionId` and the signed attempt token; for the comparative unit's pick-save route, `attemptId`, `questionId`, the signed attempt token and `pick` (a list of text ids, each re-checked by the server against the question's allowed texts), and for its grade route the same `pick` beside the fields above on the first try; and, for a
+  retry-decline route, `attemptId`, `questionId` and the signed attempt token; for the comparative unit's pick-save route, `attemptId`, `questionId`, the signed attempt token and `pick` (a list of text ids, each re-checked by the server against the question's allowed texts), and for its grade route the same `pick` beside the fields above on the first try; for the essay unit's attempt-start route, a `questionId` (an essay id the server checks is live and not already open); for its scaffold route, `attemptId`, `questionId`, the signed attempt token, an `action` (`save` or `start`) and the scaffold's text fields; for its review route and discard route, `attemptId`, `questionId` and the signed attempt token (the review also the scaffold's text fields); for its grade route, `attemptId`, `questionId`, the signed attempt token and the essay text (no `phase`); and, for a
   save retry, the server-issued signed result receipt. The transcribe route (`POST /api/transcribe`) MAY accept 1-3 images and an optional note;
   `/api/grade` MAY accept the signed transcription token. The vision prompt gets no model answer or rubric.
 - The client MUST NOT send a user id, marks, max marks or grading method. The only exception is
@@ -172,6 +178,7 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   notes, a visual text's written description, or the model answer before the discussion. Key
   material MUST come through functions exported from `lib/grading.server.ts`.
 - [DECISION] The comparative short-answer unit (spec 009) follows the unseen-text release schedule above, with two or more texts per question and nine skills. Before the first try is marked: nothing from the key (the texts a question shows, every allowed text of a choice question, the question, its marks, its source and the line that a choice question's model answer shows one pairing are public content). After a try is marked: the nine per-skill verdicts, the marker's one-line reasons, its feedback and its biggest-gap sentence (never model-answer text). At the discussion: the model answer and, for a choice question, the pairing it uses. Never, at any moment, including reload, resume and the attempt detail page of an unfinished question: the marking criteria, the marking notes, any visual text's written description, or the model answer before the discussion. The pick is the student's own choice and may be shown back to them at any step. Key material MUST come through functions exported from `lib/grading.server.ts`.
+- [DECISION] The Economics essay-writing unit (spec 010) MAY send part of its key to the browser at defined moments, and only then. Before an essay is marked: nothing from the key (the essay question, its directive verb and definition, its economy tag, its source if it is a school-trial question and whether it is live are public content, and the scaffold, the plan review and the draft are the student's own text). After an essay is marked: the five per-criterion verdicts and reasons, the band, the mark, the two lift points, the flagged figures (quoting the student's words), the gaps and the concepts used well (never model-essay or marking-note text; the server rejects a marker reply that repeats a long run of the notes or the school's criteria). With the student's own finished result: the band 1 model essay. Never, at any moment, including reload, resume, discard and the attempt detail page of an unfinished attempt: the marking notes, the school's criteria, the concept tags of an essay, or the model essay. Key material MUST come through functions exported from `lib/grading.server.ts`.
 
 Rationale: a practice tool whose answers can be read from the page source is worthless. The
 `server-only` import makes the build fail if client code ever pulls the key in.
@@ -219,6 +226,7 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     draft text is stored in the existing draft row. Verdicts and reasons never change
     marks or concept tracking, which always come from the first try's verdicts.
   - per comparative question in an attempt (spec 009): everything stored for an unseen-text question, with nine per-skill verdicts instead of seven and the pick (the text ids the student chose, on a choice question), kept in the same phase row (the pick is also held in the draft row until the first try is submitted); deleted with the student like results. Verdicts, reasons and the pick never change marks or concept tracking, which come from the first try's verdicts.
+  - per essay attempt (spec 010): the unit and essay id; the scaffold (its text fields) and when it was locked; the plan review, if one was made (seven check lines and any flagged figures), with its prompt version and model; the essay text and its word count; the five per-criterion verdicts each with the marker's one-line reason; the band; the raw and the final mark; the two lift points; flagged figures; the gaps (concept id and one-sentence detail) and the concepts used well; and the prompt version and model that marked it; stored in one essay row, kept for the attempt detail page, deleted with the student like results. The student's in-progress essay is stored in the existing draft row. A discarded attempt (unmarked only) is deleted with its scaffold, review and draft. Verdicts and reasons never change concept tracking, which comes from the gaps and concepts used well.
   It MUST NOT store profile photos, Google tokens beyond what the session needs, or any other
   personal data without amending this constitution. Photos for transcription are never stored or logged;
   only the transcription (the "answer submitted") is stored. Answer photos are sent to an AI provider
@@ -238,7 +246,7 @@ Rationale: a practice tool whose answers can be read from the page source is wor
 - No new per-student fields. A student's concept counts MUST be derived from their stored
   results, not stored separately: a wrong answer sets the concept's count to its clear-after number
   (3, or 2 for a concept whose `concepts.ts` entry declares `clearAfter: 2`), a correct answer
-  takes 1 away, and the concept clears at 0.
+  takes 1 away, and the concept clears at 0. A concept whose unit declares `conceptsClearOnOtherQuestions` (spec 010) is not taken one away by a correct use in the same question that last set it; only a different question clears it.
 - Other server-side state is limited to rate-limit and daily-cap counters (Principle VII)
   and shared concept content. Shared concept content is, per concept id: the summary and the
   illustration (with its brief), each with its own generator model, generation time, review
@@ -359,7 +367,7 @@ but the README does not yet say so.
   ends the question with the first-try mark and the discussion; the correction is never
   self-marked and no error is shown. At phase 1 the self-marking fallback applies as for other
   units.
-- [DECISION] The unseen-text and comparative short-answer units (specs 008 and 009) are never self-marked, on either of its
+- [DECISION] The unseen-text, comparative and essay-writing units (specs 008, 009 and 010) are never self-marked, on either of its
   two tries, and a try that cannot be marked does not end the question. If the marker fails (no
   key, a failed call, or an empty, cut-off, unparseable or incomplete reply after one retry), the
   student's answer stays locked on screen while the app retries; if marking still fails, the
@@ -369,6 +377,7 @@ but the README does not yet say so.
   in the box, Submit stays disabled until the next Sydney day, and the question waits at that step
   and is offered again first. These notices are plain status messages, not errors, and nothing
   else is shown. A student may still decline the retry, which records the first try's mark.
+- [DECISION] The essay-writing unit (spec 010) has one try per attempt and no second phase. If the marker fails, the editable box returns with the essay and the slot is refunded; if the student is over the daily cap, the app tells them to come back tomorrow, and the scaffold and essay stay as drafts. The optional plan review is never marked and never blocks the essay: if the reviewer fails or the student is over the cap, the app says so and offers "Start writing" without it. The essay unit cannot start, resume, mark, review, discard or save without the database and MUST NOT guess.
 - [DECISION] The unseen-text and comparative units cannot start, resume, mark or save a quiz without the database:
   it draws from the student's results, offers an unfinished question first, reserves a daily-cap
   slot and stores each try. If the database cannot be read, the unit shows a notice and asks the
@@ -430,6 +439,7 @@ block practice.
   the model the unseen-text and comparative units mark with (default `deepseek/deepseek-v4.1-flash`); it never
   falls back to `GRADING_MODEL`. Each marked try counts one slot against `LLM_DAILY_CAP`,
   refunded if the marker fails.
+- `ESSAY_GRADING_MODEL` and `ESSAY_REVIEW_MODEL` follow the same server-only rules as `OPENROUTER_API_KEY`. The first marks the essay-writing unit's essays (default `deepseek/deepseek-v4.1-flash`, or the model its marker check names); the second gives the optional plan review (same default). Neither falls back to `GRADING_MODEL` or `ENGLISH_ADV_GRADING_MODEL`. Each marked essay and each plan review counts one slot against `LLM_DAILY_CAP`, refunded if the call fails.
 - `REMARK_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. It is read only by
   `scripts/**` for the offline re-mark of full-mark paragraph, unseen-text and comparative answers, which does
   not count against `LLM_DAILY_CAP`.
@@ -503,6 +513,7 @@ Every feature plan MUST satisfy:
   - the unseen-text and comparative units' marking criteria, marking notes, model answer (before the discussion)
     and visual descriptions never leave the server, and its stimulus images are served only
     through the authenticated route;
+  - the essay unit's marking notes, school criteria, concept tags and model essay (before the student's own finished result) never leave the server;
   - every question copied from a school paper shows its source (school, year, paper type,
     question number), no real HSC question is included, and no diagram is a scanned image.
 - Testing: authorization and cost-control logic MUST ship with automated tests covering:
@@ -517,9 +528,11 @@ Every feature plan MUST satisfy:
   - the unseen-text and comparative units' marker failure returns the editable box with no mark and no self-mark,
     their daily-limit state disables Submit until the next Sydney day on both tries, and a skill's
     concept count clears after 2 first tries (a shared skill's count is one across the two units);
+  - the essay unit's marker failure returns the editable box with no mark, its daily-limit state keeps the drafts and disables Submit, a plan-review failure offers "Start writing", and a gap clears after 2 correct uses on a different essay;
   - the regenerate route rejects non-allowlisted emails;
   - an item that fails review twice is never shown to students.
   Other logic MAY have tests but is not required to.
+- A unit marked by an LLM against labelled pilot essays MUST NOT set a question `live` until its marker check (`resources/<topic>/`) has passed on the prompt version that ships.
 - Accessibility: no target is currently set.
   TODO(ACCESSIBILITY_TARGET): decide a target for quiz flows (e.g. WCAG 2.2 AA), or omit.
 
@@ -543,4 +556,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.16.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-20
+**Version**: 2.17.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-22

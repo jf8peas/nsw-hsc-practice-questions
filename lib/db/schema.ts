@@ -6,6 +6,7 @@
 
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   date,
   foreignKey,
@@ -91,6 +92,10 @@ export const attempts = pgTable(
     uniqueIndex("attempts_comparative_incomplete_unique")
       .on(t.userId)
       .where(sql`${t.unitId} = 'y12-english-advanced-comparative-texts' and ${t.completedAt} is null`),
+    // spec 010: the same for the Economics essay-writing unit (one OPEN attempt per student; two tabs starting at once end on one attempt).
+    uniqueIndex("attempts_essay_incomplete_unique")
+      .on(t.userId)
+      .where(sql`${t.unitId} = 'y12-economics-essay-writing' and ${t.completedAt} is null`),
   ],
 );
 
@@ -381,6 +386,86 @@ export const unseenPhases = pgTable(
  * draft text per phase, so a resume on another device restores what the student had typed
  * (FR-053, FR-054). Created on the first draft save; deleted with the student (cascade).
  */
+/** spec 010: one criterion's verdict and the marker's one-line reason. */
+export interface EssayCriterionResult {
+  verdict: "strong" | "sound" | "developing" | "weak";
+  reason: string;
+}
+
+/** spec 010: the stored plan review (seven check lines and any flagged figures). */
+export interface StoredPlanReview {
+  checks: Array<{ id: "answers" | "scope" | "band" | "data" | "models" | "evaluation" | "fit"; status: "strength" | "fix"; line: string }>;
+  figureFlags: Array<{ quote: string; why: string }>;
+}
+
+/**
+ * spec 010: one row per essay attempt (data-model §3): the plan (editable until locked), the optional
+ * review, and the marking of the essay. Hangs off `attempts` like the other phase rows, so deleting a
+ * student or an open attempt removes it. `status` is planning | writing | finished; marking is a
+ * request in flight guarded by `marking_started_at`, not a stored status.
+ */
+export const essayPhases = pgTable(
+  "essay_phases",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    attemptId: uuid("attempt_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    unitId: text("unit_id").notNull(),
+    questionId: text("question_id").notNull(),
+    /** planning | writing | finished */
+    status: text("status").notNull().default("planning"),
+    scaffold: jsonb("scaffold").$type<import("../essay/scaffold").EssayScaffold>().notNull(),
+    scaffoldWords: smallint("scaffold_words").notNull().default(0),
+    scaffoldLockedAt: ts("scaffold_locked_at"),
+    review: jsonb("review").$type<StoredPlanReview>(),
+    reviewPromptVersion: text("review_prompt_version"),
+    reviewModel: text("review_model"),
+    reviewedAt: ts("reviewed_at"),
+    /** The marking lease: set while a grade request is in flight; a lease older than 90 s is ignored. */
+    markingStartedAt: ts("marking_started_at"),
+    essayText: text("essay_text"),
+    essayWords: smallint("essay_words"),
+    rawMark: smallint("raw_mark"),
+    band: smallint("band"),
+    finalMark: smallint("final_mark"),
+    coversBoth: boolean("covers_both"),
+    criteria: jsonb("criteria").$type<Record<"understanding" | "theory" | "assessment" | "data" | "structure", EssayCriterionResult>>(),
+    bandReason: text("band_reason"),
+    lift: jsonb("lift").$type<string[]>(),
+    flags: jsonb("flags").$type<Array<{ quote: string; why: string }>>(),
+    gaps: jsonb("gaps").$type<Array<{ conceptId: string; detail: string }>>(),
+    usedWell: text("used_well").array(),
+    promptVersion: text("prompt_version"),
+    model: text("model"),
+    gradedAt: ts("graded_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "essay_phases_attempt_owner_fk",
+      columns: [t.attemptId, t.userId],
+      foreignColumns: [attempts.id, attempts.userId],
+    }).onDelete("cascade"),
+    unique("essay_phases_attempt_question_unique").on(t.attemptId, t.questionId),
+    check("essay_phases_status", sql`${t.status} in ('planning', 'writing', 'finished')`),
+    check("essay_phases_scaffold_words", sql`${t.scaffoldWords} >= 0 and ${t.scaffoldWords} <= 250`),
+    check("essay_phases_finished_iff_marked", sql`(${t.status} = 'finished') = (${t.finalMark} is not null)`),
+    check(
+      "essay_phases_marked_fields",
+      sql`${t.finalMark} is null or (${t.finalMark} between 1 and 20 and ${t.rawMark} between 1 and 20 and ${t.band} between 1 and 5 and ${t.essayText} is not null and ${t.essayWords} between 600 and 800 and ${t.criteria} is not null and ${t.promptVersion} is not null and ${t.model} is not null)`,
+    ),
+    check("essay_phases_locked_iff_not_planning", sql`(${t.status} = 'planning') = (${t.scaffoldLockedAt} is null)`),
+    check("essay_phases_review_needs_lock", sql`${t.review} is null or ${t.scaffoldLockedAt} is not null`),
+    index("essay_phases_user_idx").on(t.userId, t.unitId),
+  ],
+);
+
+export type EssayPhaseRow = typeof essayPhases.$inferSelect;
+export type NewEssayPhaseRow = typeof essayPhases.$inferInsert;
+
 export const rewriteDrafts = pgTable(
   "rewrite_drafts",
   {

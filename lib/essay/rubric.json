@@ -1,0 +1,62 @@
+{
+  "promptVersion": "essay-pilot-2",
+  "wordRange": [
+    600,
+    800
+  ],
+  "bands": [
+    {
+      "band": 1,
+      "min": 17,
+      "max": 20,
+      "descriptor": "Sophisticated understanding of the strategies used to promote economic growth and development. Integrates a wide range of relevant economic terms, concepts and theories. Comprehensively assesses the effectiveness of various strategies in promoting economic growth, environmental sustainability and income equality. Extensive reference to contemporary economic indicators, data and trends throughout."
+    },
+    {
+      "band": 2,
+      "min": 13,
+      "max": 16,
+      "descriptor": "Detailed understanding of the strategies. Consistently applies a range of relevant economic terms, concepts and theories. Assesses the effectiveness of various strategies in promoting economic development, economic growth and environmental sustainability. Thorough reference to contemporary economic indicators, data and trends."
+    },
+    {
+      "band": 3,
+      "min": 9,
+      "max": 12,
+      "descriptor": "Understanding of the strategies. Includes relevant economic terms, concepts and/or theories. Some evidence to assess the effectiveness of strategies in promoting economic development, growth and/or environmental sustainability. Reference to contemporary indicators, data and trends."
+    },
+    {
+      "band": 4,
+      "min": 5,
+      "max": 8,
+      "descriptor": "States some aspects of the strategies. Refers to some relevant economic terms, concepts or theories. Identifies (rather than assesses) strategies. Some reference to indicators, data and/or trends."
+    },
+    {
+      "band": 5,
+      "min": 1,
+      "max": 4,
+      "descriptor": "Limited response. Limited use of economic terms and concepts. Limited use of indicators, data and trends. Judgement not evident."
+    }
+  ],
+  "criteria": {
+    "understanding": "Understanding of strategies: accurate, specific strategies or globalisation influences since 1980 (named policies, dates, actors such as governments, the IMF, World Bank, WTO or donors), chosen for the question asked.",
+    "theory": "Terms, concepts and theory: economic terms used precisely and integrated into the argument rather than listed; models (AD/AS, PPF, Lorenz curve, Harrod-Domar, comparative advantage) explained in words and tied to the point they support.",
+    "assessment": "Assessment of effectiveness: a clear judgement that answers the directive verb, stated early and sustained to the conclusion; weighs costs against benefits; for the top band covers growth, development, environmental sustainability and income equality.",
+    "data": "Data and indicators: contemporary indicators with years (GDP growth, GDP per capita, HDI, Gini, poverty rate, emissions, remittances, FDI, trade shares) used as evidence for a claim, not dropped in. A figure that is clearly wrong weakens this criterion.",
+    "structure": "Logical, cohesive response: introduction with the judgement, body paragraphs with one idea each and linking sentences, conclusion that weighs the argument; stays on the chosen economies, not Australia."
+  },
+  "verdicts": [
+    "strong",
+    "sound",
+    "developing",
+    "weak"
+  ],
+  "maxGaps": 5,
+  "system": "You are an experienced NSW HSC Economics marker marking a Year 12 extended response (600-800 words, written in 50 minutes without notes) for the Global Economy case study: the influence of globalisation on an emerging and/or developing economy and the strategies (since 1980) used to promote growth and development. Mark holistically against the band descriptors, the way an HSC marker does: first read the whole essay, then judge each criterion, then choose the band whose descriptor fits best, then choose a mark inside that band. Reward what is there; do not mark down for omissions a 50-minute answer could not reasonably include. Accept rounded, approximate or differently sourced figures when they are plausible; flag a figure only when it is clearly wrong (wrong by a large margin, wrong year for a well-known event, or impossible). Never supply a corrected figure. A strong answer to a question naming one emerging and one developing economy must treat both; if it treats only one, the band cannot be above 3. Do not reward length or padding. Respond with JSON only, no prose outside it.",
+  "userTemplate": "Essay question: {question}\nDirective verb: {verb} ({verbMeaning})\nThe question requires: {economyRule}\n\nBand descriptors (marks out of 20):\n{bands}\n\nCriteria (judge each one on its own):\n{criteria}\n\nMarking notes for this question (what a strong answer is likely to cover; other valid content earns equal credit):\n{markingNotes}\n\nThe school's own marking criteria for this question (apply them together with the band descriptors; \"None provided.\" means there are none):\n{schoolCriteria}\n\nConcept list for knowledge gaps (use these ids only):\n{concepts}\n\nStudent's essay ({words} words):\n\"\"\"\n{essay}\n\"\"\"\n\nReply with exactly this shape:\n{\"criteria\": {\"understanding\": {\"reason\": \"<one or two sentences>\", \"verdict\": \"strong|sound|developing|weak\"}, \"theory\": {...}, \"assessment\": {...}, \"data\": {...}, \"structure\": {...}}, \"coversRequiredEconomies\": true|false, \"dataFlags\": [{\"quote\": \"<the student's words, exactly>\", \"why\": \"<why it looks wrong, with no corrected figure>\"}], \"band\": 1-5, \"mark\": <whole number inside the band>, \"bandReason\": \"<two sentences naming the descriptor words that decided the band>\", \"liftYourMark\": [\"<the most valuable change, addressed to the student>\", \"<the second>\"], \"gaps\": [{\"concept\": \"<id from the concept list>\", \"detail\": \"<what the essay got wrong, missed or only named, in one sentence>\"}], \"conceptsUsedWell\": [\"<id from the concept list>\"]}\nList at most {maxGaps} gaps, most important first: content a band 1 answer to THIS question would use that the essay got wrong, missed or only named. Use [] for no data flags. In \"conceptsUsedWell\" list (at most 8) the concept ids from the list that the essay uses correctly and with effect, as evidence for its argument rather than merely naming them; never list an id that is also in \"gaps\"; use [] if there are none.",
+  "verbMeanings": {
+    "analyse": "identify components and the relationship between them; draw out and relate implications",
+    "assess": "make a judgement of value, quality, outcomes, results or size",
+    "discuss": "identify issues and provide points for and/or against",
+    "evaluate": "make a judgement based on criteria; determine the value of",
+    "explain": "relate cause and effect; make the relationships between things evident; provide why and/or how"
+  }
+}

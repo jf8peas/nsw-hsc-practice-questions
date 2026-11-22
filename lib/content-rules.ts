@@ -78,6 +78,8 @@ export function validateConceptRules(unit: Unit): string[] {
       errors.push(`${unit.id}: conceptsReady is set but the unit has no concepts (content/units/${unit.id}/concepts.ts)`);
     }
     for (const q of unit.questions) {
+      // an essay's tags are the concepts a strong answer uses: answer content, so they live in the key (spec 010)
+      if (q.type === "essay") continue;
       if (q.concept === undefined && (!q.concepts || q.concepts.length === 0)) {
         errors.push(`${q.id}: has no concept tag, but ${unit.id} is marked conceptsReady`);
       }
@@ -127,7 +129,7 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
       if (explanations !== undefined) errors.push(`${q.id}: short questions cannot have wrongExplanations`);
       continue;
     }
-    if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative") continue; // no options to explain (spec 005, 007, 008, 009)
+    if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative" || q.type === "essay") continue; // no options to explain (spec 005, 007, 008, 009, 010)
 
     const correct = a.correctText ?? (typeof a.correctIndex === "number" ? q.options[a.correctIndex] : undefined);
     if (explanations !== undefined) {

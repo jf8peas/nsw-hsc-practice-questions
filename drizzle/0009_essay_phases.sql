@@ -1,0 +1,45 @@
+CREATE TABLE "essay_phases" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"attempt_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
+	"unit_id" text NOT NULL,
+	"question_id" text NOT NULL,
+	"status" text DEFAULT 'planning' NOT NULL,
+	"scaffold" jsonb NOT NULL,
+	"scaffold_words" smallint DEFAULT 0 NOT NULL,
+	"scaffold_locked_at" timestamp with time zone,
+	"review" jsonb,
+	"review_prompt_version" text,
+	"review_model" text,
+	"reviewed_at" timestamp with time zone,
+	"marking_started_at" timestamp with time zone,
+	"essay_text" text,
+	"essay_words" smallint,
+	"raw_mark" smallint,
+	"band" smallint,
+	"final_mark" smallint,
+	"covers_both" boolean,
+	"criteria" jsonb,
+	"band_reason" text,
+	"lift" jsonb,
+	"flags" jsonb,
+	"gaps" jsonb,
+	"used_well" text[],
+	"prompt_version" text,
+	"model" text,
+	"graded_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "essay_phases_attempt_question_unique" UNIQUE("attempt_id","question_id"),
+	CONSTRAINT "essay_phases_status" CHECK ("essay_phases"."status" in ('planning', 'writing', 'finished')),
+	CONSTRAINT "essay_phases_scaffold_words" CHECK ("essay_phases"."scaffold_words" >= 0 and "essay_phases"."scaffold_words" <= 250),
+	CONSTRAINT "essay_phases_finished_iff_marked" CHECK (("essay_phases"."status" = 'finished') = ("essay_phases"."final_mark" is not null)),
+	CONSTRAINT "essay_phases_marked_fields" CHECK ("essay_phases"."final_mark" is null or ("essay_phases"."final_mark" between 1 and 20 and "essay_phases"."raw_mark" between 1 and 20 and "essay_phases"."band" between 1 and 5 and "essay_phases"."essay_text" is not null and "essay_phases"."essay_words" between 600 and 800 and "essay_phases"."criteria" is not null and "essay_phases"."prompt_version" is not null and "essay_phases"."model" is not null)),
+	CONSTRAINT "essay_phases_locked_iff_not_planning" CHECK (("essay_phases"."status" = 'planning') = ("essay_phases"."scaffold_locked_at" is null)),
+	CONSTRAINT "essay_phases_review_needs_lock" CHECK ("essay_phases"."review" is null or "essay_phases"."scaffold_locked_at" is not null)
+);
+--> statement-breakpoint
+ALTER TABLE "essay_phases" ADD CONSTRAINT "essay_phases_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "essay_phases" ADD CONSTRAINT "essay_phases_attempt_owner_fk" FOREIGN KEY ("attempt_id","user_id") REFERENCES "public"."attempts"("id","user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "essay_phases_user_idx" ON "essay_phases" USING btree ("user_id","unit_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "attempts_essay_incomplete_unique" ON "attempts" USING btree ("user_id") WHERE "attempts"."unit_id" = 'y12-economics-essay-writing' and "attempts"."completed_at" is null;

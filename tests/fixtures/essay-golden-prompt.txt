@@ -1,0 +1,64 @@
+You are an experienced NSW HSC Economics marker marking a Year 12 extended response (600-800 words, written in 50 minutes without notes) for the Global Economy case study: the influence of globalisation on an emerging and/or developing economy and the strategies (since 1980) used to promote growth and development. Mark holistically against the band descriptors, the way an HSC marker does: first read the whole essay, then judge each criterion, then choose the band whose descriptor fits best, then choose a mark inside that band. Reward what is there; do not mark down for omissions a 50-minute answer could not reasonably include. Accept rounded, approximate or differently sourced figures when they are plausible; flag a figure only when it is clearly wrong (wrong by a large margin, wrong year for a well-known event, or impossible). Never supply a corrected figure. A strong answer to a question naming one emerging and one developing economy must treat both; if it treats only one, the band cannot be above 3. Do not reward length or padding. Respond with JSON only, no prose outside it.
+
+=====
+
+Essay question: Fixture question: evaluate the strategies used by an emerging and a developing economy.
+Directive verb: evaluate (make a judgement based on criteria; determine the value of)
+The question requires: one emerging AND one developing economy (here China and Nepal); both must be treated
+
+Band descriptors (marks out of 20):
+Band 1 (17-20): Sophisticated understanding of the strategies used to promote economic growth and development. Integrates a wide range of relevant economic terms, concepts and theories. Comprehensively assesses the effectiveness of various strategies in promoting economic growth, environmental sustainability and income equality. Extensive reference to contemporary economic indicators, data and trends throughout.
+Band 2 (13-16): Detailed understanding of the strategies. Consistently applies a range of relevant economic terms, concepts and theories. Assesses the effectiveness of various strategies in promoting economic development, economic growth and environmental sustainability. Thorough reference to contemporary economic indicators, data and trends.
+Band 3 (9-12): Understanding of the strategies. Includes relevant economic terms, concepts and/or theories. Some evidence to assess the effectiveness of strategies in promoting economic development, growth and/or environmental sustainability. Reference to contemporary indicators, data and trends.
+Band 4 (5-8): States some aspects of the strategies. Refers to some relevant economic terms, concepts or theories. Identifies (rather than assesses) strategies. Some reference to indicators, data and/or trends.
+Band 5 (1-4): Limited response. Limited use of economic terms and concepts. Limited use of indicators, data and trends. Judgement not evident.
+
+Criteria (judge each one on its own):
+- understanding: Understanding of strategies: accurate, specific strategies or globalisation influences since 1980 (named policies, dates, actors such as governments, the IMF, World Bank, WTO or donors), chosen for the question asked.
+- theory: Terms, concepts and theory: economic terms used precisely and integrated into the argument rather than listed; models (AD/AS, PPF, Lorenz curve, Harrod-Domar, comparative advantage) explained in words and tied to the point they support.
+- assessment: Assessment of effectiveness: a clear judgement that answers the directive verb, stated early and sustained to the conclusion; weighs costs against benefits; for the top band covers growth, development, environmental sustainability and income equality.
+- data: Data and indicators: contemporary indicators with years (GDP growth, GDP per capita, HDI, Gini, poverty rate, emissions, remittances, FDI, trade shares) used as evidence for a claim, not dropped in. A figure that is clearly wrong weakens this criterion.
+- structure: Logical, cohesive response: introduction with the judgement, body paragraphs with one idea each and linking sentences, conclusion that weighs the argument; stays on the chosen economies, not Australia.
+
+Marking notes for this question (what a strong answer is likely to cover; other valid content earns equal credit):
+FIXTURE MARKING NOTES
+
+The school's own marking criteria for this question (apply them together with the band descriptors; "None provided." means there are none):
+FIXTURE SCHOOL CRITERIA
+
+Concept list for knowledge gaps (use these ids only):
+- china-open-door: China: open-door policy and Special Economic Zones (from 1978-80)
+- china-wto: China: WTO accession (2001) and export-led growth
+- china-fdi-bri: China: FDI inflows and outward investment (Belt and Road Initiative)
+- china-soe: China: state-owned enterprise reform
+- china-infrastructure-debt: China: infrastructure-led investment and debt
+- china-hukou: China: hukou system and rural-urban migration
+- china-environment: China: environmental policy and emissions
+- china-inequality-poverty: China: income inequality and poverty reduction
+- china-rebalancing: China: rebalancing to consumption and 'dual circulation'
+- nepal-liberalisation: Nepal: 1990s liberalisation and privatisation
+- nepal-wto-trade: Nepal: WTO accession (2004) and trade with India and China
+- nepal-remittances: Nepal: remittances and labour migration
+- nepal-tourism: Nepal: tourism
+- nepal-hydropower: Nepal: hydropower and electricity exports
+- nepal-aid-imf-wb: Nepal: foreign aid, IMF and World Bank programs
+- nepal-ldc-graduation: Nepal: graduation from Least Developed Country status
+- nepal-instability-earthquake: Nepal: political instability and the 2015 earthquake
+- nepal-poverty-hdi: Nepal: poverty, HDI and human capital
+- skill-growth-vs-development: Growth vs development, and how each is measured
+- skill-globalisation-channels: Globalisation channels: trade, FDI, finance, labour, technology
+- skill-environment-tradeoff: Environmental sustainability and growth trade-offs
+- skill-inequality-measures: Income inequality: Gini, Lorenz curve, urban-rural gaps
+- skill-external-bodies: Role of the IMF, World Bank and aid donors
+- skill-models: Using models: AD/AS, PPF, Harrod-Domar
+- skill-judgement: Sustaining a judgement across the essay
+- skill-data-as-evidence: Using data as evidence
+
+Student's essay (3 words):
+"""
+one two three
+"""
+
+Reply with exactly this shape:
+{"criteria": {"understanding": {"reason": "<one or two sentences>", "verdict": "strong|sound|developing|weak"}, "theory": {...}, "assessment": {...}, "data": {...}, "structure": {...}}, "coversRequiredEconomies": true|false, "dataFlags": [{"quote": "<the student's words, exactly>", "why": "<why it looks wrong, with no corrected figure>"}], "band": 1-5, "mark": <whole number inside the band>, "bandReason": "<two sentences naming the descriptor words that decided the band>", "liftYourMark": ["<the most valuable change, addressed to the student>", "<the second>"], "gaps": [{"concept": "<id from the concept list>", "detail": "<what the essay got wrong, missed or only named, in one sentence>"}], "conceptsUsedWell": ["<id from the concept list>"]}
+List at most 5 gaps, most important first: content a band 1 answer to THIS question would use that the essay got wrong, missed or only named. Use [] for no data flags. In "conceptsUsedWell" list (at most 8) the concept ids from the list that the essay uses correctly and with effect, as evidence for its argument rather than merely naming them; never list an id that is also in "gaps"; use [] if there are none.

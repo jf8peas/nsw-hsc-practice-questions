@@ -73,6 +73,27 @@ export function loadRewriteDraft(
   return typeof v === "string" ? v : "";
 }
 
+// ---- the essay plan (spec 010), one key per attempt ------------------------
+
+export const essayScaffoldDraftKey = (attemptId: string) => `draft:essay-scaffold:${attemptId}`;
+
+/** Mirrors the plan to this tab's sessionStorage for an instant restore; the server row is the source of truth. */
+export function saveEssayScaffoldDraft(
+  attemptId: string,
+  scaffold: import("@/lib/essay/scaffold").EssayScaffold,
+  store: StorageLike | null = tabStorage(),
+) {
+  write(store, essayScaffoldDraftKey(attemptId), scaffold);
+}
+
+export function loadEssayScaffoldDraft(
+  attemptId: string,
+  store: StorageLike | null = tabStorage(),
+): import("@/lib/essay/scaffold").EssayScaffold | null {
+  const v = read<import("@/lib/essay/scaffold").EssayScaffold>(store, essayScaffoldDraftKey(attemptId));
+  return v && typeof v === "object" && "intro" in v ? v : null;
+}
+
 // ---- the rewrite draft beacon (spec 006 FR-053) ---------------------------
 
 const lastSentDraft = new Map<string, string>();
@@ -253,6 +274,8 @@ export interface AttemptPayload {
   unseenState?: import("@/lib/unseen/types").UnseenState;
   /** spec 009: the question state for a comparative attempt: every text, the pick, the stage (released per Principle I). */
   comparativeState?: import("@/lib/comparative/types").ComparativeState;
+  /** spec 010: the stage and state of an essay attempt: the plan, the review, the draft, the result (released per Principle I). */
+  essayState?: import("@/lib/essay/types").EssayState;
   /**
    * spec 005: per-question rewrite phase state for resume, built server-side from the phase
    * row. Exactly what the stage allows: nothing from the key before a phase 1 grade, the hint

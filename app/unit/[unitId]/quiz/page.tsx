@@ -16,6 +16,7 @@ import type { AttemptPayload } from "@/lib/drafts";
 import { loadParagraphState } from "@/lib/paragraph/state.server";
 import { loadComparativeState } from "@/lib/comparative/state.server";
 import { loadUnseenState } from "@/lib/unseen/state.server";
+import { loadEssayState } from "@/lib/essay/state.server";
 import { signAttemptToken } from "@/lib/tokens.server";
 
 export default async function QuizPage({
@@ -83,7 +84,10 @@ export default async function QuizPage({
       const unseenState = unit.draw && !isComparative ? await dbCall((db) => loadUnseenState(db, user.id, row)) : null;
       // spec 009: a comparative attempt resumes the same way, with its texts and its saved pick
       const comparativeState = isComparative ? await dbCall((db) => loadComparativeState(db, user.id, row)) : null;
+      // spec 010: an essay attempt resumes at the stage its row says (scaffold, essay or result; never a marking state)
+      const essayState = unit.flow === "essay" ? await dbCall((db) => loadEssayState(db, user.id, row)) : null;
       payload = {
+        ...(essayState ? { essayState } : {}),
         ...(paragraphState ? { paragraphState } : {}),
         ...(unseenState ? { unseenState } : {}),
         ...(comparativeState ? { comparativeState } : {}),
