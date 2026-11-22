@@ -93,6 +93,9 @@ export function UnseenPanel({
   // the pick on a choice question: saved with the draft, fixed once the first try is submitted
   const [pick, setPick] = useState<string[]>(cState?.pick ?? []);
   const [pickLocked, setPickLocked] = useState<boolean>(cState?.pickLocked ?? false);
+  // texts the student has taken away with the X on their tab (choice questions only; never the fixed text, never below
+  // the number the question needs, never after the first try is submitted)
+  const [removed, setRemoved] = useState<string[]>([]);
   const [retryOffered, setRetryOffered] = useState<boolean>(state.retryOffered ?? true);
   const [ending, setEnding] = useState<UnseenEnding | undefined>(state.ending);
   const [recorded, setRecorded] = useState<number>(state.recordedMark ?? 0);
@@ -217,6 +220,18 @@ export function UnseenPanel({
     setStage("result");
   }
 
+  // taking texts away: allowed while the pick can still change, down to the fixed texts plus the number to pick
+  const canEditTexts = Boolean(choice && cState) && !pickLocked && stage === "writing";
+  const shownTexts = cState ? (canEditTexts ? cState.texts.filter((t) => !removed.includes(t.id)) : cState.texts) : [];
+  const minTexts = choice ? choice.fixed.length + choice.pick : 0;
+  const removableIds = canEditTexts && choice && shownTexts.length > minTexts ? choice.from.filter((id) => shownTexts.some((t) => t.id === id)) : [];
+  function removeText(id: string) {
+    if (!choice || !removableIds.includes(id)) return;
+    setRemoved((r) => [...r, id]);
+    const left = shownTexts.filter((t) => t.id !== id).map((t) => t.id);
+    // once only the required number is left, those are the pick; otherwise a removed text leaves the pick
+    setPick(left.length <= minTexts ? choice.from.filter((f) => left.includes(f)) : pick.filter((p) => p !== id));
+  }
   const pickReady = !choice || pickLocked || isCompletePick(choice, pick);
 
   async function submit(phase: 1 | 2) {
@@ -313,7 +328,7 @@ export function UnseenPanel({
   return (
     <div className="rw-card un-card">
       {cState ? (
-        <TextTabs texts={cState.texts} unitId={unitId} attemptId={attemptId} uid={uid} final={stage === "discussion"} picked={choice && (pickLocked || stage !== "writing") ? pick : undefined} />
+        <TextTabs texts={shownTexts} removable={removableIds} onRemove={removeText} removedCount={canEditTexts ? removed.length : 0} onRestore={() => setRemoved([])} unitId={unitId} attemptId={attemptId} uid={uid} final={stage === "discussion"} picked={choice && (pickLocked || stage !== "writing") ? pick : undefined} />
       ) : (
         <TextPanel
           text={(state as UnseenState).text}
@@ -330,7 +345,7 @@ export function UnseenPanel({
           <Steps stage={stage} first={try1?.mark} maxMarks={question.maxMarks} />
           <QuestionBlock question={question} />
           {choice && cState && (
-            <PickChips texts={cState.texts} choice={choice} pick={pick} locked={pickLocked || stage !== "writing"} onChange={setPick} />
+            <PickChips texts={shownTexts} choice={{ ...choice, from: choice.from.filter((id) => shownTexts.some((t) => t.id === id)) }} pick={pick} locked={pickLocked || stage !== "writing"} onChange={setPick} />
           )}
 
           {stage === "writing" && (

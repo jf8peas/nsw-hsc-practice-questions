@@ -88,6 +88,6 @@ describe("tabs for a screen reader", () => {
 
 describe("print", () => {
   it("shows every text and hides the tab strip", () => {
-    expect(css).toMatch(/@media print\s*\{\s*\.un-tablist\s*\{\s*display:\s*none;\s*\}\s*\.un-tabpanel\[hidden\]\s*\{\s*display:\s*block;/);
+    expect(css).toMatch(/@media print\s*\{\s*\.un-tablist,\s*\.un-tab-restore\s*\{\s*display:\s*none;\s*\}\s*\.un-tabpanel\[hidden\]\s*\{\s*display:\s*block;/);
   });
 });

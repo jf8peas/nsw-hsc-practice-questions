@@ -21,6 +21,10 @@ export function TextTabs({
   uid,
   final,
   picked,
+  removable,
+  onRemove,
+  removedCount = 0,
+  onRestore,
 }: {
   texts: UnseenText[];
   unitId: string;
@@ -31,9 +35,16 @@ export function TextTabs({
   final: boolean;
   /** The ids of the texts the student picked (a choice question): their tabs say so in words. */
   picked?: readonly string[];
+  /** The ids of the texts the student may take away (an X on the tab); empty or absent when none may go. */
+  removable?: readonly string[];
+  onRemove?: (id: string) => void;
+  /** How many texts the student has taken away, and a way to bring them all back. */
+  removedCount?: number;
+  onRestore?: () => void;
 }) {
   const base = useId();
-  const [active, setActive] = useState(0);
+  const [activeRaw, setActive] = useState(0);
+  const active = Math.min(activeRaw, texts.length - 1); // a tab taken away can leave the old index past the end
   const tabs = useRef<Array<HTMLButtonElement | null>>([]);
 
   function move(to: number) {
@@ -55,9 +66,10 @@ export function TextTabs({
       <div role="tablist" aria-label="The texts for this question" className="un-tablist">
         {texts.map((t, i) => {
           const selected = i === active;
+          const canRemove = Boolean(onRemove && removable?.includes(t.id));
           return (
+            <div key={t.id} role="presentation" className="un-tabwrap">
             <button
-              key={t.id}
               ref={(el) => {
                 tabs.current[i] = el;
               }}
@@ -74,9 +86,32 @@ export function TextTabs({
               <span className="un-tab-label">{t.heading}</span>
               {picked?.includes(t.id) && <span className="un-tab-picked">Picked</span>}
             </button>
+            {canRemove && (
+              <button
+                type="button"
+                className="un-tab-x"
+                aria-label={`Remove ${t.heading}`}
+                title={`Remove ${t.heading} (you do not want to use it)`}
+                onClick={() => {
+                  onRemove?.(t.id);
+                  setActive(Math.max(0, Math.min(i, texts.length - 2)));
+                }}
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            )}
+            </div>
           );
         })}
       </div>
+      {removedCount > 0 && onRestore && (
+        <p className="un-tab-restore">
+          {removedCount === 1 ? "1 text removed." : `${removedCount} texts removed.`}{" "}
+          <button type="button" className="un-link" onClick={onRestore}>
+            Show {removedCount === 1 ? "it" : "them"} again
+          </button>
+        </p>
+      )}
       {texts.map((t, i) => (
         <div
           key={t.id}

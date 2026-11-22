@@ -196,21 +196,21 @@ describe("the pick (T027)", () => {
   it("typing is never blocked by the pick, and changing the pick keeps the answer text", () => {
     mount(choiceQ);
     type(words(40));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(B.heading) }));
+    fireEvent.click(screen.getByRole("button", { name: new RegExp("^" + B.heading) }));
     expect(box().value).toBe(words(40));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(V.heading) }));
+    fireEvent.click(screen.getByRole("button", { name: new RegExp("^" + V.heading) }));
     expect(box().value).toBe(words(40));
   });
 
   it("choosing the text enables Submit; for 'one other text' a new choice replaces the old one", () => {
     mount(choiceQ);
     type(words(60));
-    const b = screen.getByRole("button", { name: new RegExp(B.heading) });
+    const b = screen.getByRole("button", { name: new RegExp("^" + B.heading) });
     fireEvent.click(b);
     expect(b.getAttribute("aria-pressed")).toBe("true");
     expect(within(b).getByText(/Chosen/)).toBeTruthy(); // in words, not colour alone
     expect(submitBtn().disabled).toBe(false);
-    const v = screen.getByRole("button", { name: new RegExp(V.heading) });
+    const v = screen.getByRole("button", { name: new RegExp("^" + V.heading) });
     fireEvent.click(v);
     expect(v.getAttribute("aria-pressed")).toBe("true");
     expect(b.getAttribute("aria-pressed")).toBe("false");
@@ -219,7 +219,7 @@ describe("the pick (T027)", () => {
   it("'any TWO' needs two: one is incomplete, two enables Submit, a third replaces the oldest", () => {
     mount(twoOfThree);
     type(words(60));
-    const chip = (t: { heading: string }) => screen.getByRole("button", { name: new RegExp(t.heading.replace(/[–—]/g, ".")) });
+    const chip = (t: { heading: string }) => screen.getByRole("button", { name: new RegExp("^" + t.heading.replace(/[–—]/g, ".")) });
     fireEvent.click(chip(A));
     expect(submitBtn().disabled).toBe(true);
     expect(screen.getByText(/Choose the texts to write about, then you can submit/)).toBeTruthy();
@@ -233,10 +233,10 @@ describe("the pick (T027)", () => {
 
   it("saves the pick as soon as it is complete (debounced), and never an incomplete one", async () => {
     mount(twoOfThree);
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(A.heading.replace(/[–—]/g, ".")) }));
+    fireEvent.click(screen.getByRole("button", { name: new RegExp("^" + A.heading.replace(/[–—]/g, ".")) }));
     await act(async () => void vi.advanceTimersByTime(600));
     expect(pickCalls()).toHaveLength(0);
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(B.heading.replace(/[–—]/g, ".")) }));
+    fireEvent.click(screen.getByRole("button", { name: new RegExp("^" + B.heading.replace(/[–—]/g, ".")) }));
     await act(async () => void vi.advanceTimersByTime(600));
     expect(pickCalls()).toHaveLength(1);
     expect(pickCalls()[0].body).toEqual({ attemptId: ATTEMPT, attemptToken: "TOKEN-9", questionId: twoOfThree.id, pick: [A.id, B.id] });
@@ -244,7 +244,7 @@ describe("the pick (T027)", () => {
 
   it("restores a saved pick on resume, with the chips showing it and Submit ready", () => {
     mount(choiceQ, stateFor(choiceQ, { pick: [V.id] }));
-    expect(screen.getByRole("button", { name: new RegExp(V.heading) }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: new RegExp("^" + V.heading) }).getAttribute("aria-pressed")).toBe("true");
     type(words(60));
     expect(submitBtn().disabled).toBe(false);
   });
@@ -311,5 +311,32 @@ describe("the pick (T027)", () => {
     });
     mount(fixedQ, state);
     expect(screen.queryByText(/one possible pairing/)).toBeNull();
+  });
+});
+
+describe("taking a text away with the X on its tab", () => {
+  const xBtn = (t: { heading: string }) => screen.queryByRole("button", { name: `Remove ${t.heading}` });
+
+  it("'any TWO' of three: one text can go, the other two become the pick, and then no X is left", () => {
+    mount(twoOfThree);
+    expect(screen.getAllByRole("button", { name: /^Remove / })).toHaveLength(3);
+    fireEvent.click(xBtn(A)!);
+    expect(tabs().map((t) => t.textContent)).toEqual(expect.arrayContaining([expect.stringContaining(B.heading), expect.stringContaining(V.heading)]));
+    expect(tabs()).toHaveLength(2);
+    expect(screen.queryAllByRole("button", { name: /^Remove / })).toHaveLength(0);
+    type(words(60));
+    expect(submitBtn().disabled).toBe(false); // the two left are the pick
+  });
+
+  it("can be undone with 'Show it again'", () => {
+    mount(twoOfThree);
+    fireEvent.click(xBtn(A)!);
+    fireEvent.click(screen.getByRole("button", { name: /Show it again/ }));
+    expect(tabs()).toHaveLength(3);
+  });
+
+  it("a fixed pair has no X: both texts are required", () => {
+    mount(fixedQ);
+    expect(screen.queryAllByRole("button", { name: /^Remove / })).toHaveLength(0);
   });
 });
