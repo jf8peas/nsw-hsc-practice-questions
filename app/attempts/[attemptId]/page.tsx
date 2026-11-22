@@ -90,6 +90,20 @@ export default async function AttemptDetailPage({
                 )}
               </>
             )}
+            {q?.type === "comparative" && (
+              <>
+                <div className="pg-label">{paperLabel(q.paper)} · Compare</div>
+                {q.textIds.map((id) => {
+                  const text = found?.unit.texts?.find((t) => t.id === id);
+                  return text ? (
+                    <details className="un-collapse" key={id}>
+                      <summary>{text.heading}</summary>
+                      <TextPanel text={text} openHref={`/unit/${found!.unit.id}/text/${id}?attempt=${attemptId}`} />
+                    </details>
+                  ) : null;
+                })}
+              </>
+            )}
             <div className="detail-q">
               {q ? (
                 q.formula ? (
@@ -104,7 +118,9 @@ export default async function AttemptDetailPage({
               )}
             </div>
 
-            {!item.answered && item.unseen && q?.type === "unseen" && <UnseenAttemptDetailView detail={item.unseen} maxMarks={q.maxMarks} />}
+            {!item.answered && item.unseen && (q?.type === "unseen" || q?.type === "comparative") && (
+              <UnseenAttemptDetailView detail={item.unseen} maxMarks={q.maxMarks} headingOf={(id) => found?.unit.texts?.find((t) => t.id === id)?.heading ?? id} />
+            )}
             {item.answered ? (
               <>
                 {!item.paragraph && !item.unseen && <div className="detail-answer">{item.answer}</div>}
@@ -126,7 +142,9 @@ export default async function AttemptDetailPage({
                 {item.paragraph && q?.type === "paragraph" && (
                   <ParagraphAttemptDetailView detail={item.paragraph} partNo={q.part} />
                 )}
-                {item.unseen && q?.type === "unseen" && <UnseenAttemptDetailView detail={item.unseen} maxMarks={q.maxMarks} />}
+                {item.unseen && (q?.type === "unseen" || q?.type === "comparative") && (
+                  <UnseenAttemptDetailView detail={item.unseen} maxMarks={q.maxMarks} headingOf={(id) => found?.unit.texts?.find((t) => t.id === id)?.heading ?? id} />
+                )}
                 {!item.paragraph && !item.unseen && item.feedback && <p className="detail-feedback">{item.feedback}</p>}
                 {(() => {
                   // shown as the key reads now: nothing is stored per result (spec 002 FR-041)

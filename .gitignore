@@ -36,3 +36,6 @@ next-env.d.ts
 # agent scratch space — throwaway scripts written while working (see .clinerules/shell.md)
 /.cline/*
 !/.cline/README.md
+
+# python caches
+/scripts/__pycache__/

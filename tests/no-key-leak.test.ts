@@ -40,6 +40,10 @@ const BANNED_KEYS = [
   "descriptionCheck",
   "descriptionHash",
   "unseenKey",
+  // spec 009: the comparative key (a choice question's pairing is released with the model answer only)
+  "pairing",
+  "visuals",
+  "comparativeKey",
   // spec 006: the display-only grading data must never appear in the attempt-start payload
   // (it is delivered only with a phase's grade, or on resume after grading)
   "creditedSpans",
@@ -53,7 +57,7 @@ const BANNED_KEYS = [
  * Offline teacher tasks (spec 007 R8) that read the paragraph essay key to build test cases and to
  * re-mark. They run on a teacher's machine, never at request time and never in a bundle.
  */
-const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts", "scripts/check-unseen-descriptions.ts", "scripts/unseen-report.ts", "scripts/unseen-field-cases.ts", "scripts/unseen-remark.ts"]);
+const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts", "scripts/check-unseen-descriptions.ts", "scripts/unseen-report.ts", "scripts/unseen-field-cases.ts", "scripts/unseen-remark.ts", "scripts/comparative-field-cases.ts"]);
 
 describe("POST /api/attempts exposes no answer key, for every unit", () => {
   for (const unit of UNITS) {
@@ -75,6 +79,13 @@ describe("POST /api/attempts exposes no answer key, for every unit", () => {
         for (const point of key.rubric) if (point.length > 20) expect(text).not.toContain(point);
         if (key.notes && key.notes.length > 20) expect(text).not.toContain(key.notes);
         for (const explanation of Object.values(key.wrongExplanations ?? {})) expect(text).not.toContain(explanation);
+        // spec 009: the comparative key's strings (criteria, notes, model answer, every visual's description)
+        const cmp = key.comparative;
+        if (cmp) {
+          for (const secret of [cmp.criteria, cmp.notes, cmp.model, ...Object.values(cmp.visuals ?? {}).map((v) => v.description)]) {
+            if (secret.length > 20) expect(text).not.toContain(secret.slice(0, 60));
+          }
+        }
       }
     });
   }

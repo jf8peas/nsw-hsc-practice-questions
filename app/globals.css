@@ -2808,3 +2808,24 @@ mark.un-hl-on { cursor: pointer; }
 mark.un-hl-on:hover { outline: 1px solid var(--rd-ink-700); }
 mark.un-hl-on:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: 1px; }
 @media print { .un-hl-toggle, .un-hl-status, .un-hl-note { display: none !important; } }
+
+/* ---- the comparative unit (spec 009): the texts in tabs, never side by side, and the pick -------- */
+.un-tabs { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.un-tablist { display: flex; gap: 4px; overflow-x: auto; max-width: 100%; border-bottom: 2px solid var(--rd-border-100); scrollbar-width: thin; }
+.un-tab { flex: 0 0 auto; min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-bottom: 4px solid transparent; margin-bottom: -2px; background: transparent; color: var(--rd-ink-700); font: 500 var(--rd-fs-md) var(--rd-font-sans); cursor: pointer; white-space: nowrap; }
+.un-tab:hover { background: var(--rd-surface-100); }
+.un-tab.selected { color: var(--rd-ink-900); font-weight: 700; border-bottom-color: var(--rd-blue-500); }
+.un-tab:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: -2px; }
+.un-tab-picked { font-size: var(--rd-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: var(--rd-r-pill); background: var(--rd-blue-100); color: var(--rd-ink-900); }
+.un-tabpanel[hidden] { display: none; }
+.un-pick { display: flex; flex-direction: column; gap: 8px; }
+.un-pick-title { margin: 0; font-weight: 700; color: var(--rd-ink-900); }
+.un-pick-fixed { margin: 0; font-size: var(--rd-fs-sm); color: var(--rd-ink-700); }
+.un-pick-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.un-chip { min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; border: 1px solid var(--rd-border-200); border-radius: var(--rd-r-pill); background: var(--rd-white); color: var(--rd-ink-900); font: 500 var(--rd-fs-md) var(--rd-font-sans); cursor: pointer; text-align: left; }
+.un-chip:hover { background: var(--rd-surface-50); }
+.un-chip.chosen { border: 2px solid var(--rd-blue-500); background: var(--rd-blue-50); font-weight: 700; }
+.un-chip.readonly { cursor: default; }
+.un-chip:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: 2px; }
+.un-pairing-note { margin: 0; padding: 10px 14px; border-left: 4px solid var(--rd-blue-500); background: var(--rd-surface-50); font-size: var(--rd-fs-md); color: var(--rd-ink-900); }
+@media print { .un-tablist { display: none; } .un-tabpanel[hidden] { display: block; } }

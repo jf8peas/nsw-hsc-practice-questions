@@ -3,6 +3,7 @@
 // The prompt file lib/unseen/rubric.json is server-only; this file and the pilot script read the
 // same skills.json so the ids, names and tips can never differ.
 
+import comparativeSkillsJson from "../comparative/skills.json";
 import skillsJson from "./skills.json";
 
 export const SKILL_IDS = [
@@ -37,4 +38,37 @@ export function skillOfConcept(conceptId: string): SkillId | null {
   return found ?? null;
 }
 
-export const skillById = (id: SkillId): Skill => SKILLS.find((s) => s.id === id)!;
+/** Any of the nine skills (the seven shared ones are spec 008's; the two comparison skills are the comparative unit's). */
+export const skillById = (id: ComparativeSkillId): Skill => COMPARATIVE_SKILLS.find((s) => s.id === id)! as unknown as Skill;
+
+// ---- the comparative unit's nine skills (spec 009 FR-019, FR-021) ---------------------------------
+// The seven above are shared with spec 008 (same ids, names and tips, one count across both units);
+// the two below belong to the comparative unit and live in lib/comparative/skills.json. PUBLIC.
+
+export const COMPARATIVE_ONLY_SKILL_IDS = ["compares-texts", "treats-both-in-depth"] as const;
+export type ComparativeOnlySkillId = (typeof COMPARATIVE_ONLY_SKILL_IDS)[number];
+
+/** The nine skills of the comparative unit, in rubric order: the seven, then the two comparison skills. */
+export const COMPARATIVE_SKILL_IDS = [...SKILL_IDS, ...COMPARATIVE_ONLY_SKILL_IDS] as const;
+export type ComparativeSkillId = SkillId | ComparativeOnlySkillId;
+
+export interface ComparativeSkill {
+  id: ComparativeSkillId;
+  name: string;
+  tip: string;
+  description: string;
+}
+
+export const COMPARATIVE_SKILLS: readonly ComparativeSkill[] = [...SKILLS, ...(comparativeSkillsJson as unknown as ComparativeSkill[])];
+
+export const COMPARATIVE_UNIT_ID = "y12-english-advanced-comparative-texts";
+
+/** A comparative skill's concept id: the seven shared skills keep spec 008's ids (one count across both units). */
+export const comparativeSkillConceptId = (id: ComparativeSkillId): string =>
+  (COMPARATIVE_ONLY_SKILL_IDS as readonly string[]).includes(id) ? `${COMPARATIVE_UNIT_ID}.c-${id}` : skillConceptId(id as SkillId);
+
+export function comparativeSkillOfConcept(conceptId: string): ComparativeSkillId | null {
+  return COMPARATIVE_SKILL_IDS.find((id) => comparativeSkillConceptId(id) === conceptId) ?? null;
+}
+
+export const comparativeSkillById = (id: ComparativeSkillId): ComparativeSkill => COMPARATIVE_SKILLS.find((s) => s.id === id)!;

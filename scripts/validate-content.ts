@@ -21,9 +21,14 @@ import {
   validateShippedIds,
   type ShippedIds,
 } from "../lib/content-rules";
+import { validateComparativeRules } from "../lib/content-rules-comparative";
+import comparativeRubric from "../lib/comparative/rubric.json";
 import type { AnswerSet } from "../lib/types";
 
 const UNITS_DIR = join(process.cwd(), "content", "units");
+
+// The comparative prompt's directive verbs (spec 009 FR-014): lib/comparative/rubric.json, the comparative prompt file.
+const comparativeVerbs = (comparativeRubric as { directiveVerbs: Record<string, string> }).directiveVerbs;
 
 /** The size in bytes of a text's image file in the unit's images folder, or null when it is not there. */
 function imageSize(unitId: string, name: string): number | null {
@@ -97,6 +102,8 @@ async function main() {
     for (const m of validateRewriteRules(unit, answers)) err(m);
     for (const m of validateParagraphRules(unit, answers)) err(m);
     for (const m of validateUnseenRules(unit, answers, new Date(), (name) => imageSize(unit.id, name))) err(m);
+    // the comparative unit's images live in the shared text store, which is spec 008's unit folder
+    for (const m of validateComparativeRules(unit, answers, comparativeVerbs, UNITS, new Date(), (name) => imageSize("y12-english-advanced-unseen-texts", name))) err(m);
 
     for (const q of unit.questions) {
       if (!q.id.startsWith(`${unit.id}.`)) {
@@ -120,7 +127,7 @@ async function main() {
         err(`${q.id}: no entry in answers.ts`);
         continue;
       }
-      if (q.type === "paragraph" || q.type === "unseen") {
+      if (q.type === "paragraph" || q.type === "unseen" || q.type === "comparative") {
         // the essay key is checked by the paragraph rules (spec 007 FR-039) and the unseen-text key by the
         // unseen rules (spec 008 FR-046); no rubric or model answer here
       } else if (!a.rubric || a.rubric.length === 0) {
@@ -145,7 +152,7 @@ async function main() {
         if (new Set(q.options).size !== q.options.length) {
           err(`${q.id}: mc has duplicate option text`);
         }
-      } else if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen") {
+      } else if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative") {
         // model sentences, target terms and essay keys are checked by their own rules (FR-008, spec 007)
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);

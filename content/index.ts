@@ -47,6 +47,10 @@ import { meta as y12EnglishUnseenMeta } from "./units/y12-english-advanced-unsee
 import { questions as y12EnglishUnseenQuestions } from "./units/y12-english-advanced-unseen-texts/questions";
 import { texts as y12EnglishUnseenTexts } from "./units/y12-english-advanced-unseen-texts/texts";
 import { concepts as y12EnglishUnseenConcepts, retired as y12EnglishUnseenRetired } from "./units/y12-english-advanced-unseen-texts/concepts";
+import { meta as y12EnglishComparativeMeta } from "./units/y12-english-advanced-comparative-texts/meta";
+import { questions as y12EnglishComparativeQuestions } from "./units/y12-english-advanced-comparative-texts/questions";
+import { texts as y12EnglishComparativeTexts } from "./units/y12-english-advanced-comparative-texts/texts";
+import { concepts as y12EnglishComparativeConcepts, retired as y12EnglishComparativeRetired } from "./units/y12-english-advanced-comparative-texts/concepts";
 
 /**
  * The unit registry. This is the ONLY file that imports every unit.
@@ -123,6 +127,19 @@ export const UNITS: Unit[] = [
     concepts: y12EnglishUnseenConcepts,
     retired: y12EnglishUnseenRetired,
   },
+  // The comparative unit (spec 009) is registered only once it has questions: until the marker check has passed
+  // and the bank is released it does not exist for the home page, the unit route or any API (research R7, R9).
+  ...(y12EnglishComparativeQuestions.length > 0
+    ? [
+        {
+          ...y12EnglishComparativeMeta,
+          questions: y12EnglishComparativeQuestions,
+          texts: y12EnglishComparativeTexts,
+          concepts: y12EnglishComparativeConcepts,
+          retired: y12EnglishComparativeRetired,
+        } as Unit,
+      ]
+    : []),
 ];
 
 /** The order the home page lists them in: the HSC year first, then the preliminary year. */

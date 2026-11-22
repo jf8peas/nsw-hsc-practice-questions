@@ -1,4 +1,6 @@
-// Writes the unseen-text unit's bank files from the content task's bank JSON (spec 008, research R2).
+// Writes the unseen-text unit's bank files from the content task's bank JSON (spec 008, research R2), and the
+// comparative unit's questions and keys from bank/comparative/*.json (spec 009 research R12). The texts live in the
+// SHARED store (store-texts.ts): texts new to the store that only a comparative question shows join it here.
 //
 //   npm run unseen-build-bank                      (questions pending review stay out of the unit)
 //   npm run unseen-build-bank -- --include-pending   (preview: writes them too; `npm run validate` then fails by design)
@@ -11,10 +13,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { COMPARATIVE_UNIT, buildComparativeFiles, newStoreTexts, withoutPendingComparative, type ComparativeBankFile } from "./comparative-build-bank-lib";
 import { UNIT_ID, buildFiles, withoutPending, type BankFile } from "./unseen-build-bank-lib";
 
 const BANK_DIR = path.resolve(process.cwd(), "resources", "english-unseen", "bank");
 const UNIT_DIR = path.resolve(process.cwd(), "content", "units", UNIT_ID);
+const COMPARATIVE_BANK_DIR = path.join(BANK_DIR, "comparative");
+const COMPARATIVE_DIR = path.resolve(process.cwd(), "content", "units", COMPARATIVE_UNIT);
 
 function main(): number {
   if (!fs.existsSync(BANK_DIR)) {
@@ -38,9 +43,19 @@ function main(): number {
     console.error("✗ every question is pending review; nothing to write.");
     return 1;
   }
+  // the comparative banks (spec 009): none when the folder is absent, and then nothing below changes the output
+  const comparativeAll: ComparativeBankFile[] = fs.existsSync(COMPARATIVE_BANK_DIR)
+    ? fs.readdirSync(COMPARATIVE_BANK_DIR).filter((n) => n.endsWith(".json")).sort().map((n) => JSON.parse(fs.readFileSync(path.join(COMPARATIVE_BANK_DIR, n), "utf8")) as ComparativeBankFile)
+    : [];
+  const { banks: comparativeBanks, pending: comparativePending } = includePending
+    ? { banks: comparativeAll, pending: [] as string[] }
+    : withoutPendingComparative(comparativeAll);
+  if (comparativePending.length > 0) console.log(`  ${comparativePending.length} comparative question(s) pending review stay out of the unit (drafted, no reviewedOn): ${comparativePending.join(", ")}`);
   let files;
+  let comparativeFiles;
   try {
-    files = buildFiles(banks);
+    files = buildFiles(banks, newStoreTexts(comparativeBanks));
+    comparativeFiles = buildComparativeFiles(comparativeBanks, new Set(banks.flatMap((b) => b.texts.map((t) => t.id))));
   } catch (error) {
     console.error(`✗ ${(error as Error).message}`);
     return 1;
@@ -56,8 +71,19 @@ function main(): number {
       console.log(`  wrote ${name}`);
     }
   }
+  fs.mkdirSync(COMPARATIVE_DIR, { recursive: true });
+  for (const [name, content] of Object.entries(comparativeFiles)) {
+    const target = path.join(COMPARATIVE_DIR, name);
+    const current = fs.existsSync(target) ? fs.readFileSync(target, "utf8") : null;
+    if (current !== content) {
+      fs.writeFileSync(target, content, "utf8");
+      changed += 1;
+      console.log(`  wrote comparative/${name}`);
+    }
+  }
   const questionCount = banks.reduce((n, b) => n + b.questions.length, 0);
-  console.log(`✓ ${questionCount} question(s) from ${banks.length} bank file(s); ${changed} file(s) changed.`);
+  const comparativeCount = comparativeBanks.reduce((n, b) => n + b.questions.length, 0);
+  console.log(`✓ ${questionCount} question(s) from ${banks.length} bank file(s)${comparativeCount ? ` and ${comparativeCount} comparative question(s) from ${comparativeBanks.length} bank file(s)` : ""}; ${changed} file(s) changed.`);
   return 0;
 }
 

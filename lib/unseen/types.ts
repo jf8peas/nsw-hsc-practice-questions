@@ -4,10 +4,11 @@
 // it; the model answer at the discussion only.
 
 import type { UnseenText } from "@/lib/types";
-import type { SkillId } from "@/lib/unseen/skills";
+import type { ComparativeSkillId } from "@/lib/unseen/skills";
 
 export interface SkillView {
-  id: SkillId;
+  /** One of spec 008's seven skills, or (comparative unit only) one of the two comparison skills. */
+  id: ComparativeSkillId;
   met: boolean;
   /** The marker's one line; "" when it gave none. */
   reason: string;
@@ -16,7 +17,7 @@ export interface SkillView {
 export interface TryView {
   text: string;
   mark: number;
-  /** All seven, in rubric order. */
+  /** All seven (nine in the comparative unit), in rubric order. */
   skills: SkillView[];
   feedback: string;
   biggestGap: string;
@@ -35,9 +36,11 @@ export type UnseenEnding = "full_marks" | "retried" | "declined" | "no_retry";
 
 export interface UnseenGradeResult {
   questionId: string;
-  type: "unseen";
+  type: "unseen" | "comparative";
   maxMarks: number;
   phase: 1 | 2;
+  /** spec 009: the texts the student picked on a choice question (fixed from the first try). */
+  pick?: string[];
   /** 0..maxMarks (try 1) or 0..maxMarks-1 (try 2, capped in code). */
   marksAwarded: number;
   /** Present when the question is final. */
@@ -89,5 +92,5 @@ export interface UnseenState {
   /** The student has answered this question before: this quiz is a repeat (a new attempt). */
   repeating?: boolean;
   /** Only when stage = "discussion". */
-  discussion?: UnseenDiscussion;
+  discussion?: UnseenDiscussion & { pairing?: string[] };
 }

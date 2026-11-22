@@ -96,6 +96,18 @@ export function conceptProgress(unit: Unit, results: readonly ConceptResult[]): 
   );
 }
 
+/**
+ * The uncleared concepts of a unit that shares skill progress with other units (spec 009 FR-022): the results of
+ * this unit AND of every unit it shares with are replayed together in answer order, so one count covers a skill
+ * that both units tag (a miss in either unit sets it to 2; each later first try, in either, that shows it takes 1
+ * off). Only this unit's own concepts are returned, so a skill only the other unit knows never appears here, and
+ * the comparison skills, whose outcomes exist only in the comparative unit's results, are tracked only from it.
+ */
+export function sharedConceptProgress(unit: Unit, results: readonly ConceptResult[]): ConceptState[] {
+  const own = new Set((unit.concepts ?? []).map((c) => c.id));
+  return conceptProgress(unit, results).filter((s) => own.has(s.conceptId));
+}
+
 /** One saved result from any unit (the home page's "to review" counts). */
 export interface ConceptResultWithUnit extends ConceptResult {
   unitId: string;
@@ -121,9 +133,10 @@ export function conceptReviewCounts(
   }
   const out = new Map<string, number>();
   for (const unit of units) {
-    const list = perUnit.get(unit.id);
-    if (!list) continue;
-    const n = conceptProgress(unit, list).length;
+    const shared = unit.sharesProgressWith ?? [];
+    const list = shared.length ? [unit.id, ...shared].flatMap((id) => perUnit.get(id) ?? []) : perUnit.get(unit.id);
+    if (!list || list.length === 0) continue;
+    const n = (shared.length ? sharedConceptProgress(unit, list) : conceptProgress(unit, list)).length;
     if (n > 0) out.set(unit.id, n);
   }
   return out;

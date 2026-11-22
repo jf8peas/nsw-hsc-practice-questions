@@ -13,11 +13,13 @@ export const SKIP_REASONS = [
   "visual_not_describable",
   "scan_needs_ocr",
   "reserved_holdout",
+  "duplicate_question", // spec 009: the same question and text as another paper already inventoried (Roseville 2026 Q1 to Q4 repeat Danebank 2026)
 ] as const;
 
 export interface InventoryFile {
   paper: { school?: string; short: string; year: number; exam?: string };
-  questions: Array<{ qNo: number; marks: number; texts: string[]; forms: string[]; decision: "kept" | "skipped"; reason?: string }>;
+  /** `choice` (spec 009): set on a multi-text question whose student chooses the texts. */
+  questions: Array<{ qNo: number; marks: number; texts: string[]; forms: string[]; decision: "kept" | "skipped"; reason?: string; choice?: { fixed: string[]; from: string[]; pick: number } }>;
 }
 
 export interface ReportQuestion {

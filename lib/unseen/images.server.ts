@@ -2,7 +2,7 @@ import "server-only";
 
 import path from "node:path";
 
-import { getUnit } from "@/content";
+import { storeTexts } from "@/content/units/y12-english-advanced-unseen-texts/store-texts";
 import type { UnseenText } from "@/lib/types";
 import { UNIT_ID } from "@/lib/unseen/skills";
 
@@ -12,9 +12,9 @@ import { UNIT_ID } from "@/lib/unseen/skills";
 
 export type VisualText = UnseenText & { body: { kind: "image"; image: string; alt: string } };
 
-/** The unit's visual text with this id, or null (unknown id, or a text that is not an image). */
+/** The visual text with this id in the shared text store (both Advanced English units), or null (unknown id, or a text that is not an image). */
 export function findVisualText(textId: string): VisualText | null {
-  const text = getUnit(UNIT_ID)?.texts?.find((t) => t.id === textId);
+  const text = storeTexts.find((t) => t.id === textId);
   return text && text.body.kind === "image" ? (text as VisualText) : null;
 }
 

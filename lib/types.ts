@@ -88,7 +88,12 @@ export interface UnitMeta {
    * unseen-text unit, spec 008), not a random subset and not a fixed order. Public metadata: it
    * holds no answers.
    */
-  draw?: { kind: "unseen-weighted" };
+  draw?: { kind: "unseen-weighted" | "comparative-weighted" };
+  /**
+   * Units whose skill progress this unit shares (spec 009 FR-022): one count per shared concept
+   * id, replayed from the results of this unit and every unit listed here. Public metadata.
+   */
+  sharesProgressWith?: string[];
   /** Formulas tested by this unit, shown on the unit page below Start quiz. */
   formulas?: FormulaRef[];
   /** A structured "how to" panel shown on the unit page below Start quiz. */
@@ -213,7 +218,7 @@ export interface UnseenPaper {
   short: string;
   year: number;
   exam: "Trial" | "Half-yearly";
-  qNo: 1 | 2 | 3 | 4;
+  qNo: 1 | 2 | 3 | 4 | 5;
 }
 
 /**
@@ -239,8 +244,43 @@ export interface UnseenQuestion extends BaseQuestion {
   concepts: string[];
 }
 
+/** How a comparative question's texts are chosen (spec 009, data-model §1.1). A fixed pair has no choice. */
+export interface ComparativeChoice {
+  /** Texts every answer is about (may be empty, e.g. "any TWO of Texts 1 to 4"). */
+  fixed: string[];
+  /** Texts the student chooses from (all shown in tabs). */
+  from: string[];
+  /** How many of `from` the student picks (1 or 2). */
+  pick: number;
+}
+
+/**
+ * A comparative short-answer question (spec 009): one Section I question on two texts. A fixed pair
+ * names both texts; a choice question lets the student pick. The criteria, notes, model answer and
+ * pairing are the answer key (SERVER ONLY).
+ */
+export interface ComparativeQuestion extends BaseQuestion {
+  type: "comparative";
+  group: "comparative";
+  /** Every text shown, tab order: fixed first, then choosable. Each resolves in the unit's texts. */
+  textIds: string[];
+  /** null for a fixed pair. */
+  choice: ComparativeChoice | null;
+  /** The directive verb, lower case, a key of the comparative prompt's directive verbs. */
+  verb: string;
+  parts?: Array<{ label: string; text: string; marks: number }>;
+  /** 3 to 8. */
+  maxMarks: number;
+  suggestedWords: number;
+  suggestedFrom: "lines" | "median";
+  paper: UnseenPaper;
+  outcome: "EAV-12-01" | "EAV-12-02" | "EAV-12-04";
+  /** The 1 to 3 skill concept ids (of the nine). */
+  concepts: string[];
+}
+
 /** Public question — no answer key. Safe to ship to the browser. */
-export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion | UnseenQuestion;
+export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion | UnseenQuestion | ComparativeQuestion;
 
 /** A full unit as consumed by the UI: metadata + public questions. */
 export interface Unit extends UnitMeta {
@@ -313,6 +353,8 @@ export interface Answer {
   paragraph?: { essay: EssayKey; part: 1 | 2 | 3 | 4 | 5 };
   /** `unseen` only (spec 008): the question's key. SERVER ONLY. */
   unseen?: UnseenKey;
+  /** `comparative` only (spec 009): the question's key. SERVER ONLY. */
+  comparative?: ComparativeKey;
 }
 
 /** The answer key of one unseen-text question (spec 008, data-model §1). SERVER ONLY. */
@@ -334,6 +376,22 @@ export interface UnseenKey {
     /** Absent until scripts/check-unseen-descriptions.ts has run: validation blocks the question. */
     check?: DescriptionCheck;
   };
+}
+
+/** The answer key of one comparative question (spec 009, data-model §1.2). SERVER ONLY. */
+export interface ComparativeKey {
+  /** The school's band descriptors, one "N – …" line per mark. */
+  criteria: string;
+  notes: string;
+  /** An example full-mark answer for ONE pairing: given to the marker, shown at the discussion. */
+  model: string;
+  modelOrigin: "school" | "drafted";
+  criteriaOrigin: "school" | "drafted";
+  reviewedOn?: string;
+  /** The text ids the model answer uses (all of textIds for a fixed pair). Released at the discussion only. */
+  pairing: string[];
+  /** One entry per visual text in textIds (picked or not): the marker's description and its check. */
+  visuals?: Record<string, { description: string; check?: DescriptionCheck }>;
 }
 
 /** The pre-release check that a visual text's description is enough to mark from (FR-017). */

@@ -76,7 +76,7 @@ export function Quiz({
 
   // a paragraph attempt (spec 007) is one question that ends in its own discussion screen, never in
   // the quiz results screen, even when the part already has a result
-  const isParagraphAttempt = (p: AttemptPayload | null | undefined) => Boolean(p?.paragraphState || p?.unseenState); // one question that ends in its own discussion (specs 007, 008)
+  const isParagraphAttempt = (p: AttemptPayload | null | undefined) => Boolean(p?.paragraphState || p?.unseenState || p?.comparativeState); // one question that ends in its own discussion (specs 007, 008)
   const [i, setI] = useState(() =>
     initial && !isParagraphAttempt(initial) ? firstUnanswered(initial.questions, initial.answered) : 0,
   );
@@ -892,6 +892,24 @@ export function Quiz({
           uid={uid}
           question={current}
           state={payload.unseenState}
+          onFinish={() => router.push(`/unit/${unitId}`)}
+        />
+      </>
+    );
+  }
+
+  // spec 009: one comparative question: its texts in tabs, the pick, then the same states as spec 008
+  if (current.type === "comparative" && payload?.comparativeState) {
+    return (
+      <>
+        {banners}
+        <UnseenPanel
+          attemptId={attemptId}
+          attemptToken={attemptToken}
+          unitId={unitId}
+          uid={uid}
+          question={current}
+          state={payload.comparativeState}
           onFinish={() => router.push(`/unit/${unitId}`)}
         />
       </>

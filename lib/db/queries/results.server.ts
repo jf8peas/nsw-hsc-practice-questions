@@ -2,9 +2,10 @@ import "server-only";
 
 import { and, asc, eq, ne, sql } from "drizzle-orm";
 
-import type { ConceptResult, ConceptResultWithUnit } from "@/lib/concepts/progress";
+import { conceptProgress, sharedConceptProgress, type ConceptResult, type ConceptResultWithUnit, type ConceptState } from "@/lib/concepts/progress";
 import type { Db } from "@/lib/db/index.server";
 import { results, users, type ResultRow } from "@/lib/db/schema";
+import type { Unit } from "@/lib/types";
 
 export interface ResultInsert {
   attemptId: string;
@@ -103,6 +104,18 @@ export async function listUnitResultsForProgress(
     .from(results)
     .where(and(eq(results.userId, userId), eq(results.unitId, unitId)))
     .orderBy(asc(results.createdAt), asc(results.id));
+}
+
+/**
+ * The student's uncleared concepts for one unit: replayed from this unit's results, or, for a unit that shares skill
+ * progress with others (spec 009 FR-022, `sharesProgressWith`), from the results of all of them together. Always
+ * scoped to the session user's id (Principle IX).
+ */
+export async function loadConceptProgress(db: Db, userId: string, unit: Unit): Promise<ConceptState[]> {
+  const shared = unit.sharesProgressWith ?? [];
+  if (shared.length === 0) return conceptProgress(unit, await listUnitResultsForProgress(db, userId, unit.id));
+  const lists = await Promise.all([unit.id, ...shared].map((id) => listUnitResultsForProgress(db, userId, id)));
+  return sharedConceptProgress(unit, lists.flat());
 }
 
 /**

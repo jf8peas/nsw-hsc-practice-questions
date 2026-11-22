@@ -8,12 +8,11 @@ import { runInBackground } from "@/lib/background.server";
 import { createConceptLlmPort, sameModel } from "@/lib/concepts/llm.server";
 import { runConceptPipeline } from "@/lib/concepts/pipeline.server";
 import { planConceptWork, type PlannedWork } from "@/lib/concepts/plan.server";
-import { conceptProgress } from "@/lib/concepts/progress";
 import { claimLease, ensureSlot, releaseLease } from "@/lib/concepts/store.server";
 import { getConceptModels, getConfig } from "@/lib/config.server";
 import { DbUnavailableError, dbCall, getDb } from "@/lib/db/index.server";
 import { loadConceptContentView } from "@/lib/db/queries/concepts.server";
-import { listUnitResultsForProgress } from "@/lib/db/queries/results.server";
+import { loadConceptProgress } from "@/lib/db/queries/results.server";
 import { checkConceptRateLimit } from "@/lib/ratelimit.server";
 
 export const runtime = "nodejs";
@@ -65,7 +64,7 @@ export async function POST(_req: Request, ctx: { params: Promise<{ unitId: strin
   let view;
   try {
     ({ claimed, view } = await dbCall(async (db) => {
-      const states = conceptProgress(unit, await listUnitResultsForProgress(db, user.id, unit.id));
+      const states = await loadConceptProgress(db, user.id, unit);
       const planned = canWork ? await planConceptWork(db, states, models, now) : [];
       const won: PlannedWork[] = [];
       for (const work of planned) {

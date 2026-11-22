@@ -22,7 +22,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import type { SkillId } from "../unseen/skills";
+import type { ComparativeOnlySkillId, SkillId } from "../unseen/skills";
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: "date" });
 
@@ -87,6 +87,10 @@ export const attempts = pgTable(
     uniqueIndex("attempts_unseen_incomplete_unique")
       .on(t.userId)
       .where(sql`${t.unitId} = 'y12-english-advanced-unseen-texts' and ${t.completedAt} is null`),
+    // spec 009: the same for the comparative unit (one OPEN attempt per student; a student may have one open in each unit).
+    uniqueIndex("attempts_comparative_incomplete_unique")
+      .on(t.userId)
+      .where(sql`${t.unitId} = 'y12-english-advanced-comparative-texts' and ${t.completedAt} is null`),
   ],
 );
 
@@ -281,6 +285,8 @@ export interface SkillVerdict {
   reason: string;
 }
 export type SkillVerdicts = Record<SkillId, SkillVerdict>;
+/** The comparative unit's nine verdicts (spec 009): spec 008's seven plus the two comparison skills, which only that unit records. */
+export type AnySkillVerdicts = SkillVerdicts & Partial<Record<ComparativeOnlySkillId, SkillVerdict>>;
 
 /**
  * spec 008: one row per question in an unseen-text attempt. Both tries' text and marks, the seven
@@ -307,17 +313,19 @@ export const unseenPhases = pgTable(
     ending: text("ending"),
     try1Text: text("try1_text").notNull(),
     try1Mark: smallint("try1_mark").notNull(),
-    try1Verdicts: jsonb("try1_verdicts").$type<SkillVerdicts>().notNull(),
+    try1Verdicts: jsonb("try1_verdicts").$type<AnySkillVerdicts>().notNull(),
     try1Feedback: text("try1_feedback").notNull(),
     try1BiggestGap: text("try1_biggest_gap").notNull(),
     /** One sentence of advice beyond the top band; set only for a full-mark first try (the retry is capped below full marks). */
     try1GoFurther: text("try1_go_further"),
+    /** spec 009: the text ids a student picked on a comparative choice question (fixed on the first try); null otherwise. */
+    pickedTextIds: text("picked_text_ids").array(),
     try1PromptVersion: text("try1_prompt_version").notNull(),
     try1Model: text("try1_model").notNull(),
     try1GradedAt: ts("try1_graded_at").notNull().defaultNow(),
     try2Text: text("try2_text"),
     try2Mark: smallint("try2_mark"),
-    try2Verdicts: jsonb("try2_verdicts").$type<SkillVerdicts>(),
+    try2Verdicts: jsonb("try2_verdicts").$type<AnySkillVerdicts>(),
     try2Feedback: text("try2_feedback"),
     try2BiggestGap: text("try2_biggest_gap"),
     try2PromptVersion: text("try2_prompt_version"),
@@ -339,7 +347,8 @@ export const unseenPhases = pgTable(
       "unseen_phases_ending",
       sql`${t.ending} is null or ${t.ending} in ('full_marks', 'retried', 'declined', 'no_retry')`,
     ),
-    check("unseen_phases_max", sql`${t.maxMarks} >= 1 and ${t.maxMarks} <= 6`),
+    check("unseen_phases_max", sql`${t.maxMarks} >= 1 and ${t.maxMarks} <= 8`),
+    check("unseen_phases_pick_shape", sql`${t.pickedTextIds} is null or cardinality(${t.pickedTextIds}) between 1 and 2`),
     check("unseen_phases_try1_mark", sql`${t.try1Mark} >= 0 and ${t.try1Mark} <= ${t.maxMarks}`),
     check(
       "unseen_phases_try2_mark",
@@ -384,6 +393,8 @@ export const rewriteDrafts = pgTable(
     questionId: text("question_id").notNull(),
     phase1Draft: text("phase1_draft").notNull().default(""),
     phase2Draft: text("phase2_draft").notNull().default(""),
+    /** spec 009: the pick saved before the first try is submitted (a comparative choice question); null otherwise. */
+    pickedTextIds: text("picked_text_ids").array(),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),
   },

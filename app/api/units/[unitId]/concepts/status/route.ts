@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 
 import { getUnit } from "@/content";
 import { authenticate } from "@/lib/api-auth.server";
-import { conceptProgress } from "@/lib/concepts/progress";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { loadConceptContentView } from "@/lib/db/queries/concepts.server";
-import { listUnitResultsForProgress } from "@/lib/db/queries/results.server";
+import { loadConceptProgress } from "@/lib/db/queries/results.server";
 
 export const runtime = "nodejs";
 
@@ -26,7 +25,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ unitId: string
 
   try {
     const view = await dbCall(async (db) => {
-      const states = conceptProgress(unit, await listUnitResultsForProgress(db, auth.user.id, unit.id));
+      const states = await loadConceptProgress(db, auth.user.id, unit);
       return loadConceptContentView(db, states.map((s) => s.conceptId), new Date());
     }, POLL_TIMEOUT_MS);
     return NextResponse.json({ pending: view.pending, version: view.version });

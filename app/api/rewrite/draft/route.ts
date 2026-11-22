@@ -57,8 +57,8 @@ export async function POST(req: Request) {
   const token = verified.payload;
   if (!token.questionIds.includes(questionId)) return bad("not_found", 404);
   const found = getQuestion(questionId);
-  // serves the sentence unit (spec 006), the paragraph unit (spec 007) and the unseen-text unit (spec 008)
-  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph" && found.question.type !== "unseen")) return bad("not_found", 404);
+  // serves the sentence unit (spec 006), the paragraph unit (spec 007), the unseen-text unit (spec 008) and the comparative unit (spec 009)
+  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph" && found.question.type !== "unseen" && found.question.type !== "comparative")) return bad("not_found", 404);
   const kind = found.question.type;
 
   // A dedicated per-user limiter, separate from the grading limits (research R5.2).
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
     const phaseRow =
       kind === "paragraph"
         ? await dbCall((db) => getParagraphPhase(db, user.id, attemptId, questionId))
-        : kind === "unseen"
+        : kind === "unseen" || kind === "comparative"
           ? await dbCall((db) => getUnseenPhase(db, user.id, attemptId, questionId))
           : await dbCall((db) => getRewritePhase(db, user.id, attemptId, questionId));
     if (phaseRow && (phase === 1 || phaseRow.status === "final")) {

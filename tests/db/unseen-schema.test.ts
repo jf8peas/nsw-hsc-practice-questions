@@ -3,12 +3,15 @@
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { unseenPhases, type SkillVerdicts } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+import { rewriteDrafts, unseenPhases, type SkillVerdicts } from "@/lib/db/schema";
 
 import { createTestDb, type TestDb } from "../helpers/db";
 import { seedAttempt, seedUser } from "../helpers/fixtures";
 
 const UNIT = "y12-english-advanced-unseen-texts";
+const CMP = "y12-english-advanced-comparative-texts";
 const Q1 = `${UNIT}.fs25-q1`;
 const Q2 = `${UNIT}.fs25-q2`;
 
@@ -78,7 +81,7 @@ describe("unseen_phases checks", () => {
     ).rejects.toThrow();
   });
 
-  it("rejects a retry mark above max minus one, a first mark above max, and a max outside 1 to 6", async () => {
+  it("rejects a retry mark above max minus one, a first mark above max, and a max outside 1 to 8 (spec 009 widened it from 6)", async () => {
     const b = await base("un-7");
     await expect(
       t.db.insert(unseenPhases).values({ ...b, status: "final", ending: "retried", ...try1(2), ...try2(4), recordedMark: 4 }),
@@ -86,7 +89,7 @@ describe("unseen_phases checks", () => {
     const c = await base("un-8");
     await expect(t.db.insert(unseenPhases).values({ ...c, status: "try1", ...try1(5) })).rejects.toThrow();
     const d = await base("un-9");
-    await expect(t.db.insert(unseenPhases).values({ ...d, maxMarks: 7, status: "try1", ...try1(2) })).rejects.toThrow();
+    await expect(t.db.insert(unseenPhases).values({ ...d, maxMarks: 9, status: "try1", ...try1(2) })).rejects.toThrow();
   });
 
   it("rejects a final row with no ending or no recorded mark, and endings that disagree with the retry", async () => {
@@ -114,5 +117,55 @@ describe("unseen_phases checks", () => {
     const row = { ...b, status: "try1", ...try1(2) };
     await t.db.insert(unseenPhases).values(row);
     await expect(t.db.insert(unseenPhases).values(row)).rejects.toThrow();
+  });
+});
+
+describe("spec 009: the comparative unit's additions", () => {
+  it("accepts a max of 7 or 8 marks, and nine verdicts", async () => {
+    const u = await seedUser(t.db, { googleSub: "cmp-1" });
+    const at = await seedAttempt(t.db, u.id, { unitId: CMP, questionIds: [`${CMP}.q1`] });
+    const nine = { ...verdicts, "compares-texts": skill(false), "treats-both-in-depth": skill(true) };
+    await t.db.insert(unseenPhases).values({
+      attemptId: at.id, userId: u.id, unitId: CMP, questionId: `${CMP}.q1`, maxMarks: 8, status: "try1",
+      try1Text: "x", try1Mark: 5, try1Verdicts: nine, try1Feedback: "f", try1BiggestGap: "g",
+      try1PromptVersion: "comparative-pilot-1", try1Model: "m", pickedTextIds: ["a-t1", "a-t2"],
+    });
+    const [row] = await t.db.select().from(unseenPhases).where(eq(unseenPhases.attemptId, at.id));
+    expect(row.pickedTextIds).toEqual(["a-t1", "a-t2"]);
+    expect(row.try1Verdicts["compares-texts"]?.met).toBe(false);
+  });
+
+  it("allows no pick, but rejects an empty or three-text pick", async () => {
+    const mk = async (sub: string, picked: string[] | null) => {
+      const u = await seedUser(t.db, { googleSub: sub });
+      const at = await seedAttempt(t.db, u.id, { unitId: CMP, questionIds: [`${CMP}.q1`] });
+      return t.db.insert(unseenPhases).values({
+        attemptId: at.id, userId: u.id, unitId: CMP, questionId: `${CMP}.q1`, maxMarks: 6, status: "try1",
+        try1Text: "x", try1Mark: 2, try1Verdicts: verdicts, try1Feedback: "f", try1BiggestGap: "g",
+        try1PromptVersion: "p", try1Model: "m", pickedTextIds: picked,
+      });
+    };
+    await mk("cmp-2", null);
+    await mk("cmp-3", ["a"]);
+    await expect(mk("cmp-4", [])).rejects.toThrow();
+    await expect(mk("cmp-5", ["a", "b", "c"])).rejects.toThrow();
+  });
+
+  it("keeps one OPEN attempt per student per unit: a second in the comparative unit is rejected, one in each unit is fine", async () => {
+    const u = await seedUser(t.db, { googleSub: "cmp-6" });
+    await seedAttempt(t.db, u.id, { unitId: CMP, questionIds: [`${CMP}.q1`] });
+    await seedAttempt(t.db, u.id, { unitId: UNIT, questionIds: [Q1] });
+    await expect(seedAttempt(t.db, u.id, { unitId: CMP, questionIds: [`${CMP}.q2`] })).rejects.toThrow();
+    const other = await seedUser(t.db, { googleSub: "cmp-7" });
+    await seedAttempt(t.db, other.id, { unitId: CMP, questionIds: [`${CMP}.q1`] });
+  });
+
+  it("holds a draft pick on the draft row", async () => {
+    const u = await seedUser(t.db, { googleSub: "cmp-8" });
+    const at = await seedAttempt(t.db, u.id, { unitId: CMP, questionIds: [`${CMP}.q1`] });
+    await t.db.insert(rewriteDrafts).values({ attemptId: at.id, userId: u.id, unitId: CMP, questionId: `${CMP}.q1`, pickedTextIds: ["a-t2"] });
+    const [row] = await t.db.select().from(rewriteDrafts).where(eq(rewriteDrafts.attemptId, at.id));
+    expect(row.pickedTextIds).toEqual(["a-t2"]);
+    expect(row.phase1Draft).toBe("");
   });
 });

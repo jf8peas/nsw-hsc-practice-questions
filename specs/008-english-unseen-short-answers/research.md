@@ -264,7 +264,7 @@ only what that task writes into:
   qNo, marks, texts: ["Text 1"], forms: ["poem"], decision: "kept" | "skipped", reason }] }`. One file
   per paper; every Section I question appears, kept or skipped with a reason from a fixed list
   (`two_or_more_texts`, `not_q1_to_q4`, `text_illegible`, `text_missing`, `hsc_text`, `visual_not_describable`,
-  `scan_needs_ocr`, `reserved_holdout`). `reserved_holdout` is used for every question of the two papers
+  `scan_needs_ocr`, `reserved_holdout`, and, added by spec 009, `duplicate_question`: the same question on the same text as another inventoried paper, e.g. Roseville 2026 Q1 to Q4 repeat Danebank 2026). `reserved_holdout` is used for every question of the two papers
   that make up the marker's frozen holdout set (Cheltenham Girls 2023, St George Girls 2025): their inventory
   files list every question as skipped for this reason and they are never written to the bank, so the
   frozen set stays unseen by the prompt and by the shipped bank (an HSC-style rule of the pilot, not a

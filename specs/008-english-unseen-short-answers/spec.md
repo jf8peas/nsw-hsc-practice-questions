@@ -240,7 +240,7 @@ The unit ships with a **starter bank** of five Fort Street questions (a poem, tw
 **Content**
 
 - **FR-039**: The bank MUST be built from the 37 school trial papers in `resources/y12_english_advanced_paper1_trial_exams/`. Content MUST be copied verbatim with each question's source quoted. No real HSC question or text, including one reused in a school paper, MAY be used, so real HSC papers stay unseen.
-- **FR-040**: For each paper, every Section I question MUST be listed (number, marks, texts referred to, each text's form), and only Questions 1–4 that refer to exactly one text MUST be kept.
+- **FR-040**: For each paper, every Section I question MUST be listed (number, marks, texts referred to, each text's form), and every Section I question that refers to exactly one text MUST be kept, whatever its number (amended by spec 009 FR-034: the six single-text Question 5s of Abbotsleigh 2023, Barker 2026, Caringbah 2024, James Ruse 2024, North Sydney Girls 2024 and 2025 belong in this bank; a question that refers to two or more texts belongs to spec 009's comparative unit).
 - **FR-041**: Each kept text MUST be extracted verbatim with its layout and stored once, with questions pointing at it. Visual texts MUST be cropped to an image with a written description of what the marker needs (composition, colour, salient detail, any words in the image).
 - **FR-042**: The school's marking guidelines and sample answers MUST be used where they exist. Otherwise draft band descriptors and a generated model answer MUST be written and flagged as new for review.
 - **FR-043**: Each question MUST be tagged with its text form, 1–3 skills and a syllabus outcome (EAV-12-01, EAV-12-02 or EAV-12-04).

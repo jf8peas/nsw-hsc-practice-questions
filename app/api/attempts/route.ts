@@ -10,6 +10,7 @@ import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { createAttempt } from "@/lib/db/queries/attempts.server";
 import { checkAttemptRateLimit } from "@/lib/ratelimit.server";
 import { startSequential } from "@/lib/paragraph/start.server";
+import { startComparative } from "@/lib/comparative/start.server";
 import { startUnseen } from "@/lib/unseen/start.server";
 import { signAttemptToken } from "@/lib/tokens.server";
 
@@ -94,6 +95,42 @@ export async function POST(req: Request) {
   // The unseen-text unit (spec 008): an unfinished question first, otherwise one unanswered question
   // drawn from the student's results. It cannot choose or resume without the database, so an unreadable
   // database is a 503 (constitution Principle VI); it never starts degraded and never guesses.
+  // The comparative unit (spec 009) is the same flow with two texts: same rules, its own start and state.
+  if (unit.draw?.kind === "comparative-weighted") {
+    if (session.kind !== "user") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    const started = await startComparative(user.id, unit);
+    if (started.kind === "unavailable") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    if (started.kind === "finished") {
+      return NextResponse.json({ finished: true, total: started.total, answered: started.answered }, { status: 200 });
+    }
+    const { attempt, question } = started;
+    const attemptToken = signAttemptToken({
+      uid: user.id,
+      attemptId: attempt.id,
+      unitId: unit.id,
+      questionIds: [question.id],
+      mcOptionOrder: {},
+    });
+    return NextResponse.json(
+      {
+        attemptId: attempt.id,
+        attemptToken,
+        persisted: true,
+        unitId: unit.id,
+        passMark: unit.quiz?.passMark ?? DEFAULT_PASS_MARK,
+        questions: [question],
+        answered: {},
+        comparativeState: started.comparativeState,
+        ...(started.created ? {} : { resumed: true }),
+      },
+      { status: started.created ? 201 : 200 },
+    );
+  }
+
   if (unit.draw) {
     if (session.kind !== "user") {
       return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });

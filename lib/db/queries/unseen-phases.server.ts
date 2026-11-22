@@ -6,7 +6,7 @@ import type { Db } from "@/lib/db/index.server";
 import {
   unseenPhases,
   type NewUnseenPhaseRow,
-  type SkillVerdicts,
+  type AnySkillVerdicts,
   type UnseenPhaseRow,
 } from "@/lib/db/schema";
 
@@ -67,7 +67,7 @@ export interface FinaliseRetryInput {
     text: string;
     /** Already capped at max marks minus one. */
     mark: number;
-    verdicts: SkillVerdicts;
+    verdicts: AnySkillVerdicts;
     feedback: string;
     biggestGap: string;
     promptVersion: string;

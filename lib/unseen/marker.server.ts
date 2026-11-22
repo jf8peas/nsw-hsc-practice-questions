@@ -1,10 +1,10 @@
 import "server-only";
 
 import { getEnglishAdvModel } from "@/lib/config.server";
-import type { SkillVerdicts } from "@/lib/db/schema";
+import type { AnySkillVerdicts, SkillVerdict } from "@/lib/db/schema";
 import { chatCompletion, type ChatMessage } from "@/lib/openrouter.server";
 import type { UnseenText } from "@/lib/types";
-import { SKILL_IDS, type SkillId } from "@/lib/unseen/skills";
+import { SKILL_IDS } from "@/lib/unseen/skills";
 import { countWords } from "@/lib/wordcount";
 
 import rubricJson from "./rubric.json";
@@ -15,7 +15,7 @@ import rubricJson from "./rubric.json";
 // answer and a visual's description) as arguments from lib/grading.server.ts and sends it to the model
 // provider only; nothing here is returned to a browser. It logs nothing but a reason code, never text.
 
-interface Rubric {
+export interface Rubric {
   promptVersion: string;
   directiveVerbs: Record<string, string>;
   systemPrompt: string;
@@ -37,7 +37,20 @@ const MAX_GO_FURTHER = 300;
 /** A run of the model answer this long in the reply is an echo (shorter runs are quotations). */
 export const ECHO_RUN = 60;
 
+/** One text the marker is given (spec 009: a comparative question gives it each picked text in tab order). */
+export interface MarkerText {
+  /** The text's heading as on the paper, e.g. "Text 4 – Poem". */
+  heading: string;
+  /** The text form as the prompt names it. */
+  textForm: string;
+  visual: boolean;
+  /** The stimulus text, or for a visual text its written description. */
+  text: string;
+}
+
 export interface UnseenMarkerInput {
+  /** Several texts (the comparative unit); the prompt's {texts} placeholder is filled from them. The single-text fields below stay for spec 008. */
+  texts?: MarkerText[];
   maxMarks: number;
   /** The text's heading as on the paper, e.g. "Text 1 – Poem". */
   questionHeading: string;
@@ -67,16 +80,25 @@ function render(template: string, values: Record<string, string | number>): stri
 /** "prose-fiction" → "prose fiction": the form names the pilot prompt used. */
 export const formForPrompt = (form: string): string => form.replace(/^(prose|personal)-/, "$1 ");
 
+const NL = "\n";
 const VISUAL_NOTE = " — VISUAL TEXT: you cannot see the image; this is a written description of it";
 
-export function buildUnseenMessages(input: UnseenMarkerInput): ChatMessage[] {
+/** The picked texts as the comparative prompt shows them: a numbered block per text, in tab order. */
+export function renderMarkerTexts(texts: readonly MarkerText[]): string {
+  return texts
+    .map((t, i) => `TEXT ${i + 1} — ${t.heading} (${t.textForm})${t.visual ? VISUAL_NOTE : ""}` + NL + t.text)
+    .join(NL + NL);
+}
+
+export function buildUnseenMessages(input: UnseenMarkerInput, rub: Rubric = rubric): ChatMessage[] {
   const values = {
+    texts: input.texts ? renderMarkerTexts(input.texts) : "",
     anchor: input.modelAnswer || "None available.",
     marks: input.maxMarks,
     questionHeading: input.questionHeading,
     question: input.question,
     directive: input.verb,
-    directiveDefinition: rubric.directiveVerbs[input.verb] ?? "",
+    directiveDefinition: rub.directiveVerbs[input.verb] ?? "",
     textForm: input.textForm,
     visualNote: input.visual ? VISUAL_NOTE : "",
     text: input.text,
@@ -87,8 +109,8 @@ export function buildUnseenMessages(input: UnseenMarkerInput): ChatMessage[] {
     answer: input.answer,
   };
   return [
-    { role: "system", content: rubric.systemPrompt },
-    { role: "user", content: render(rubric.userTemplate, values) },
+    { role: "system", content: rub.systemPrompt },
+    { role: "user", content: render(rub.userTemplate, values) },
   ];
 }
 
@@ -109,7 +131,7 @@ export function renderTextForMarker(text: UnseenText): string {
 
 export interface ParsedReply {
   mark: number;
-  skills: SkillVerdicts;
+  skills: AnySkillVerdicts;
   feedback: string;
   /** The one thing to fix; "" at full marks, where there is no gap (goFurther does the job). */
   biggestGap: string;
@@ -141,7 +163,7 @@ const text = (v: unknown, max: number): string => (typeof v === "string" ? v.tri
  * full-mark reply may have a null or empty biggestGap, and a goFurther on a below-full reply is
  * dropped (biggestGap does that job). A missing reason is stored as "".
  */
-export function parseUnseenReply(content: string, maxMarks: number): ParsedReply | null {
+export function parseUnseenReply(content: string, maxMarks: number, skillIds: readonly string[] = SKILL_IDS): ParsedReply | null {
   const start = content.indexOf("{");
   const end = content.lastIndexOf("}");
   if (start === -1 || end <= start) return null;
@@ -155,8 +177,8 @@ export function parseUnseenReply(content: string, maxMarks: number): ParsedReply
   if (typeof mark !== "number" || !Number.isInteger(mark) || mark < 0 || mark > maxMarks) return null;
 
   const raw = (obj.skills && typeof obj.skills === "object" ? obj.skills : {}) as Record<string, unknown>;
-  const skills = {} as SkillVerdicts;
-  for (const id of SKILL_IDS) {
+  const skills: Record<string, SkillVerdict> = {};
+  for (const id of skillIds) {
     const met = flag(raw[id]);
     if (met === null) return null;
     const entry = raw[id];
@@ -167,7 +189,7 @@ export function parseUnseenReply(content: string, maxMarks: number): ParsedReply
   const filled: Array<"feedback" | "biggestGap"> = [];
   let feedback = text(obj.feedback, MAX_FEEDBACK);
   if (!feedback) {
-    feedback = SKILL_IDS.filter((id) => skills[id].met && skills[id].reason)
+    feedback = skillIds.filter((id) => skills[id].met && skills[id].reason)
       .map((id) => skills[id].reason)
       .join(" ")
       .slice(0, MAX_FEEDBACK)
@@ -182,7 +204,7 @@ export function parseUnseenReply(content: string, maxMarks: number): ParsedReply
   const full = mark === maxMarks;
   let biggestGap = text(obj.biggestGap, MAX_GAP);
   if (!full && !biggestGap) {
-    const firstMissed = SKILL_IDS.find((id) => !skills[id].met && skills[id].reason);
+    const firstMissed = skillIds.find((id) => !skills[id].met && skills[id].reason);
     if (!firstMissed) return null;
     biggestGap = skills[firstMissed].reason.slice(0, MAX_GAP);
     filled.push("biggestGap");
@@ -191,7 +213,7 @@ export function parseUnseenReply(content: string, maxMarks: number): ParsedReply
   if (full && !goFurther) return null;
 
   const adequate = flag(obj.descriptionAdequate);
-  return { mark, skills, feedback, biggestGap, goFurther: goFurther || null, descriptionAdequate: adequate, ...(filled.length ? { filled } : {}) };
+  return { mark, skills: skills as AnySkillVerdicts, feedback, biggestGap, goFurther: goFurther || null, descriptionAdequate: adequate, ...(filled.length ? { filled } : {}) };
 }
 
 const squash = (s: string): string => s.replace(/\s+/g, " ").trim().toLowerCase();
@@ -205,7 +227,7 @@ export function containsModelEcho(reply: ParsedReply, modelAnswer: string, stimu
   const model = squash(modelAnswer);
   if (model.length < ECHO_RUN) return false;
   const inStimulus = squash(stimulus);
-  const strings = [reply.feedback, reply.biggestGap, reply.goFurther ?? "", ...SKILL_IDS.map((id: SkillId) => reply.skills[id].reason)].map(squash);
+  const strings = [reply.feedback, reply.biggestGap, reply.goFurther ?? "", ...Object.values(reply.skills).map((v) => v?.reason ?? "")].map(squash);
   const haystack = strings.join(" ¶ ");
   for (let i = 0; i + ECHO_RUN <= model.length; i++) {
     const window = model.slice(i, i + ECHO_RUN);
@@ -231,17 +253,29 @@ export interface UnseenMarkerOutput {
  * route answers inside its 60 s limit). Returns null when the marker is unavailable (no key, errors,
  * or failure twice); the caller returns the editable box, never a mark (constitution Principle VI).
  */
-export async function markWithModel(input: UnseenMarkerInput): Promise<UnseenMarkerOutput | null> {
+/** What differs between the units' markers: the prompt file and the skills the reply must carry (spec 009 research R6). */
+export interface MarkerOptions {
+  rubric?: Rubric;
+  skillIds?: readonly string[];
+  /** Overrides the unit's model (the comparative unit's own model only if its marker check demands one). */
+  model?: string;
+  /** Overrides max_tokens (the comparative marker reasons for longer: lib/comparative/rubric.ts). */
+  maxTokens?: number;
+}
+
+export async function markWithModel(input: UnseenMarkerInput, options: MarkerOptions = {}): Promise<UnseenMarkerOutput | null> {
   if (!process.env.OPENROUTER_API_KEY) {
     console.warn("[unseen] OPENROUTER_API_KEY not set — the marker is unavailable");
     return null;
   }
-  const model = getEnglishAdvModel();
-  const messages = buildUnseenMessages(input);
+  const model = options.model ?? getEnglishAdvModel();
+  const rub = options.rubric ?? rubric;
+  const skillIds = options.skillIds ?? SKILL_IDS;
+  const messages = buildUnseenMessages(input, rub);
   const startedAt = Date.now();
 
   async function attempt(timeoutMs: number): Promise<ParsedReply | null> {
-    const res = await chatCompletion({ model, messages, temperature: 0, maxTokens: MAX_TOKENS, timeoutMs, json: true });
+    const res = await chatCompletion({ model, messages, temperature: 0, maxTokens: options.maxTokens ?? MAX_TOKENS, timeoutMs, json: true });
     if (!res.ok) {
       console.error(`[unseen] model call failed: ${res.reason}${res.status ? ` ${res.status}` : ""}`);
       return null;
@@ -250,7 +284,7 @@ export async function markWithModel(input: UnseenMarkerInput): Promise<UnseenMar
       console.error("[unseen] reply cut off at max_tokens");
       return null;
     }
-    const parsed = parseUnseenReply(res.content, input.maxMarks);
+    const parsed = parseUnseenReply(res.content, input.maxMarks, skillIds);
     if (!parsed) {
       console.error("[unseen] could not parse the marker reply");
       return null;
@@ -270,5 +304,5 @@ export async function markWithModel(input: UnseenMarkerInput): Promise<UnseenMar
       reply = await attempt(Math.min(FIRST_CALL_TIMEOUT_MS, remaining - RETRY_MARGIN_MS));
     }
   }
-  return reply ? { reply, model, promptVersion: PROMPT_VERSION } : null;
+  return reply ? { reply, model, promptVersion: rub.promptVersion } : null;
 }

@@ -40,7 +40,7 @@ export function SpinnerIcon() {
 }
 
 /** The question with its mark value and its source credit (FR-005). Parts on one text are shown together. */
-export function QuestionBlock({ question }: { question: UnseenQuestion }) {
+export function QuestionBlock({ question }: { question: Pick<UnseenQuestion, "maxMarks" | "source" | "prompt" | "parts"> }) {
   return (
     <section className="un-q" aria-labelledby="un-q-title">
       <div className="un-q-meta">
@@ -96,6 +96,7 @@ export function AnswerBox({
   textareaRef,
   limitReached,
   extraNote,
+  blockedNote,
 }: {
   id: string;
   label: string;
@@ -108,11 +109,13 @@ export function AnswerBox({
   /** The day's allowance is used up: Submit stays disabled until the next day (FR-031). */
   limitReached?: boolean;
   extraNote?: string;
+  /** Something else must happen first (a comparative choice question's pick): Submit is off, and this says why. */
+  blockedNote?: string;
 }) {
   const words = countWords(value);
   const state = lengthState(words, suggestedWords);
-  const note = limitReached ? "Submit is off until marking is available again tomorrow." : lengthNote(words, suggestedWords);
-  const blocked = limitReached || state === "short" || state === "over";
+  const note = limitReached ? "Submit is off until marking is available again tomorrow." : (blockedNote ?? lengthNote(words, suggestedWords));
+  const blocked = limitReached || Boolean(blockedNote) || state === "short" || state === "over";
   return (
     <div className="un-answer">
       <label className="un-label" htmlFor={id}>

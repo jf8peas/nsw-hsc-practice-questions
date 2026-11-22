@@ -37,13 +37,13 @@ describe("rule 1: the source", () => {
     firstQuestion(u).source = "Fort Street High School, 2025 Trial HSC, English Advanced Paper 1, Question 1";
     expect(run(u, answersOf())).toMatch(/source .* must be "Fort St 2025 Trial, Q1"/);
   });
-  it("fails on a question number outside 1 to 4 and a year outside 2023 to 2026", () => {
+  it("fails on a question number outside 1 to 5 (spec 009 FR-034 widened it for the single-text Question 5s) and a year outside 2023 to 2026", () => {
     const u = unitOf();
     const q = firstQuestion(u);
-    (q.paper as { qNo: number }).qNo = 5;
+    (q.paper as { qNo: number }).qNo = 6;
     q.paper.year = 2022;
     const out = run(u, answersOf());
-    expect(out).toMatch(/paper.qNo must be 1 to 4/);
+    expect(out).toMatch(/paper.qNo must be 1 to 5/);
     expect(out).toMatch(/outside 2023 to 2026/);
   });
 });

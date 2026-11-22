@@ -20,7 +20,7 @@ export interface BankFile {
 export interface BankQuestion {
   /** The id suffix, e.g. "fs25-q1" (equal to the pilot's case-id prefix). */
   slug: string;
-  qNo: 1 | 2 | 3 | 4;
+  qNo: 1 | 2 | 3 | 4 | 5;
   maxMarks: number;
   verb: string;
   prompt: string;
@@ -67,6 +67,7 @@ export function withoutPending(banks: BankFile[]): { banks: BankFile[]; pending:
 
 export interface GeneratedFiles {
   "texts.ts": string;
+  "store-texts.ts": string;
   "questions.ts": string;
   "keys.ts": string;
   "descriptions.ts": string;
@@ -81,8 +82,12 @@ const HEADER = (what: string, serverOnly: boolean): string =>
   // files; only content/answers/index.ts (which is server-only) may import them (constitution Principle I)
   (serverOnly ? `// SERVER ONLY: never import this file from a client component or a public module.\n` : "");
 
-/** Throws with every problem found, so one run lists them all. */
-export function buildFiles(banks: BankFile[]): GeneratedFiles {
+/**
+ * Throws with every problem found, so one run lists them all. `extraTexts` are texts that only another unit's
+ * questions use (spec 009: the comparative unit's new texts): they join the shared store (store-texts.ts) but
+ * not this unit's own texts.ts, which lists only the texts this unit's questions point at.
+ */
+export function buildFiles(banks: BankFile[], extraTexts: BankFile["texts"] = []): GeneratedFiles {
   const problems: string[] = [];
   const texts = new Map<string, BankFile["texts"][number]>();
   const slugs = new Set<string>();
@@ -102,6 +107,13 @@ export function buildFiles(banks: BankFile[]): GeneratedFiles {
       for (const s of q.skills) if (!SKILL_IDS.includes(s)) problems.push(`${q.slug}: unknown skill ${s}`);
       questions.push({ q, paper: bank.paper });
     }
+  }
+  const store = new Map(texts);
+  for (const text of extraTexts) {
+    if (store.has(text.id)) problems.push(`duplicate text id ${text.id} (already in the shared store)`);
+    if (!text.hscChecked) problems.push(`text ${text.id}: no hscChecked date (compare it with the NESA HSC papers first)`);
+    if (text.body.kind === "image" && !text.description?.trim()) problems.push(`visual text ${text.id}: no description for the marker`);
+    store.set(text.id, text);
   }
   if (problems.length > 0) throw new Error(`bank problems:\n- ${problems.join("\n- ")}`);
 
@@ -126,16 +138,19 @@ export function buildFiles(banks: BankFile[]): GeneratedFiles {
     };
   });
 
-  const publicTexts = [...texts.values()].map(({ description: _description, ...rest }) => rest);
+  const publicTexts = [...store.values()].map(({ description: _description, ...rest }) => rest);
   const keys = Object.fromEntries(questions.map(({ q }) => [`${UNIT_ID}.${q.slug}`, q.key]));
   const descriptions = Object.fromEntries(
-    [...texts.values()].filter((t) => t.description?.trim()).map((t) => [t.id, t.description!.trim()]),
+    [...store.values()].filter((t) => t.description?.trim()).map((t) => [t.id, t.description!.trim()]),
   );
 
   return {
+    "store-texts.ts":
+      HEADER("PUBLIC: the shared text store, every unseen text once, for both Advanced English units. No answer key (a visual's description is in descriptions.ts).", false) +
+      `\nimport type { UnseenText } from "@/lib/types";\n\nexport const storeTexts: UnseenText[] = ${json(publicTexts)};\n`,
     "texts.ts":
-      HEADER("PUBLIC: every unseen text, once. No answer key (a visual's description is in descriptions.ts).", false) +
-      `\nimport type { UnseenText } from "@/lib/types";\n\nexport const texts: UnseenText[] = ${json(publicTexts)};\n`,
+      HEADER("PUBLIC: the texts this unit's questions use, picked from the shared text store (store-texts.ts). No answer key.", false) +
+      `\nimport type { UnseenText } from "@/lib/types";\n\nimport { questions } from "./questions";\nimport { storeTexts } from "./store-texts";\n\nconst used = new Set(questions.flatMap((q) => (q.type === "unseen" ? [q.textId] : [])));\n\nexport const texts: UnseenText[] = storeTexts.filter((t) => used.has(t.id));\n`,
     "questions.ts":
       HEADER("PUBLIC: no answer keys. Marking criteria, notes and model answers are in keys.ts (server-only).", false) +
       `\nimport type { Question } from "@/lib/types";\n\nexport const questions: Question[] = ${json(questionObjects)} as Question[];\n`,

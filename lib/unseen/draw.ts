@@ -5,6 +5,13 @@
 
 import type { TextForm, UnseenQuestion } from "@/lib/types";
 
+/** What the draw needs of a question: both Advanced English units' questions satisfy it (spec 009 research R9). */
+export interface DrawQuestion {
+  id: string;
+  /** The skill concept ids the question is tagged with. */
+  concepts: string[];
+}
+
 /** A source of random integers in [0, max). Production uses crypto.randomInt. */
 export type RandomInt = (max: number) => number;
 
@@ -14,7 +21,7 @@ export function unseenQuestions(unit: { questions: Array<{ type: string }> }): U
 }
 
 /** The questions the student has no result for. */
-export function unansweredOf(questions: readonly UnseenQuestion[], answered: ReadonlySet<string>): UnseenQuestion[] {
+export function unansweredOf<Q extends DrawQuestion>(questions: readonly Q[], answered: ReadonlySet<string>): Q[] {
   return questions.filter((q) => !answered.has(q.id));
 }
 
@@ -25,9 +32,9 @@ export interface FormStat {
 }
 
 /** `marks`: question id to mark / full marks (0..1) for the questions the student has answered. */
-export function formStatsOf(
-  questions: readonly UnseenQuestion[],
-  formOf: (q: UnseenQuestion) => TextForm | null,
+export function formStatsOf<Q extends DrawQuestion>(
+  questions: readonly Q[],
+  formOf: (q: Q) => TextForm | null,
   marks: ReadonlyMap<string, number>,
 ): Map<TextForm, FormStat> {
   const sums = new Map<TextForm, { n: number; total: number }>();
@@ -50,7 +57,7 @@ export function formWeight(stat: FormStat | undefined): number {
 
 /** formWeight times (2 + how many of the question's skill tags are still uncleared): 4 to 50, an integer. */
 export function weightOf(
-  q: UnseenQuestion,
+  q: DrawQuestion,
   form: TextForm | null,
   stats: ReadonlyMap<TextForm, FormStat>,
   uncleared: ReadonlySet<string>,
@@ -63,11 +70,11 @@ export function weightOf(
  * Pick one candidate with probability proportional to its integer weight (the cumulative walk in bank
  * order). Returns null when there are no candidates. Every weight must be a positive integer.
  */
-export function drawUnseen(
-  candidates: readonly UnseenQuestion[],
-  weightOf: (q: UnseenQuestion) => number,
+export function drawUnseen<Q extends DrawQuestion>(
+  candidates: readonly Q[],
+  weightOf: (q: Q) => number,
   rand: RandomInt,
-): UnseenQuestion | null {
+): Q | null {
   if (candidates.length === 0) return null;
   const weights = candidates.map(weightOf);
   const total = weights.reduce((a, b) => a + b, 0);
@@ -108,12 +115,12 @@ export function latestShares(results: readonly AnsweredResult[]): Map<string, nu
 }
 
 /** True when every question of a non-empty bank has a recorded mark: the draw then repeats. */
-export function isRepeating(questions: readonly UnseenQuestion[], answered: ReadonlySet<string>): boolean {
+export function isRepeating(questions: readonly DrawQuestion[], answered: ReadonlySet<string>): boolean {
   return questions.length > 0 && unansweredOf(questions, answered).length === 0;
 }
 
 /** The bank questions of the student's last `n` quizzes, newest first (a question appears once). */
-export function recentQuestionIds(questions: readonly UnseenQuestion[], results: readonly AnsweredResult[], n = 3): string[] {
+export function recentQuestionIds(questions: readonly DrawQuestion[], results: readonly AnsweredResult[], n = 3): string[] {
   const inBank = new Set(questions.map((q) => q.id));
   const ordered = results.filter((r) => inBank.has(r.questionId)); // answer order, oldest first
   const ids: string[] = [];
@@ -125,7 +132,7 @@ export function recentQuestionIds(questions: readonly UnseenQuestion[], results:
  * Never offer a question answered in the last 3 quizzes, unless the bank has 3 or fewer questions: then
  * exclude only the most recent one; with 1 question, offer it.
  */
-export function repeatCandidates(questions: readonly UnseenQuestion[], recent: readonly string[]): UnseenQuestion[] {
+export function repeatCandidates<Q extends DrawQuestion>(questions: readonly Q[], recent: readonly string[]): Q[] {
   if (questions.length <= 1) return [...questions];
   const excluded = new Set(questions.length > 3 ? recent.slice(0, 3) : recent.slice(0, 1));
   return questions.filter((q) => !excluded.has(q.id));
@@ -137,7 +144,7 @@ export function markWeight(share: number): number {
 }
 
 /** 1 to 4 by age rank among the candidates: the longest since answered gets 4, the most recent 1 (ties by bank order). */
-export function ageWeights(candidates: readonly UnseenQuestion[], latest: ReadonlyMap<string, LatestAnswer>): Map<string, number> {
+export function ageWeights(candidates: readonly DrawQuestion[], latest: ReadonlyMap<string, LatestAnswer>): Map<string, number> {
   const ranked = candidates.map((q, i) => ({ id: q.id, at: latest.get(q.id)?.at ?? 0, i })).sort((a, b) => a.at - b.at || a.i - b.i);
   const n = ranked.length;
   return new Map(ranked.map((r, rank) => [r.id, n <= 1 ? 1 : 1 + Math.round((3 * (n - 1 - rank)) / (n - 1))]));
@@ -145,7 +152,7 @@ export function ageWeights(candidates: readonly UnseenQuestion[], latest: Readon
 
 /** The existing weight (form times skills) times the mark weight times the age weight: an integer, 4 to 1000. */
 export function repeatWeightOf(
-  q: UnseenQuestion,
+  q: DrawQuestion,
   form: TextForm | null,
   stats: ReadonlyMap<TextForm, FormStat>,
   uncleared: ReadonlySet<string>,

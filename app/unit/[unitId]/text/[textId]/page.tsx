@@ -14,7 +14,8 @@ import { attemptUsesText, hasStartedText } from "@/lib/db/queries/unseen-progres
 // footnotes. It carries no question, answer box, description, criteria, notes or model answer.
 //
 // Access (constitution Principles I and II): sign-in is required (requirePageUser redirects), and the text
-// renders only if the student has an attempt on a question that uses it. Anything else is the same 404, so
+// renders only if the student has an attempt, in either Advanced English unit (spec 009 research R3), on a question
+// that shows it (a comparative question shows every text it offers, picked or not). Anything else is the same 404, so
 // the page never reveals whether a text exists.
 
 const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ unitId: s
   const text = publicText(unitId, textId);
   const unit = getUnit(unitId);
   if (!text || !unit || degraded) return { title: "Text", robots: { index: false } };
-  const started = await load((db) => hasStartedText(db, user.id, unit, textId));
+  const started = await load((db) => hasStartedText(db, user.id, textId));
   if (started.status !== "ok" || !started.data) return { title: "Text", robots: { index: false } };
   return { title: text.title ? `${text.heading} – ${text.title}` : text.heading, robots: { index: false } };
 }
@@ -50,14 +51,14 @@ export default async function TextPage({
   const text = publicText(unitId, textId);
   if (!unit || !text) notFound();
   if (degraded) return <TextUnavailable />;
-  const started = await load((db) => hasStartedText(db, user.id, unit, textId));
+  const started = await load((db) => hasStartedText(db, user.id, textId));
   if (started.status === "unavailable") return <TextUnavailable />;
   if (!started.data) notFound();
   // Highlights are kept per attempt: the quiz puts its attempt id in the link. Without a valid one (the id is not
   // this student's, or does not hold a question on this text) the text still shows, with highlighting off.
   const raw = (await searchParams)?.attempt;
   const attemptId = typeof raw === "string" && UUID_RE.test(raw) ? raw : null;
-  const linked = attemptId ? await load((db) => attemptUsesText(db, user.id, unit, attemptId, textId)) : null;
+  const linked = attemptId ? await load((db) => attemptUsesText(db, user.id, attemptId, textId)) : null;
   const attemptOk = Boolean(attemptId && linked?.status === "ok" && linked.data);
   return (
     <Shell>

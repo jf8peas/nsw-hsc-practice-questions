@@ -189,3 +189,33 @@ describe("lowest mark and oldest first", () => {
     expect(withSkill / without).toBeCloseTo(3 / 2);
   });
 });
+
+describe("the comparative unit's draw: the text-form weight switched off (spec 009 research R9)", () => {
+  // a comparative question is only { id, concepts } to the draw
+  const cq = (id: string, concepts: string[] = []) => ({ id, concepts });
+  const noForm = () => null;
+  const stats = formStatsOf([cq("a")], noForm, new Map());
+
+  it("weighs every question 10 × (2 + uncleared skill tags) whatever its texts", () => {
+    expect(weightOf(cq("a"), null, stats, new Set())).toBe(20);
+    expect(weightOf(cq("b", ["x"]), null, stats, new Set(["x"]))).toBe(30);
+    expect(weightOf(cq("c", ["x", "y", "z"]), null, stats, new Set(["x", "y", "z"]))).toBe(50);
+  });
+
+  it("repeats multiply that weight by the mark and age weights, as spec 008", () => {
+    const qs = [cq("a", ["x"]), cq("b")];
+    const latest = new Map([["a", { share: 0, at: 1 }], ["b", { share: 1, at: 2 }]]);
+    const ages = ageWeights(qs, latest);
+    expect(repeatWeightOf(qs[0], null, stats, new Set(["x"]), latest, ages)).toBe(30 * 5 * 4);
+    expect(repeatWeightOf(qs[1], null, stats, new Set(), latest, ages)).toBe(20 * 1 * 1);
+  });
+
+  it("draws, and offers no answered question until every one is answered", () => {
+    const qs = [cq("a"), cq("b"), cq("c")];
+    const unanswered = unansweredOf(qs, new Set(["a"]));
+    expect(unanswered.map((x) => x.id)).toEqual(["b", "c"]);
+    expect(isRepeating(qs, new Set(["a"]))).toBe(false);
+    expect(drawUnseen(unanswered, () => 1, (max) => max - 1)?.id).toBe("c");
+    expect(isRepeating(qs, new Set(["a", "b", "c"]))).toBe(true);
+  });
+});

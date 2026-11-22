@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
 import { questions } from "@/content/units/y12-english-advanced-unseen-texts/questions";
-import { SKILL_IDS } from "@/lib/unseen/skills";
+import { COMPARATIVE_SKILL_IDS, SKILL_IDS } from "@/lib/unseen/skills";
 
 import { setupTestEnv, type TestEnv } from "./env";
 import { post, startAttempt, type StartedAttempt } from "./routes";
@@ -34,6 +34,19 @@ export function markerContent(mark: number, missed: string[] = [], overrides: Re
     feedback: FEEDBACK,
     biggestGap: GAP,
     // always sent, so the app is what keeps it to full-mark tries (a below-full reply's goFurther is dropped)
+    goFurther: GO_FURTHER,
+    descriptionAdequate: null,
+    ...overrides,
+  });
+}
+
+/** The comparative unit's reply (spec 009): the same, with all nine verdicts. */
+export function markerContent9(mark: number, missed: string[] = [], overrides: Record<string, unknown> = {}): string {
+  return JSON.stringify({
+    mark,
+    skills: Object.fromEntries(COMPARATIVE_SKILL_IDS.map((id) => [id, { met: !missed.includes(id), reason: REASON }])),
+    feedback: FEEDBACK,
+    biggestGap: GAP,
     goFurther: GO_FURTHER,
     descriptionAdequate: null,
     ...overrides,

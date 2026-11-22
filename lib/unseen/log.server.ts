@@ -17,7 +17,9 @@ export type UnseenOutcome =
   | "phase_refused"
   | "answer_rejected"
   | "db_unavailable"
-  | "declined";
+  | "declined"
+  | "invalid_pick"
+  | "pick_changed";
 
 export function logUnseen(input: {
   outcome: UnseenOutcome;

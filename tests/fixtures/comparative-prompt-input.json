@@ -1,0 +1,56 @@
+{
+  "note": "Synthetic fixture for the golden comparative prompt (spec 009 research R7): invented texts, a choice question whose student picked the visual. tests/unseen/prompt-comparative.test.ts and scripts/pilot-unseen-marker.py --unit comparative both render it to tests/fixtures/comparative-prompt.golden.txt.",
+  "question": {
+    "id": "inv-q5",
+    "marks": 6,
+    "question": "Compare how Text 1 and ONE other text represent the experience of waiting.",
+    "directive": "compare",
+    "choice": { "fixed": ["inv-t1"], "from": ["inv-t2", "inv-t3"], "pick": 1 },
+    "texts": [
+      {
+        "id": "inv-t1",
+        "heading": "Text 1 – Poem",
+        "textForm": "poem",
+        "visual": false,
+        "text": "Platform\n\nThe clock ticks its small coins into the dark\nand nobody comes."
+      },
+      {
+        "id": "inv-t2",
+        "heading": "Text 2 – Prose",
+        "textForm": "prose fiction",
+        "visual": false,
+        "text": "She counted the cars as they passed, each one a small refusal."
+      },
+      {
+        "id": "inv-t3",
+        "heading": "Text 3 – Image",
+        "textForm": "visual",
+        "visual": true,
+        "text": "A grey photograph of an empty chair beside a window, the light falling across the floor and a coat left over its back."
+      }
+    ],
+    "criteria": "6 – Provides a skilful comparison of how the texts represent waiting\n5 – Provides an effective comparison\n4 – Provides a sound comparison\n3 – Provides some comparison\n2 – Provides limited information about the texts\n1 – Provides some relevant information",
+    "notes": "None provided by the school.",
+    "suggestedWords": 216,
+    "anchors": ["inv-q5-model"],
+    "cases": [
+      {
+        "id": "inv-q5-model",
+        "origin": "authored",
+        "pick": ["inv-t3"],
+        "expectMark": [6, 6],
+        "expectMissed": [],
+        "allSkillsMet": true,
+        "answer": "Both texts make waiting visible as an absence, whereas the poem measures it in sound and the image measures it in light. In Platform, the metaphor of the clock ticking its small coins into the dark turns time into something spent for nothing, and the closing line that nobody comes confirms the emptiness. By contrast, the photograph shows an empty chair beside a window, where light falls across the floor and a coat is left on the chair back, so that someone's presence is implied only by what remains. Similarly, each composer leaves the waiting person out, which invites the reader to supply the longing."
+      },
+      {
+        "id": "inv-q5-student",
+        "origin": "authored",
+        "pick": ["inv-t3"],
+        "expectMark": [3, 4],
+        "expectMissed": ["compares-texts"],
+        "answer": "In the poem Platform the clock ticks its small coins into the dark and nobody comes. This shows waiting is lonely because time is wasted like coins. The poet uses a metaphor to show this. The image shows an empty chair beside a window and a coat left over its back. The light falls across the floor. This shows someone has gone. The photographer uses light and an empty chair. Both are about waiting."
+      }
+    ]
+  }
+}

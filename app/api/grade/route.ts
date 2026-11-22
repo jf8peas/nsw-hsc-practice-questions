@@ -34,6 +34,7 @@ import type { AttemptTokenPayload } from "@/lib/tokens.server";
 import type { NewRewritePhaseRow } from "@/lib/db/schema";
 import { logRewriteGrade } from "@/lib/rewrite-log.server";
 import { handleParagraphGrade } from "@/lib/paragraph/grade-handler.server";
+import { handleComparativeGrade } from "@/lib/comparative/grade.server";
 import { handleUnseenGrade } from "@/lib/unseen/grade-handler.server";
 
 export const runtime = "nodejs";
@@ -63,7 +64,7 @@ async function giveBack(slot: AiSlot): Promise<void> {
 }
 
 /** 409: this question already has a stored result; show that mark and move on. */
-function alreadyAnswered(row: ResultRow, type: "mc" | "short" | "rewrite" | "paragraph" | "unseen"): NextResponse {
+function alreadyAnswered(row: ResultRow, type: "mc" | "short" | "rewrite" | "paragraph" | "unseen" | "comparative"): NextResponse {
   const body: AlreadyAnswered = {
     error: "already_answered",
     result: {
@@ -131,6 +132,11 @@ export async function POST(req: Request) {
   // Spec 008: unseen-text questions run their own two-try flow (no self-marking).
   if (question.type === "unseen") {
     return handleUnseenGrade(req, user, body, token, question, degraded);
+  }
+
+  // Spec 009: comparative questions run the same two-try flow with a pick (no self-marking).
+  if (question.type === "comparative") {
+    return handleComparativeGrade(req, user, body, token, question, degraded);
   }
 
   // Spec 007: paragraph parts run their own two-phase flow.

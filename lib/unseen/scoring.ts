@@ -3,8 +3,8 @@
 // higher-mark rule, the no-retry rule for a 1-mark question, the first-try concept outcomes and the
 // summary wording.
 
-import type { SkillVerdicts } from "@/lib/db/schema";
-import { SKILL_IDS, skillConceptId, type SkillId } from "@/lib/unseen/skills";
+import type { AnySkillVerdicts } from "@/lib/db/schema";
+import { COMPARATIVE_SKILL_IDS, comparativeSkillConceptId, type ComparativeSkillId } from "@/lib/unseen/skills";
 import type { UnseenEnding } from "@/lib/unseen/types";
 
 /** A retry is offered below full marks, and never on a 1-mark question (its cap would be 0). */
@@ -33,13 +33,21 @@ export function endingAfterFirstTry(mark: number, maxMarks: number): UnseenEndin
   return null;
 }
 
-/** Skill ids in rubric order. */
-export function missedSkills(v: SkillVerdicts): SkillId[] {
-  return SKILL_IDS.filter((id) => !v[id].met);
+/**
+ * The skills a stored verdict set covers, in rubric order: spec 008's seven, then the two comparison skills when the
+ * set carries them (a comparative unit's reply has all nine; a spec 008 row has seven).
+ */
+export function skillsOf(v: AnySkillVerdicts): ComparativeSkillId[] {
+  return COMPARATIVE_SKILL_IDS.filter((id) => v[id as keyof AnySkillVerdicts] !== undefined);
 }
 
-export function metSkills(v: SkillVerdicts): SkillId[] {
-  return SKILL_IDS.filter((id) => v[id].met);
+/** Skill ids in rubric order. */
+export function missedSkills(v: AnySkillVerdicts): ComparativeSkillId[] {
+  return skillsOf(v).filter((id) => !v[id as keyof AnySkillVerdicts]!.met);
+}
+
+export function metSkills(v: AnySkillVerdicts): ComparativeSkillId[] {
+  return skillsOf(v).filter((id) => v[id as keyof AnySkillVerdicts]!.met);
 }
 
 export interface ConceptOutcome {
@@ -48,19 +56,21 @@ export interface ConceptOutcome {
 }
 
 /**
- * The seven concept outcomes of the FIRST try, in rubric order, whatever the question's tags
- * (spec 008 FR-026). Stored on the result row; the retry and a decline never add any.
+ * The concept outcomes of the FIRST try, in rubric order, whatever the question's tags (spec 008 FR-026): seven for
+ * a spec 008 try, nine for a comparative one (spec 009 FR-022: the seven keep spec 008's concept ids, so one count
+ * covers both units). Stored on the result row; the retry and a decline never add any.
  */
-export function conceptOutcomes(try1: SkillVerdicts): ConceptOutcome[] {
-  return SKILL_IDS.map((id) => ({ conceptId: skillConceptId(id), correct: try1[id].met }));
+export function conceptOutcomes(try1: AnySkillVerdicts): ConceptOutcome[] {
+  return skillsOf(try1).map((id) => ({ conceptId: comparativeSkillConceptId(id), correct: try1[id as keyof AnySkillVerdicts]!.met }));
 }
 
 export type Pill = "first-try" | "fixed-in-retry" | "missed";
 
 /** First try if met on the first try; Fixed in retry if met only in the retry; else Missed. */
-export function pillFor(id: SkillId, try1: SkillVerdicts, try2?: SkillVerdicts | null): Pill {
-  if (try1[id].met) return "first-try";
-  if (try2?.[id].met) return "fixed-in-retry";
+export function pillFor(id: ComparativeSkillId, try1: AnySkillVerdicts, try2?: AnySkillVerdicts | null): Pill {
+  const key = id as keyof AnySkillVerdicts;
+  if (try1[key]?.met) return "first-try";
+  if (try2?.[key]?.met) return "fixed-in-retry";
   return "missed";
 }
 

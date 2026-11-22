@@ -4,7 +4,8 @@
 
 import { saveAttemptPayload } from "@/lib/drafts";
 import type { EssayBar, ParagraphState } from "@/lib/paragraph/types";
-import { UNIT_ID as UNSEEN_UNIT_ID } from "@/lib/unseen/skills";
+import type { ComparativeState } from "@/lib/comparative/types";
+import { COMPARATIVE_UNIT_ID, UNIT_ID as UNSEEN_UNIT_ID } from "@/lib/unseen/skills";
 import type { UnseenState } from "@/lib/unseen/types";
 import type { Question } from "@/lib/types";
 
@@ -25,11 +26,13 @@ interface StartResponse {
   paragraphState?: ParagraphState;
   /** spec 008: the question state for an unseen-text unit. */
   unseenState?: UnseenState;
+  /** spec 009: the question state for a comparative attempt. */
+  comparativeState?: ComparativeState;
 }
 
 /** The notices a sequential or progress-dependent unit shows when it cannot start a quiz (constitution Principle VI). */
 function unitNotices(unitId: string): { unavailable: string; finished: string } {
-  if (unitId === UNSEEN_UNIT_ID) {
+  if (unitId === UNSEEN_UNIT_ID || unitId === COMPARATIVE_UNIT_ID) {
     return {
       unavailable: "We can't load your questions right now. Try again in a moment.",
       finished: "You've answered every question in the bank so far. New questions are added as the papers are processed.",
@@ -79,6 +82,7 @@ export async function startAttempt(unitId: string): Promise<StartResult> {
     ...(data.essay ? { essay: data.essay } : {}),
     ...(data.paragraphState ? { paragraphState: data.paragraphState } : {}),
     ...(data.unseenState ? { unseenState: data.unseenState } : {}),
+    ...(data.comparativeState ? { comparativeState: data.comparativeState } : {}),
   });
   return { ok: true, attemptId: data.attemptId, persisted: data.persisted };
 }

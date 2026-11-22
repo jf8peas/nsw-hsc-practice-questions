@@ -48,8 +48,10 @@ export function validateConceptRules(unit: Unit): string[] {
   for (const c of concepts) {
     if (seen.has(c.id)) errors.push(`${unit.id}: duplicate concept id ${c.id}`);
     seen.add(c.id);
-    if (!c.id.startsWith(`${unit.id}.c-`)) {
-      errors.push(`${c.id}: concept id must start with "${unit.id}.c-"`);
+    // a unit that shares skill progress with another (spec 009 FR-022) lists that unit's concept ids for the shared skills
+    const prefixes = [unit.id, ...(unit.sharesProgressWith ?? [])];
+    if (!prefixes.some((p) => c.id.startsWith(`${p}.c-`))) {
+      errors.push(`${c.id}: concept id must start with "${unit.id}.c-"${prefixes.length > 1 ? " (or the id of a unit it shares progress with)" : ""}`);
     }
     if (!c.description.trim()) {
       errors.push(`${c.id}: concept description is empty`);
@@ -125,7 +127,7 @@ export function validateExplanationRules(unit: Unit, answers: AnswerSet): string
       if (explanations !== undefined) errors.push(`${q.id}: short questions cannot have wrongExplanations`);
       continue;
     }
-    if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen") continue; // no options to explain (spec 005, 007, 008)
+    if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative") continue; // no options to explain (spec 005, 007, 008, 009)
 
     const correct = a.correctText ?? (typeof a.correctIndex === "number" ? q.options[a.correctIndex] : undefined);
     if (explanations !== undefined) {
@@ -260,7 +262,7 @@ const LEAK_RUN = 30;
  * A longer run for the essay question itself: it legitimately shares everyday wording with the model
  * ("the impact of globalisation on"), because the Link is meant to echo the question's words.
  */
-const PROMPT_LEAK_RUN = 60;
+export const PROMPT_LEAK_RUN = 60;
 
 /** Every number, percentage or year-like token in a text, e.g. "774%", "16.8%", "1986". */
 function figuresIn(text: string): string[] {
@@ -427,13 +429,13 @@ export function validateParagraphRules(unit: Unit, answers: AnswerSet, today: Da
 // ---- unseen-text rules (spec 008 FR-046, research R2) -------------------------------------------
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-const isPastIsoDate = (value: string | undefined, today: Date): boolean =>
+export const isPastIsoDate = (value: string | undefined, today: Date): boolean =>
   typeof value === "string" && ISO_DATE.test(value) && !Number.isNaN(Date.parse(value)) && value <= today.toISOString().slice(0, 10);
 
 const squash = (v: string): string => v.replace(/\s+/g, " ").trim().toLowerCase();
 
 /** True when `run` characters of `key` (checked every 5) appear in `publicText` outside the question's own stimulus. */
-function sharedRun(key: string, publicText: string, run: number, stimulus: string): boolean {
+export function sharedRun(key: string, publicText: string, run: number, stimulus: string): boolean {
   const k = squash(key);
   const p = squash(publicText);
   const own = squash(stimulus);
@@ -448,7 +450,7 @@ function sharedRun(key: string, publicText: string, run: number, stimulus: strin
 export const MAX_IMAGE_BYTES = 300 * 1024;
 
 /** The public stimulus as one string, so quotation of it is not mistaken for a leak. */
-function renderStimulus(text: UnseenText): string {
+export function renderStimulus(text: UnseenText): string {
   const body =
     text.body.kind === "poem" ? text.body.stanzas.flat().join("\n") : text.body.kind === "prose" ? text.body.paragraphs.join("\n") : "";
   return [text.title, text.author, body, ...(text.footnotes ?? []).map((f) => f.text)].join("\n");
@@ -506,7 +508,7 @@ export function validateUnseenRules(
     // 1. source
     if (!q.paper) errors.push(`${q.id}: no paper fields (school, year, exam, question number)`);
     else {
-      if (![1, 2, 3, 4].includes(q.paper.qNo)) errors.push(`${q.id}: paper.qNo must be 1 to 4`);
+      if (![1, 2, 3, 4, 5].includes(q.paper.qNo)) errors.push(`${q.id}: paper.qNo must be 1 to 5`);
       if (q.paper.year < 2023 || q.paper.year > 2026) errors.push(`${q.id}: paper.year ${q.paper.year} is outside 2023 to 2026`);
       if (q.paper.exam !== "Trial" && q.paper.exam !== "Half-yearly") errors.push(`${q.id}: paper.exam must be Trial or Half-yearly`);
       if (q.source !== sourceOf(q.paper)) errors.push(`${q.id}: source "${q.source}" must be "${sourceOf(q.paper)}"`);

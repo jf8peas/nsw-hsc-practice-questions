@@ -3,7 +3,7 @@ import "server-only";
 import { and, eq, inArray } from "drizzle-orm";
 
 import { UNITS, conceptsOf } from "@/content";
-import { conceptProgress, conceptReviewCounts, type ConceptState } from "@/lib/concepts/progress";
+import { conceptReviewCounts, type ConceptState } from "@/lib/concepts/progress";
 import {
   contentVersionHash,
   getVersionsByIds,
@@ -16,7 +16,7 @@ import { conceptSlots, conceptVersions, type ConceptVersionRow } from "@/lib/db/
 import type { Unit } from "@/lib/types";
 
 import { load, type Loaded } from "./history.server";
-import { listAllResultsForProgress, listUnitResultsForProgress } from "./results.server";
+import { listAllResultsForProgress, loadConceptProgress } from "./results.server";
 
 /**
  * What a student may see of a concept's shared content. Deliberately small: no review reason,
@@ -92,7 +92,7 @@ export const loadConceptContentViewForPage = (conceptIds: string[]) =>
  */
 export function loadUnitConceptProgress(userId: string, unit: Unit): Promise<Loaded<ConceptState[]>> {
   if (!unit.conceptsReady) return Promise.resolve({ status: "ok", data: [] });
-  return load(async (db) => conceptProgress(unit, await listUnitResultsForProgress(db, userId, unit.id)));
+  return load((db) => loadConceptProgress(db, userId, unit));
 }
 
 /**

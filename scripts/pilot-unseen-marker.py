@@ -13,6 +13,11 @@ times each, using the same OpenRouter setup as the app (OPENROUTER_API_KEY, ENGL
   - description    : for visual texts, did the marker flag a description that is too thin to mark from?
   - consistency    : did repeated runs give the same mark?
 
+Spec 009 (comparative short answers) uses the SAME script with --unit comparative: it reads lib/comparative/rubric.json
+(the file the app sends for that unit), the nine skills (lib/unseen/skills.json plus lib/comparative/skills.json) and
+resources/english-unseen/pilot-comparative.json, whose questions carry several texts and, for a choice question, the
+student's pick per answer; the default (--unit unseen) is unchanged.
+
 Usage (from the repo root, in Git Bash):
   python scripts/pilot-unseen-marker.py --check                 # offline: data, word counts, no API calls
   python scripts/pilot-unseen-marker.py --show-prompt fs25-q1-mid
@@ -35,6 +40,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from collections import Counter, defaultdict
@@ -42,23 +48,46 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 BASE = REPO / "resources" / "english-unseen"
-DATA_PATH = BASE / "pilot-questions.json"
-RUBRIC_PATH = REPO / "lib" / "unseen" / "rubric.json"
+
+
+def _unit_from_argv() -> str:
+    """--unit is read before the paths are chosen (the rubric and skills load at import time)."""
+    argv = sys.argv[1:]
+    for i, a in enumerate(argv):
+        if a == "--unit" and i + 1 < len(argv):
+            return argv[i + 1]
+        if a.startswith("--unit="):
+            return a.split("=", 1)[1]
+    return "unseen"
+
+
+UNIT = _unit_from_argv()
+COMPARATIVE = UNIT == "comparative"  # spec 009: two texts, nine skills, the unit's own prompt file
+if UNIT not in ("unseen", "comparative"):
+    sys.exit(f"--unit must be unseen or comparative, not {UNIT!r}")
+
+DATA_PATH = BASE / ("pilot-comparative.json" if COMPARATIVE else "pilot-questions.json")
+RUBRIC_PATH = REPO / "lib" / ("comparative" if COMPARATIVE else "unseen") / "rubric.json"
 SKILLS_PATH = REPO / "lib" / "unseen" / "skills.json"
+EXTRA_SKILLS_PATH = REPO / "lib" / "comparative" / "skills.json"
 RUNS_DIR = BASE / "runs"
 FIXTURES = REPO / "tests" / "fixtures"
-FIXTURE_PATH = FIXTURES / "unseen-prompt-input.json"
-GOLDEN_PATH = FIXTURES / "unseen-prompt.golden.txt"
-HASH_PATH = FIXTURES / "unseen-rubric.hash"
+_PFX = "comparative" if COMPARATIVE else "unseen"
+FIXTURE_PATH = FIXTURES / f"{_PFX}-prompt-input.json"
+GOLDEN_PATH = FIXTURES / f"{_PFX}-prompt.golden.txt"
+HASH_PATH = FIXTURES / f"{_PFX}-rubric.hash"
 
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash"  # the unit's default (ENGLISH_ADV_GRADING_MODEL); never GRADING_MODEL
 TIMEOUT_S = 90
-MAX_TOKENS = 4000  # room for models that reason before replying
+COMPARATIVE_MAX_TOKENS = 12000  # spec 009 T022: raised from 6607 after the holdout run 20261121-185954 had 4 of 44 replies cut off; keep equal to lib/comparative/rubric.ts
+MAX_TOKENS = COMPARATIVE_MAX_TOKENS if COMPARATIVE else 4000  # room for models that reason before replying
 
 RUBRIC = json.loads(RUBRIC_PATH.read_text(encoding="utf-8"))
 PROMPT_VERSION = RUBRIC["promptVersion"]
 SKILLS = [s["id"] for s in json.loads(SKILLS_PATH.read_text(encoding="utf-8"))]
+if COMPARATIVE:
+    SKILLS += [s["id"] for s in json.loads(EXTRA_SKILLS_PATH.read_text(encoding="utf-8"))]
 
 
 # ---- helpers ------------------------------------------------------------------------------
@@ -90,24 +119,50 @@ def all_cases(data: dict):
             yield q, c
 
 
-def build_messages(q: dict, c: dict) -> list[dict]:
-    text = c.get("textOverride") or q["text"]
-    visual_note = (
-        " — VISUAL TEXT: you cannot see the image; this is a written description of it" if q.get("visual") else ""
+VISUAL_NOTE = " — VISUAL TEXT: you cannot see the image; this is a written description of it"
+
+
+def picked_texts(q: dict, c: dict) -> list[dict]:
+    """Spec 009: the texts the answer is about, in tab order: both texts of a fixed pair, or a choice question's
+    fixed texts and the answer's pick. Mirrors pickedTextIdsOf in lib/grading.server.ts."""
+    choice = q.get("choice")
+    if not choice:
+        return list(q["texts"])
+    want = set(choice["fixed"]) | set(c.get("pick", []))
+    return [t for t in q["texts"] if t["id"] in want]
+
+
+def render_texts(texts: list[dict]) -> str:
+    """The picked texts as lib/unseen/marker.server.ts renderMarkerTexts shows them."""
+    return "\n\n".join(
+        f"TEXT {i + 1} — {t['heading']} ({t['textForm']}){VISUAL_NOTE if t.get('visual') else ''}\n{t['text']}"
+        for i, t in enumerate(texts)
     )
+
+
+def stimulus_of(q: dict, c: dict) -> str:
+    if COMPARATIVE:
+        return "\n\n".join(t["text"] for t in picked_texts(q, c) if not t.get("visual"))
+    return c.get("textOverride") or q["text"]
+
+
+def build_messages(q: dict, c: dict) -> list[dict]:
+    text = c.get("textOverride") or q.get("text", "")
+    visual_note = VISUAL_NOTE if q.get("visual") else ""
     by_id = {x["id"]: x for x in q["cases"]}
     anchor_id = next((a for a in q.get("anchors", []) if by_id[a]["answer"] != c["answer"]), None)
     anchor = by_id[anchor_id]["answer"] if anchor_id else "None available."
     values = {
         "anchor": anchor,
         "marks": q["marks"],
-        "questionHeading": q["questionHeading"],
+        "questionHeading": q.get("questionHeading", ""),
         "question": q["question"],
         "directive": q["directive"],
         "directiveDefinition": RUBRIC["directiveVerbs"].get(q["directive"], ""),
-        "textForm": q["textForm"],
+        "textForm": q.get("textForm", ""),
         "visualNote": visual_note,
         "text": text,
+        "texts": render_texts(picked_texts(q, c)) if COMPARATIVE else "",
         "criteria": q["criteria"],
         "notes": q["notes"] or "None provided.",
         "suggestedWords": q["suggestedWords"],
@@ -120,7 +175,7 @@ def build_messages(q: dict, c: dict) -> list[dict]:
     return [{"role": "system", "content": RUBRIC["systemPrompt"]}, {"role": "user", "content": user}]
 
 
-def call_model(key: str, model: str, messages: list[dict]) -> tuple[str | None, str | None]:
+def call_model(key: str, model: str, messages: list[dict], usage_out: dict | None = None) -> tuple[str | None, str | None]:
     body = json.dumps(
         {
             "model": model,
@@ -148,6 +203,13 @@ def call_model(key: str, model: str, messages: list[dict]) -> tuple[str | None, 
         return None, f"http {e.code}: {e.read().decode('utf-8', 'replace')[:200]}"
     except Exception as e:  # network, timeout, bad JSON
         return None, f"{type(e).__name__}: {str(e)[:200]}"
+    if usage_out is not None:
+        # token use of this call, for sizing max_tokens (spec 009 T022); present even when the reply was cut off
+        u = data.get("usage") or {}
+        usage_out["completion_tokens"] = u.get("completion_tokens")
+        usage_out["reasoning_tokens"] = (u.get("completion_tokens_details") or {}).get("reasoning_tokens")
+        usage_out["prompt_tokens"] = u.get("prompt_tokens")
+        usage_out["finish_reason"] = (data.get("choices") or [{}])[0].get("finish_reason")
     try:
         choice = data["choices"][0]
         content = choice["message"].get("content")
@@ -236,7 +298,7 @@ def reply_echoes_anchor(q: dict, c: dict, reply: dict) -> bool:
     if not anchor_id:
         return False
     model = _squash(by_id[anchor_id]["answer"])
-    stimulus = _squash(c.get("textOverride") or q["text"])
+    stimulus = _squash(stimulus_of(q, c))
     out = " ".join(
         [reply.get("feedback") or "", reply.get("biggestGap") or "", reply.get("goFurther") or ""]
         + [v.get("reason", "") for v in (reply.get("skills") or {}).values() if isinstance(v, dict)]
@@ -256,7 +318,11 @@ def mark_once(key, model, q, c, run, attempts=2):
     rec = {"case": c["id"], "question": q["id"], "run": run, "model": model, "promptVersion": PROMPT_VERSION}
     for attempt in range(1, attempts + 1):
         try:
-            content, err = call_model(key, model, build_messages(q, c))
+            t0 = time.monotonic()
+            usage: dict = {}
+            content, err = call_model(key, model, build_messages(q, c), usage)
+            rec.setdefault("usage", []).append(usage)
+            rec["ms"] = round((time.monotonic() - t0) * 1000)  # one model call, for the p95 in the report (spec 009 SC-003)
             if err:
                 rec["error"] = err
                 continue
@@ -331,7 +397,26 @@ def check_data(data: dict) -> list[str]:
         if count_words(c["answer"]) < 20:
             problems.append(f"{c['id']}: under 20 words (the app would block it, FR-017)")
     for q in data["questions"]:
-        if not q["text"].strip():
+        if COMPARATIVE:
+            choice = q.get("choice")
+            ids = [t["id"] for t in q["texts"]]
+            for t in q["texts"]:
+                if not t["text"].strip():
+                    problems.append(f"{q['id']}: empty text for {t['id']}")
+            if choice:
+                if sorted(ids) != sorted(choice["fixed"] + choice["from"]):
+                    problems.append(f"{q['id']}: texts must be the fixed and choosable texts")
+                for c in q["cases"]:
+                    pick = c.get("pick", [])
+                    if len(set(pick)) != choice["pick"] or any(p not in choice["from"] for p in pick):
+                        problems.append(f"{c['id']}: pick {pick} is not {choice['pick']} of {choice['from']}")
+            else:
+                if len(ids) != 2:
+                    problems.append(f"{q['id']}: a fixed pair has exactly 2 texts")
+                for c in q["cases"]:
+                    if c.get("pick"):
+                        problems.append(f"{c['id']}: a fixed pair has no pick")
+        elif not q["text"].strip():
             problems.append(f"{q['id']}: empty text")
     return problems
 
@@ -347,6 +432,27 @@ def word_table(data: dict) -> str:
 
 
 # ---- report -------------------------------------------------------------------------------
+
+
+def tokens_line(records: list[dict]) -> str:
+    """The completion and reasoning tokens of every call, and how many replies were cut off at max_tokens."""
+    us = [u for r in records for u in r.get("usage", []) if u.get("completion_tokens") is not None]
+    if not us:
+        return "- Tokens: no usage recorded"
+    comp = sorted(u["completion_tokens"] for u in us)
+    reas = sorted((u.get("reasoning_tokens") or 0) for u in us)
+    cut = sum(1 for u in us if u.get("finish_reason") == "length")
+    return (f"- Completion tokens per call (n={len(us)}, max_tokens {MAX_TOKENS}): median {comp[len(comp) // 2]}, max {comp[-1]}; "
+            f"reasoning tokens median {reas[len(reas) // 2]}, max {reas[-1]}; {cut} reply(ies) cut off at max_tokens")
+
+
+def latency_line(records: list[dict]) -> str:
+    """Per-call latency of the calls that answered (spec 009 SC-003: 95% of answers inside one minute)."""
+    ms = sorted(r["ms"] for r in records if "reply" in r and "ms" in r)
+    if not ms:
+        return "- Latency: no timed calls"
+    p = lambda q: ms[min(len(ms) - 1, max(0, -(-len(ms) * q // 100) - 1))]
+    return f"- Latency per call (n={len(ms)}): median {p(50) / 1000:.1f}s, p95 {p(95) / 1000:.1f}s, max {ms[-1] / 1000:.1f}s (the app's first-call timeout is 40s)"
 
 
 def summarise(data: dict, records: list[dict], model: str, runs: int) -> str:
@@ -424,6 +530,8 @@ def summarise(data: dict, records: list[dict], model: str, runs: int) -> str:
         f"- Skills an answer was written to miss, marked missed: {pct(caught, should_catch)}",
         f"- False docks on answers that should meet every skill: {pct(false_docks, full_skill_checks)}",
         f"- Visual description verdict as expected: {pct(desc_ok, desc_total)}",
+        latency_line(records),
+        tokens_line(records),
         "",
         "Skills marked missed (majority), across all answers: "
         + ", ".join(f"{s} {skill_miss_counter[s]}" for s in SKILLS),
@@ -557,12 +665,15 @@ def gate_report(data: dict, records: list[dict], model: str, runs: int) -> tuple
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--unit", choices=("unseen", "comparative"), default="unseen",
+                    help="unseen (spec 008, default) or comparative (spec 009: two texts, nine skills, its own prompt file)")
     ap.add_argument("--check", action="store_true", help="offline checks only, no API calls")
     ap.add_argument("--show-prompt", metavar="CASE_ID", help="print the messages sent for one answer")
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--only", default=None, help="only cases whose id starts with this")
     ap.add_argument("--model", default=None, help="model slug (default: ENGLISH_ADV_GRADING_MODEL, else deepseek/deepseek-v4.1-flash)")
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--max-tokens", type=int, default=None, help="override max_tokens (to measure the longest completion without cut-offs)")
     ap.add_argument("--write-golden", action="store_true", help="regenerate the golden prompt and rubric hash fixtures")
     ap.add_argument("--set", choices=("tuning", "holdout", "field", "all"), default="tuning",
                     help="which questions to mark: the tuning set (default), the frozen holdout set, the field set (flagged answers), or all")
@@ -571,6 +682,9 @@ def main() -> int:
                     help="mark every case of every set and report tuning, holdout and field separately; exit 1 when "
                          "tuning in-range is under 90%%, holdout in-range under 80%%, or any tuning or holdout case is more than 1 mark out")
     args = ap.parse_args()
+    global MAX_TOKENS
+    if args.max_tokens:
+        MAX_TOKENS = args.max_tokens
 
     if args.write_golden:
         GOLDEN_PATH.write_text(golden_text(), encoding="utf-8", newline="\n")

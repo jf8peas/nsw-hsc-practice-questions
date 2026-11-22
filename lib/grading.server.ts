@@ -3,7 +3,7 @@ import "server-only";
 import { getQuestion, getUnit } from "@/content";
 import { getAnswer } from "@/content/answers";
 import type { ReviewMaterial } from "@/lib/concepts/port";
-import type { RewriteDisplayData } from "@/lib/db/schema";
+import type { AnySkillVerdicts, RewriteDisplayData } from "@/lib/db/schema";
 import type {
   GradeResult,
   RewriteCreditedSpan,
@@ -18,12 +18,16 @@ import { PARTS, partKeyOf } from "@/lib/paragraph/parts";
 import { buildVerdicts, markOf, phase2Mark } from "@/lib/paragraph/scoring";
 import type { ParagraphDiscussion, ParagraphQuestionView } from "@/lib/paragraph/types";
 import { rewriteScore } from "@/lib/rewrite-scoring";
-import type { Answer, ParagraphQuestion, PartNo, UnseenKey, UnseenQuestion, UnseenText } from "@/lib/types";
-import { formForPrompt, markWithModel as markUnseenWithModel, renderTextForMarker } from "@/lib/unseen/marker.server";
+import type { Answer, ComparativeKey, ComparativeQuestion, ParagraphQuestion, PartNo, UnseenKey, UnseenQuestion, UnseenText } from "@/lib/types";
+import { pickedTextIdsOf } from "@/lib/comparative/pick";
+import { COMPARATIVE_MAX_TOKENS, comparativeRubric } from "@/lib/comparative/rubric";
+import type { ComparativeDiscussion } from "@/lib/comparative/types";
+import { formForPrompt, markWithModel as markUnseenWithModel, renderTextForMarker, type MarkerText } from "@/lib/unseen/marker.server";
+import { COMPARATIVE_SKILL_IDS } from "@/lib/unseen/skills";
 import { cappedMark } from "@/lib/unseen/scoring";
 import type { UnseenDiscussion } from "@/lib/unseen/types";
 import { countWords } from "@/lib/wordcount";
-import type { ParagraphVerdicts, SkillVerdicts } from "@/lib/db/schema";
+import type { ParagraphVerdicts } from "@/lib/db/schema";
 
 export interface GradeOptions {
   /** MC only: optionOrder[displayIndex] = original option index (from the attempt). */
@@ -695,7 +699,8 @@ function unseenKeyOf(questionId: string): { question: UnseenQuestion; text: Unse
 }
 
 export interface UnseenMarked {
-  verdicts: SkillVerdicts;
+  /** Seven verdicts for a spec 008 question; nine for a comparative one (spec 009). */
+  verdicts: AnySkillVerdicts;
   /** 0..maxMarks at the first try; 0..maxMarks-1 at the retry (the cap is applied here). */
   mark: number;
   feedback: string;
@@ -755,4 +760,100 @@ export function unseenDiscussion(questionId: string): UnseenDiscussion | null {
   const k = unseenKeyOf(questionId);
   if (!k) return null;
   return { modelAnswer: k.key.model, modelWords: countWords(k.key.model) };
+}
+
+// ---- the comparative unit (spec 009) ------------------------------------------------------------
+//   markComparative   sends the criteria, notes, model answer and, for a picked visual text, its written
+//                     description to the model provider and returns verdicts only; it is given ONLY the texts the
+//                     student wrote about (a choice question's pick, or both texts of a fixed pair), so an unpicked
+//                     allowed text's words and description never leave the server for the provider either.
+//   comparativeDiscussion  (spec 009 T042) the model answer and, for a choice question, its pairing, for the
+//                     discussion of a FINAL attempt only; the caller must check the phase row is final.
+
+function comparativeKeyOf(questionId: string): { question: ComparativeQuestion; texts: UnseenText[]; key: ComparativeKey } | null {
+  const found = getQuestion(questionId);
+  const key = getAnswer(questionId)?.comparative;
+  if (!found || found.question.type !== "comparative" || !key) return null;
+  const question = found.question;
+  const texts: UnseenText[] = [];
+  for (const id of question.textIds) {
+    const text = found.unit.texts?.find((t) => t.id === id);
+    if (!text) return null;
+    texts.push(text);
+  }
+  return { question, texts, key };
+}
+
+/**
+ * Mark one comparative answer. Returns null when the marker is unavailable (the caller returns the editable box and
+ * never invents a mark or self-marks). The retry cap is applied in code, as for spec 008.
+ */
+export async function markComparative(
+  questionId: string,
+  answer: string,
+  phase: 1 | 2,
+  pickedTextIds: readonly string[] | undefined,
+  options: { skipLlm?: boolean } = {},
+): Promise<UnseenMarked | null> {
+  const k = comparativeKeyOf(questionId);
+  if (!k || options.skipLlm) return null;
+  const { question, texts, key } = k;
+  const ids = pickedTextIdsOf(question, pickedTextIds);
+  if (!ids) return null;
+  const markerTexts: MarkerText[] = [];
+  const stimuli: string[] = [];
+  for (const id of ids) {
+    const text = texts.find((t) => t.id === id)!;
+    const visual = text.body.kind === "image";
+    const description = key.visuals?.[id]?.description;
+    if (visual && !description) return null; // nothing to mark a picture from
+    const stimulus = visual ? "" : renderTextForMarker(text);
+    if (stimulus) stimuli.push(stimulus);
+    markerTexts.push({ heading: text.heading, textForm: formForPrompt(text.form), visual, text: visual ? description! : stimulus });
+  }
+  const out = await markUnseenWithModel(
+    {
+      maxMarks: question.maxMarks,
+      questionHeading: "",
+      question: [question.prompt, ...(question.parts ?? []).map((p) => `(${p.label}) ${p.text}`)].join("\n"),
+      verb: question.verb,
+      textForm: "",
+      visual: false,
+      text: "",
+      texts: markerTexts,
+      criteria: key.criteria,
+      notes: key.notes,
+      suggestedWords: question.suggestedWords,
+      modelAnswer: key.model,
+      stimulus: stimuli.join("\n\n"),
+      answer,
+    },
+    { rubric: comparativeRubric, skillIds: COMPARATIVE_SKILL_IDS, maxTokens: COMPARATIVE_MAX_TOKENS },
+  );
+  if (!out) return null;
+  return {
+    verdicts: out.reply.skills,
+    mark: phase === 2 ? cappedMark(out.reply.mark, question.maxMarks) : out.reply.mark,
+    feedback: out.reply.feedback,
+    biggestGap: out.reply.biggestGap,
+    goFurther: phase === 1 && out.reply.mark === question.maxMarks ? out.reply.goFurther : null,
+    wordCount: countWords(answer),
+    promptVersion: out.promptVersion,
+    model: out.model,
+  };
+}
+
+/**
+ * The model answer for the discussion of a FINAL comparative attempt, and (choice questions only) the pairing it uses,
+ * as the ids of the texts it covers. Never the criteria, notes or descriptions. The caller must check the phase row
+ * is final; this function never decides that.
+ */
+export function comparativeDiscussion(questionId: string): ComparativeDiscussion | null {
+  const k = comparativeKeyOf(questionId);
+  if (!k) return null;
+  return {
+    modelAnswer: k.key.model,
+    modelWords: countWords(k.key.model),
+    ...(k.question.choice ? { pairing: [...k.key.pairing] } : {}),
+  };
 }

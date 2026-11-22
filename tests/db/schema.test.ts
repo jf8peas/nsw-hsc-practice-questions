@@ -100,7 +100,8 @@ describe("migrations and column sets (Principle II)", () => {
         "updated_at",
       ].sort(),
     );
-    // spec 006: the draft row holds only the student's in-progress draft text per phase
+    // spec 006: the draft row holds only the student's in-progress draft text per phase (spec 009 adds the
+    // comparative unit's pick: text ids of the question's own public texts)
     expect(await columns("rewrite_drafts")).toEqual(
       [
         "id",
@@ -110,6 +111,7 @@ describe("migrations and column sets (Principle II)", () => {
         "question_id",
         "phase1_draft",
         "phase2_draft",
+        "picked_text_ids",
         "created_at",
         "updated_at",
       ].sort(),

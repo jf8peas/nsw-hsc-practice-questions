@@ -112,3 +112,25 @@ export async function deleteRewriteDraft(
       ),
     );
 }
+
+/**
+ * Save the pick a student made on a comparative choice question (spec 009 research R5), as soon as it is
+ * complete or changed. Creates the draft row if the student has not typed yet; never touches the draft
+ * text, and a draft save never touches the pick. Scoped by the caller to the session user's attempt.
+ */
+export async function savePickedTextIds(
+  db: Db,
+  userId: string,
+  attemptId: string,
+  unitId: string,
+  questionId: string,
+  pick: string[],
+): Promise<void> {
+  await db
+    .insert(rewriteDrafts)
+    .values({ attemptId, userId, unitId, questionId, pickedTextIds: pick })
+    .onConflictDoUpdate({
+      target: [rewriteDrafts.attemptId, rewriteDrafts.questionId],
+      set: { pickedTextIds: pick, updatedAt: new Date() },
+    });
+}

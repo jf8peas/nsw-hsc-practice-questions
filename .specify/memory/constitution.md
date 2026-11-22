@@ -1,5 +1,11 @@
 <!--
 Sync Impact Report
+- Version change: 2.15.1 → 2.16.0 (MINOR: guidance in Principles I, II, V, VI and VII and the Quality Gates extended to a second Advanced English unit, the comparative short-answer unit, and one new student-chosen field, the pick of texts).
+- Reason (amendment log): the comparative unit (spec 009) is spec 008 with two texts per question. It reuses 008's stimulus texts and cropped images, marker pipeline, no-self-marking rule and model setting, so the wording that named "the unseen-text unit" now names both units. A choice question lets the student choose which allowed texts to write about; the choice is a list of text ids from the question's own public allowed set, re-checked by the server, stored with the attempt so the marker can be revised from real use. Nine skill verdicts replace seven in this unit. A unit's concept list may name concept ids defined by another unit it shares progress with (spec 009 FR-022). Nothing new is released earlier than in 008: the key is still server-only and the model answer is released at the discussion only.
+- Modified principles: I (the comparative unit's release schedule; the pick on the pick-save route, an answer-submission route, and on the grade route; the image route's id checked against the shared text store); II (the comparative phase row, nine verdicts and the pick); V (the cropped-image exception covers the shared store); VI (both units never self-marked; both need the database); VII (the model setting also serves the comparative unit); Quality Gates (leakage and testing bullets).
+- Templates requiring updates: none (plan, spec and tasks templates name no unit).
+
+Previous report (2.15.1):
 - Version change: 2.15.0 → 2.15.1 (PATCH: two clarifications of the unseen-text unit's Principle I and II wording; no new class of behaviour).
 - Amendment log (2.15.1, second line): the unseen-text unit has no student flag. The "This mark seems wrong" button, its route (`POST /api/unseen/flag`) and the stored flag (`unseen_phases.flagged_at`) are removed, so the 2.15.0 amendments no longer list them: Principle I's submission-routes bullet names only the unit's retry-decline route, and Principle II's stored unseen fields no longer include a flag. The marker is revised from an offline re-mark of real first tries in every mark band instead. The paragraph unit's flag route and stored flag (spec 007) are unchanged.
 - Reason (amendment log): the unseen-text marker (spec 008, prompt unseen-pilot-5) adds one advice sentence, "Make it even stronger" (field `goFurther`), to a full-mark first try. It is stored in the unseen phase row with the try, shown only for a full-mark first try, and never changes a mark. Principle II lists the stored fields, so it is added there.
@@ -113,14 +119,14 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   server-issued signed attempt token; for a self-mark, a binary `correct` flag or per-criterion
   tick flags together with the server-issued signed self-mark token; for the paragraph unit's
   flag route, `attemptId`, `questionId` and the signed attempt token; for the unseen-text unit's
-  retry-decline route, `attemptId`, `questionId` and the signed attempt token; and, for a
+  retry-decline route, `attemptId`, `questionId` and the signed attempt token; for the comparative unit's pick-save route, `attemptId`, `questionId`, the signed attempt token and `pick` (a list of text ids, each re-checked by the server against the question's allowed texts), and for its grade route the same `pick` beside the fields above on the first try; and, for a
   save retry, the server-issued signed result receipt. The transcribe route (`POST /api/transcribe`) MAY accept 1-3 images and an optional note;
   `/api/grade` MAY accept the signed transcription token. The vision prompt gets no model answer or rubric.
 - The client MUST NOT send a user id, marks, max marks or grading method. The only exception is
   the binary self-mark flag, which the server accepts only with a valid token.
 - Other routes MAY take from the client only resource identifiers that the server re-checks: a
   unit id, concept id, version id, the kind of concept item (summary or illustration), or the text
-  id of an unseen-text unit's stimulus image, which the server checks against the unit's texts. They
+  id of an unseen-text or comparative unit's stimulus image or text page, which the server checks against the shared text store and the student's attempts. They
   MUST NOT accept a user id, marks, max marks, grading method or answer, and the server MUST
   authorise every such request from the session (Principle IX for teacher routes).
 - Before acting on any request, the server MUST verify that every `attemptId` belongs to the
@@ -165,6 +171,7 @@ decided to take, and the rules that every feature, spec and plan MUST respect.
   resume and the attempt detail page of an unfinished question: the marking criteria, the marking
   notes, a visual text's written description, or the model answer before the discussion. Key
   material MUST come through functions exported from `lib/grading.server.ts`.
+- [DECISION] The comparative short-answer unit (spec 009) follows the unseen-text release schedule above, with two or more texts per question and nine skills. Before the first try is marked: nothing from the key (the texts a question shows, every allowed text of a choice question, the question, its marks, its source and the line that a choice question's model answer shows one pairing are public content). After a try is marked: the nine per-skill verdicts, the marker's one-line reasons, its feedback and its biggest-gap sentence (never model-answer text). At the discussion: the model answer and, for a choice question, the pairing it uses. Never, at any moment, including reload, resume and the attempt detail page of an unfinished question: the marking criteria, the marking notes, any visual text's written description, or the model answer before the discussion. The pick is the student's own choice and may be shown back to them at any step. Key material MUST come through functions exported from `lib/grading.server.ts`.
 
 Rationale: a practice tool whose answers can be read from the page source is worthless. The
 `server-only` import makes the build fail if client code ever pulls the key in.
@@ -204,13 +211,14 @@ Rationale: a practice tool whose answers can be read from the page source is wor
     in-progress draft text is stored in the existing draft row. Verdicts, reasons and the flag
     never change marks or concept tracking, which always come from the phase 1 outcomes;
   - per unseen-text question in an attempt (spec 008): the first-try and retry texts, their marks,
-    the seven per-skill verdicts each with the marker's one-line reason, the feedback and
+    the per-skill verdicts each with the marker's one-line reason, the feedback and
     biggest-gap sentence shown, the "to go further" sentence for a full-mark first try, the prompt version and model that marked each try, how the
     question ended (full marks, retried, declined, or no retry offered), and the recorded
     mark; stored in a phase row, kept for
     the attempt detail page, deleted with the student like results. The student's in-progress
     draft text is stored in the existing draft row. Verdicts and reasons never change
     marks or concept tracking, which always come from the first try's verdicts.
+  - per comparative question in an attempt (spec 009): everything stored for an unseen-text question, with nine per-skill verdicts instead of seven and the pick (the text ids the student chose, on a choice question), kept in the same phase row (the pick is also held in the draft row until the first try is submitted); deleted with the student like results. Verdicts, reasons and the pick never change marks or concept tracking, which come from the first try's verdicts.
   It MUST NOT store profile photos, Google tokens beyond what the session needs, or any other
   personal data without amending this constitution. Photos for transcription are never stored or logged;
   only the transcription (the "answer submitted") is stored. Answer photos are sent to an AI provider
@@ -302,10 +310,10 @@ Automated checks do not drift.
   lightly reworded or recreated, so that past HSC papers stay unseen for full practice exams.
 - Every diagram MUST be redrawn in code (for example a per-unit `diagram.ts`). Scanned,
   photographed or otherwise copied images MUST NOT be committed or served, with one exception.
-  [DECISION] While the app is non-commercial, a visual stimulus text of an unseen-text unit (spec
-  008) MAY be an image cropped from a school trial or half-yearly paper, under the school-paper
+  [DECISION] While the app is non-commercial, a visual stimulus text of an unseen-text unit or the comparative unit (specs
+  008 and 009) MAY be an image cropped from a school trial or half-yearly paper, under the school-paper
   exception above. It MUST show its credit (school, year, paper type, question number) with the
-  question; it MUST be committed only under that unit's own `images/` folder and served only to a
+  question; it MUST be committed only under the `images/` folder of the unseen-text unit that stores texts (spec 008's, shared with spec 009's unit) and served only to a
   signed-in student through an authenticated route, never from a public path and never listed or
   guessable without a session; it MUST NOT come from a real HSC paper; and before the app goes
   commercial it MUST be removed, or replaced by an original or properly licensed image, together
@@ -351,7 +359,7 @@ but the README does not yet say so.
   ends the question with the first-try mark and the discussion; the correction is never
   self-marked and no error is shown. At phase 1 the self-marking fallback applies as for other
   units.
-- [DECISION] The unseen-text short-answer unit (spec 008) is never self-marked, on either of its
+- [DECISION] The unseen-text and comparative short-answer units (specs 008 and 009) are never self-marked, on either of its
   two tries, and a try that cannot be marked does not end the question. If the marker fails (no
   key, a failed call, or an empty, cut-off, unparseable or incomplete reply after one retry), the
   student's answer stays locked on screen while the app retries; if marking still fails, the
@@ -361,7 +369,7 @@ but the README does not yet say so.
   in the box, Submit stays disabled until the next Sydney day, and the question waits at that step
   and is offered again first. These notices are plain status messages, not errors, and nothing
   else is shown. A student may still decline the retry, which records the first try's mark.
-- [DECISION] The unseen-text unit cannot start, resume, mark or save a quiz without the database:
+- [DECISION] The unseen-text and comparative units cannot start, resume, mark or save a quiz without the database:
   it draws from the student's results, offers an unfinished question first, reserves a daily-cap
   slot and stores each try. If the database cannot be read, the unit shows a notice and asks the
   student to try again; it MUST NOT guess the next question or a resumed step, MUST NOT mark an
@@ -419,11 +427,11 @@ block practice.
 - `VISION_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. Photo reads count
   against `LLM_DAILY_CAP` (one slot per question, no separate cap).
 - `ENGLISH_ADV_GRADING_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. It is
-  the model the unseen-text unit marks with (default `deepseek/deepseek-v4.1-flash`); it never
+  the model the unseen-text and comparative units mark with (default `deepseek/deepseek-v4.1-flash`); it never
   falls back to `GRADING_MODEL`. Each marked try counts one slot against `LLM_DAILY_CAP`,
   refunded if the marker fails.
 - `REMARK_MODEL` follows the same server-only rules as `OPENROUTER_API_KEY`. It is read only by
-  `scripts/**` for the offline re-mark of full-mark paragraph and unseen-text answers, which does
+  `scripts/**` for the offline re-mark of full-mark paragraph, unseen-text and comparative answers, which does
   not count against `LLM_DAILY_CAP`.
 - In production, missing auth or database config MUST fail closed (refuse to serve), never fall
   back to open access. In local development only, a documented dev-login MAY stand in for Google,
@@ -492,7 +500,7 @@ Every feature plan MUST satisfy:
   - illustrations are rendered only through `<img>`;
   - concept generation enforces its own cap;
   - the paragraph unit's later-part model text and marking notes never leave the server;
-  - the unseen-text unit's marking criteria, marking notes, model answer (before the discussion)
+  - the unseen-text and comparative units' marking criteria, marking notes, model answer (before the discussion)
     and visual descriptions never leave the server, and its stimulus images are served only
     through the authenticated route;
   - every question copied from a school paper shows its source (school, year, paper type,
@@ -506,9 +514,9 @@ Every feature plan MUST satisfy:
   - concept counts follow the rule: a wrong answer sets the count to the concept's clear-after
     number (3, or 2 for part tips), a correct answer takes 1 away, and the concept clears at 0;
   - the paragraph unit's capped-correction ending keeps the first-try mark and shows no error;
-  - the unseen-text unit's marker failure returns the editable box with no mark and no self-mark,
-    its daily-limit state disables Submit until the next Sydney day on both tries, and a skill's
-    concept count clears after 2 first tries;
+  - the unseen-text and comparative units' marker failure returns the editable box with no mark and no self-mark,
+    their daily-limit state disables Submit until the next Sydney day on both tries, and a skill's
+    concept count clears after 2 first tries (a shared skill's count is one across the two units);
   - the regenerate route rejects non-allowlisted emails;
   - an item that fails review twice is never shown to students.
   Other logic MAY have tests but is not required to.
@@ -535,4 +543,4 @@ These are documented deliberately. Do not "fix" them silently.
   be justified in the plan's Complexity Tracking table.
 - Compliance is reviewed in PRs against the Quality Gates above.
 
-**Version**: 2.15.1 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-19
+**Version**: 2.16.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-20

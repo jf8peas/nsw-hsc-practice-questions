@@ -111,3 +111,21 @@ describe("text pairs used by the unseen-text unit meet 4.5:1", () => {
     });
   }
 });
+
+// The comparative unit's tabs, chips and pairing note (spec 009 FR-035, SC-008): the pairs they put together, 4.5:1 for text.
+const COMPARATIVE_TEXT: Array<[string, string, string]> = [
+  ["ink-900", "white", "the selected tab, a chip, the pick title"],
+  ["ink-700", "white", "an unselected tab, the 'Always included' line"],
+  ["ink-900", "blue-50", "a chosen chip"],
+  ["ink-900", "blue-100", "the 'Picked' badge on a tab"],
+  ["ink-900", "surface-50", "the pairing note, a chip on hover"],
+  ["ink-700", "surface-100", "an unselected tab on hover"],
+];
+
+describe("text pairs used by the comparative unit's tabs and chips meet 4.5:1", () => {
+  for (const [fg, bg, use] of COMPARATIVE_TEXT) {
+    it(`${fg} on ${bg} (${use})`, () => {
+      expect(ratio(fg, bg)).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+});

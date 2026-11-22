@@ -3,7 +3,7 @@
 import type { Ref } from "react";
 
 import { PILL_LABEL, pillFor, retryCap, summaryLines, type Pill } from "@/lib/unseen/scoring";
-import { SKILL_IDS, skillById, type SkillId } from "@/lib/unseen/skills";
+import { skillById, type ComparativeSkillId } from "@/lib/unseen/skills";
 import type { SkillView, TryView, UnseenDiscussion, UnseenEnding } from "@/lib/unseen/types";
 
 // The result, retry and discussion surfaces of the unseen-text unit (spec 008 FR-018 to FR-021).
@@ -117,7 +117,7 @@ export function DeclineButton({ onDecline, busy }: { onDecline: () => void; busy
 }
 
 /** One card per skill missed on the first try: its name and its tip. No model text, ever. */
-export function TipCards({ missed }: { missed: SkillId[] }) {
+export function TipCards({ missed }: { missed: ComparativeSkillId[] }) {
   if (missed.length === 0) return null;
   return (
     <section className="un-tips" aria-labelledby="un-tips-title">
@@ -143,7 +143,7 @@ export function SkillPills({ try1, try2 }: { try1: TryView; try2: TryView | null
   const v2 = try2 ? (Object.fromEntries(try2.skills.map((s) => [s.id, { met: s.met, reason: s.reason }])) as never) : null;
   return (
     <ul className="un-pills" aria-label="Skills, first try and retry">
-      {SKILL_IDS.map((id) => {
+      {try1.skills.map((s) => s.id).map((id) => {
         const pill = pillFor(id, v1, v2);
         return (
           <li key={id} className="un-pill-row">
@@ -215,9 +215,12 @@ export function Discussion({
   ending,
   recorded,
   discussion,
+  pairingNote,
   onFinish,
   summaryRef,
 }: {
+  /** A choice question: says the model answer shows one possible pairing (spec 009 FR-015). */
+  pairingNote?: string;
   maxMarks: number;
   try1: TryView;
   try2: TryView | null;
@@ -248,6 +251,11 @@ export function Discussion({
       </div>
       <SkillPills try1={try1} try2={try2} />
       {deciding.mark >= maxMarks && deciding.goFurther && <GoFurther text={deciding.goFurther} />}
+      {pairingNote && (
+        <p className="un-pairing-note" role="note">
+          {pairingNote}
+        </p>
+      )}
       <FinalVsModel answer={final.text} answerWords={final.wordCount} discussion={discussion} />
       <SkillsAdded try1={try1} />
       {try2 && <FirstTryCollapsed try1={try1} maxMarks={maxMarks} />}

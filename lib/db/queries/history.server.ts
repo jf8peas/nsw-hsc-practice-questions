@@ -10,7 +10,8 @@ import { getQuestion } from "@/content";
 import { finalizeIfComplete } from "@/lib/attempts/complete.server";
 import { DbUnavailableError, dbCall, type Db } from "@/lib/db/index.server";
 import { attempts, results, type ParagraphVerdicts, type UnseenPhaseRow } from "@/lib/db/schema";
-import { unseenDiscussion } from "@/lib/grading.server";
+import { comparativeDiscussion, unseenDiscussion } from "@/lib/grading.server";
+import { getQuestion as questionOf } from "@/content";
 import type { SkillView } from "@/lib/unseen/types";
 import { tryViewFrom } from "@/lib/unseen/views";
 import { attemptPercent, bestLatest, trend, type Trend } from "@/lib/stats";
@@ -126,6 +127,10 @@ export interface UnseenAttemptDetail {
   recordedMark: number | null;
   /** Only when the question is final: the student has already seen it at the discussion. */
   modelAnswer: string | null;
+  /** spec 009: the texts the student picked on a comparative choice question (their own choice, shown at any step). */
+  pick: string[] | null;
+  /** spec 009: the texts the model answer covers, a choice question's and ONLY once final, with the model answer. */
+  pairing: string[] | null;
 }
 
 export interface AttemptDetail {
@@ -148,6 +153,9 @@ function paragraphPhaseOf(
 }
 
 function unseenDetailOf(row: UnseenPhaseRow): UnseenAttemptDetail {
+  // spec 009: a comparative question releases its pairing with the model answer, and only once final
+  const comparative = questionOf(row.questionId)?.question.type === "comparative" ? comparativeDiscussion(row.questionId) : null;
+  const discussion = comparative ?? unseenDiscussion(row.questionId);
   const t1 = tryViewFrom(row, 1)!;
   const t2 = tryViewFrom(row, 2);
   const pick = (t: NonNullable<typeof t1>): UnseenAttemptTry => ({
@@ -164,7 +172,9 @@ function unseenDetailOf(row: UnseenPhaseRow): UnseenAttemptDetail {
     ending: row.ending,
     recordedMark: row.recordedMark,
     // the model answer is released only for a final question (constitution Principle I, 2.15.0)
-    modelAnswer: row.status === "final" ? (unseenDiscussion(row.questionId)?.modelAnswer ?? null) : null,
+    modelAnswer: row.status === "final" ? (discussion?.modelAnswer ?? null) : null,
+    pick: row.pickedTextIds ?? null,
+    pairing: row.status === "final" ? (comparative?.pairing ?? null) : null,
   };
 }
 

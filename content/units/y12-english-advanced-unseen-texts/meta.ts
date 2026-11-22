@@ -13,6 +13,8 @@ export const meta: UnitMeta = {
   conceptsReady: true,
   // A quiz is one unanswered question, weighted toward your weakest text forms and uncleared skills (spec 008).
   draw: { kind: "unseen-weighted" },
+  // the seven skills are one count across this unit and the comparative unit (spec 009 FR-022)
+  sharesProgressWith: ["y12-english-advanced-comparative-texts"],
   guide: {
     title: "How unseen-text practice works",
     items: [

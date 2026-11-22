@@ -22,6 +22,10 @@ function attemptName(questionId: string | null | undefined): string | null {
     const text = found.unit.texts?.find((t) => t.id === q.textId);
     return `${paperLabel(q.paper)}${text ? ` · ${formLabel(text.form)}` : ""}`;
   }
+  if (found.question.type === "comparative") {
+    // a comparative attempt (spec 009) is named for its paper: "Abbotsleigh 2024 · Q5 · Compare"
+    return `${paperLabel(found.question.paper)} · Compare`;
+  }
   if (found.question.type !== "paragraph") return null;
   return `Essay ${found.question.essayNo} · ${PARTS[partKeyOf(found.question.part)].short}`;
 }

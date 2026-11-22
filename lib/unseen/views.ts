@@ -2,14 +2,17 @@
 // Pure: no I/O, no key. The model answer is passed in by the caller (it comes from
 // lib/grading.server.ts and only for a final row).
 
-import type { SkillVerdicts, UnseenPhaseRow } from "@/lib/db/schema";
-import { retryOffered } from "@/lib/unseen/scoring";
-import { SKILL_IDS } from "@/lib/unseen/skills";
+import type { AnySkillVerdicts, UnseenPhaseRow } from "@/lib/db/schema";
+import { retryOffered, skillsOf } from "@/lib/unseen/scoring";
 import type { SkillView, TryView, UnseenDiscussion, UnseenEnding, UnseenGradeResult } from "@/lib/unseen/types";
 import { countWords } from "@/lib/wordcount";
 
-export function skillViewsFrom(v: SkillVerdicts): SkillView[] {
-  return SKILL_IDS.map((id) => ({ id, met: v[id].met, reason: v[id].reason }));
+/** One view per skill the verdicts cover, in rubric order: seven for a spec 008 row, nine for a comparative one. */
+export function skillViewsFrom(v: AnySkillVerdicts): SkillView[] {
+  return skillsOf(v).map((id) => {
+    const verdict = v[id as keyof AnySkillVerdicts]!;
+    return { id, met: verdict.met, reason: verdict.reason };
+  });
 }
 
 export function tryViewFrom(row: UnseenPhaseRow, which: 1 | 2): TryView | null {

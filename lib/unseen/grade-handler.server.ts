@@ -11,17 +11,16 @@ import {
   insertUnseenPhase,
 } from "@/lib/db/queries/unseen-phases.server";
 import type { UnseenPhaseRow } from "@/lib/db/schema";
-import { markUnseen, unseenDiscussion } from "@/lib/grading.server";
+import { markUnseen, unseenDiscussion, type UnseenMarked } from "@/lib/grading.server";
 import { llmGradingConfigured } from "@/lib/openrouter.server";
 import { checkIpRateLimit, checkUserRateLimit } from "@/lib/ratelimit.server";
 import { buildReceipt, saveResult, type ResultFields } from "@/lib/results/save.server";
 import { nextSydneyMidnight, toSydneyIso } from "@/lib/sydney";
 import { attemptFieldsOf, type AttemptTokenPayload } from "@/lib/tokens.server";
-import type { UnseenQuestion } from "@/lib/types";
 import { limitsFor, MIN_WORDS } from "@/lib/unseen/limits";
 import { logUnseen, type UnseenOutcome } from "@/lib/unseen/log.server";
 import { conceptOutcomes, endingAfterFirstTry, metSkills, missedSkills, recordedMark, retryOffered } from "@/lib/unseen/scoring";
-import type { NotMarked, UnseenGradeResult } from "@/lib/unseen/types";
+import type { NotMarked } from "@/lib/unseen/types";
 import { gradeResultFrom } from "@/lib/unseen/views";
 import { refundAiSlot, reserveAiSlot, type AiSlot } from "@/lib/usage.server";
 import { countWords } from "@/lib/wordcount";
@@ -34,6 +33,39 @@ import { countWords } from "@/lib/wordcount";
 // the question at that step (constitution Principle VI, 2.15.0). Both outcomes answer `200 { notMarked }`.
 
 const MAX_ANSWER_CHARS = 6000;
+
+/** What the flow needs of a question: spec 008's and spec 009's questions both satisfy it. */
+export interface GradeQuestion {
+  id: string;
+  maxMarks: number;
+  suggestedWords: number;
+}
+
+/**
+ * The parts of the flow that differ between the Advanced English units (spec 009 research R6): how a
+ * try is marked, what the discussion and the result are made of, and any question-type checks (the
+ * comparative unit's pick). Everything else (word rules, database, phase order, rate limits, the
+ * daily-limit slot, refund, insert and finalise, the result row) is one shared core.
+ */
+export interface GradeFlow {
+  /**
+   * Checks that depend on the question type, run after the stored row is read and the phase is
+   * known, before any limit, slot or marker call. Returns a response to refuse with, or what the
+   * marker and the stored row need (the picked text ids).
+   */
+  check?(i: { body: Record<string, unknown>; row: UnseenPhaseRow | null; phase: 1 | 2 }): NextResponse | { pickedTextIds?: string[] };
+  mark(i: { questionId: string; answer: string; phase: 1 | 2; pickedTextIds?: string[] }): Promise<UnseenMarked | null>;
+  /** Key material for a FINAL row only; the caller has checked the row is final. */
+  discussion(questionId: string): unknown;
+  resultFrom(row: UnseenPhaseRow, discussion?: unknown): object;
+}
+
+/** Spec 008's flow: one text, seven skills. */
+export const unseenFlow: GradeFlow = {
+  mark: ({ questionId, answer, phase }) => markUnseen(questionId, answer, phase),
+  discussion: (questionId) => unseenDiscussion(questionId),
+  resultFrom: (row, discussion) => gradeResultFrom(row, discussion as ReturnType<typeof unseenDiscussion> | null | undefined),
+};
 
 const json = (body: unknown, status = 200, headers?: Record<string, string>) =>
   NextResponse.json(body, { status, headers });
@@ -75,7 +107,7 @@ export async function saveFinalAndRespond(i: {
   userId: string;
   attemptId: string;
   attempt: ReturnType<typeof attemptFieldsOf>;
-  result: UnseenGradeResult;
+  result: object;
   row: UnseenPhaseRow;
 }): Promise<NextResponse> {
   const fields = resultFieldsFor(i.row);
@@ -103,8 +135,9 @@ export async function handleUnseenGrade(
   user: { id: string },
   body: Record<string, unknown>,
   token: AttemptTokenPayload,
-  question: UnseenQuestion,
+  question: GradeQuestion,
   degraded: boolean,
+  flow: GradeFlow = unseenFlow,
 ): Promise<NextResponse> {
   const attemptId = String(body.attemptId ?? "");
   const questionId = question.id;
@@ -147,7 +180,7 @@ export async function handleUnseenGrade(
     log("db_unavailable", phase);
     return bad("temporarily_unavailable", 503);
   }
-  const stored = (r: UnseenPhaseRow) => gradeResultFrom(r, r.status === "final" ? unseenDiscussion(questionId) : null);
+  const stored = (r: UnseenPhaseRow) => flow.resultFrom(r, r.status === "final" ? flow.discussion(questionId) : null);
   if (phase === 2) {
     if (row?.status === "final") {
       log("already_answered", 2);
@@ -161,6 +194,10 @@ export async function handleUnseenGrade(
     log("already_answered", 1);
     return json({ error: "already_answered", result: stored(row) }, 409);
   }
+
+  // Question-type checks (the comparative unit's pick) before any limit, slot or marker call.
+  const extra = flow.check?.({ body, row, phase });
+  if (extra instanceof NextResponse) return extra;
 
   // Keep what the student typed, whatever happens next: a reload can never lose it.
   const saveDraft = () =>
@@ -204,7 +241,7 @@ export async function handleUnseenGrade(
   const t0 = Date.now();
   let marked;
   try {
-    marked = await markUnseen(questionId, answer, phase);
+    marked = await flow.mark({ questionId, answer, phase, pickedTextIds: extra?.pickedTextIds });
   } catch (error) {
     await giveBack(slot);
     throw error;
@@ -240,6 +277,7 @@ export async function handleUnseenGrade(
           try1GoFurther: marked.goFurther,
           try1PromptVersion: marked.promptVersion,
           try1Model: marked.model,
+          ...(extra?.pickedTextIds ? { pickedTextIds: extra.pickedTextIds } : {}),
         }),
       );
       if (!inserted.inserted) {
@@ -259,10 +297,10 @@ export async function handleUnseenGrade(
     if (!saved) return bad("temporarily_unavailable", 503);
     if (!ending) {
       await dbCall((db) => clearRewriteDraft(db, user.id, attemptId, questionId, 1)).catch(() => {});
-      return json({ result: gradeResultFrom(saved), saved: false, phaseSaved: true, attemptCompleted: false });
+      return json({ result: flow.resultFrom(saved), saved: false, phaseSaved: true, attemptCompleted: false });
     }
     await dbCall((db) => deleteRewriteDraft(db, user.id, attemptId, questionId)).catch(() => {});
-    return saveFinalAndRespond({ userId: user.id, attemptId, attempt, result: gradeResultFrom(saved, unseenDiscussion(questionId)), row: saved });
+    return saveFinalAndRespond({ userId: user.id, attemptId, attempt, result: flow.resultFrom(saved, flow.discussion(questionId)), row: saved });
   }
 
   // ---- try 2 (the retry): already capped at max - 1; the recorded mark is the higher try ---------
@@ -287,5 +325,5 @@ export async function handleUnseenGrade(
     return json({ error: "already_answered", result: existing ? stored(existing) : undefined }, 409);
   }
   await dbCall((db) => deleteRewriteDraft(db, user.id, attemptId, questionId)).catch(() => {});
-  return saveFinalAndRespond({ userId: user.id, attemptId, attempt, result: gradeResultFrom(ended, unseenDiscussion(questionId)), row: ended });
+  return saveFinalAndRespond({ userId: user.id, attemptId, attempt, result: flow.resultFrom(ended, flow.discussion(questionId)), row: ended });
 }

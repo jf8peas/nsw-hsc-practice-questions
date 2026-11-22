@@ -1,0 +1,14 @@
+[
+  {
+    "id": "compares-texts",
+    "name": "Compares the texts",
+    "tip": "Compare as you go, with words like whereas or by contrast, not only in a last sentence.",
+    "description": "Draws out similarities and differences in how the texts shape the idea, linked by comparative language."
+  },
+  {
+    "id": "treats-both-in-depth",
+    "name": "Treats both texts in depth",
+    "tip": "Give both texts equal depth: a technique and a detail from each, not one text closely and one briefly.",
+    "description": "Gives each text the same depth of analysis, with apt evidence from both."
+  }
+]

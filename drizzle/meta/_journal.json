@@ -57,6 +57,13 @@
       "when": 1795067097015,
       "tag": "0007_robust_tony_stark",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795163501742,
+      "tag": "0008_fresh_namora",
+      "breakpoints": true
     }
   ]
 }
