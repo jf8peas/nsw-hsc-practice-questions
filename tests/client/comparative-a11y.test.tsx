@@ -36,8 +36,9 @@ describe("targets and focus", () => {
 });
 
 describe("no sideways scrolling at 390 px", () => {
-  it("the tab strip scrolls inside its own box and the page never does; nothing sets a fixed width over 390 px", () => {
-    expect(body(".un-tablist")).toMatch(/overflow-x:\s*auto/);
+  it("the tab strip wraps onto more rows and never scrolls, nor does the page; nothing sets a fixed width over 390 px", () => {
+    expect(body(".un-tablist")).toMatch(/flex-wrap:\s*wrap/);
+    expect(body(".un-tablist")).not.toMatch(/overflow/);
     expect(body(".un-tablist")).toMatch(/max-width:\s*100%/);
     expect(body(".un-tabs")).toMatch(/min-width:\s*0/);
     for (const [, b] of rules) for (const m of b.matchAll(/(?:^|[;\s])width:\s*(\d+)px/g)) expect(Number(m[1])).toBeLessThanOrEqual(390);

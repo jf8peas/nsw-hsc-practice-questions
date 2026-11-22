@@ -2811,9 +2811,9 @@ mark.un-hl-on:focus-visible { outline: 2px solid var(--rd-blue-500); outline-off
 
 /* ---- the comparative unit (spec 009): the texts in tabs, never side by side, and the pick -------- */
 .un-tabs { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.un-tablist { display: flex; align-items: stretch; gap: 4px; overflow-x: auto; overflow-y: hidden; max-width: 100%; border-bottom: 2px solid var(--rd-border-100); scrollbar-width: thin; }
-.un-tab { flex: 0 0 auto; min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-bottom: 4px solid transparent; background: transparent; color: var(--rd-ink-700); font: 500 var(--rd-fs-md) var(--rd-font-sans); cursor: pointer; white-space: nowrap; }
-.un-tabwrap { flex: 0 0 auto; display: inline-flex; align-items: stretch; }
+.un-tablist { display: flex; align-items: stretch; gap: 4px; flex-wrap: wrap; max-width: 100%; border-bottom: 2px solid var(--rd-border-100); }
+.un-tab { flex: 0 1 auto; min-width: 0; text-align: left; min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-bottom: 4px solid transparent; background: transparent; color: var(--rd-ink-700); font: 500 var(--rd-fs-md) var(--rd-font-sans); cursor: pointer; }
+.un-tabwrap { flex: 0 1 auto; min-width: 0; max-width: 100%; display: inline-flex; align-items: stretch; }
 .un-tab-x { min-width: 44px; min-height: 44px; border: 0; border-bottom: 4px solid transparent; background: transparent; color: var(--rd-ink-700); font: 500 22px/1 var(--rd-font-sans); cursor: pointer; }
 .un-tab-x:hover { background: var(--rd-surface-100); color: var(--rd-ink-900); }
 .un-tab-x:focus-visible { outline: 2px solid var(--rd-blue-500); outline-offset: -2px; }
