@@ -5,7 +5,7 @@ export const meta: UnitMeta = {
   year: "Year 12",
   topic: "Topic 1: The Global Economy",
   type: "Writing Practice",
-  title: "Writing whole essays",
+  title: "Global Economy Essays",
   description:
     "Rehearse the whole extended response: plan it on a one-page scaffold, write 600 to 800 words, and get it marked out of 20 against the school's AT1 bands.",
   created: "2026-11-22",
