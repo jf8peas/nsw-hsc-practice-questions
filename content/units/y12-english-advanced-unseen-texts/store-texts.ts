@@ -1384,6 +1384,26 @@ export const storeTexts: UnseenText[] = [
     "hscChecked": "2026-11-19"
   },
   {
+    "id": "nsg25-t6",
+    "form": "prose-fiction",
+    "heading": "Text 6 – Prose fiction extract",
+    "title": "The Committed",
+    "author": "Viet Thanh Nguyen",
+    "sourceLine": "Extract from The Committed. As printed in the North Sydney Girls High School 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "We were the unwanted, the unneeded, and the unseen, invisible to all but ourselves. Less than nothing, we also saw nothing as we crouched blindly in the unlit belly of our ark, 150 of us sweating in a space not meant for us mammals but for the fish of the sea. With the waves driving us from side to side, we spoke in our native tongues. For some, this meant prayer; for others, curses. When a change in the motion of the waves shuttled our vessel more forcefully, one of the few sailors among us whispered, We're on the ocean now. After hours winding through river, estuary, and canal, we had departed our motherland.",
+        "The navigator opened the hatch and called us onto the deck of our ark, which the uncaring world denigrated as merely a boat. By the lopsided smile of the crescent moon, we saw ourselves alone on the surface of this watery world. For a moment we were giddy with delight, until the rippling ocean made us giddy in another way. All over the deck, and all over one another, we turned ourselves inside out, and even after nothing remained we continued to heave and gasp, wretched in our retching. In this manner we passed our first night on the sea, shivering with the ocean breezes.",
+        "Dawn broke, and in every direction we saw only the infinitely receding horizon. The day was hot, with no shade and no respite, with nothing to eat but a mouthful and nothing to drink but a spoonful, the length of our journey unknown and our rations limited. But even eating so little, we still left our human traces all over the deck and in the hold, and were by evening awash in our own filth.",
+        "And it struck us all then, the answer to humanity's eternal question of Why?",
+        "It was, and is, simply this: Why not?",
+        "We, the unwanted, wanted so much. We wanted food, water, and parasols, although umbrellas would be fine. We wanted clean clothes, baths, and toilets, even of the squatting kind, since squatting on land was safer and less embarrassing than clinging to the bulwark of a rolling boat with one's posterior hanging over the edge. We wanted rain, clouds, and dolphins. We wanted it to be cooler during the hot day and warmer during the freezing night. We wanted an estimated time of arrival. We wanted not to be dead on arrival. We wanted to be rescued from being barbecued by the unrelenting sun. We wanted television, movies, music, anything with which to pass the time. We wanted love, peace, and justice, except for our enemies, whom we wanted to burn in Hell, preferably for eternity. We wanted independence and freedom, except for the communists, who should all be sent to reeducation, preferably for life. We wanted benevolent leaders who represented the people, by which we meant us and not them, whoever they were. We wanted to live in a society of equality, although if we had to settle for owning more than our neighbor, that would be fine. We wanted a revolution that would overturn the revolution we had just lived through. In sum, we wanted to want for nothing!"
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
     "id": "nsg24-t1",
     "form": "visual",
     "heading": "Text 1 – Image",
@@ -1487,6 +1507,31 @@ export const storeTexts: UnseenText[] = [
       }
     ],
     "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "nsg24-t5",
+    "form": "personal-essay",
+    "heading": "Text 5 – Memoir extract",
+    "title": "I’d Rather Not",
+    "author": "Robert Skinner",
+    "sourceLine": "Extract from I'd Rather Not. As printed in the North Sydney Girls High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "I retired when I was 28 years old, but ran out of money the same afternoon, so I caught a bus to the dole office.",
+        "At the Centrelink office I learnt that it was no longer called ‘the dole’. Some overpaid marketing agency had rebranded it ‘Newstart’. The walls were covered with inspirational posters (‘When opportunity knocks, open the door!’) alongside more practical advice, telling us not to drink alcohol before job interviews. Fake nails clacked away at keyboards. Someone called my name, and I followed him into a small room. I hadn’t even sat down before he started trying to sign me up for forklift-driving jobs on the other side of town.",
+        "‘Whoa,’ I said. ‘This isn’t the kind of Newstart I had in mind at all.’",
+        "I had only just moved to Melbourne. It was a place filled with magic and possibility. I wanted to meet interesting people at rooftop bars. I wanted to read Russian novels. What I didn’t want was a pesky job, but try telling that to your dole officer.",
+        "I held in my lap my talismanic copy of War and Peace. I had vowed not to get a job until I finished reading it.",
+        "What followed was a series of long and glorious autumn days. I wandered through parks, winked at old ladies and had long boozy dinners in friends’ backyards.",
+        "My uncle was in town one day, and I explained that, what with the demands of War and Peace and everything else going on, I scarcely had time for a job.",
+        "‘Well, it’s a question of priorities, Robbie,’ he said. We looked at each other and I hit the table with my fist. ‘Exactly.’",
+        "Then, through a series of clerical errors and misunderstandings, I accidentally got a job as a dishwasher.",
+        "Every time I start a new dishwashing job, I can’t imagine why I ever quit. It’s exhilarating. You feel like a general marshalling troops. Waiters pile up coffee cups and teaspoons on one side, chefs drop hot pots and pans into the sink on the other, and you’re in the middle of it all, suds flying. At the end of a shift you have that physical tiredness that feels almost like a life well lived. On your lunch break, if you get one, you send out group text messages: ‘Friends! You were right! Maybe this is the answer!’",
+        "And then, after two or three shifts, you start to remember. The sinks are always too low, so you stoop all day, or all night, and wake up in the mornings, or afternoons, with a cracking headache. You get covered face to feet in grime. The kitchens are hot, cramped and almost always an insufferable boys’ club. If you’re new they’ll send you off to fetch a made-up item, like a ‘rice peeler’ or a ‘bucket of steam’. (I would pretend to fall for that one and sit in the storage room reading a book until someone came looking for me.) What sort of answer is this to the question of what to do with our short time on Planet Earth? Sometimes I would find myself standing at the sink with my hands dangling in the dirty water, thinking, This is it. I can’t go on. It’s just too pointless. And dishwashing is one of the important jobs! Imagine how the consultants feel! As soon as I smelt spring in the air, I quit the dishwashing and raced back to the dole office."
+      ]
+    },
+    "hscChecked": "2026-11-22"
   },
   {
     "id": "nsb25-t1",
@@ -2098,6 +2143,29 @@ export const storeTexts: UnseenText[] = [
       ]
     },
     "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "jr24-t5",
+    "form": "prose-fiction",
+    "heading": "Text 5 – Short Story Extract",
+    "title": "Identities",
+    "author": "W.D. Valgardson",
+    "sourceLine": "Extract from Identities. As printed in the James Ruse Agricultural High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Normally, he goes clean-shaven into the world, but the promise of a Saturday liquid with sunshine draws him first from his study to the backyard, from there to his front lawn. The smell of burning leaves stirs the memories of childhood – wakes in him a desire to temporarily abandon the twice-cut yards and hundred-year-old oaks.",
+        "He does not hurry for he has no destination. He meanders, instead, through the neat suburban labyrinth of cul-de-sacs, bays and circles, losing and finding himself endlessly. Becoming lost is made all the easier because the houses repeat themselves with superficial variations. There grows within him, however, a vague unease with symmetry, with nothing left to chance, no ragged edges, no unkempt vacant lots, no houses rendered unique by necessity and indifference.",
+        "The houses all face the sun. They have no artificial divisions. There is room enough for everyone. Now, as he passes grey stone gates, the yards are all proscribed by stiff picket fences and, quickly, a certain untidiness creeps in: a fragment of glass, a chocolate bar wrapper, a plastic horse, cracked sidewalks with ridges of stiff grass. Although he has on blue jeans – matching pants and jacket made in Paris – he is driving a grey Mercedes Benz. Gangs of young men follow the car with their unblinking eyes. The young men stand and lean in tired, watchful knots close to phone booths and seedy-looking grocery stores. Their slick hair glistens. Their leather jackets gleam with studs. Eagles, tigers, wolves and serpents ride their backs.",
+        "The houses are squat, as though they have been taller and have, slowly, sunk into the ground. Each has a band of dirt around the bottom. Cars jam the narrow streets and he worries that he might strike the unkempt children who dart back and forth like startled fish.",
+        "Streetlights come on. He takes them as a signal to return the way he came, but it has been a reckless, haphazard path. Retracing it is impossible. He is overtaken by sudden guilt. He has left no message for his wife. Time has run away with him. His wife, he realizes, will have returned from bridge, his children gathered for supper.",
+        "He decides to call the next time he sees a store or phone booth. So intent is he upon the future that he dangerously ignores the present and does not notice the police car, concealed in the shadows of a side street, nose out and follow him.",
+        "Ahead, there is a small store with windows covered in hand painted signs and vertical metal bars. On the edge of the light, three young men and a girl slouch. One of them has a beard and, in spite of the advancing darkness, wears sunglasses. He has on a fringed leather vest. In spite of his car, he hopes his day-old beard which he strokes upward with the heel of his hand, will, when combined with his clothes, provide immunity. He slips his wallet into his shirt pocket, does up the metal buttons on his jacket and slips a ten dollar bill into his back pocket. Recalling a television show, he decides that if he is accosted, he will say that the ten is all he’s got, that he stole the car, and ask them if they know a buyer.",
+        "He eases out of the car, edges nervously along the fender and past the grille. The store window illuminates the sidewalk like a stage. Beyond the light, everything is obscured by darkness. He is so intent upon the three men and the girl that he does not notice the police car drift against the curb, nor the officer who is advancing with a pistol in his hand.",
+        "When the officer, who is inexperienced, who is nervous because of the neighbourhood, who is suspicious because of the car and because he has been trained to see an unshaven man in blue jeans as a potential thief and not as a probable owner, orders him to halt, he is surprised. When he turns part way around and recognizes the uniform, he does not feel fear but relief. Instinctively relaxing, certain of his safety, in the last voluntary movement of his life, he reaches his hand not in the air as he was ordered to, but toward his wallet for his identity."
+      ]
+    },
+    "hscChecked": "2026-11-22"
   },
   {
     "id": "gw25-t1",
@@ -2951,6 +3019,34 @@ export const storeTexts: UnseenText[] = [
     "hscChecked": "2026-11-19"
   },
   {
+    "id": "cb24-t5",
+    "form": "personal-essay",
+    "heading": "Text 5 – Memoir extract",
+    "title": "Belonging: Memories and Meanderings in Middle Europe",
+    "author": "Roberta Esbitt",
+    "sourceLine": "Extract from Belonging: Memories and Meanderings in Middle Europe. As printed in the Caringbah High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "We’re all part of a family, and often more than one. Even without kids, I turn up on several family trees, albeit as a cryptic and peripheral mention. But what bare bones family trees show: only dry lineage, not the hot pressure of relations. Those thin black lines connecting partners and progeny give nothing away. Better to map circles of influence, radiating colours and casting shadows, with bold connections that pulsate with anger and laughter, and spidery traces that hint at longing and regret carried across generations.",
+        "Memories. Jack and I marvel at how our disparate trajectories brought us together, but though we come from opposite sides of the globe, our backstories are not dissimilar. Refugees from Old World to New, both families emanated from the Austro-Hungarian Empire, from either side of the Alps. We share a cuisine, a taste for goulash, sauerkraut, onions in our potato salad, caraway seeds, fat dill pickles and plenty of mustard. But while both families fled their homelands, mine steamed across the ocean to America in first-class cabins, en masse, just before World War II. They enjoyed the luxury of selecting their asylum from a position of advantage and foresight. Jack’s parents took a different route, an impromptu escape on foot across a mountainous border one bitter winter’s night. Young survivors, they embarked on the long voyage to Australia in steerage, leaving behind parents and siblings in a decimated land.",
+        "We are off to Europe for a two-month honeymoon, Jack and I. This is his first trip to the place where I spent half my life. But we are both paying homage to the past: I to revisit old haunts, and he to fulfil his dying father’s wish for him to seek out their ancestral home, abandoned since the war. He expresses supreme indifference to the family there that he has never met. It will be strange if he resembles them, to see his eyes twinkling above the prominent nose of some uncle, or his smile beaming from the wrinkled visage of a great-aunt. A mealtime assembly of relatives might reveal the particular shape of his fingers as common currency: reaching for pieces of bread, gesturing in midair, a multitude of digits all shaped like his. Perhaps it is his sense of uniqueness, so dear to his heart, that he is reluctant to relinquish. I expect his detachment will be tested.",
+        "I left my own family behind in a puff of dust half a lifetime ago, but that was my decision; Jack’s choice was made for him. His parents constructed the ultimate nuclear unit, cutting off contact with the clan and hiding the portals to their culture and language. It is not uncommon to turn one’s back on the mother country, as the fastest way to assimilate is to have no other option. Without the sharing of experience or memories, the family left behind was reduced to a biological construct, a coincidence of blood lines, leaving Jack a distant and disinterested stranger, content in the freedom of not belonging. I am a lone addition to Jack’s family, the last dinosaur of a line almost extinct. But I share with him my valuable dowry of family folklore, my Middle European ghosts, in an attempt to make up for what his parents excised."
+      ]
+    },
+    "footnotes": [
+      {
+        "mark": "",
+        "text": "progeny: a descendant or the descendants of a person, animal, or plant; offspring"
+      },
+      {
+        "mark": "",
+        "text": "steerage: the part of a ship providing the cheapest accommodation for passengers"
+      }
+    ],
+    "hscChecked": "2026-11-22"
+  },
+  {
     "id": "bk26-t1",
     "form": "visual",
     "heading": "Text 1 – Image",
@@ -3019,6 +3115,28 @@ export const storeTexts: UnseenText[] = [
       ]
     },
     "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "bk26-t6",
+    "form": "non-fiction",
+    "heading": "Text 6 — Nonfiction Extract",
+    "title": "The God We Made: The Threat and Promise of Artificial Intelligence",
+    "author": "Anna Goldsworthy",
+    "sourceLine": "Essay adapted from the original article printed in the Quarterly Essay, #102. As printed in the Barker College 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "My children are early adopters, as children tend to be. Once I was an early adopter too – gleefully manoeuvring the neighbourhood’s first mouse for my father’s Macintosh 128K – but now I am the humiliated Gen X-er, patronised by my children as I fumble over my phone.",
+        "There are benefits to life alongside the tech-savvy. At thirteen, O is the best cook in the family, largely self-taught through YouTube. It is difficult to overstate my gratitude upon stepping into the kitchen after a frosty ride home to discover an eggplant parmigiana in the oven.",
+        "“Thank you for a really scrumptious meal,” I say, once we have finished eating, but this does not seem enough. That caramelised eggplant! That rich and fragrant tomato sauce! “It really enhances my quality of life.”",
+        "My sixteen-year-old, R, swivels his head towards me and grins. “You sound like an AI.” He assumes the ingratiating tone of an AI-generated podcast: “Thank you for a truly scrumptious meal! My satisfaction levels are currently elevated!”",
+        "I try to keep up, but it soon becomes clear that I cannot. While I have to pause to generate sentences, he unspools seamless ribbons of AI-speak: “I observed a harmonious synergy between tomato and eggplant – a collaboration both robust and gratifying!”",
+        "Our arguments were no longer emotional; instead, they had become quickfire exchanges of data, systematic deconstructions of each other’s positions. If it were possible for R to transmit his argument instantaneously, I suspected he would. Instead, he sequenced it into language and then delivered it at an almost monotonal velocity.",
+        "Over previous generations, people tended to live recognisable versions of their parents’ lives, punctuated by technological inflection points: the printing press, steam power, electricity. I remember, as a child in the ’80s, feeling a kind of vertigo at the speed of technological development – videos, personal computers, microwave ovens – but in fact the structure of my life still resembled that of my parents.",
+        "Our “digital native” children have been born into a different reality altogether. The Pied Piper came for them early, summoning them into his Snapchat cave. They were left largely undefended, because their parents were similarly enchanted. But the coming tsunami is of a different order of magnitude. Arguing with my children can feel like arguing with the future. They are forever upgrading, just like AI."
+      ]
+    },
+    "hscChecked": "2026-11-22"
   },
   {
     "id": "bk23-t1",
@@ -3596,6 +3714,25 @@ export const storeTexts: UnseenText[] = [
       "alt": "Text 4 – Prose fiction extracts: two facing book pages, one of text and one of black"
     },
     "hscChecked": "2026-11-19"
+  },
+  {
+    "id": "ab23-t5",
+    "form": "non-fiction",
+    "heading": "Text 5 – Persuasive extract",
+    "title": "Ten Years on From the Misogyny Speech – Not Now, Not Ever",
+    "author": "Julia Gillard",
+    "sourceLine": "From Ten Years on From the Misogyny Speech – Not Now, Not Ever. As printed in the Abbotsleigh 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Misogyny is both as old as time and modern as a tweet. It continues to pervade workplaces, influence media reporting and shape politics. Misogyny still appears in its traditional forms, as well as shapeshifting as technology and social norms change. Misogyny allies itself with racism and ither forms of discrimination, so that women who are already facing prejudice and exclusion endure more of it.",
+        "Misogyny is the fist that strikes a woman’s body and the belief that women’s bodies are not their own. For women, living with misogyny is like walking through the world being forced to carry an unwanted burden. We are so used to this baggage, most of the time we don’t even recognise how heavy it is. Women everywhere are weighed down by misogyny, but the degree of gender inequality women confront varies from nation to nation, community to community. For billions of women, poverty and the denial of basic rights, such as getting to go to school, cement inequality and rob them of choices and opportunities. A vital part of our feminist mission is showing solidarity with and giving support to these women, many of whom are courageously campaigning for change.",
+        "Billions of other women today have more options available to them than their mothers or grandmothers could have imagined in their wildest dreams, yet they do not live in a gender equal world. Instead, when looking up, they see a glass ceiling, and at the same time the floor they stand on feels wobbly because hard-won advances, including reproductive rights, can be taken away. In the face of all this, do words matter? A speech? A book? A shout of solidarity? Are words poor weapons in the face of a phenomenon so ubiquitous and insidious? My answer to that is a resounding no. Words can and do change the world. Looking back since the misogyny speech, the biggest thing that stands out to me is the sea change in how we see and describe the world. This is what has been achieved through the #MeToo movement, the revival of women’s history and the identification of gender barriers in work, politics, and civil society.",
+        "We see the world differently and we use our words to describe the manifest gender inequality. This is a vital process, because the more we analyse, categorise and describe misogyny and its impacts, the easier it becomes to stand up to it now and ultimately defeat it.",
+        "Misogyny will end when we all come together to call it out and then demand immediate and effective action to eradicate it. A marrying of words, minds and decisive campaigning, all fuelled by impatient energy, because the world should already be better than it is. I want for everyone on earth the sense of openness and inclusion that would come is gender inequality was something that only existed in history books. And we can get there together. Obviously, there will be carping critics and curmudgeons who will want to stand in our way. But we don’t have to listen to any lectures from them. Not now, not ever."
+      ]
+    },
+    "hscChecked": "2026-11-22"
   },
   {
     "id": "ab24-t5",

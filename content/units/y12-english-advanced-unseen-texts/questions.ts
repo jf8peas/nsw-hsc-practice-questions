@@ -1127,6 +1127,31 @@ export const questions: Question[] = [
     "source": "North Sydney Girls 2025 Trial, Q4"
   },
   {
+    "id": "y12-english-advanced-unseen-texts.nsg25-q5",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg25-t6",
+    "verb": "evaluate",
+    "prompt": "Evaluate how Nguyen humanises the unwanted.",
+    "maxMarks": 5,
+    "suggestedWords": 588,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2025 Trial, Q5"
+  },
+  {
     "id": "y12-english-advanced-unseen-texts.nsg24-q1",
     "type": "unseen",
     "group": "unseen",
@@ -1225,6 +1250,31 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-apt-evidence"
     ],
     "source": "North Sydney Girls 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.nsg24-q5",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "nsg24-t5",
+    "verb": "evaluate",
+    "prompt": "Evaluate how Skinner offers insights into how to live a purposeful life.",
+    "maxMarks": 5,
+    "suggestedWords": 588,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "North Sydney Girls 2024 Trial, Q5"
   },
   {
     "id": "y12-english-advanced-unseen-texts.nsb25-q1",
@@ -1725,6 +1775,31 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-apt-evidence"
     ],
     "source": "James Ruse 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.jr24-q5",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "jr24-t5",
+    "verb": "how",
+    "prompt": "How does Valgardson use contrast to illuminate how human qualities and emotions are shaped by an individual's experiences?",
+    "maxMarks": 6,
+    "suggestedWords": 492,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "James Ruse 2024 Trial, Q5"
   },
   {
     "id": "y12-english-advanced-unseen-texts.gw25-q1",
@@ -2402,6 +2477,31 @@ export const questions: Question[] = [
     "source": "Caringbah 2024 Trial, Q4"
   },
   {
+    "id": "y12-english-advanced-unseen-texts.cb24-q5",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "cb24-t5",
+    "verb": "evaluate",
+    "prompt": "`Despite our differences, we are united through shared experiences.'\nEvaluate how this notion is represented in Text 5.",
+    "maxMarks": 5,
+    "suggestedWords": 432,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Caringbah High School",
+      "short": "Caringbah",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Caringbah 2024 Trial, Q5"
+  },
+  {
     "id": "y12-english-advanced-unseen-texts.bk26-q1",
     "type": "unseen",
     "group": "unseen",
@@ -2475,6 +2575,31 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-apt-evidence"
     ],
     "source": "Barker 2026 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.bk26-q5",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "bk26-t6",
+    "verb": "how",
+    "prompt": "How does Goldsworthy explore technology’s impact on human relationships?",
+    "maxMarks": 4,
+    "suggestedWords": 240,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-answers-question",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Barker 2026 Trial, Q5"
   },
   {
     "id": "y12-english-advanced-unseen-texts.bk23-q1",
@@ -2975,5 +3100,30 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-apt-evidence"
     ],
     "source": "Abbotsleigh 2023 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-unseen-texts.ab23-q5",
+    "type": "unseen",
+    "group": "unseen",
+    "textId": "ab23-t5",
+    "verb": "discuss",
+    "prompt": "Discuss how Julia Gillard makes connections with the reader and wider world by using both reflective and persuasive devices to represent the courageousness of women.",
+    "maxMarks": 6,
+    "suggestedWords": 444,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-unseen-texts.c-directive-verb",
+      "y12-english-advanced-unseen-texts.c-technique-effect",
+      "y12-english-advanced-unseen-texts.c-apt-evidence"
+    ],
+    "source": "Abbotsleigh 2023 Trial, Q5"
   }
 ] as Question[];
