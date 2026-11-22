@@ -7,6 +7,260 @@ import type { Question } from "@/lib/types";
 
 export const questions: Question[] = [
   {
+    "id": "y12-english-advanced-comparative-texts.ab24-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "ab24-t5",
+      "ab24-t1",
+      "ab24-t2",
+      "ab24-t3",
+      "ab24-t4"
+    ],
+    "choice": {
+      "fixed": [
+        "ab24-t5"
+      ],
+      "from": [
+        "ab24-t1",
+        "ab24-t2",
+        "ab24-t3",
+        "ab24-t4"
+      ],
+      "pick": 1
+    },
+    "verb": "compare",
+    "prompt": "Compare how composers represent the way in which unique environments shape human behaviour.\n\nIn your response, make detailed reference to Text 5 AND Text 1 OR 2 OR 3 OR 4.",
+    "maxMarks": 6,
+    "suggestedWords": 444,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Abbotsleigh 2024 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.ab25-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "ab25-t5",
+      "ab25-t1",
+      "ab25-t2",
+      "ab25-t3",
+      "ab25-t4"
+    ],
+    "choice": {
+      "fixed": [
+        "ab25-t5"
+      ],
+      "from": [
+        "ab25-t1",
+        "ab25-t2",
+        "ab25-t3",
+        "ab25-t4"
+      ],
+      "pick": 1
+    },
+    "verb": "compare",
+    "prompt": "Compare how composers provide insight into the way humans connect with places and people.\n\nIn your response, refer to Text 5 AND EITHER Text 1 OR 2 OR 3 OR 4.",
+    "maxMarks": 6,
+    "suggestedWords": 456,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Abbotsleigh",
+      "short": "Abbotsleigh",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Abbotsleigh 2025 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.as23-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "as23-t5",
+      "as23-t6"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare how Chow and Hari represent the relationship between humans and technology.",
+    "maxMarks": 6,
+    "suggestedWords": 576,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Ascham School",
+      "short": "Ascham",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Ascham 2023 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.bk23-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "bk23-t5",
+      "bk23-t6"
+    ],
+    "choice": null,
+    "verb": "explore",
+    "prompt": "Explore how these two texts convey the disastrous effects of complacency.",
+    "maxMarks": 6,
+    "suggestedWords": 540,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Barker 2023 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.bk26-q4",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "bk26-t4",
+      "bk26-t5"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare how Text 4 and Text 5 explore the complex relationship between individuals and place.",
+    "maxMarks": 5,
+    "suggestedWords": 528,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Barker College",
+      "short": "Barker",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Barker 2026 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.ct23-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "ct23-t4",
+      "ct23-t1",
+      "ct23-t2",
+      "ct23-t3"
+    ],
+    "choice": {
+      "fixed": [
+        "ct23-t4"
+      ],
+      "from": [
+        "ct23-t1",
+        "ct23-t2",
+        "ct23-t3"
+      ],
+      "pick": 1
+    },
+    "verb": "evaluate",
+    "prompt": "Texts 1, 2, 3 and 4\n\nEvaluate the significance of connection explored in the prose fiction extract and ONE other text.",
+    "maxMarks": 5,
+    "suggestedWords": 528,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2023,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Cherrybrook Tech 2023 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.ct24-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "ct24-t1",
+      "ct24-t2",
+      "ct24-t3",
+      "ct24-t4"
+    ],
+    "choice": {
+      "fixed": [],
+      "from": [
+        "ct24-t1",
+        "ct24-t2",
+        "ct24-t3",
+        "ct24-t4"
+      ],
+      "pick": 2
+    },
+    "verb": "compare",
+    "prompt": "Texts 1, 2, 3 and 4\n\nCompare how two texts have represented what we value in our contemporary world.",
+    "maxMarks": 5,
+    "suggestedWords": 516,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Cherrybrook Technology High School",
+      "short": "Cherrybrook Tech",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Cherrybrook Tech 2024 Trial, Q5"
+  },
+  {
     "id": "y12-english-advanced-comparative-texts.db26-q5",
     "type": "comparative",
     "group": "comparative",
@@ -74,6 +328,49 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-technique-effect"
     ],
     "source": "Fort St 2023 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.fs24-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "fs24-t5",
+      "fs24-t1",
+      "fs24-t2",
+      "fs24-t3",
+      "fs24-t4"
+    ],
+    "choice": {
+      "fixed": [
+        "fs24-t5"
+      ],
+      "from": [
+        "fs24-t1",
+        "fs24-t2",
+        "fs24-t3",
+        "fs24-t4"
+      ],
+      "pick": 1
+    },
+    "verb": "compare",
+    "prompt": "Using the Image (Text 5), and ONE of the other texts provided, compare and contrast the depiction of a human experience in these texts.\n\n(You may make reference to the same evidence you employed in previous responses.)",
+    "maxMarks": 5,
+    "suggestedWords": 372,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Fort Street High School",
+      "short": "Fort St",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Fort St 2024 Trial, Q5"
   },
   {
     "id": "y12-english-advanced-comparative-texts.fs25-q5",
@@ -159,6 +456,261 @@ export const questions: Question[] = [
     "source": "Fort St 2026 Trial, Q5"
   },
   {
+    "id": "y12-english-advanced-comparative-texts.jr26-q4",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "jr26-t4",
+      "jr26-t5"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare how Text 4 and Text 5 represent ideas about perspectives on human experiences.",
+    "maxMarks": 6,
+    "suggestedWords": 480,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "James Ruse Agricultural High School",
+      "short": "James Ruse",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "James Ruse 2026 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.km25-q2",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "km25-t1",
+      "km25-t2"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare how the composers of Text 1 and Text 2 use their forms to represent superficiality as a human quality.",
+    "maxMarks": 7,
+    "suggestedWords": 720,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Kambala 2025 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.km26-q2",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "km26-t2",
+      "km26-t3"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare how Text 2 and Text 3 represent the relationship between deception and authority.",
+    "maxMarks": 5,
+    "suggestedWords": 552,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Kambala",
+      "short": "Kambala",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Kambala 2026 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.kx25-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "kx25-t5",
+      "kx25-t1",
+      "kx25-t2",
+      "kx25-t3",
+      "kx25-t4"
+    ],
+    "choice": {
+      "fixed": [
+        "kx25-t5"
+      ],
+      "from": [
+        "kx25-t1",
+        "kx25-t2",
+        "kx25-t3",
+        "kx25-t4"
+      ],
+      "pick": 1
+    },
+    "verb": "compare",
+    "prompt": "Text 5 – prose fiction\n\nCompare how Text 5 and ONE OTHER TEXT of your own choosing illustrate the complexity of human motivations and desires.",
+    "maxMarks": 6,
+    "suggestedWords": 516,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Knox Grammar School",
+      "short": "Knox",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Knox 2025 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.nsb25-q3",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "nsb25-t3",
+      "nsb25-t4"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare how Text 3 - Memoir Extract and Text 4 - Fiction Extract represents the power of perspective to shape the human experience.",
+    "maxMarks": 7,
+    "suggestedWords": 252,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Boys High School",
+      "short": "North Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Boys 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.nsg25-q3",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "nsg25-t3",
+      "nsg25-t4"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare the ways that Text 3 and Text 4 convey the impact of prejudice.",
+    "maxMarks": 4,
+    "suggestedWords": 276,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 3
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Girls 2025 Trial, Q3"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.nsg26-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "nsg26-t5",
+      "nsg26-t4"
+    ],
+    "choice": null,
+    "verb": "evaluate",
+    "prompt": "Text 5 – Prose fiction extract and Text 4 - Prose fiction extract\n\nEvaluate how Bajani and Lohrey portray the complexity of human experience.",
+    "maxMarks": 6,
+    "suggestedWords": 480,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "North Sydney Girls High School",
+      "short": "North Sydney Girls",
+      "year": 2026,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "North Sydney Girls 2026 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.py24-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "py24-t2",
+      "py24-t3",
+      "py24-t4"
+    ],
+    "choice": {
+      "fixed": [],
+      "from": [
+        "py24-t2",
+        "py24-t3",
+        "py24-t4"
+      ],
+      "pick": 2
+    },
+    "verb": "compare",
+    "prompt": "Choose two texts from the Stimulus Booklet – either Text 2, 3 and/or 4 – and compare how they represent the power of the individual human experience.",
+    "maxMarks": 6,
+    "suggestedWords": 456,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Pymble Ladies' College",
+      "short": "Pymble",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Pymble 2024 Trial, Q5"
+  },
+  {
     "id": "y12-english-advanced-comparative-texts.py25-q5",
     "type": "comparative",
     "group": "comparative",
@@ -227,6 +779,231 @@ export const questions: Question[] = [
       "y12-english-advanced-unseen-texts.c-human-experience"
     ],
     "source": "Roseville 2026 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.sh24-q2",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "sh24-t2",
+      "sh24-t1",
+      "sh24-t3",
+      "sh24-t4"
+    ],
+    "choice": {
+      "fixed": [
+        "sh24-t2"
+      ],
+      "from": [
+        "sh24-t1",
+        "sh24-t3",
+        "sh24-t4"
+      ],
+      "pick": 1
+    },
+    "verb": "assess",
+    "prompt": "To what extent have TWO composers offered insights about the importance of a positive mindset? In your response, you must refer to Text 2 and ONE other text.",
+    "maxMarks": 8,
+    "suggestedWords": 660,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Shore",
+      "short": "Shore",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 2
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Shore 2024 Trial, Q2"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.sg24-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "sg24-t1",
+      "sg24-t2",
+      "sg24-t3",
+      "sg24-t4"
+    ],
+    "choice": {
+      "fixed": [],
+      "from": [
+        "sg24-t1",
+        "sg24-t2",
+        "sg24-t3",
+        "sg24-t4"
+      ],
+      "pick": 2
+    },
+    "verb": "compare",
+    "prompt": "Text 1, Text 2, Text 3 and Text 4 (choose two)\n\nCompare how two texts ignite new ideas and invite the responder to see the world differently.",
+    "maxMarks": 6,
+    "suggestedWords": 576,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "St George Girls High School",
+      "short": "St George Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "St George Girls 2024 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.sb24-q4",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "sb24-t4",
+      "sb24-t5"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare the ways Baltasar and Winterson have represented the complex emotions associated with alienation.",
+    "maxMarks": 8,
+    "suggestedWords": 528,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 4
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Boys 2024 Trial, Q4"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.sb25-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "sb25-t5",
+      "sb25-t1",
+      "sb25-t2",
+      "sb25-t3",
+      "sb25-t4"
+    ],
+    "choice": {
+      "fixed": [
+        "sb25-t5"
+      ],
+      "from": [
+        "sb25-t1",
+        "sb25-t2",
+        "sb25-t3",
+        "sb25-t4"
+      ],
+      "pick": 1
+    },
+    "verb": "compare",
+    "prompt": "Text 5 – Prose Fiction Extract and ONE Other Text\n\nCompare how Tara June Winch and ONE other text depict the interplay between the individual and their environment.",
+    "maxMarks": 6,
+    "suggestedWords": 708,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Boys High School",
+      "short": "Sydney Boys",
+      "year": 2025,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Boys 2025 Trial, Q5"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.sgh24-q1",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "sgh24-t1",
+      "sgh24-t2"
+    ],
+    "choice": null,
+    "verb": "compare",
+    "prompt": "Compare how the emotions arising from childhood memories are represented in Text 1 Poem and Text 2 Prose Fiction extract.",
+    "maxMarks": 6,
+    "suggestedWords": 540,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Girls High School",
+      "short": "Sydney Girls",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 1
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Girls 2024 Trial, Q1"
+  },
+  {
+    "id": "y12-english-advanced-comparative-texts.sgr24-q5",
+    "type": "comparative",
+    "group": "comparative",
+    "textIds": [
+      "sgr24-t5",
+      "sgr24-t1",
+      "sgr24-t2",
+      "sgr24-t3",
+      "sgr24-t4"
+    ],
+    "choice": {
+      "fixed": [
+        "sgr24-t5"
+      ],
+      "from": [
+        "sgr24-t1",
+        "sgr24-t2",
+        "sgr24-t3",
+        "sgr24-t4"
+      ],
+      "pick": 1
+    },
+    "verb": "compare",
+    "prompt": "Texts 5 – Letter and a choice of 1, 2, 3 or 4\n\nCompare how Text 5 and ONE other text from the selection above illustrate the complexity of human motivations and desires.",
+    "maxMarks": 6,
+    "suggestedWords": 516,
+    "suggestedFrom": "lines",
+    "paper": {
+      "school": "Sydney Grammar School",
+      "short": "Sydney Grammar",
+      "year": 2024,
+      "exam": "Trial",
+      "qNo": 5
+    },
+    "outcome": "EAV-12-01",
+    "concepts": [
+      "y12-english-advanced-comparative-texts.c-compares-texts",
+      "y12-english-advanced-comparative-texts.c-treats-both-in-depth",
+      "y12-english-advanced-unseen-texts.c-human-experience"
+    ],
+    "source": "Sydney Grammar 2024 Trial, Q5"
   },
   {
     "id": "y12-english-advanced-comparative-texts.sgr25-q5",

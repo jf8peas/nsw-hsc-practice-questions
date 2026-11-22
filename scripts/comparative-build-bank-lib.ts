@@ -88,9 +88,14 @@ const HEADER = (what: string, serverOnly: boolean): string =>
 
 /**
  * Throws with every problem found, so one run lists them all. `knownTextIds` are the ids in the shared store before this
- * run (008's banks); each comparative bank adds its own new texts.
+ * run (008's banks); each comparative bank adds its own new texts. `medians` is injectable so the no-counted-median path
+ * remains testable when the shipped table has a value for every mark.
  */
-export function buildComparativeFiles(banks: ComparativeBankFile[], knownTextIds: ReadonlySet<string>): GeneratedComparativeFiles {
+export function buildComparativeFiles(
+  banks: ComparativeBankFile[],
+  knownTextIds: ReadonlySet<string>,
+  medians: Readonly<Record<number, number>> = MEDIAN_WORDS,
+): GeneratedComparativeFiles {
   const problems: string[] = [];
   const texts = new Set(knownTextIds);
   const slugs = new Set<string>();
@@ -137,7 +142,7 @@ export function buildComparativeFiles(banks: ComparativeBankFile[], knownTextIds
       ...(q.parts ? { parts: q.parts } : {}),
       maxMarks: q.maxMarks,
       // no median is guessed for a mark value that has not been counted: validation then refuses the question
-      suggestedWords: fromLines ? q.answerLines! * 12 : (MEDIAN_WORDS[q.maxMarks] ?? 0),
+      suggestedWords: fromLines ? q.answerLines! * 12 : (medians[q.maxMarks] ?? 0),
       suggestedFrom: fromLines ? "lines" : "median",
       paper: full,
       outcome: q.outcome,

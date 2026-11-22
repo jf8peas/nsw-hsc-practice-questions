@@ -18,7 +18,8 @@ import { countWords } from "@/lib/wordcount";
  * reviewed, every visual text the question shows (picked or not) has an image, a neutral alt and a passed,
  * current description check, and no key text, pairing label included, appears in a public string.
  * `verbs` is the comparative prompt's directive verbs; `partners` are the registered units (to find the home of a
- * shared concept id); `imageSizeOf` reads the shared store's images.
+ * shared concept id); `imageSizeOf` reads the shared store's images. `medians` is injectable so validation of an
+ * uncounted mark value remains testable when the shipped table has a value for every mark.
  */
 export function validateComparativeRules(
   unit: Unit,
@@ -27,6 +28,7 @@ export function validateComparativeRules(
   partners: readonly Unit[] = [],
   today: Date = new Date(),
   imageSizeOf: (imageName: string) => number | null = () => null,
+  medians: Readonly<Record<number, number>> = MEDIAN_WORDS,
 ): string[] {
   const errors: string[] = [];
   const questions = unit.questions.filter((q): q is ComparativeQuestion => q.type === "comparative");
@@ -119,8 +121,8 @@ export function validateComparativeRules(
     if (!Number.isInteger(q.suggestedWords) || q.suggestedWords <= 0) errors.push(`${q.id}: suggestedWords must be set`);
     else if (q.suggestedFrom === "lines" && q.suggestedWords % 12 !== 0) errors.push(`${q.id}: suggestedWords ${q.suggestedWords} must be answer lines × 12`);
     else if (q.suggestedFrom === "median") {
-      if (MEDIAN_WORDS[q.maxMarks] === undefined) errors.push(`${q.id}: no median is counted for ${q.maxMarks} marks yet (lib/unseen/limits.ts)`);
-      else if (q.suggestedWords !== MEDIAN_WORDS[q.maxMarks]) errors.push(`${q.id}: suggestedWords ${q.suggestedWords} must be the median ${MEDIAN_WORDS[q.maxMarks]} for ${q.maxMarks} marks`);
+      if (medians[q.maxMarks] === undefined) errors.push(`${q.id}: no median is counted for ${q.maxMarks} marks yet (lib/unseen/limits.ts)`);
+      else if (q.suggestedWords !== medians[q.maxMarks]) errors.push(`${q.id}: suggestedWords ${q.suggestedWords} must be the median ${medians[q.maxMarks]} for ${q.maxMarks} marks`);
     }
 
     // 6 and 7. the key

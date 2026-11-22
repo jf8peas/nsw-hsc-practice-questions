@@ -3598,6 +3598,169 @@ export const storeTexts: UnseenText[] = [
     "hscChecked": "2026-11-19"
   },
   {
+    "id": "ab24-t5",
+    "form": "non-fiction",
+    "heading": "Text 5 – Discursive article",
+    "title": "How the steady click of knitting needles and crochet hooks is bringing comfort, mindfulness and healing",
+    "author": "Julia Baird",
+    "sourceLine": "Julia Baird, “How the steady click of knitting needles and crochet hooks is bringing comfort, mindfulness and healing”. As printed in the Abbotsleigh 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Sarah Lulu Faith refuses to use conventional terms like sick or ill, when she is feeling unwell. She prefers the term “reduced fabulousness.”",
+        "When you meet her, as I did recently in Newcastle, you quickly understand – she wears a riot of colours with bright lipstick, has a big, open grin, and the air of someone with an innate capacity to see and emit joy.",
+        "When she was in her mid-60s she experienced “severely reduced fabulousness.” After decades working in welfare, she had been made redundant because of her health, in and out of hospital and then isolated in her home on the mid-north coast of NSW during the pandemic.",
+        "In response, she began to crochet, and found she gained a curious strength from it.",
+        "“The repetitive, mindful nature of working the stitches, watching the project grow, however haltingly, kept me largely sane. More than sane, it provided comfort, expression and soothed my bruised soul.” Faith decided her practice was even helping her breath stabilise. Due to a lung condition and brittle asthma, breathing can be a source of huge difficulty for Faith, but she became aware that her, “breathing regulated itself with the tempo of the crocheting,” which she describes as: “Magic. Really.”",
+        "Faith – who has reached the age she now broadly calls “Queenager” — started a “yarners group” for women to talk. And talk they do, about everything and nothing, from trauma to tea, while they knit or crochet.",
+        "Funny isn't it, how long we've adhered to the stereotype of knitters as doddery, sweet grandmothers, as though the activity itself was a sign of ageing, dismissed as useless frippery and distraction – not what it actually is, which is useful and mindful.",
+        "While breath experts and “wellness warriors” throng on social media, posing on yoga mats, in ice baths and on headlands, often charging small fortunes to tell people how to fill and empty their lungs, how to learn to be present and focused, the steady click of needles on the couches of Australia might serve as a reminder that knitters have been on to this stuff for a very long time."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "ab25-t5",
+    "form": "non-fiction",
+    "heading": "Text 5 – Memoir extract",
+    "title": "A Different Kind of Power",
+    "author": "Jacinda Ardern",
+    "sourceLine": "Jacinda Ardern, A Different Kind of Power. As printed in the Abbotsleigh 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Arizona was hot, and beautiful, and expensive. While I’d saved up enough money to survive there, I didn’t exactly have enough to live independently. I lived in Mesa, about 12 kilometres from campus. Everything was flat, low-rise, with the exception of Camelback Mountain glowing red far off in the distance. The desert landscape was so different from anything I was used to. Most front yards were covered in stone and dotted with succulents: massive yucca spikes and cacti standing taller than me. Backyards were surrounded by tall fences, though I couldn’t quite imagine children playing outside. Not in that heat. In some places there were no sidewalks, but that made some sense. No one here walked. Even when I tried, people honked at me, as if warning me that it was a bad idea.",
+        "To get to campus, I took two buses. One day, early in the semester, I decided to walk home instead of waiting in the heat for my second bus. When I reached home a few miles later, I caught a glimpse of myself in the mirror. I looked like a char-grilled red capsicum with googly eyes attached. A few hours after that, the nausea, headache and dizziness of heat stroke kicked in. I never walked to or from that bus stop again.",
+        "Classes at ASU (Arizona State University) felt different, too. My American foreign policy professor, for example, was a tall, assertive man, with a barrel chest and a booming voice. He declared that he used the ‘Harvard method.’ He was unforgiving about missed classes, and he liked to call on students at random, by pointing at them. Answer promptly, and correctly, or lose points. I was never sure if that was what he meant by the Harvard method; all I knew was that I was afraid of it.",
+        "One day, as I sat on campus, eating a jam sandwich I had made that morning, the question came into my head: Why am I here? I knew why I’d come – for the excitement of being in a different place while still surrounded by an enormous community of church members. And I had got both of these things. I was also making friends. These friends were welcoming, funny, generous and kind. But for all that, I was lonely.",
+        "This loneliness was deeper than homesickness. It was about far more than the distance between Arizona and New Zealand, about the change in landscape, or the fact that long-distance phone calls were too expensive to allow me to talk to Mum or Dad often. It was something more fundamental. I’d always believed that there was a reason and purpose to every experience. But as I finished my sandwich and packed up in the blazing red sun to move to my next class, I could not figure out the purpose of this one."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "as23-t5",
+    "form": "visual",
+    "heading": "Text 5 – Illustration",
+    "title": "",
+    "author": "Eric Chow",
+    "sourceLine": "Illustration by Eric Chow, from The Guardian. As printed in the Ascham 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "as23-t5",
+      "alt": "Text 5 – Illustration: an illustration"
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "as23-t6",
+    "form": "non-fiction",
+    "heading": "Text 6 – Nonfiction extract",
+    "title": "Your attention didn’t collapse. It was stolen",
+    "author": "Johann Hari",
+    "sourceLine": "Johann Hari, edited extract from Stolen Focus: Why You Can’t Pay Attention, The Guardian, 2 January 2022. As printed in the Ascham 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "SOCIAL MEDIA AND MANY OTHER FACETS OF MODERN LIFE ARE DESTROYING OUR ABILITY TO CONCENTRATE. WE NEED TO RECLAIM OUR MINDS WHILE WE STILL CAN",
+        "When he was nine years old, my godson Adam developed a brief but freakishly intense obsession with Elvis Presley. He took to singing Jailhouse Rock at the top of his voice with all the low crooning and pelvis-jiggling of the King himself. One day, as I tucked him in, he looked at me very earnestly and asked: “Johann, will you take me to Graceland one day?” Without really thinking, I agreed. I never gave it another thought, until everything had gone wrong.",
+        "Ten years later, Adam was lost. He had dropped out of school when he was 15, and he spent almost all his waking hours alternating blankly between screens – a blur of YouTube, WhatsApp and porn. He seemed to be whirring at the speed of Snapchat, and nothing still or serious could gain any traction in his mind. During the decade in which Adam had become a man, this fracturing seemed to be happening to many of us. Our ability to pay attention was cracking and breaking. I had just turned 40, and I still read a lot of books, but it felt more and more like running up a down escalator. Then one evening, as we lay on my sofa, each staring at our own ceaselessly shrieking screens, I looked at him and felt a low dread. “Adam,” I said softly, “let’s go to Graceland.” I reminded him of the promise I had made. I could see that the idea of breaking this numbing routine ignited something in him, but I told him there was one condition he had to stick to if we went. He had to switch his phone off during the day. He swore he would.",
+        "When you arrive at the gates of Graceland, there is no longer a human being whose job is to show you around. You are handed an iPad, you put in little earbuds, and the iPad tells you what to do – turn left; turn right; walk forward. In each room, a photograph of where you are appears on the screen, while a narrator describes it. When we got to the jungle room – Elvis’s favourite place in the mansion – a middle-aged man standing next to me turned to his wife. “Honey,” he said, “this is amazing. Look.” He waved the iPad in her direction, and began to move his finger across it. “If you swipe left, you can see the jungle room to the left. And if you swipe right, you can see the jungle room to the right.”",
+        "His wife stared, smiled, and began to swipe at her own iPad. I leaned forward. “Look!” I said. “Don’t you see? We’re actually there. There’s no need for your screen. We are in the jungle room.” Their eyes returned to their screens. I turned to Adam, ready to laugh about it all – but he was in a corner, holding his phone under his jacket, flicking through Snapchat."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "bk23-t5",
+    "form": "non-fiction",
+    "heading": "Text 5 – Non-fiction extract",
+    "title": "Speech at the United Nations Climate Action Summit, 2019",
+    "author": "Greta Thunberg",
+    "sourceLine": "Greta Thunberg, Speech at the United Nations Climate Action Summit, 2019. As printed in the Barker College 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "My message is that we’ll be watching you.",
+        "This is all wrong. I shouldn’t be up here. I should be back in school on the other side of the ocean. Yet, you all come to us young people for hope. How dare you!",
+        "You have stolen my dreams and my childhood with your empty words and yet I’m one of the lucky ones. People are suffering. People are dying. Entire ecosystems are collapsing. We are in the beginning of a mass extinction and all you can talk about is money and fairytales of eternal economic growth. How dare you!",
+        "For more than 30 years, the science has been crystal clear. How dare you continue to look away and come here saying that you’re doing enough when the politics and solutions needed are still nowhere in sight…",
+        "How dare you pretend that this can be solved with just business as usual and some technical solutions? With today’s emissions levels, that remaining CO2 budget will be entirely gone within less than eight and a half years. There will not be any solutions or plans presented in line with these figures here today, because these numbers are too uncomfortable, and you are still not mature enough to tell it like it is.",
+        "You are failing us, but the young people are starting to understand your betrayal. The eyes of all future generations are upon you and if you choose to fail us, I say: We will never forgive you."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "bk23-t6",
+    "form": "visual",
+    "heading": "Text 6 – Photograph",
+    "title": "",
+    "author": "",
+    "sourceLine": "As printed in the Barker College 2023 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "bk23-t6",
+      "alt": "Text 6 – Photograph: a photograph"
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "bk26-t4",
+    "form": "poem",
+    "heading": "Text 4 – Poem",
+    "title": "The City",
+    "author": "C.P. Cavafy",
+    "sourceLine": "As printed in the Barker College 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "You said: “I’ll go to another country, go to another shore,",
+          "find another city better than this one.",
+          "Whatever I try to do is fated to turn out wrong",
+          "and my heart lies buried like something dead.",
+          "How long can I let my mind moulder in this place?",
+          "Wherever I turn, wherever I look,",
+          "I see the black ruins of my life, here,",
+          "where I’ve spent so many years, wasted them, destroyed them totally.”"
+        ],
+        [
+          "You won’t find a new country, won’t find another shore.",
+          "This city will always pursue you.",
+          "You’ll walk the same streets, grow old",
+          "in the same neighbourhoods, turn grey in these same houses.",
+          "You’ll always end up in this city. Don’t hope for things elsewhere:",
+          "there’s no ship for you, there’s no road.",
+          "Now that you’ve wasted your life here, in this small corner,",
+          "you’ve destroyed it everywhere in the world"
+        ]
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "bk26-t5",
+    "form": "prose-fiction",
+    "heading": "Text 5 – Prose fiction extract",
+    "title": "Perfection",
+    "author": "Vincenzo Latronico",
+    "sourceLine": "As printed in the Barker College 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Reality didn’t always live up to the pictures.",
+        "In the mornings it often would, waking up, the sight of the filtered light dancing on the walls would instantly put them in a good mood. Yesterday’s clothes would be strewn over the clothes stands. Tom and Anna’s phones, having charged overnight, would be glaring rectangles on the dusty covers of two open books with their spine facing up. They would check their emails and social media from bed, their faces blue from the backlit screens, looking like a young professional couple in Berlin, which is exactly what they were.",
+        "But the moment they set foot in the living room, that confidence would start to falter, like a previously clear voice on a phone losing signal.",
+        "It wasn’t order they so desperately craved, but something deeper and more essential. They lived in a country whose language they didn’t speak, in a job with unclear boundaries and no fixed hours or base, and which was, to a great extent, subject to the whims of their clients and social media contacts. That apartment and those objects weren’t merely reflections of their personalities: they provided a foothold, proof of a grounded lifestyle, which, from another perspective (that of, say, their parents’ generation) appeared loose. In itself chaos could be joyful, creative; but in that context, it only seemed to signal impermanence.",
+        "They knew they had been lucky to find each other so young, but it had also taken determination and perseverance.",
+        "The results of that love were all around them. Delicious hot meals, bills paid, a job, a home they liked – the details that comprised their life. It was a life they had created for themselves, building difference upon difference until it encapsulated the real them, with a freedom as expats that they would never have had back at home. They were proud of it. On the other side of the window the city pulsed on, calling them with promises they were in no rush to put to the test.",
+        "Later on, they would fall asleep breathing in each other’s smell, whispering little jokes, sweet nothings, plans for the next day. But really what they were saying was a prayer, a silent and strangely solemn prayer for things to remain exactly as they were. It was always answered."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
     "id": "db26-t5",
     "form": "prose-fiction",
     "heading": "Text 5 – Prose fiction extract",
@@ -3705,6 +3868,20 @@ export const storeTexts: UnseenText[] = [
     "hscChecked": "2026-11-21"
   },
   {
+    "id": "fs24-t5",
+    "form": "visual",
+    "heading": "Text 5 – Image",
+    "title": "",
+    "author": "Newsha Tavakolian",
+    "sourceLine": "NEWSHA TAVAKOLIAN. As printed in the Fort Street High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "fs24-t5",
+      "alt": "Text 5 – Image: a woman seated behind a birthday cake"
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
     "id": "fs25-t4",
     "form": "non-fiction",
     "heading": "Text 4 – Creative Non-Fiction",
@@ -3744,6 +3921,254 @@ export const storeTexts: UnseenText[] = [
     "hscChecked": "2026-11-21"
   },
   {
+    "id": "jr26-t4",
+    "form": "poem",
+    "heading": "Text 4 – Poem",
+    "title": "SELF-PORTRAIT",
+    "author": "Mary Oliver",
+    "sourceLine": "Felicity © Mary Oliver (2015). As printed in the James Ruse Agricultural High School 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "I wish I was twenty and in love with life",
+          "and still full of beans.",
+          "Onward, old legs!",
+          "There are the long, pale dunes; on the other side",
+          "the roses are blooming and finding their labour",
+          "no adversity to the spirit.",
+          "Upward, old legs! There are the roses, and there is the sea",
+          "shining like a song, like a body",
+          "I want to touch",
+          "though I’m not twenty",
+          "and won’t be again but ah! seventy. And still",
+          "in love with life. And still",
+          "full of beans."
+        ]
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "jr26-t5",
+    "form": "visual",
+    "heading": "Text 5 – Image",
+    "title": "",
+    "author": "",
+    "sourceLine": "Source: Unknown. As printed in the James Ruse Agricultural High School 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "jr26-t5",
+      "alt": "Text 5 – Image: a colour cartoon of a three-step winners' podium"
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "km25-t2",
+    "form": "poem",
+    "heading": "Text 2 – Poem",
+    "title": "Curtain",
+    "author": "Charles Bukowski",
+    "sourceLine": "From: Curtain - Charles Bukowski. As printed in the Kambala 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "the final curtain on one of the longest running",
+          "musicals ever, some people claim to have",
+          "seen it over one hundred times.",
+          "I saw it on the tv news, that final curtain:",
+          "flowers, cheers, tears, a thunderous",
+          "accolade.",
+          "I have not seen this particular musical",
+          "but I know if I had that I wouldn't have",
+          "been able to bear it, it would have",
+          "sickened me.",
+          "trust me on this, the world and its",
+          "peoples and its artful entertainment has",
+          "done very little for me, only to me.",
+          "still, let them enjoy one another, it will",
+          "keep them from my door",
+          "and for this, my own thunderous",
+          "accolade."
+        ]
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "km26-t2",
+    "form": "visual",
+    "heading": "Text 2 – Theatre Poster: TARTUFFE",
+    "title": "TARTUFFE",
+    "author": "Moliere",
+    "sourceLine": "Theatre poster: TARTUFFE. As printed in the Kambala 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "km26-t2",
+      "alt": "Text 2 – Theatre Poster: TARTUFFE: a yellow poster with a television-headed figure and smaller figures"
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "km26-t3",
+    "form": "visual",
+    "heading": "Text 3 – Theatre Poster: MACBETH",
+    "title": "MACBETH",
+    "author": "Verdi",
+    "sourceLine": "Theatre poster: MACBETH. As printed in the Kambala 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "km26-t3",
+      "alt": "Text 3 – Theatre Poster: MACBETH: an olive poster with two figures and enormous crowned shadows"
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "kx25-t5",
+    "form": "prose-fiction",
+    "heading": "Text 5 – Prose fiction extract",
+    "title": "Norwegian Wood",
+    "author": "Haruki Murukami",
+    "sourceLine": "Norwegian Wood, Haruki Murukami, 1987 (the author's name is spelled as printed on the paper). As printed in the Knox Grammar School 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Eighteen years have gone by, and still I can bring back every detail of that day in the meadow. Washed clean of summer's dust by days of gentle rain, the mountains wore a deep, brilliant green. The October breeze set white fronds of head-high grasses swaying. One long streak of cloud hung pasted across a dome of frozen blue. It almost hurt to look at that far-off sky. A puff of wind swept across the meadow and through her hair before it slipped into the woods to rustle branches and send back snatches of distant barking - a hazy sound that seemed to reach us from the doorway to another world. We heard no other sounds. We met no other people. We saw only two bright, red birds leap startled from the centre of the meadow and dart into the woods. As we ambled along, Naoko spoke to me of wells.",
+        "Memory is a funny thing. When I was in the scene, I hardly paid it any attention. I never stopped to think of it as something that would make a lasting impression, certainly never imagined that eighteen years later I would recall it in such detail. I didn't give a damn about the scenery that day. I was thinking about myself. I was thinking about the beautiful girl walking next to me. I was thinking about the two of us together, and then about myself again. It was at that age, that time of life when every sight, every feeling, every thought came back, like a boomerang, to me. And worse, I was in love. Love with complications. Scenery was the last thing on my mind.",
+        "Now, though, that meadow scene is the first thing that comes back to me. The smell of the grass, the faint chill of the wind, the line of the hills, the barking of a dog: these are the first things, and they come with absolute clarity. I feel as if I can reach out and trace them with a fingertip. And yet, as clear as the scene may be, no one is in it. No one. Naoko is not there, and neither am I. Where could we have disappeared to? How could such a thing have happened? Everything that seemed so important back then - Naoko, and the self I was then, and the world I had then: where could they have all gone? It's true, I can't even bring back her face - not straight away, at least. All I'm left holding is a background, pure scenery, with no people at the front."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "nsb25-t3",
+    "form": "personal-essay",
+    "heading": "Text 3 – Memoir Extract",
+    "title": "Hand knit Sweater",
+    "author": "Ken Liu",
+    "sourceLine": "Ken Liu, Hand knit Sweater. As printed in the North Sydney Boys High School 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "Winter evening.",
+        "Six-year-old me did my homework at the dinner table; my grandmother sat next to me, knitting a sweater. The yarn, thick and green, appeared almost black in the glow of the lone 40-watt incandescent lightbulb. My grandmother squinted as she struggled to manipulate the bamboo needles with her arthritis-gnarled fingers, the skin cracked in countless places from the arid, frosty air.",
+        "“Do your hands hurt, Nainai?”",
+        "“They do.”",
+        "“Why are you still working, then?”",
+        "“I don’t want you to be cold.”",
+        "She made almost all my sweaters. They were bulky and thick to keep out the frigid winds of Northwestern China; they hung loose so I could grow into them and make them last; they were stained and darned repeatedly, because that was what happened to clothes worn by a child running wild with his friends, tumbling across frozen ponds, climbing ginkgoes and pines, scrambling over iron fences, fighting with fists and snowballs.",
+        "The sweaters worked great; they were beautiful.",
+        "I liked watching my grandmother knit. She never used a pattern, but drafted the design in her head, feeling her way toward the final product much like writers who refuse to outline. With only two basic stitches—the knit and the purl—she could weave a single string into a garment, transform a line into a plane, uplift one dimension into two. The tension between the different stitches gave the surface yet another dimension of texture, forming natural pleats, folds, soft ruffled rings that hugged wrists and collars. Years later, when I studied advanced mathematics, I would imagine the various curves on my graphing calculator as the yarn in my grandmother’s hands, looping, twisting, knotting toward a solution in space.",
+        "I didn’t learn to knit until decades later, after it was no longer possible to tell her everything I wanted to say. As my clumsy fingers grew used to the repetitive movements, I allowed my mind to drift, each stitch bringing to mind a memory of my grandmother: pushing me around in a stroller, teaching me the times tables, listening to pingshu storytellers on the radio, laughing at my first story…",
+        "“I don’t want you to be cold.”",
+        "A person’s story is knitted together from the single dimension of inexorably passing time, twisting, looping, knotting, winding through memory and experience and grief and hope and regret until it becomes something with a shape, with texture and tension and strength.",
+        "Some things could never be said, and if we’re lucky, they needn’t be."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "nsb25-t4",
+    "form": "prose-fiction",
+    "heading": "Text 4 – Fiction Extract",
+    "title": "The Wren, The Wren",
+    "author": "Anne Enright",
+    "sourceLine": "Anne Enright, The Wren, The Wren. As printed in the North Sydney Boys High School 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "There is a psychologist in Nevada called Russell T. Hurlburt who is interested in the different ways people think. In 2009, he fitted a young woman called Melanie with a beeper that went off randomly during the day, prompting her to record everything in her awareness at that moment, and she later reconstructed these mental events for his research.",
+        "On the third day of Melanie’s experiment, as her boyfriend was asking her a question about insurance, she was trying to remember the word ‘periodontist’. On the fourth day, she was having a strong urge to go scuba diving. On the sixth day, she was picking flower petals from the sink while hearing echoes of the phrase ‘nice long time’.",
+        "Dr Hurlburt says that there are great variations in the way our inner lives play themselves out in our heads. ‘My research says that there are a lot of people who don’t ever naturally form images, and then there are other people who form very florid, Technicolor, moving images.’ Some people have inner lives dominated by speech or emotions, and yet others by ‘unsymbolized thinking’ that can take the form of wordless questions like, ‘Should I have the ham sandwich or the roast beef?’",
+        "I find this experiment very useful. No explanations are sought or given. Melanie thinks this way because that is the way she thinks. There may be no reason for Melanie to have the mind of a poet, with her sink full of faded petals, and her inner ear enjoying the words ‘nice long time’, where other people would see used teabags and think ‘my life is turning to shit’.",
+        "I wonder what was going through her boyfriend’s mind at these moments.\nLet’s get insured!\nor:\nWhy is she ignoring me?\nor:\nIf I talk about insurance I don’t have to think about death, except usefully.",
+        "*",
+        "Melanie and her boyfriend. I wish them well. I think she is a dreamer and he is a treasure, he keeps them both safe. And in time – in time – they will each learn exactly what the other one thinks.",
+        "We don’t walk down the same street as the person walking beside us. All we can do is tell the other person what we see. We can point at things and try to name them. If we do this well, our friend can look at the world in a new way. We can meet.",
+        "When I began thinking about all this I was interested in empathy, like it’s the solution (and it is! it is!) to pretty much everything. I thought about gender and empathy, religion and empathy, the evolutionary benefits of empathy. I had a big beautiful cake in my head called ‘Feeling the Pain of Others’ and I sliced it this way and that because I thought that emotion is the bridge between people, sentiment crosses space, sympathy is a gas, exhaled by one, inhaled by the other.",
+        "Empathy! It’s just like melting.",
+        "We can merge, you know. We can connect. We can cry at the same movie. You and I. But some people can’t do this – really quite complicated – thing. There is a gap."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "nsg25-t3",
+    "form": "visual",
+    "heading": "Text 3 – Photograph",
+    "title": "Segregated Water Fountains",
+    "author": "Elliot Erwitt",
+    "sourceLine": "ELLIOT ERWIIT, Segregated Water Fountains (the photographer's name is spelled as printed). As printed in the North Sydney Girls High School 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "image",
+      "image": "nsg25-t3",
+      "alt": "Text 3 – Photograph: a black-and-white photograph of segregated drinking facilities"
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "nsg25-t4",
+    "form": "poem",
+    "heading": "Text 4 – Poem",
+    "title": "I, Too",
+    "author": "Langston Hughes",
+    "sourceLine": "As printed in the North Sydney Girls High School 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "I, too, sing America."
+        ],
+        [
+          "I am the darker brother.",
+          "They send me to eat in the kitchen",
+          "When company comes,",
+          "But I laugh,",
+          "And eat well,",
+          "And grow strong."
+        ],
+        [
+          "Tomorrow,",
+          "I’ll be at the table",
+          "When company comes.",
+          "Nobody’ll dare",
+          "Say to me,",
+          "“Eat in the kitchen,”",
+          "Then."
+        ],
+        [
+          "Besides,",
+          "They’ll see how beautiful I am",
+          "And be ashamed—"
+        ],
+        [
+          "I, too, am America."
+        ]
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "nsg26-t5",
+    "form": "prose-fiction",
+    "heading": "Text 5 – Prose fiction extract",
+    "title": "Constellation",
+    "author": "Andrea Bajani",
+    "sourceLine": "Andrea Bajani, extract from Constellation. As printed in the North Sydney Girls High School 2026 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "When I think of the free time my mother spent with my father, in our small town outside Turin, this is the scene I usually picture: she’s on the couch, working through La Settimana Enigmistica, a weekly word-puzzle magazine, while he reads a book. She looks bored; her glasses have slipped down the bridge of her nose, where they remain out of carelessness rather than to help her eyes focus. She’s waiting for him to finish reading and decide what to do with whatever time remains before dinner. Did she find crossword puzzles interesting? Fun? I suspect they were mostly a way to kill time. In my memory, she’s often distracted, looking out the window. Or, more often still, she’s dozing off, pencil dropping from her hand, head lolling onto the back of the couch or to one side, mouth half open. I don’t know if she had a passion for fitting words into boxes as much as a desire to conform to the version of herself that my father had laid out.",
+        "“This is a book for your mother” was my father’s way of declaring that a novel wasn’t any good. The phrase did contain a kind of affection, the perverse, frank, aggressive kind that follows, or underlines, an assertion of control. To admit such a book to our home library—which he, an eager autodidact, had gradually built over the years—was a concession he made to her. But labelling a book as “for your mother” meant, above all, that its proper place was in the bin.",
+        "I don’t remember where all these supposedly second-rate novels came from, the ones that ended up on my mother’s nightstand. I know some were gifts from my father himself, birthday or Christmas presents wrapped in bookstore paper. She’d unwrap them and say thank you. Eventually, even she began to say “these are books for me,” as if seeing herself through his eyes—holding on, through self-deprecation, only to the part of the phrase that passed for affection.",
+        "I don’t know if it was my father who bought those weekly copies of La Settimana Enigmistica. In any case, he never objected to the expense, because he needed to keep her busy, “give her something to do,” as he put it, so that he could read his books or do other things he liked: ski across the French border, go climbing. For her, the important thing wasn’t so much that he be able to read or do his sports but that he see her as the person he had decided she was. This amounted, perhaps, in my mother’s view of life, to a wretched demonstration of love. That may have been one of the fundamental misunderstandings between them: he wanted her to be nothing so that he could be something; she wanted to be nothing because being nothing was, at least, something. Or maybe it wasn’t so much a misunderstanding as a sort of unspoken, secret pact. The result was that she actually did erase herself, and his bitterness, scorn, and despair at having that nothing on his couch piled up the way those crossword magazines piled up on the table, week after week, before ending up in the trash.",
+        "And yet, of the two, only my mother had gone to college—a detail rarely mentioned in our household, and when it was, my father used it against her, as evidence that she could have been more than a woman who did crosswords. Her own father probably went no further than elementary school, but her mother, raised in an orphanage, graduated from a vocational high school and went on to become a secretary at a law firm where, over time, she proved herself indispensable. My mother, then, grew up among Rome’s petty bourgeoisie, and she became the first in her family to aspire to college, attending a prestigious high school to prepare. What did she have in mind when she enrolled in that school? What future life did she picture? High-school teacher? Doctor? Lawyer? Did she believe she’d leave her parents’ rental life behind and one day own her own home? It’s hard to say, because we never discussed it. And, besides, that girl was so profoundly different from the woman I came to know over the course of my childhood and adulthood that, no matter how hard I try to imagine it, I struggle to see her face in my mother’s. It’s not that she hid any of this from me, and it’s true that I could have asked her questions, investigated. But I, too, had adopted my father’s official version: the crossword-puzzle woman."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
     "id": "py25-t5",
     "form": "visual",
     "heading": "Text 5 – Image",
@@ -3756,5 +4181,179 @@ export const storeTexts: UnseenText[] = [
       "alt": "Text 5 – Image: a colour photograph of a dense crowd queuing outdoors in winter"
     },
     "hscChecked": "2026-11-21"
+  },
+  {
+    "id": "sh24-t2",
+    "form": "non-fiction",
+    "heading": "Text 2 – Article extract",
+    "title": "Transforming Local Communities Through Artistic Leadership",
+    "author": "Stephan Manning and Yeim Uygur",
+    "sourceLine": "STEPHAN MANNING and YEIM UYGUR. As printed in the Shore 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "How artists, communities, and funders can come together to effectively promote local change.",
+        "Addressing entrenched social problems in local communities like inequality, violence, or environmental degradation is as much about changing local cultures and mindsets as it is about reworking the socioeconomic structures around them. Cultural norms and values, such as gender roles and attitudes toward the environment, guide economic and social interactions in communities. Challenging or redirecting established values is therefore at the heart of structural change.",
+        "Some of the most powerful tools for challenging established norms and for raising awareness about social problems are cultural artifacts like art, music, and film. However, artists and artistic projects have the power to do much more. Indeed, they can play a vital role in community change. Given the right support and strategy, artist-led efforts can empower communities to craft desirable futures, make social issues visible beyond the community, and promote long-term investments in local transformations. But where exactly does the power of art for social change lie, and how can artists, communities, and funders effectively promote art-based change projects?",
+        "Artistic projects have a unique capacity to empower communities to envision a world different from their present reality. Indeed, the creative process can be particularly useful in contexts of poverty and hardship, where it can be difficult for people to think beyond their immediate opportunities and constraints and imagine alternative futures.",
+        "The 2010 documentary Waste Land offers a good example. The film portrays a collaboration between Brazilian artist Vik Muniz and a group of catadores, or “collectors,” who gather recyclable materials in Jardim Gramacho, a large landfill near Rio de Janeiro. Muniz works with the catadores to create artworks from materials they have collected. The process takes the catadores on a transformative journey that helps them see themselves differently. They develop a newfound sense of pride and value in their work, and a new outlook on their roles as recyclers contributing to environmental sustainability. They also develop new artistic skills.",
+        "The documentary ends with an auction, where one portrait sells for more than $64,000. Muniz returns all sales revenues to Jardim Gramacho, supporting catadores to improve their working conditions. The documentary imparts valuable insights into labour conditions in landfill environments and more generally retains the power to mobilize people to take proactive stances on societal issues.",
+        "Artist-led change projects can get communities emotionally invested in their own transformation and in creating real, structural change. For funders, supporting artist-led projects can take many forms, including dedicated funding for a campaign manager, access to potential partners and public space, and providing educational and mentorship opportunities. By coming together, artists, community members, and funders can find creative pathways to making social and environmental issues more visible, and inspiring and empowering communities to take an active part in the process of change."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "sb24-t4",
+    "form": "prose-fiction",
+    "heading": "Text 4 – Prose Extract",
+    "title": "Boulder",
+    "author": "Eva Baltasar",
+    "sourceLine": "EVA BALTASAR from the novel Boulder. As printed in the Sydney Boys High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "I don’t like them, Icelanders. They feel so insular, tribal. I envy their strength, their asymptomatic bodies, the painful brightness of their eyes. They’re born with pieces of their enormous island inside them and as adults they emanate an almost earthly force that seems to celebrate them and bring them closer together. I can put up with them one-on -one, but in groups I find them exhausting. Samsa is sociable and has made plenty of friends. Which is unsurprising. She has this ethereal gift for drawing to her own light the less gentle and less captivating light of other people, who then have the urge to touch her and feel as though they shine brighter. There isn’t a week that goes by when we don’t have to socialize. With friends she’s made at work, yoga, the gym, the Spanish lessons she enrolled in so she can have something of mine, she said, as though by loaning each other our languages we were giving sustenance to one another. If I charged for every meal I cook on the weekends, I’d make a tidy living., The worst thing about these get- togethers, though, isn’t the get-together itself—following the thread of the conversation, laughing at the right moment, nodding like a strange species of bird that’s been set loose in an aviary full of wilder and more beautiful birds. No. The worst thing is the children. Icelanders are slaves to biology, breeders. They begin to have children when they’re still in their teens—countless cubs, feral and blonde like their Viking ancestors. They form extensive clans and take their kids with them wherever they go, loke marsupials. The whole country is set up for it. I’m not into kids. I find them annoying. They’re unpredictable variables that come crashing into my coastal shelf with the gale force of their natural madness. They’re craggy, out of control, scattered. They’re drawn to me in the same way cats zero in on people who are allergic to them. Samsa welcomes these kids with cookies, their parents forget about them, and I make sure everyone stays lubricated, Glasses, bottle, ice. They’re walls behind which I shelter, as if those extremely high-proof green and lilac liquors could keep them all on the far side of my world. I don’t know why it doesn’t work. Halfway through the meal the kids start climbing on me, getting food all over my jeans and begging me to pay attention to them, fuss over them, talk to them. The more I ignore them, the more they insist. Samsa looks at me and smiles. The fact that she’s moved, the fact that she looks at me as a challenge and believes she can train me the way a farmer would train a wolf—it drives me up the wall."
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "sb24-t5",
+    "form": "personal-essay",
+    "heading": "Text 5 – Memoir extract",
+    "title": "Why be Happy when you can be Normal",
+    "author": "Jeanette Winterson",
+    "sourceLine": "JEANETTE WINTERSON from Why be Happy when you can be Normal. As printed in the Sydney Boys High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "There are markings here, raised like welts. Read them. Read the hurt. Rewrite them. Rewrite the hurt.",
+        "That’s why I am a writer. To avoid the narrow mesh of (my mother’s) story I had to be able to tell my own. Part fact part fiction is what life is. And it is always a cover story. I wrote my way out.",
+        "There was a terraced house in Accrington, in Lancashire—we called those houses two up two down: two rooms downstairs, two rooms upstairs. Three of us lived together in that house for sixteen years. I told my version –faithful and invented, accurate and misremembered, shuffled in time. I told myself as a hero like any shipwreck story. It was a shipwreck and me thrown on the coastline of humankind, and finding it not altogether human, and rarely kind.",
+        "And I suppose the saddest thing for me, thinking about the cover version that is Oranges, is that I wrote a story that I could live with. The other one was too painful. I could not survive it.",
+        "There is a character in Oranges called Testifying Elsie who looks after little Jeanette and acts as a soft wall against the hut(ling) force of Mother.",
+        "I wrote her in because I couldn’t bear to leave her out. I wrote her in because I really wished it had been that way. When you are a solitary child, you find an imaginary friend.",
+        "There was no Elsie. There was no one like Elsie. Things were much lonelier than that.",
+        "I spent most of my school years sitting on the railings outside the school gates in the breaks. I was not a popular or likeable child, too spiky, too angry, too intense, too odd. The churchgoing didn’t encourage school friends, and school situations always pick out the misfit.",
+        "But even when I did make friends, I made sure it went wrong…",
+        "If someone liked me, I waited until she was off guard, and then I told her I didn’t want to be her friend anymore. I watched the confusion and upset. The tears. Then I ran off, triumphantly in control, and very fast, the triumph and the control leaked away, and then I cried and cried, because I had put myself on the outside again, on the doorstep again, where I didn’t want to be.",
+        "Adoption is outside. You act out what it feels like to be the one who doesn’t belong. And you act it out by trying to do to others what has been done to you. It is impossible to believe that anyone loves you for yourself.",
+        "I never believed that my parents loved me. I tried to love them, but it didn’t work. It has taken me a long time to learn how to –both the giving and the receiving. I have written about love obsessively, forensically and I know/ knew it as the highest value.",
+        "."
+      ]
+    },
+    "footnotes": [
+      {
+        "mark": "",
+        "text": "Oranges are the Only Fruit: Jeanette Winterson's first published work."
+      }
+    ],
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "sb25-t5",
+    "form": "prose-fiction",
+    "heading": "Text 5 – Prose fiction extract",
+    "title": "The Yield",
+    "author": "Tara June Winch",
+    "sourceLine": "Tara June Winch, extract from The Yield. As printed in the Sydney Boys High School 2025 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "artist – bundadhaany What a wonderful thing to make something. I saw a painting in a book, it’s called Dluga Street; it was painted by a bundadhaany called Bernardo Bellotto. He was an Italian fella. He painted the city of Warsaw, Poland – there were twenty-six of them, in a style called vedute. He made those paintings, detailed lives of the people and the city, and he passed away just a handful of years before Australia was invaded. Almost two hundred years later the Nazis bombed Warsaw, killing hundreds and thousands of people, horrible annihilation. In this dark time almost the entire city of Warsaw was burned and destroyed. The people left were thinking about moving the city somewhere else, rebuilding a new Warsaw. But then they had all these paintings of the city, these great detailed things by the bundadhaany Bernardo Bellotto, and they rebuilt the city from paintings done generations before the city was bombed to bits. I want the younger ones, the next little ones to read this book and for them to look into the riverbed, to stare up into the tops of the gums, to look and know and name the birds. To recognise that city that no-one seems to see anymore. I wouldn’t be invisible anymore, none of us would be.",
+        "ashamed, have shame – giyal-dhuray I’m done with this word. I’d leave it out completely but I can’t. It’s become part of the dictionary we think we should carry. We mustn’t anymore. See, pain travels through our family tree like a songline. We’ve been singing our pain into a solid thing. The old ones, the young ones too, are ready to heal. We don’t have to be giyal-dhuray anymore, we don’t have to pass that down anymore.",
+        "ashes – bunhaan I want to spread everywhere I can over Prosperous, I want the body to float up to the leaves, I want to rest in the wheatfield, the last yield, before it’s dug open.",
+        "Australia – Ngurambang That’s my country, anyway. It spreads to almost the size of England, from the mountains in the north, to the boundary of Ngurambang in the south. The water once flowed through the Murrumby from the southern rivers, filling the creeks, the lagoons, the lakes, and feeding everything in its wake. Ngurambang is my country; in my mind it will always be on the waterfront. Five hundred acres where the Gondiwindi lived, live. Australia – Ngurambang! Can you hear it now? Say it – Ngu-ram-bang!"
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "sgh24-t1",
+    "form": "poem",
+    "heading": "Text 1 – Poem",
+    "title": "Lost In The Forest…",
+    "author": "Pablo Neruda",
+    "sourceLine": "PABLO NERUDA. As printed in the Sydney Girls High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "poem",
+      "stanzas": [
+        [
+          "Lost in the forest, I broke off a dark twig",
+          "and lifted its whisper to my thirsty lips:",
+          "maybe it was the voice of the rain crying,",
+          "a cracked bell, or a torn heart."
+        ],
+        [
+          "Something from far off it seemed",
+          "deep and secret to me, hidden by the earth,",
+          "a shout muffled by huge autumns,",
+          "by the moist half-open darkness of the leaves."
+        ],
+        [
+          "Wakening from the dreaming forest there, the hazel-sprig",
+          "sang under my tongue, its drifting fragrance",
+          "climbed up through my conscious mind"
+        ],
+        [
+          "as if suddenly the roots I had left behind",
+          "cried out to me, the land I had lost with my childhood---",
+          "and I stopped, wounded by the wandering scent."
+        ]
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "sgh24-t2",
+    "form": "prose-fiction",
+    "heading": "Text 2 – Prose fiction extract",
+    "title": "The Queen of Dirt Island",
+    "author": "Donal Ryan",
+    "sourceLine": "THE QUEEN OF DIRT ISLAND, Donal Ryan. As printed in the Sydney Girls High School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "She was four in her earliest memory, or maybe just turned five.",
+        "It was springtime so it must have been near her birthday. The cherry blossom tree was heavily flowered at the edge of the small front garden; it was itself the greater part of the memory. Or maybe it was her birthday, because someone was taking her photograph and she was standing beneath the cherry blossom tree with sunlight dancing green and pink across the grass, her grandmother on one side of her and her mother on the other side, each of them holding one of her hands, as though they might at any moment start to tug in their opposite directions and pull her clean apart.",
+        "But that violence must have attached itself to the memory afterwards. She surely hadn’t thought of it at the time. What was clearest about the memory was their reflection in the long window at the front of the small house, how clear it was, the tartan of her mother’s short skirt, the heavy grey of her grandmother’s cardigan, the way they were linked to each other like a daisy chain. And the back of the man who was taking the photograph, long and white-shirted, his head bowed down towards the old-fashioned camera that he had held out from himself, low down below his stomach.",
+        "Why did she remember the image of his back so clearly and not his front, his face? Why had she fixated on their reflection and not their realness? It never happened anyway, her mother told her years later, who she asked who the man was who had taken the photo. I can guarantee you, she said, that no man stood out there on that lawn and took a photograph of you and your grandmother and me. Where is it so, if it really happened? The photograph. Did you ever see this famous photograph at your grandmother’s house or here in this house or anywhere else for that matter?",
+        "She wondered why her mother was so adamant about the memory’s falseness. She knew her mother was wrong, of course. It had really happened, almost exactly as she said, with just a few details up for argument, like whether or not it had been her birthday, and who the man was that her mother said never existed. It could have been one of her father’s brothers, though neither of them had long backs, or some relative or other who had faded from their lives. It could have been a neighbour. It could, she supposed, have been a boyfriend of her mother’s, though her mother denied ever entertaining a suitor, even for a moment. Her husband might have been gone from this world but he was and always would be her husband and that was all there was to it. The memory was real though. The cherry blossom blazing pink, the grass warm under her feet, her grandmother’s hand, her mother’s soft hand"
+      ]
+    },
+    "hscChecked": "2026-11-22"
+  },
+  {
+    "id": "sgr24-t5",
+    "form": "non-fiction",
+    "heading": "Text 5 – Letter",
+    "title": "The Red Hand Files",
+    "author": "Nick Cave",
+    "sourceLine": "Nick Cave, letter extract from The Red Hand Files. As printed in the Sydney Grammar School 2024 Trial HSC stimulus booklet.",
+    "body": {
+      "kind": "prose",
+      "paragraphs": [
+        "I have heard it said, now and then, that some individuals wake up happy in the morning. Unfortunately, I can't count myself among them. So, forgive me if I come across as some Wim Hof-style wellness guru, but I have found something I can do to significantly improve this sorry state of affairs - wild swimming, or more accurately, cold-water swimming.",
+        "Some years ago, the winter after Arthur died, I was walking along an empty beach in Brighton and had the sudden impulse to jump into the sea. I was shocked to find that, upon entering the freezing water, I experienced a sudden, violent, radical rearrangement of my relationship with almost everything. I discovered that it was simply impossible to grieve in icy water. This revelation began my love affair with cold-water swimming.",
+        "When I am in London, I wake up early, walk through the woods with some other wild swimmers, and jump into the lake. During winter, with water temperatures dropping to freezing, this is nothing less than a catastrophic outrage to the nervous system and an excruciatingly intimate engagement with one’s mortality.",
+        "This encounter obliterates all anger and worldly woes. To quote Roger Deacon’s beautiful book, Waterlog, you plunge into the lake with all your raging devils and clamber out ‘a giggling idiot’. In icy water, with our adrenaline and endorphins running riot, we are returned to our innocent, primordial selves via an internal ecstatic screaming to be born defiantly afresh. We become tiny creatures in the shock of nature, and, […] we are made happy!",
+        "As my friends and I make our way back through the woods, borne on the wings of God’s laughing angels, in the grip of some massive dopamine surge, we understand we are better now. This sense of delight, this shivering joy, will remain with us as we go about our day.",
+        "[…]",
+        "I swim in the sea in Brighton and the lakes of London, and while away on tour, any available river, stream, reservoir, pond, or ocean. That’s where you’ll find me, early in the morning, unsupervised, illicit, subversive - wild swimming - my true antidote to despair.",
+        "Love, Nick"
+      ]
+    },
+    "footnotes": [
+      {
+        "mark": "",
+        "text": "Wim Hof: A famous Dutch motivational figure."
+      },
+      {
+        "mark": "",
+        "text": "Arthur: Nick Cave’s son"
+      }
+    ],
+    "hscChecked": "2026-11-22"
   }
 ];

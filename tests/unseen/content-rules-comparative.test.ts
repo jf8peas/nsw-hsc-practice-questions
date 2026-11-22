@@ -15,6 +15,7 @@ import { storeTexts } from "@/content/units/y12-english-advanced-unseen-texts/st
 import type { AnswerSet, ComparativeKey, ComparativeQuestion, Unit, UnseenText } from "@/lib/types";
 import { sourceOf } from "@/lib/unseen/source";
 import { COMPARATIVE_SKILL_IDS, comparativeSkillConceptId } from "@/lib/unseen/skills";
+import { MEDIAN_WORDS } from "@/lib/unseen/limits";
 
 const CMP = "y12-english-advanced-comparative-texts";
 const TODAY = new Date("2026-11-20T00:00:00Z");
@@ -163,7 +164,9 @@ describe("marks, verb, source and suggested length", () => {
     expect(run(g.u, g.a)).toMatch(/answer lines × 12/);
     const m = good();
     Object.assign(m.u.questions[0], { suggestedFrom: "median", suggestedWords: 500, maxMarks: 8 });
-    expect(run(m.u, m.a)).toMatch(/no median is counted for 8 marks yet/);
+    const withoutEight = { ...MEDIAN_WORDS };
+    delete withoutEight[8];
+    expect(validateComparativeRules(m.u, m.a, verbs, partners, TODAY, () => 1000, withoutEight).join("\n")).toMatch(/no median is counted for 8 marks yet/);
   });
 });
 

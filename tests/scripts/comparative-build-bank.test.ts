@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildComparativeFiles, newStoreTexts, withoutPendingComparative, type ComparativeBankFile } from "../../scripts/comparative-build-bank-lib";
 import { buildFiles, type BankFile } from "../../scripts/unseen-build-bank-lib";
+import { MEDIAN_WORDS } from "../../lib/unseen/limits";
 
 const CMP = "y12-english-advanced-comparative-texts";
 const KNOWN = new Set(["old-t1", "old-t2", "old-t3"]);
@@ -57,9 +58,15 @@ describe("buildComparativeFiles", () => {
   });
 
   it("uses the median for a mark value whose lines cannot be counted, and 0 (which validation refuses) where none is counted", () => {
-    const { "questions.ts": q } = buildComparativeFiles([bank()], KNOWN);
-    expect(q).toContain('"suggestedFrom": "median"');
-    expect(q).toContain('"suggestedWords": 0'); // 8 marks: no median counted yet, so nothing ships on a guess
+    const { "questions.ts": counted } = buildComparativeFiles([bank()], KNOWN);
+    expect(counted).toContain('"suggestedFrom": "median"');
+    expect(counted).toContain(`"suggestedWords": ${MEDIAN_WORDS[8]}`);
+
+    const withoutEight = { ...MEDIAN_WORDS };
+    delete withoutEight[8];
+    const { "questions.ts": missing } = buildComparativeFiles([bank()], KNOWN, withoutEight);
+    expect(missing).toContain('"suggestedFrom": "median"');
+    expect(missing).toContain('"suggestedWords": 0'); // 8 is removed from this test's table, so nothing ships on a guess
   });
 
   it("keeps the key, with its pairing, out of the public file", () => {
