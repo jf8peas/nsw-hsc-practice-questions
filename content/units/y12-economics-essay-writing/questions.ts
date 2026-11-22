@@ -24,7 +24,7 @@ export const questions: Question[] = [
     verb: "explain",
     economy: "china",
     source: "Barker 2024 Trial, Q27",
-    live: false,
+    live: true,
   }),
   essay(2, {
     prompt: "Assess the effectiveness of the strategies used by an emerging economy you have studied to balance economic growth with environmental sustainability and income equality.",
@@ -37,7 +37,7 @@ export const questions: Question[] = [
     verb: "evaluate",
     economy: "nepal",
     source: "Sydney Boys 2020 Trial, Q27",
-    live: false,
+    live: true,
   }),
   essay(4, {
     prompt: "Explain the impact of globalisation in achieving economic growth and development on an economy other than Australia.",
@@ -50,7 +50,7 @@ export const questions: Question[] = [
     prompt: "Evaluate the effectiveness of the strategies used to promote economic growth and development in one emerging and one developing economy you have studied.",
     verb: "evaluate",
     economy: "both",
-    live: false,
+    live: true,
   }),
   essay(6, {
     prompt: "Assess the extent to which integration into the global economy has improved living standards in one emerging and one developing economy you have studied.",

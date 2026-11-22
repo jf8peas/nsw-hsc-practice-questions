@@ -40,7 +40,7 @@ import { handleEssayGrade } from "@/lib/essay/grade-handler.server";
 
 export const runtime = "nodejs";
 /** A paragraph marking call can take 10 to 30 seconds (spec 007); the platform default is shorter. */
-export const maxDuration = 60; // seconds
+export const maxDuration = 120; // seconds (needs Vercel Fluid compute or a Pro plan; see README)
 
 const MAX_ANSWER_LEN = 6000;
 

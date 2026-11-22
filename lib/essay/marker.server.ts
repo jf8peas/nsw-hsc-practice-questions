@@ -41,10 +41,10 @@ export const rubric = rubricJson as unknown as Rubric;
 export const concepts = conceptList as Record<string, string>;
 export const PROMPT_VERSION = rubric.promptVersion;
 
-/** A starting value: the English markers' models reasoned to 7500 tokens (spec 009's gate), so the pilot decides (research R7, R8e). */
-export const MAX_TOKENS = 3000;
-export const FIRST_CALL_TIMEOUT_MS = 40_000;
-export const BUDGET_MS = 55_000; // inside the grade route's maxDuration of 60 s
+/** 3000 cut off 3 of 21 replies in the first pilot run (the model reasons before it replies; spec 009 needed 12000), so 8000. Keep in step with scripts/pilot-essay-marker.py. */
+export const MAX_TOKENS = 8000;
+export const FIRST_CALL_TIMEOUT_MS = 60_000; // one holdout call took 46.5 s
+export const BUDGET_MS = 115_000; // inside the grade route's maxDuration of 120 s; a retry still fits SC-003's 2 minutes
 export const MIN_RETRY_MS = 12_000;
 const RETRY_MARGIN_MS = 2_000;
 const MAX_REASON = 300;
@@ -122,6 +122,30 @@ export interface ParsedEssayReply {
 
 const text = (v: unknown, max: number): string => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
+// The marker sometimes says where it found something ("named in the marking notes as ..."). That would tell the
+// student the hidden notes or the school's criteria exist, so every student-facing text is rewritten after parsing.
+const KEY_NAMES = String.raw`(?:the\s+)?(?:marking\s+notes?|marking\s+criteria|school(?:['’]s)?\s+(?:marking\s+)?criteria|marking\s+guide|marking\s+key)`;
+const KEY_LOCATION = new RegExp(String.raw`(?:\b(?:is|are|was|were)\s+)?\b(?:named|listed|mentioned|identified|stated|set out|noted|specified|described|given|expected|required|flagged)\s+(?:in|by)\s+${KEY_NAMES}\s+(?:as|to be)\b`, "gi");
+const KEY_ASIDE = new RegExp(String.raw`(?:,\s*)?\b(?:according to|as per|per|based on|in line with|against|under|in light of)\s+${KEY_NAMES}(?:\s*,)?`, "gi");
+const KEY_SUBJECT = new RegExp(String.raw`\b${KEY_NAMES}\s+(?:expects?|requires?|lists?|names?|states?|says?|mentions?|indicates?|specif(?:y|ies)|calls? for|wants?)\b`, "gi");
+const KEY_ANY = new RegExp(String.raw`\b${KEY_NAMES}`, "gi");
+
+/** Rewrites any mention of the marking notes or the school's criteria so the student is not told they exist. */
+export function scrubKeyMentions(value: string): string {
+  if (!KEY_ANY.test(value)) return value;
+  KEY_ANY.lastIndex = 0;
+  let out = value
+    .replace(KEY_LOCATION, "is")
+    .replace(KEY_ASIDE, "")
+    .replace(KEY_SUBJECT, "a strong answer includes")
+    .replace(KEY_ANY, "a strong answer");
+  out = out.replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").replace(/\bis\s+is\b/gi, "is").trim();
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+/** `text`, then the key-mention rewrite (an empty result stays empty). */
+const safeText = (v: unknown, max: number): string => scrubKeyMentions(text(v, max));
+
 /**
  * The first {...} block of the reply, as the pilot does. A missing verdict, band, mark,
  * coversRequiredEconomies, band reason or lift point makes the whole reply a failure: it is never read
@@ -147,7 +171,7 @@ export function parseEssayReply(content: string, essay: string, list: Record<str
     if (!entry || typeof entry !== "object") return null;
     const verdict = (entry as { verdict?: unknown }).verdict;
     if (typeof verdict !== "string" || !(VERDICTS as readonly string[]).includes(verdict)) return null;
-    criteria[id] = { verdict: verdict as Verdict, reason: text((entry as { reason?: unknown }).reason, MAX_REASON) };
+    criteria[id] = { verdict: verdict as Verdict, reason: safeText((entry as { reason?: unknown }).reason, MAX_REASON) };
   }
 
   const band = obj.band;
@@ -156,10 +180,11 @@ export function parseEssayReply(content: string, essay: string, list: Record<str
   if (typeof mark !== "number" || !Number.isInteger(mark) || mark < 0 || mark > 20) return null;
   const covers = obj.coversRequiredEconomies;
   if (typeof covers !== "boolean") return null;
-  const bandReason = text(obj.bandReason, MAX_BAND_REASON);
+  const bandReason = safeText(obj.bandReason, MAX_BAND_REASON);
   if (!bandReason) return null;
-  const liftRaw = Array.isArray(obj.liftYourMark) ? obj.liftYourMark : [];
-  const lift = liftRaw.map((x) => text(x, MAX_LIFT)).filter(Boolean).slice(0, 2);
+  // One holdout run returned a single string rather than an array: accept it as one lift point.
+  const liftRaw = Array.isArray(obj.liftYourMark) ? obj.liftYourMark : typeof obj.liftYourMark === "string" ? [obj.liftYourMark] : [];
+  const lift = liftRaw.map((x) => safeText(x, MAX_LIFT)).filter(Boolean).slice(0, 2);
   if (lift.length === 0) return null;
 
   const flags: ParsedEssayReply["flags"] = [];
@@ -167,7 +192,7 @@ export function parseEssayReply(content: string, essay: string, list: Record<str
     if (!f || typeof f !== "object") continue;
     const quote = text((f as { quote?: unknown }).quote, 300);
     if (!quote || !quoteInText(quote, essay)) continue;
-    flags.push({ quote, why: scrubFlagWhy(quote, text((f as { why?: unknown }).why, 300)) });
+    flags.push({ quote, why: scrubFlagWhy(quote, safeText((f as { why?: unknown }).why, 300)) });
     if (flags.length >= MAX_FLAGS) break;
   }
 
@@ -178,7 +203,7 @@ export function parseEssayReply(content: string, essay: string, list: Record<str
     const key = (g as { concept?: unknown }).concept;
     if (typeof key !== "string" || !(key in list) || gapKeys.has(key)) continue;
     gapKeys.add(key);
-    gaps.push({ conceptId: essayConceptId(key), detail: text((g as { detail?: unknown }).detail, MAX_DETAIL) });
+    gaps.push({ conceptId: essayConceptId(key), detail: safeText((g as { detail?: unknown }).detail, MAX_DETAIL) });
     if (gaps.length >= MAX_GAPS) break;
   }
 

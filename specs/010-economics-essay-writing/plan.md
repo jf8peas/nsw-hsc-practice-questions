@@ -35,7 +35,7 @@ The unit is **a one-question, one-try cousin of the English units (008/009)**, n
 
 **Project Type**: web application (single Next.js project).
 
-**Performance Goals**: ≥ 95% of essays show a mark and feedback within 2 minutes (SC-003). The grade request keeps 008's budget (40 s first call, one retry inside 55 s, `maxDuration` 60); the pilot records seconds per call and the gate requires p95 ≤ 40 s, otherwise the plan raises timeouts (R7, R8).
+**Performance Goals**: ≥ 95% of essays show a mark and feedback within 2 minutes (SC-003). The grade request keeps 008's budget (raised after the gate: 60 s first call, one retry inside 115 s, `maxDuration` 120; lease 130 s); the pilot records seconds per call and the gate requires p95 ≤ 40 s, otherwise the plan raises timeouts (R7, R8).
 
 **Constraints**: constitution 2.17.0 (key server-only; never self-marked; database required; daily cap; no new dependency); 600–800 words enforced in browser and server with one counter; 44 px targets, 4.5:1 contrast, no sideways scroll at 390 px; essays 1, 3 and 5 live before Tue 1 Dec 2026, gate first.
 

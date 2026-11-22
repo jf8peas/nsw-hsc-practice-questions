@@ -156,16 +156,16 @@ async function main() {
         if (new Set(q.options).size !== q.options.length) {
           err(`${q.id}: mc has duplicate option text`);
         }
-      } else if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative") {
+      } else if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative" || q.type === "essay") {
         // model sentences, target terms and essay keys are checked by their own rules (FR-008, spec 007)
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);
       }
     }
 
-    // a unit either sources every question or none (no silent gaps in attribution)
+    // a unit either sources every question or none (no silent gaps in attribution); the essay unit sources its trial essays only (spec 010)
     const sourced = unit.questions.filter((q) => q.source !== undefined).length;
-    if (sourced > 0 && sourced < unit.questions.length) {
+    if (unit.flow !== "essay" && sourced > 0 && sourced < unit.questions.length) {
       err(`Unit "${unit.id}": ${unit.questions.length - sourced} question(s) have no source but others do`);
     }
 

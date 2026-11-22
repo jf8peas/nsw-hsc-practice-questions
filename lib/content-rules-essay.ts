@@ -83,7 +83,9 @@ export function validateEssayRules(unit: Unit, answers: AnswerSet, otherUnits: r
 
     // the key must not appear in anything public
     for (const [label, text] of [["marking notes", key.markingNotes], ["model essay", key.modelEssay], ["school criteria", key.schoolCriteria ?? ""]] as const) {
-      if (text && publicTexts.some((p) => sharesRun(text, p, LEAK_RUN))) {
+      // the school's criteria legitimately repeat the wording of their own question, which is public
+      const against = label === "school criteria" ? publicTexts.filter((p) => p !== q.prompt) : publicTexts;
+      if (text && against.some((p) => sharesRun(text, p, LEAK_RUN))) {
         errors.push(`${q.id}: the ${label} share a run of ${LEAK_RUN} characters with public text`);
       }
     }

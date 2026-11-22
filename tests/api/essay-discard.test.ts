@@ -65,7 +65,7 @@ describe("discarding an attempt", () => {
     await env.db.update(essayPhases).set({ markingStartedAt: new Date() }).where(eq(essayPhases.attemptId, a.attemptId));
     expect(await discard(a)).toMatchObject({ status: 409, body: { error: "marking_in_progress" } });
     expect(await env.db.select().from(attempts).where(eq(attempts.id, a.attemptId))).toHaveLength(1);
-    await env.db.update(essayPhases).set({ markingStartedAt: new Date(Date.now() - 120_000) }).where(eq(essayPhases.attemptId, a.attemptId));
+    await env.db.update(essayPhases).set({ markingStartedAt: new Date(Date.now() - 150_000) }).where(eq(essayPhases.attemptId, a.attemptId));
     expect((await discard(a)).status).toBe(200);
   });
 

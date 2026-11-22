@@ -13,7 +13,7 @@ import type { EssayScaffold } from "@/lib/essay/scaffold";
  */
 
 /** A marking lease older than this is ignored (a crashed request must not strand an attempt). */
-export const LEASE_SECONDS = 90;
+export const LEASE_SECONDS = 130;
 
 const leaseExpired = sql`(${essayPhases.markingStartedAt} is null or ${essayPhases.markingStartedAt} < now() - make_interval(secs => ${LEASE_SECONDS}))`;
 
@@ -210,7 +210,7 @@ export type DiscardOutcome = "discarded" | "marking_in_progress" | "already_fini
 
 /**
  * Deletes the student's OPEN essay attempt (S2): the attempt row, and by cascade its phase row and draft.
- * Refused while a marking is in flight (a lease younger than 90 s). Earlier finished attempts are other
+ * Refused while a marking is in flight (a lease younger than 130 s). Earlier finished attempts are other
  * attempt rows and are never touched.
  */
 export async function discardOpenAttempt(db: Db, userId: string, attemptId: string): Promise<DiscardOutcome> {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { questions } from "@/content/units/y12-economics-essay-writing/questions";
 import { concepts } from "@/content/units/y12-economics-essay-writing/concepts";
+import { answers } from "@/content/units/y12-economics-essay-writing/answers";
 import { meta } from "@/content/units/y12-economics-essay-writing/meta";
 import { validateConceptRules } from "@/lib/content-rules";
 import { validateEssayRules } from "@/lib/content-rules-essay";
@@ -11,7 +12,9 @@ const UNIT = "y12-economics-essay-writing";
 const words = (n: number) => Array.from({ length: n }, (_, i) => `word${i}`).join(" ");
 
 function unit(patch: (q: EssayQuestion[]) => EssayQuestion[] = (q) => q, extra: Partial<Unit> = {}): Unit {
-  return { ...meta, questions: patch(structuredClone(questions) as EssayQuestion[]), concepts, retired: {}, ...extra } as Unit;
+  // every essay starts not live here so each rule is tested on its own; the shipped state has its own test below
+  const base = (structuredClone(questions) as EssayQuestion[]).map((q) => ({ ...q, live: false }));
+  return { ...meta, questions: patch(base), concepts, retired: {}, ...extra } as Unit;
 }
 
 const live = (id: string) => (qs: EssayQuestion[]) => qs.map((q) => (q.id === `${UNIT}.${id}` ? { ...q, live: true } : q));
@@ -33,6 +36,13 @@ describe("the six essays as shipped", () => {
   it("pass the rules with every essay not live and no keys", () => {
     expect(validateEssayRules(unit(), {})).toEqual([]);
     expect(validateConceptRules(unit())).toEqual([]);
+  });
+
+  it("pass the rules as shipped: e1, e3 and e5 live with their real keys, e2, e4 and e6 not live", () => {
+    const shipped = { ...meta, questions, concepts, retired: {} } as Unit;
+    expect(validateEssayRules(shipped, answers)).toEqual([]);
+    const live = (questions as EssayQuestion[]).filter((q) => q.live).map((q) => q.id.split(".")[1]);
+    expect(live).toEqual(["e1", "e3", "e5"]);
   });
 
   it("have the offered order 1, 3, 5, 2, 4, 6 and the trial sources", () => {
@@ -90,6 +100,20 @@ describe("a live essay must be complete", () => {
     const leak = "The open door policy and special economic zones drew foreign investment into coastal China after 1980.";
     const withLeak = unit(live("e5"), { description: `${meta.description} ${leak}` });
     expect(validateEssayRules(withLeak, { [`${UNIT}.e5`]: key({ markingNotes: leak }) }).join("\n")).toMatch(/share a run of 60 characters/);
+  });
+});
+
+describe("school criteria may repeat their own question but not another essay's", () => {
+  const own = "Makes a clear judgement using supporting evidence of the impacts of globalisation on the growth and development of an economy other than Australia";
+  it("allows a run of the essay's own question", () => {
+    const e3 = (questions as EssayQuestion[]).find((q) => q.id.endsWith(".e3"))!;
+    expect(e3.prompt.toLowerCase()).toContain("impacts of globalisation on the growth and development of an economy other than australia");
+    expect(validateEssayRules(unit(live("e3")), { [`${UNIT}.e3`]: key({ schoolCriteria: own }) })).toEqual([]);
+  });
+
+  it("refuses a run of another essay's question", () => {
+    const other = "With reference to an economy other than Australia, explain the role that globalisation has played in their economic growth and development.";
+    expect(validateEssayRules(unit(live("e3")), { [`${UNIT}.e3`]: key({ schoolCriteria: other }) }).join(String.fromCharCode(10))).toMatch(/school criteria share a run of 60 characters/);
   });
 });
 

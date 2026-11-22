@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getAnswer } from "@/content/answers";
 import { conceptProgress } from "@/lib/concepts/progress";
+import rubric from "@/lib/paragraph/rubric.json";
 import { getUnit } from "@/content";
 import { attempts, dailyAiUsage, paragraphPhases, results } from "@/lib/db/schema";
 
@@ -65,7 +66,7 @@ describe("paragraph phase 1: 4/4", () => {
     expect(row.phase1Text).toContain("strong topic sentence");
     expect(row.phase1Verdicts.a).toEqual({ met: true, reason: REASON });
     expect(row.phase1Verdicts.d.subs).toEqual({ preciseLanguage: true, noPadding: true, withinLimit: true });
-    expect(row.phase1PromptVersion).toBe("round 5 (4 Nov 2026)");
+    expect(row.phase1PromptVersion).toBe(rubric.promptVersion);
     expect(row.phase1Model).toBe("mock-default");
     expect(await used(user.id)).toBe(1);
   });
@@ -178,7 +179,7 @@ describe("paragraph grading: logs and route config", () => {
   it("allows a model call longer than the platform default", async () => {
     env = await setupParagraphEnv();
     const route = await import("@/app/api/grade/route");
-    expect(route.maxDuration).toBe(60);
+    expect(route.maxDuration).toBe(120);
   });
 });
 

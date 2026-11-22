@@ -1,4 +1,12 @@
 {
-  "regions": ["syd1"],
-  "crons": [{ "path": "/api/cron/retention", "schedule": "0 17 * * 0" }]
+  "fluid": true,
+  "regions": [
+    "syd1"
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/retention",
+      "schedule": "0 17 * * 0"
+    }
+  ]
 }

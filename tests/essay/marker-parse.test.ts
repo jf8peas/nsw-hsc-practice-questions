@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { containsKeyEcho, parseEssayReply, type ParsedEssayReply } from "@/lib/essay/marker.server";
+import { containsKeyEcho, parseEssayReply, scrubKeyMentions, type ParsedEssayReply } from "@/lib/essay/marker.server";
 
 import { markerEssayContent } from "../helpers/essay";
 
@@ -47,6 +47,14 @@ describe("a reply that must fail (never a default)", () => {
 });
 
 describe("lift points", () => {
+  it("accepts a single string as one lift point", () => {
+    expect(parse(text({ ...obj(), liftYourMark: "Add a dated Gini figure." }))?.lift).toEqual(["Add a dated Gini figure."]);
+  });
+
+  it("rejects an empty string", () => {
+    expect(parse(text({ ...obj(), liftYourMark: "  " }))).toBeNull();
+  });
+
   it("keeps the first two of three", () => {
     expect(parse(text({ ...obj(), liftYourMark: ["a", "b", "c"] }))?.lift).toEqual(["a", "b"]);
   });
@@ -121,5 +129,35 @@ describe("the key echo guard", () => {
 
   it("ignores key text shorter than the run", () => {
     expect(containsKeyEcho(reply({ bandReason: "None provided." }), ["None provided."], [])).toBe(false);
+  });
+});
+
+describe("mentions of the marking notes or school criteria are removed from every student-facing text", () => {
+  const HIDDEN = /marking notes?|school(?:'s)? (?:marking )?criteria|marking criteria|marking guide|marking key/i;
+
+  it.each([
+    ["named in the notes as", "Hydropower is named in the marking notes as a key strategy but is not developed.", "Hydropower is a key strategy but is not developed."],
+    ["listed in the school criteria as", "The WTO is listed in the school's marking criteria as essential.", "The WTO is essential."],
+    ["an aside", "Add a model, according to the marking notes, to explain the mechanism.", "Add a model to explain the mechanism."],
+    ["a subject", "The marking notes expect a Lorenz curve to show inequality.", "A strong answer includes a Lorenz curve to show inequality."],
+    ["any other mention", "No link is made to the school criteria here.", "No link is made to a strong answer here."],
+    ["an ordinary sentence", "No Gini coefficient is given for either economy.", "No Gini coefficient is given for either economy."],
+  ])("%s", (_name, input, expected) => {
+    expect(scrubKeyMentions(input)).toBe(expected);
+  });
+
+  it("is applied to gap details, lift points, criterion reasons, the band reason and flag reasons", () => {
+    const o = obj();
+    (o.criteria as Record<string, { verdict: string; reason: string }>).theory.reason = "The theory is named in the marking notes as essential but is absent.";
+    o.bandReason = "A Band 2 answer, as the marking notes describe, with clear judgement.";
+    o.liftYourMark = ["The marking notes expect a dated figure for each claim.", "Weigh the limits, per the school criteria, in the conclusion."];
+    o.gaps = [{ concept: "china-wto", detail: "WTO accession is named in the marking notes as the key export driver but is not explained." }];
+    o.dataFlags = [{ quote: "China GDP was $90 trillion in 2020", why: "This figure looks wrong against the marking notes." }];
+    const r = parse(text(o))!;
+    const all = [r.bandReason, ...r.lift, ...Object.values(r.criteria).map((c) => c.reason), ...r.gaps.map((g) => g.detail), ...r.flags.map((f) => f.why)];
+    for (const t of all) expect(t).not.toMatch(HIDDEN);
+    expect(r.gaps[0].detail).toBe("WTO accession is the key export driver but is not explained.");
+    expect(r.criteria.theory.reason).toBe("The theory is essential but is absent.");
+    expect(r.flags).toHaveLength(1);
   });
 });

@@ -57,7 +57,7 @@ A finished-essay Redo is `questionId` of that essay: a new attempt (the previous
 
 ### `POST /api/essay/discard` — body `{ attemptId, attemptToken, questionId }` [S2]
 
-`200 { discarded: true }` (the attempt row and, by cascade, its essay row, draft and nothing else); `409 { error: "marking_in_progress" }` if the lease is younger than 90 s; `409 { error: "already_finished" }` if the attempt is complete (finished attempts are never deleted); `404` if not the student's. Earlier finished attempts of the same essay are untouched.
+`200 { discarded: true }` (the attempt row and, by cascade, its essay row, draft and nothing else); `409 { error: "marking_in_progress" }` if the lease is younger than 130 s; `409 { error: "already_finished" }` if the attempt is complete (finished attempts are never deleted); `404` if not the student's. Earlier finished attempts of the same essay are untouched.
 
 ## C. Scaffold save and lock — `POST /api/essay/scaffold` [S1]
 

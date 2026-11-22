@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { getAnswer } from "@/content/answers";
 import { dailyAiUsage, paragraphPhases, results } from "@/lib/db/schema";
+import rubric from "@/lib/paragraph/rubric.json";
 
 import {
   gradeParagraph,
@@ -57,7 +58,7 @@ describe("paragraph phase 2: the correction", () => {
     const row = await phaseRow(questionId);
     expect(row).toMatchObject({ status: "final", ending: "corrected", phase1Mark: 2, phase2Mark: 3, recordedMark: 3, phase2Text: "A fuller correction. [met:abcd]" });
     expect(row.phase2Verdicts!.b.met).toBe(true);
-    expect(row.phase2PromptVersion).toBe("round 5 (4 Nov 2026)");
+    expect(row.phase2PromptVersion).toBe(rubric.promptVersion);
     const res = await resultRow(questionId);
     expect(res.marksAwarded).toBe(3);
     expect(res.answer).toBe("A fuller correction. [met:abcd]");

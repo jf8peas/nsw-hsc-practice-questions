@@ -126,7 +126,7 @@ planning --Start writing--> writing      [validate; lock; scaffold frozen]      
 planning --Get feedback--> (review in flight)
      review ok            --> writing    [review stored; lock]                                    S2
      reviewer failed/cap  --> planning   [nothing locked; "Start writing" offered]                 S2
-planning|writing --Discard--> (deleted)  [unmarked only; confirm; lease null or > 90 s old]        S2
+planning|writing --Discard--> (deleted)  [unmarked only; confirm; lease null or > 130 s old]        S2
 writing --Submit essay--> (marking in flight; lease taken)
      marked               --> finished   [row filled; results row saved; attempt completes; draft deleted]
      marker failed        --> writing    [lease cleared; slot refunded; editable box; draft kept]
@@ -135,7 +135,7 @@ writing --Submit essay--> (marking in flight; lease taken)
 finished --Redo--> new attempt (planning) [a new attempts row; this one is untouched]
 ```
 
-Resume shows the stage the row is in: `planning` → scaffold page; `writing` → essay page (with the review if stored; the draft restored); `finished` → result. The marking screen is never restored (a lease older than 90 s is ignored). An unreadable database at start/resume → a notice ("try again"), never a guess.
+Resume shows the stage the row is in: `planning` → scaffold page; `writing` → essay page (with the review if stored; the draft restored); `finished` → result. The marking screen is never restored (a lease older than 130 s is ignored). An unreadable database at start/resume → a notice ("try again"), never a guess.
 
 ## 5. Concept list and gap progress
 

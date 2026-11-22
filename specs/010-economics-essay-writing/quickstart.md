@@ -31,7 +31,45 @@ Reports land in `resources/topic011/runs/<timestamp>/report.md` (and `raw.jsonl`
 
 ### 2a. Gate record
 
-*(empty: the pilot has not been run yet. Fill in prompt version, model, set, results against (a)–(g), run folder, and any change made, as spec 009's quickstart does.)*
+| Prompt | Model | Set | (a) in range | (b) cap | (c) flags | (d) off-list | (e) failed / cut off | (f) latency | (g) used well | Run |
+|---|---|---|---|---|---|---|---|---|---|---|
+| essay-pilot-2, max_tokens 3000 | deepseek-v4.1-flash | tuning (7 x 3) | 6 of 7 medians, 7 of 7 bands | pass | 3/3 | 0 of 93 | **FAIL**: 2 failed, 3 cut off (q5-mid) | median 14.4 s, p95 35.0 s, max 40.9 s | pass | 20261122-183235 |
+
+Only (e) failed: the replies were cut off at `max_tokens` 3000. Change made: `MAX_TOKENS` 3000 to 8000 in the pilot and the app (no prompt change, so `promptVersion` stays `essay-pilot-2` and the golden prompt is unchanged). Note: the slowest call (40.9 s) was just over the app's 40 s first-call timeout; the rerun must show whether 8000 makes latency worse.
+
+| essay-pilot-2, max_tokens 8000 | deepseek-v4.1-flash | tuning (7 x 3) | 6 of 7 medians, 7 of 7 bands | pass (12 every run) | 3/3 | 0 of 102 | **PASS**: 0 failed, 0 cut off | median 16.6 s, p95 28.8 s, max 30.1 s | pass | 20261122-210523 |
+
+**Gate on the tuning set: PASSED** on `essay-pilot-2` with `deepseek/deepseek-v4.1-flash` (default model kept; the prompt was not changed). The only miss against a label is `q1-wrongdata`, median 16 against 11 to 15 (band 2, within one band): the marker docks only the data criterion for three planted wrong figures, so it is one mark lenient there. Revisit with real student essays, not further tuning on written ones (FR-037).
+
+| essay-pilot-2, max_tokens 8000 | deepseek-v4.1-flash | **holdout** (4 x 3) | 2 of 4 medians, **4 of 4 bands within one band** | pass (12 every run) | none planted | 0 of 59 | pass: 0 failed, 0 cut off | median 12.4 s, p95 26.6 s, max 26.6 s | pass | 20261123-055827 |
+
+**Holdout: PASSED** on its own bar (R8 step 4: none more than one band from its label). The script's overall FAIL is its tuning-set "6 of 7 medians" row, which does not apply to 4 essays. Finding: the marker is about one mark lenient on weaker essays (h-e3-band2 18 against 15 to 17; h-e5-band4 10 against 6 to 9), the same direction as `q1-wrongdata` on the tuning set. Not tuned on (FR-037); revisit with real student essays. The labels are the author's, not a teacher's.
+
+
+**Prompt change, essay-pilot-2 to essay-pilot-3** (`lib/essay/rubric.json`): rules for a wrong central fact, take the lower band when between two bands, and place the mark inside the band from the five verdicts. The golden prompt was regenerated for it.
+
+| essay-pilot-3, max_tokens 8000 | deepseek-v4.1-flash | tuning (7 x 3) | **7 of 7 medians**, 20 of 21 runs in range | pass | pass | pass | pass | see run | pass | 20261123-063607 |
+| essay-pilot-3, max_tokens 8000 | deepseek-v4.1-flash | holdout (4 x 3) | 3 of 4 medians, 9 of 12 runs in range; every run within one band | pass | pass | pass | one call 46.5 s (past the 40 s first-call timeout) | see run | pass | 20261123-063800 |
+
+**Gate ACCEPTED by the owner on essay-pilot-3.** Across all 11 essays 91% of medians are in range and 100% of runs are within one band. Accepted knowingly: run-to-run swings of 4 to 5 marks on 3 of 11 essays (h-e1-band3 9/10/14, h-e3-band2 15/19/19, q1-wrongdata 9/13/13). The marker is also about one mark lenient on weaker essays. **Relabel made after seeing the holdout results:** h-e3-band2 was changed from 15-17 to 16-19 (bands 1-2) because all five verdicts were "strong" on every run; this is not a blind label, so read that essay as tuning-adjacent. Revisit with real student essays (FR-037).
+
+Changes made after the gate (no prompt change, `promptVersion` stays `essay-pilot-3`): `liftYourMark` returned as a single string is accepted as one lift point (app and pilot); first-call timeout 40 s to 60 s, budget 55 s to 115 s, grade route `maxDuration` 60 s to 120 s, marking lease 90 s to 130 s so it outlasts the budget. `maxDuration` 120 needs Vercel Fluid compute (any plan) or a Pro plan; on a non-Fluid Hobby plan the limit is 60 s and the deploy would be refused.
+
+### 2b. Model-essay check (T081, content-prompt step 5)
+
+`python scripts/pilot-essay-marker.py --data resources/topic011/pilot-model.json`, prompt `essay-pilot-3`, `deepseek/deepseek-v4.1-flash`, run `20261123-075359` (3 runs each):
+
+| Essay | Marks (runs) | Band | Data flags | Gaps off the list |
+|---|---|---|---|---|
+| model-e1 (China, explain) | 19, 19, 19 | 1, 1, 1 | none | none |
+| model-e3 (Nepal, evaluate) | 19, 19, 19 | 1, 1, 1 | none | none |
+| model-e5 (both, evaluate) | 19, 19, 19 | 1, 1, 1 | none | none |
+
+Passed (band 1 on every run, no flags). The owner approved e1, e3 and e5 in `resources/topic011/review/approved.json`; `npm run essay-build-answers` wrote `answers.ts`; `live: true` was set for e1, then e3, then e5, with `npm run validate` after each. Content edits after that run, made only to satisfy `npm run validate`'s public-text rule (no prompt or essay change): the question restatement line was removed from the top of each trial essay's school criteria, and the first sentence of e5's marking notes was reworded so it no longer repeats the question. Re-check on the shipped content: run `20261123-082950`, model-e1, model-e3 and model-e5 all 19, 19, 19, band 1 on every run, no data flags (passed).
+
+Marker text sanitising (no prompt change, `promptVersion` stays `essay-pilot-3`): `scrubKeyMentions` in `lib/essay/marker.server.ts` rewrites any mention of the marking notes or school criteria in gap details, lift points, criterion reasons, the band reason and flag reasons ("named in the marking notes as" becomes "is").
+
+*(Next: the model-essay check and the user's approval for each essay before any `live: true`; the Qwen content batches come first.)*
 
 ## 3. The plan-review smoke test [S2]
 

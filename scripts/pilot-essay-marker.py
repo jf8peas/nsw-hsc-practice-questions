@@ -56,7 +56,7 @@ PROMPT_VERSION = RUBRIC["promptVersion"]
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash"
 TIMEOUT_S = 180
-MAX_TOKENS = 3000  # keep in step with lib/essay/marker.server.ts; raise both if a run reports finish_reason length
+MAX_TOKENS = 8000  # keep in step with lib/essay/marker.server.ts; 3000 cut off 3 of 21 replies in the first run (the model reasons first)
 FIRST_CALL_P95_BAR_S = 40
 CRITERIA = list(RUBRIC["criteria"].keys())
 VERDICTS = set(RUBRIC["verdicts"])
@@ -228,7 +228,7 @@ def parse_reply(content: str) -> tuple[dict | None, str | None]:
         "gaps": [g for g in gaps if isinstance(g, dict)],
         "usedPresent": used_present,
         "usedWell": [u for u in used if isinstance(u, str)],
-        "lift": obj.get("liftYourMark") or [],
+        "lift": ([obj["liftYourMark"]] if isinstance(obj.get("liftYourMark"), str) and obj["liftYourMark"].strip() else (obj.get("liftYourMark") if isinstance(obj.get("liftYourMark"), list) else [])),
         "bandReason": obj.get("bandReason", ""),
     }, None
 

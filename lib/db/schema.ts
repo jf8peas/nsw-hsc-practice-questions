@@ -423,7 +423,7 @@ export const essayPhases = pgTable(
     reviewPromptVersion: text("review_prompt_version"),
     reviewModel: text("review_model"),
     reviewedAt: ts("reviewed_at"),
-    /** The marking lease: set while a grade request is in flight; a lease older than 90 s is ignored. */
+    /** The marking lease: set while a grade request is in flight; a lease older than 130 s is ignored (just over the marker's 115 s budget). */
     markingStartedAt: ts("marking_started_at"),
     essayText: text("essay_text"),
     essayWords: smallint("essay_words"),

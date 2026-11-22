@@ -234,7 +234,7 @@ describe("marking an essay", () => {
     expect(res.body).toMatchObject({ saved: true, attemptCompleted: true });
 
     const row = await phase(a.attemptId);
-    expect(row).toMatchObject({ status: "finished", rawMark: 14, band: 2, finalMark: 14, coversBoth: true, markingStartedAt: null, promptVersion: "essay-pilot-2" });
+    expect(row).toMatchObject({ status: "finished", rawMark: 14, band: 2, finalMark: 14, coversBoth: true, markingStartedAt: null, promptVersion: "essay-pilot-3" });
     expect(row.criteria?.assessment.verdict).toBe("developing");
     expect(row.usedWell).toEqual([`${ESSAY_UNIT}.c-skill-judgement`]);
     const res0 = (await env.db.select().from(results).where(eq(results.userId, user.id)))[0];
@@ -412,7 +412,7 @@ describe("marking an essay", () => {
     await env.db.update(essayPhases).set({ markingStartedAt: new Date() }).where(eq(essayPhases.attemptId, a.attemptId));
     expect(await gradeEssay(a, E1, essayOfWords(700))).toMatchObject({ status: 409, body: { error: "marking_in_progress" } });
     expect(env.chat).not.toHaveBeenCalled();
-    await env.db.update(essayPhases).set({ markingStartedAt: new Date(Date.now() - 120_000) }).where(eq(essayPhases.attemptId, a.attemptId));
+    await env.db.update(essayPhases).set({ markingStartedAt: new Date(Date.now() - 150_000) }).where(eq(essayPhases.attemptId, a.attemptId));
     expect((await gradeEssay(a, E1, essayOfWords(700))).status).toBe(200);
   });
 

@@ -68,7 +68,9 @@ describe("POST /api/attempts exposes no answer key, for every unit", () => {
       env = await setupRouteEnv();
       await signedInStudent(env);
       const { POST } = await import("@/app/api/attempts/route");
-      const res = await POST(post("/api/attempts", { unitId: unit.id }));
+      // the essay unit starts one essay per attempt (spec 010)
+      const essayStart = unit.flow === "essay" ? { questionId: unit.questions.find((q) => q.type === "essay" && q.live)?.id } : {};
+      const res = await POST(post("/api/attempts", { unitId: unit.id, ...essayStart }));
       expect(res.status).toBe(201);
       const body = await res.json();
       const text = JSON.stringify(body);
@@ -82,6 +84,13 @@ describe("POST /api/attempts exposes no answer key, for every unit", () => {
         for (const point of key.rubric) if (point.length > 20) expect(text).not.toContain(point);
         if (key.notes && key.notes.length > 20) expect(text).not.toContain(key.notes);
         for (const explanation of Object.values(key.wrongExplanations ?? {})) expect(text).not.toContain(explanation);
+        // spec 010: the essay key (marking notes, school criteria, model essay) never reaches the attempt-start payload
+        const essayKey = key.essay;
+        if (essayKey) {
+          for (const secret of [essayKey.markingNotes, essayKey.schoolCriteria ?? "", essayKey.modelEssay]) {
+            if (secret.length > 20) expect(text).not.toContain(secret.slice(0, 60));
+          }
+        }
         // spec 009: the comparative key's strings (criteria, notes, model answer, every visual's description)
         const cmp = key.comparative;
         if (cmp) {
