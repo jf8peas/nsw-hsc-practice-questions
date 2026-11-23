@@ -5,9 +5,9 @@ export const meta: UnitMeta = {
   year: "Year 12",
   topic: "Texts and Human Experiences",
   type: "Writing Practice",
-  title: "Away Essays",
+  title: "Common Module essays: Away",
   description:
-    "Rehearse a whole Section II essay on Michael Gow's Away: plan it, write 800 to 1,200 words and get it marked out of 20 against the school's bands, with your quotations checked against the play.",
+    "Rehearse a whole Paper 1, Section II essay on Michael Gow's Away (Common Module: Texts and Human Experiences): plan it, write 800 to 1,200 words and get it marked out of 20 against the school's bands, with your quotations checked against the play.",
   created: "2026-11-23",
   order: 3,
   conceptsReady: true,
