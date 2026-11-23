@@ -41,14 +41,14 @@ export const questions: Question[] = [
       "'Texts illuminate the anomalies in human behaviour and motivation, encouraging the audience to see the world differently.' To what extent does this statement align with your understanding of your prescribed text?",
     directive: "to what extent",
     source: "Pymble 2024 Trial, Q6",
-    live: false,
+    live: true,
   }),
   essay(3, {
     prompt:
       "Discuss how the composer of your prescribed text makes connections between the audience and the complex lives of others within the play.",
     directive: "discuss",
     source: "Abbotsleigh 2025 Trial, Q6",
-    live: false,
+    live: true,
   }),
   essay(4, {
     prompt:

@@ -183,7 +183,7 @@ async function main() {
         if (new Set(q.options).size !== q.options.length) {
           err(`${q.id}: mc has duplicate option text`);
         }
-      } else if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative" || q.type === "essay") {
+      } else if (q.type === "rewrite" || q.type === "paragraph" || q.type === "unseen" || q.type === "comparative" || q.type === "essay" || q.type === "englishEssay") {
         // model sentences, target terms and essay keys are checked by their own rules (FR-008, spec 007)
       } else {
         if (!a.modelAnswer) err(`${q.id}: short question needs a modelAnswer`);
