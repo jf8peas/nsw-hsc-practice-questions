@@ -96,6 +96,11 @@ export const attempts = pgTable(
     uniqueIndex("attempts_essay_incomplete_unique")
       .on(t.userId)
       .where(sql`${t.unitId} = 'y12-economics-essay-writing' and ${t.completedAt} is null`),
+    // spec 011: the same for the English essay-writing unit. Independent of Economics: a student may have one open
+    // essay in each unit.
+    uniqueIndex("attempts_english_essay_incomplete_unique")
+      .on(t.userId)
+      .where(sql`${t.unitId} = 'y12-english-essay-writing' and ${t.completedAt} is null`),
   ],
 );
 
@@ -440,6 +445,14 @@ export const essayPhases = pgTable(
     promptVersion: text("prompt_version"),
     model: text("model"),
     gradedAt: ts("graded_at"),
+    // spec 011 (English essay unit only; null for Economics rows). `band` stays the MARKER-selected band and
+    // `raw_mark` the marker's mark; `final_band` is the band containing the adjusted `final_mark`.
+    finalBand: smallint("final_band"),
+    questionFocus: text("question_focus"),
+    questionFocusReason: text("question_focus_reason"),
+    knowledgeErrors: jsonb("knowledge_errors").$type<Array<{ quote: string; why: string; source: "marker" | "quote-check" }>>(),
+    quoteResults: jsonb("quote_results").$type<Array<{ quote: string; status: "ok" | "near" | "other-source" | "not-found"; correct?: string; ratio?: number }>>(),
+    referenceTextHash: text("reference_text_hash"),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),
   },
@@ -451,12 +464,18 @@ export const essayPhases = pgTable(
     }).onDelete("cascade"),
     unique("essay_phases_attempt_question_unique").on(t.attemptId, t.questionId),
     check("essay_phases_status", sql`${t.status} in ('planning', 'writing', 'finished')`),
-    check("essay_phases_scaffold_words", sql`${t.scaffoldWords} >= 0 and ${t.scaffoldWords} <= 250`),
+    // Per-unit branches (spec 011 data-model §5.3): Economics keeps 0-250 scaffold words, English allows 0-150.
+    check(
+      "essay_phases_scaffold_words",
+      sql`${t.scaffoldWords} >= 0 and ${t.scaffoldWords} <= case when ${t.unitId} = 'y12-english-essay-writing' then 150 else 250 end`,
+    ),
     check("essay_phases_finished_iff_marked", sql`(${t.status} = 'finished') = (${t.finalMark} is not null)`),
     check(
       "essay_phases_marked_fields",
-      sql`${t.finalMark} is null or (${t.finalMark} between 1 and 20 and ${t.rawMark} between 1 and 20 and ${t.band} between 1 and 5 and ${t.essayText} is not null and ${t.essayWords} between 600 and 800 and ${t.criteria} is not null and ${t.promptVersion} is not null and ${t.model} is not null)`,
+      sql`(${t.unitId} <> 'y12-english-essay-writing' and (${t.finalMark} is null or (${t.finalMark} between 1 and 20 and ${t.rawMark} between 1 and 20 and ${t.band} between 1 and 5 and ${t.essayText} is not null and ${t.essayWords} between 600 and 800 and ${t.criteria} is not null and ${t.promptVersion} is not null and ${t.model} is not null))) or (${t.unitId} = 'y12-english-essay-writing' and (${t.finalMark} is null or (${t.finalMark} between 1 and 20 and ${t.rawMark} between 0 and 20 and ${t.band} between 1 and 5 and ${t.finalBand} between 1 and 5 and ${t.essayText} is not null and ${t.essayWords} between 800 and 1200 and ${t.criteria} ?& array['argument','analysis','knowledge','expression'] and ${t.questionFocus} is not null and ${t.questionFocusReason} is not null and ${t.knowledgeErrors} is not null and ${t.quoteResults} is not null and length(${t.referenceTextHash}) = 64 and ${t.promptVersion} is not null and ${t.model} is not null)))`,
     ),
+    check("essay_phases_question_focus", sql`${t.questionFocus} is null or ${t.questionFocus} in ('fully', 'partly', 'barely')`),
+    check("essay_phases_final_band", sql`${t.finalBand} is null or ${t.finalBand} between 1 and 5`),
     check("essay_phases_locked_iff_not_planning", sql`(${t.status} = 'planning') = (${t.scaffoldLockedAt} is null)`),
     check("essay_phases_review_needs_lock", sql`${t.review} is null or ${t.scaffoldLockedAt} is not null`),
     index("essay_phases_user_idx").on(t.userId, t.unitId),
@@ -465,6 +484,19 @@ export const essayPhases = pgTable(
 
 export type EssayPhaseRow = typeof essayPhases.$inferSelect;
 export type NewEssayPhaseRow = typeof essayPhases.$inferInsert;
+
+/**
+ * spec 011: shared, non-personal reference texts used only to verify a student's quotations (the prescribed play,
+ * id "away"). Server-only: no browser route reads this table, and the text is loaded from a gitignored local copy by
+ * `scripts/load-reference-text.ts`. No user id, attempt id, answer or name.
+ */
+export const referenceTexts = pgTable("reference_texts", {
+  id: text("id").primaryKey(),
+  content: text("content").notNull(),
+  contentHash: text("content_hash").notNull(),
+  loadedAt: ts("loaded_at").notNull().defaultNow(),
+});
+export type ReferenceTextRow = typeof referenceTexts.$inferSelect;
 
 export const rewriteDrafts = pgTable(
   "rewrite_drafts",

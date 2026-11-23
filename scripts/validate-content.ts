@@ -23,6 +23,9 @@ import {
 } from "../lib/content-rules";
 import { validateComparativeRules } from "../lib/content-rules-comparative";
 import { validateEssayRules } from "../lib/content-rules-essay";
+import { validateEnglishEssayRules } from "../lib/content-rules-english-essay";
+import { checkModelEssay, modelProblems } from "../lib/english-essay/model-check";
+import { PlayIndex } from "../lib/english-essay/play-index";
 import comparativeRubric from "../lib/comparative/rubric.json";
 import type { AnswerSet, Unit } from "../lib/types";
 
@@ -62,6 +65,28 @@ const SOURCE_RE = /^[A-Z][A-Za-z'’ .-]+ (19|20)\d{2} (Trial|Half-yearly|Common
 // In a unit whose other questions are copied from school papers, a question written new for the
 // unit says so, so that every question in the unit shows where it came from.
 const ORIGINAL_SOURCE = "Original question";
+
+/**
+ * Spec 011 T068: every LIVE English model essay must be 900 to 1,100 words with zero near or not-found quotations against the
+ * play. The play is gitignored, so this runs only where the local copy exists (a teacher's machine); on a build machine without
+ * it the check is skipped with a notice, never failed, and validation stays independent of the database.
+ */
+function validateEnglishModels(unit: Unit, answers: AnswerSet): string[] {
+  const live = unit.questions.filter((q) => q.type === "englishEssay" && q.live);
+  if (live.length === 0) return [];
+  const playFile = join(process.cwd(), "resources", "english-unseen", "away-by-michael-gow.txt");
+  if (!existsSync(playFile)) {
+    console.log(`  (the local play is not present, so the live English model quotations were not checked)`);
+    return [];
+  }
+  const play = new PlayIndex(readFileSync(playFile, "utf8"));
+  const out: string[] = [];
+  for (const q of live) {
+    const key = answers[q.id]?.englishEssay;
+    if (key) out.push(...modelProblems(q.id, checkModelEssay(key.modelEssay, q.prompt, play)));
+  }
+  return out;
+}
 
 async function main() {
   const seenQuestionIds = new Set<string>();
@@ -103,6 +128,8 @@ async function main() {
     for (const m of validateRewriteRules(unit, answers)) err(m);
     for (const m of validateParagraphRules(unit, answers)) err(m);
     for (const m of validateEssayRules(unit, answers, UNITS)) err(m);
+    for (const m of validateEnglishEssayRules(unit, answers)) err(m);
+    for (const m of validateEnglishModels(unit, answers)) err(m);
     for (const m of validateUnseenRules(unit, answers, new Date(), (name) => imageSize(unit.id, name))) err(m);
     // the comparative unit's images live in the shared text store, which is spec 008's unit folder
     for (const m of validateComparativeRules(unit, answers, comparativeVerbs, UNITS, new Date(), (name) => imageSize("y12-english-advanced-unseen-texts", name))) err(m);
@@ -126,12 +153,12 @@ async function main() {
 
       const a = answers[q.id];
       // an essay that is not live has no key yet (spec 010); validateEssayRules checks a live essay's key
-      if (q.type === "essay" && !q.live && !a) continue;
+      if ((q.type === "essay" || q.type === "englishEssay") && !q.live && !a) continue;
       if (!a) {
         err(`${q.id}: no entry in answers.ts`);
         continue;
       }
-      if (q.type === "paragraph" || q.type === "unseen" || q.type === "comparative" || q.type === "essay") {
+      if (q.type === "paragraph" || q.type === "unseen" || q.type === "comparative" || q.type === "essay" || q.type === "englishEssay") {
         // the essay key is checked by the paragraph rules (spec 007 FR-039) and the unseen-text key by the
         // unseen rules (spec 008 FR-046); no rubric or model answer here
       } else if (!a.rubric || a.rubric.length === 0) {
@@ -226,6 +253,18 @@ async function main() {
     const unlisted = { ...meta, questions, concepts, retired } as Unit;
     for (const m of validateConceptRules(unlisted)) err(m);
     for (const m of validateEssayRules(unlisted, answers, UNITS)) err(m);
+  }
+
+  // The English essay unit (spec 011) is registered only once an essay is live, but its content is checked either way.
+  const englishEssayUnitId = "y12-english-essay-writing";
+  if (!UNITS.some((u) => u.id === englishEssayUnitId)) {
+    const { meta } = await import("../content/units/y12-english-essay-writing/meta");
+    const { questions } = await import("../content/units/y12-english-essay-writing/questions");
+    const { concepts, retired } = await import("../content/units/y12-english-essay-writing/concepts");
+    const { answers } = (await import(`../content/units/${englishEssayUnitId}/answers`)) as { answers: AnswerSet };
+    const unlisted = { ...meta, questions, concepts, retired } as Unit;
+    for (const m of validateConceptRules(unlisted)) err(m);
+    for (const m of validateEnglishEssayRules(unlisted, answers)) err(m);
   }
 
   if (errors.length) {

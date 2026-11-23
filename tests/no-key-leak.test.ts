@@ -37,6 +37,10 @@ const BANNED_KEYS = [
   // spec 010: the essay key (the model essay is released only in the student's own finished result)
   "schoolCriteria",
   "essayKey",
+  // spec 011: the English essay key and the marker's Away notes (the model essay is released only in the student's own result)
+  "conceptTags",
+  "englishEssayKey",
+  "textNotes",
   // spec 008: the unseen-text key (criteria, notes, model answer, a visual's description and its check)
   "criteria",
   "visualDescription",
@@ -60,7 +64,7 @@ const BANNED_KEYS = [
  * Offline teacher tasks (spec 007 R8) that read the paragraph essay key to build test cases and to
  * re-mark. They run on a teacher's machine, never at request time and never in a bundle.
  */
-const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts", "scripts/check-unseen-descriptions.ts", "scripts/unseen-report.ts", "scripts/unseen-field-cases.ts", "scripts/unseen-remark.ts", "scripts/comparative-field-cases.ts"]);
+const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts", "scripts/check-unseen-descriptions.ts", "scripts/unseen-report.ts", "scripts/unseen-field-cases.ts", "scripts/unseen-remark.ts", "scripts/comparative-field-cases.ts", "scripts/check-english-essay-models.ts"]);
 
 describe("POST /api/attempts exposes no answer key, for every unit", () => {
   for (const unit of UNITS) {
@@ -69,7 +73,12 @@ describe("POST /api/attempts exposes no answer key, for every unit", () => {
       await signedInStudent(env);
       const { POST } = await import("@/app/api/attempts/route");
       // the essay unit starts one essay per attempt (spec 010)
-      const essayStart = unit.flow === "essay" ? { questionId: unit.questions.find((q) => q.type === "essay" && q.live)?.id } : {};
+      const essayStart =
+        unit.flow === "essay"
+          ? { questionId: unit.questions.find((q) => q.type === "essay" && q.live)?.id }
+          : unit.flow === "englishEssay"
+            ? { questionId: unit.questions.find((q) => q.type === "englishEssay" && q.live)?.id } // spec 011
+            : {};
       const res = await POST(post("/api/attempts", { unitId: unit.id, ...essayStart }));
       expect(res.status).toBe(201);
       const body = await res.json();
@@ -88,6 +97,13 @@ describe("POST /api/attempts exposes no answer key, for every unit", () => {
         const essayKey = key.essay;
         if (essayKey) {
           for (const secret of [essayKey.markingNotes, essayKey.schoolCriteria ?? "", essayKey.modelEssay]) {
+            if (secret.length > 20) expect(text).not.toContain(secret.slice(0, 60));
+          }
+        }
+        // spec 011: the English essay key (marking notes, model essay) never reaches the attempt-start payload
+        const englishKey = key.englishEssay;
+        if (englishKey) {
+          for (const secret of [englishKey.markingNotes, englishKey.modelEssay]) {
             if (secret.length > 20) expect(text).not.toContain(secret.slice(0, 60));
           }
         }

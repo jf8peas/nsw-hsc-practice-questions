@@ -93,7 +93,7 @@ export interface UnitMeta {
    * Set on the Economics essay-writing unit (spec 010): a quiz is one whole essay the student picks
    * (scaffold, optional plan review, 600-800 words, marked out of 20). Public metadata.
    */
-  flow?: "essay";
+  flow?: "essay" | "englishEssay";
   /**
    * Spec 010: a correct use of a concept in the SAME question that last set it does not clear it;
    * only a different question does. Public metadata.
@@ -204,6 +204,31 @@ export interface EssayQuestion extends BaseQuestion {
   live: boolean;
 }
 
+/** The directive of an English essay question (spec 011): the full stored phrase, lower case. */
+export type EnglishDirective = "to what extent" | "discuss" | "how" | "evaluate";
+
+/**
+ * A whole-essay question for the Advanced English essay unit (spec 011, data-model §1.1). `prompt` is the
+ * school-trial question verbatim. The marking notes, the band 1 model essay and the key concept tags are the
+ * answer key (SERVER ONLY, `Answer.englishEssay`). Worth 20 marks. `conceptIds` are PUBLIC practice tags
+ * (the eight `skill-*` ids only); they are not the answer key's coverage.
+ */
+export interface EnglishEssayQuestion extends BaseQuestion {
+  type: "englishEssay";
+  group: "englishEssay";
+  maxMarks: 20;
+  /** The directive phrase as it appears in `prompt`; the highlighter and the reviewer use it. */
+  directive: EnglishDirective;
+  /** Position in the offered order (1 to 6). */
+  offer: 1 | 2 | 3 | 4 | 5 | 6;
+  /** False until the essay has passed review and the marker gate; a non-live essay is never offered. */
+  live: boolean;
+  /** Required: all six questions are school-trial questions (constitution Principle V). */
+  source: string;
+  /** Public skill-only practice tags. */
+  conceptIds: string[];
+}
+
 /** The form of an unseen text (spec 008). A closed union: the draw weights by form. */
 export type TextForm =
   | "poem"
@@ -309,7 +334,7 @@ export interface ComparativeQuestion extends BaseQuestion {
 }
 
 /** Public question — no answer key. Safe to ship to the browser. */
-export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion | UnseenQuestion | ComparativeQuestion | EssayQuestion;
+export type Question = McQuestion | ShortQuestion | RewriteQuestion | ParagraphQuestion | UnseenQuestion | ComparativeQuestion | EssayQuestion | EnglishEssayQuestion;
 
 /** A full unit as consumed by the UI: metadata + public questions. */
 export interface Unit extends UnitMeta {
@@ -386,6 +411,18 @@ export interface Answer {
   comparative?: ComparativeKey;
   /** `essay` only (spec 010): the essay's key. SERVER ONLY. */
   essay?: EssayQuestionKey;
+  /** `englishEssay` only (spec 011): the essay's key. SERVER ONLY. */
+  englishEssay?: EnglishEssayKey;
+}
+
+/** The answer key of one English essay question (spec 011, data-model §1.2). SERVER ONLY. */
+export interface EnglishEssayKey {
+  /** What a strong answer to THIS question does. Never browser-facing. */
+  markingNotes: string;
+  /** An original band 1 response on Away, 900 to 1,100 words. */
+  modelEssay: string;
+  /** Full concept ids a strong answer uses (any of the unit's ids). */
+  conceptTags: string[];
 }
 
 /** The answer key of one whole-essay question (spec 010, data-model §1). SERVER ONLY. */

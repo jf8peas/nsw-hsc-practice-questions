@@ -201,3 +201,15 @@ export async function createEssayAttempt(
   if (!existing) throw new Error("essay attempt vanished after a conflict");
   return { attempt: existing, created: false };
 }
+
+/**
+ * Start (or rejoin) the student's one OPEN attempt in the English essay-writing unit (spec 011). Same shape as the
+ * Economics function and its own partial unique index (`attempts_english_essay_incomplete_unique`): a racing start
+ * resumes the winning row. The caller checks whether the open attempt is for the essay it wanted.
+ */
+export async function createEnglishEssayAttempt(
+  db: Db,
+  input: { id: string; userId: string; unitId: string; questionId: string },
+): Promise<{ attempt: Attempt; created: boolean }> {
+  return createEssayAttempt(db, input);
+}

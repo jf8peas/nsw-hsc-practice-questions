@@ -1,0 +1,12 @@
+{
+  "about": "Phrases a student may put in quotation marks that are not from Away: Common Module rubric wording that students commonly quote. A quotation matching one of these, or the essay question's own wording, is status 'other-source': not flagged and not a knowledge error. This list is NOT part of the marking prompt, so editing it does not change promptVersion; rerun the quote parity check after any edit. Wording should be checked against the current NESA syllabus.",
+  "phrases": [
+    "individual and collective human experiences",
+    "human qualities and emotions associated with, or arising from, these experiences",
+    "anomalies, paradoxes and inconsistencies in human behaviour and motivation",
+    "inviting the responder to see the world differently",
+    "to challenge assumptions, ignite new ideas or reflect personally",
+    "the role of storytelling throughout time to express and reflect particular lives and cultures",
+    "texts and human experiences"
+  ]
+}

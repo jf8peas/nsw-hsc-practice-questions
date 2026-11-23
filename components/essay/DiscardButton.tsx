@@ -8,7 +8,18 @@ import { Dialog } from "@/components/unseen/Dialog";
 // "Discard this attempt" (spec 010 FR-002a): offered only on the open, unmarked essay, behind a confirm that says
 // what is deleted. Marked essays are never touched.
 
-export function DiscardButton({ attemptId, attemptToken, questionId }: { attemptId: string; attemptToken: string; questionId: string }) {
+export function DiscardButton({
+  attemptId,
+  attemptToken,
+  questionId,
+  endpoint = "/api/essay/discard",
+}: {
+  attemptId: string;
+  attemptToken: string;
+  questionId: string;
+  /** The discard route; the Economics essay's by default (spec 011 passes the English one). */
+  endpoint?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -18,7 +29,7 @@ export function DiscardButton({ attemptId, attemptToken, questionId }: { attempt
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/essay/discard", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ attemptId, attemptToken, questionId }),

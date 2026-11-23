@@ -17,6 +17,7 @@ import { loadParagraphState } from "@/lib/paragraph/state.server";
 import { loadComparativeState } from "@/lib/comparative/state.server";
 import { loadUnseenState } from "@/lib/unseen/state.server";
 import { loadEssayState } from "@/lib/essay/state.server";
+import { loadEnglishEssayState } from "@/lib/english-essay/state.server";
 import { signAttemptToken } from "@/lib/tokens.server";
 
 export default async function QuizPage({
@@ -86,8 +87,11 @@ export default async function QuizPage({
       const comparativeState = isComparative ? await dbCall((db) => loadComparativeState(db, user.id, row)) : null;
       // spec 010: an essay attempt resumes at the stage its row says (scaffold, essay or result; never a marking state)
       const essayState = unit.flow === "essay" ? await dbCall((db) => loadEssayState(db, user.id, row)) : null;
+      // spec 011: an English essay attempt resumes the same way
+      const englishEssayState = unit.flow === "englishEssay" ? await dbCall((db) => loadEnglishEssayState(db, user.id, row)) : null;
       payload = {
         ...(essayState ? { essayState } : {}),
+        ...(englishEssayState ? { englishEssayState } : {}),
         ...(paragraphState ? { paragraphState } : {}),
         ...(unseenState ? { unseenState } : {}),
         ...(comparativeState ? { comparativeState } : {}),

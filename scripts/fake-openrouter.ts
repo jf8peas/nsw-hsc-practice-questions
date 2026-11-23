@@ -48,6 +48,17 @@
  *   echo       the feedback repeats the example (model) answer, which the app must reject
  *   slow       as pass, but each reply takes 12 seconds (to watch the marking status steps)
  *
+ *   FAKE_ENGLISH_ESSAY (spec 011, the English essay marker; its system prompt names "Paper 1, Section II").
+ *   Directives in the student's essay choose the reply: [band:n], [mark:n], [focus:partly|barely], [err1], [err2].
+ *   pass       a valid marker reply (default)
+ *   malformed  every reply is prose, not JSON (the app retries once, then the marker is unavailable)
+ *   retry      the first reply of each essay is prose, the retry is valid
+ *   cutoff     the reply stops mid-JSON with finish_reason "length"
+ *   empty      the reply content is empty
+ *   fail       every request answers HTTP 500
+ *   down       every request answers HTTP 503
+ *   slow       as pass, but each reply takes 12 seconds (to watch the marking status steps)
+ *
  * Generators always answer. Each request is logged with its purpose and model. Development
  * tool only: it is never imported by the app.
  */
@@ -83,6 +94,14 @@ if (!["pass", "partial", "fail", "malformed", "down", "slow"].includes(PARAGRAPH
   process.exit(1);
 }
 
+const ENGLISH_ESSAY_MODE = (process.env.FAKE_ENGLISH_ESSAY ?? "pass") as
+  | "pass" | "malformed" | "retry" | "cutoff" | "empty" | "fail" | "down" | "slow";
+if (!["pass", "malformed", "retry", "cutoff", "empty", "fail", "down", "slow"].includes(ENGLISH_ESSAY_MODE)) {
+  console.error(`FAKE_ENGLISH_ESSAY must be pass, malformed, retry, cutoff, empty, fail, down or slow (got "${ENGLISH_ESSAY_MODE}")`);
+  process.exit(1);
+}
+const seenEnglishEssays = new Set<string>();
+
 const seenReviews = new Set<string>();
 
 const SVG =
@@ -114,6 +133,30 @@ const SKILLS = [
   "human-experience",
   "succinct",
 ];
+
+/** The English essay marker's reply (spec 011, contracts/replies.md section 1): directives in the essay choose it. */
+function englishEssayReply(user: string) {
+  const essay = /"""\n([\s\S]*?)\n"""/.exec(user)?.[1] ?? "";
+  const band = Number(/\[band:(\d)\]/.exec(essay)?.[1] ?? "2");
+  const mark = Number(/\[mark:(\d+)\]/.exec(essay)?.[1] ?? "14");
+  const focus = /\[focus:(partly|barely)\]/.exec(essay)?.[1] ?? "fully";
+  const errors = ["[err1]", "[err2]"].filter((t) => essay.includes(t)).map((t, i) => ({ quote: t, why: `Fake marker: distinct mistake ${i + 1}.` }));
+  const c = (verdict: string) => ({ reason: "Fake marker: a one-line reason.", verdict });
+  return reply(
+    JSON.stringify({
+      criteria: { argument: c("sound"), analysis: c("sound"), knowledge: c("developing"), expression: c("strong") },
+      questionFocus: focus,
+      questionFocusReason: "Fake marker: engages the question's own terms.",
+      knowledgeErrors: errors,
+      band,
+      mark,
+      bandReason: "Fake marker: detailed analysis with some controlled expression.",
+      liftYourMark: ["Fake marker: sustain the thesis in every paragraph.", "Fake marker: explain the effect of each technique."],
+      gaps: [{ concept: "skill-thesis", detail: "Fake marker: the thesis was named but not sustained." }],
+      conceptsUsedWell: ["skill-expression"],
+    }),
+  );
+}
 
 /** The unseen-text marker's reply (spec 008): mark and missed skills from directives in the answer. */
 function unseenReply(user: string) {
@@ -201,6 +244,24 @@ function handle(body: { model?: string; messages?: Array<{ role: string; content
     return reply(
       JSON.stringify({ transcription: "F = ma", legible: true, answersQuestion: true, notes: "" }),
     );
+  }
+
+  // English essay marking (spec 011): the system prompt names "Paper 1, Section II". Checked before the unseen marker,
+  // whose system prompt starts with the same words.
+  if (/Paper 1, Section II/.test(system)) {
+    if (ENGLISH_ESSAY_MODE === "fail") return reply("", 500);
+    if (ENGLISH_ESSAY_MODE === "down") return reply("", 503);
+    if (ENGLISH_ESSAY_MODE === "empty") return reply("");
+    if (ENGLISH_ESSAY_MODE === "cutoff") return reply('{"criteria": {"argument": {"reason": "a', 200, "length");
+    if (ENGLISH_ESSAY_MODE === "malformed") return reply("I am sorry, I cannot give JSON today.");
+    if (ENGLISH_ESSAY_MODE === "retry") {
+      const essay = /"""\n([\s\S]*?)\n"""/.exec(user)?.[1] ?? user;
+      if (!seenEnglishEssays.has(essay)) {
+        seenEnglishEssays.add(essay);
+        return reply("I am sorry, I cannot give JSON today.");
+      }
+    }
+    return englishEssayReply(user);
   }
 
   // Unseen-text marking (spec 008): the system prompt starts "You are an experienced NSW HSC English Advanced marker".
@@ -297,7 +358,8 @@ createServer((req, res) => {
       const out = handle(JSON.parse(raw));
       const slowParagraph = PARAGRAPH_MODE === "slow" && /one part of a body paragraph/.test(raw);
       const slowUnseen = UNSEEN_MODE === "slow" && /experienced NSW HSC English Advanced marker/.test(raw);
-      const delay = slowParagraph || slowUnseen ? 12_000 : 0;
+      const slowEnglish = ENGLISH_ESSAY_MODE === "slow" && /Paper 1, Section II/.test(raw);
+      const delay = slowParagraph || slowUnseen || slowEnglish ? 12_000 : 0;
       setTimeout(() => res.writeHead(out.status, { "content-type": "application/json" }).end(out.body), delay);
     } catch (error) {
       console.error("[fake] bad request", error);

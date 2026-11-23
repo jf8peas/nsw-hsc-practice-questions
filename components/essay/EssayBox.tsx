@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from "react";
 
 import { saveRewriteDraft, sendRewriteDraftBeacon } from "@/lib/drafts";
-import { essayCounter } from "@/lib/essay/counter";
+import { essayCounter, type EssayCounter } from "@/lib/essay/counter";
 import { countWords } from "@/lib/wordcount";
 
 // The essay box (spec 010 FR-019 to FR-023): a live counter against 600 to 800 words, a Submit button that is
@@ -26,6 +26,7 @@ export function EssayBox({
   onSubmit,
   locked,
   limitReached,
+  counterOf = essayCounter,
 }: {
   attemptId: string;
   attemptToken: string;
@@ -37,9 +38,11 @@ export function EssayBox({
   locked: boolean;
   /** The day's marking allowance is used up: Submit stays off until tomorrow. */
   limitReached: boolean;
+  /** The counter wording and limits; the Economics essay's by default (spec 011 passes the English one). */
+  counterOf?: (words: number) => EssayCounter;
 }) {
   const words = countWords(value);
-  const counter = essayCounter(words);
+  const counter = counterOf(words);
   const [announced, setAnnounced] = useState(counter.text);
   const [pasteNote, setPasteNote] = useState(false);
   const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -86,6 +86,23 @@ export function getEssayReviewModel(env: Record<string, string | undefined> = pr
   return modelOrNull(env.ESSAY_REVIEW_MODEL) ?? DEFAULT_ESSAY_MODEL;
 }
 
+/** The default model for the English essay-writing unit's marker and plan review (spec 011). */
+export const DEFAULT_ENGLISH_ESSAY_MODEL = "openai/gpt-6.2-sol";
+
+/**
+ * The English essay unit's marking model (`ENGLISH_ESSAY_GRADING_MODEL`, spec 011). Blank counts as unset. It
+ * never falls back to the review model, `ESSAY_GRADING_MODEL`, `ESSAY_REVIEW_MODEL`, `ENGLISH_ADV_GRADING_MODEL`
+ * or `GRADING_MODEL`. Never throws.
+ */
+export function getEnglishEssayGradingModel(env: Record<string, string | undefined> = process.env): string {
+  return modelOrNull(env.ENGLISH_ESSAY_GRADING_MODEL) ?? DEFAULT_ENGLISH_ESSAY_MODEL;
+}
+
+/** The English essay unit's optional plan-review model (`ENGLISH_ESSAY_REVIEW_MODEL`). Independent of every other model setting. */
+export function getEnglishEssayReviewModel(env: Record<string, string | undefined> = process.env): string {
+  return modelOrNull(env.ENGLISH_ESSAY_REVIEW_MODEL) ?? DEFAULT_ENGLISH_ESSAY_MODEL;
+}
+
 /** The concept pipeline's models. Never throws. */
 export function getConceptModels(env: Record<string, string | undefined> = process.env): ConceptModels {
   return {

@@ -13,13 +13,17 @@ import { requirePageUser } from "@/lib/auth.server";
 import { loadAttemptDetail } from "@/lib/db/queries/history.server";
 import { formatWhen } from "@/lib/format";
 import { PARTS, partKeyOf } from "@/lib/paragraph/parts";
-import { getOptionExplanation, essayPublicView } from "@/lib/grading.server";
+import { getOptionExplanation, essayPublicView, englishEssayPublicView } from "@/lib/grading.server";
 import { EssayAttemptDetail } from "@/components/essay/AttemptDetail";
 import { dbCall } from "@/lib/db/index.server";
 import { getEssayPhase } from "@/lib/db/queries/essay-phases.server";
 import { getRewriteDraft } from "@/lib/db/queries/rewrite-drafts.server";
 import { finishedResult } from "@/lib/essay/results.server";
 import { ESSAY_UNIT_ID } from "@/lib/essay/types";
+import { EnglishEssayAttemptDetail } from "@/components/english-essay/AttemptDetail";
+import { getEnglishEssayPhase } from "@/lib/db/queries/english-essay-phases.server";
+import { englishFinishedResult } from "@/lib/english-essay/results.server";
+import { ENGLISH_ESSAY_UNIT_ID } from "@/lib/english-essay/types";
 
 /**
  * One attempt in full: each question, the student's answer, the marks and the
@@ -54,6 +58,27 @@ export default async function AttemptDetailPage({
 
   const { attempt, items } = loaded.data;
   const unit = getUnit(attempt.unitId);
+
+  // the English essay unit (spec 011): the student's own result (with the band 1 model essay) once finished; only the public
+  // question, the plan and the draft before that. Read through the session user's id, so another student's attempt is not found.
+  if (attempt.unitId === ENGLISH_ESSAY_UNIT_ID) {
+    const essayId = items[0]?.questionId ?? "";
+    const essay = englishEssayPublicView(essayId);
+    const row = essay ? await dbCall((db) => getEnglishEssayPhase(db, user.id, attemptId, essayId)).catch(() => null) : null;
+    if (!essay || !row) notFound();
+    const draft = row.status === "finished" ? "" : ((await dbCall((db) => getRewriteDraft(db, user.id, attemptId, essayId)).catch(() => null))?.phase1Draft ?? "");
+    return (
+      <Shell backHref={unit ? `/unit/${unit.id}` : "/progress"}>
+        <h1 className="page-h1" style={{ fontSize: 24, margin: "4px 0 6px" }}>
+          {unit?.title ?? attempt.unitId}
+        </h1>
+        <p className="page-sub" style={{ marginBottom: 16 }}>
+          {formatWhen(attempt.startedAt)}
+        </p>
+        <EnglishEssayAttemptDetail essay={essay} result={englishFinishedResult(row)} plan={row.scaffold} draft={draft} backHref={`/unit/${ENGLISH_ESSAY_UNIT_ID}`} />
+      </Shell>
+    );
+  }
 
   // the essay unit (spec 010): the student's own result (with the band 1 model essay) once finished; only the plan
   // and the draft before that. Read through the session user's id, so another student's attempt is not found.

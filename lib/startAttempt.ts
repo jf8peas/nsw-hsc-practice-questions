@@ -30,11 +30,13 @@ interface StartResponse {
   comparativeState?: ComparativeState;
   /** spec 010: the stage and state of an essay attempt. */
   essayState?: import("@/lib/essay/types").EssayState;
+  /** spec 011: the stage and state of an English essay attempt. */
+  englishEssayState?: import("@/lib/english-essay/types").EnglishEssayState;
 }
 
 /** The notices a sequential or progress-dependent unit shows when it cannot start a quiz (constitution Principle VI). */
 function unitNotices(unitId: string): { unavailable: string; finished: string } {
-  if (unitId === "y12-economics-essay-writing") {
+  if (unitId === "y12-economics-essay-writing" || unitId === "y12-english-essay-writing") {
     return {
       unavailable: "We can't load your essays right now. Try again in a moment.",
       finished: "You've finished every essay so far. New essays are added as they're checked.",
@@ -79,7 +81,7 @@ export async function startAttempt(unitId: string, questionId?: string): Promise
       return { ok: false, error: "Finish or discard your open essay before starting another.", openEssay: typeof body.questionId === "string" ? body.questionId : undefined };
     }
   }
-  if (res.status === 404 && unitId === "y12-economics-essay-writing") {
+  if (res.status === 404 && (unitId === "y12-economics-essay-writing" || unitId === "y12-english-essay-writing")) {
     const body = await res.json().catch(() => ({}));
     if (body?.error === "no_open_attempt") return { ok: false, error: "You have no essay in progress. Pick an essay to start." };
   }
@@ -104,6 +106,7 @@ export async function startAttempt(unitId: string, questionId?: string): Promise
     ...(data.unseenState ? { unseenState: data.unseenState } : {}),
     ...(data.comparativeState ? { comparativeState: data.comparativeState } : {}),
     ...(data.essayState ? { essayState: data.essayState } : {}),
+    ...(data.englishEssayState ? { englishEssayState: data.englishEssayState } : {}),
   });
   return { ok: true, attemptId: data.attemptId, persisted: data.persisted };
 }

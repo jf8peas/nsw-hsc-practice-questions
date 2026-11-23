@@ -30,7 +30,10 @@ import { countWords } from "@/lib/wordcount";
 import { markEssayWithModel, type ParsedEssayReply } from "@/lib/essay/marker.server";
 import { finalMark } from "@/lib/essay/scoring";
 import type { PublicEssay } from "@/lib/essay/types";
-import type { EssayQuestion, EssayQuestionKey } from "@/lib/types";
+import { directiveInfo } from "@/content/units/y12-english-essay-writing/directives";
+import { markEnglishEssayWithModel, type EnglishMarkerOutput } from "@/lib/english-essay/marker.server";
+import type { PublicEnglishEssay } from "@/lib/english-essay/types";
+import type { EnglishEssayKey, EnglishEssayQuestion, EssayQuestion, EssayQuestionKey } from "@/lib/types";
 import type { ParagraphVerdicts } from "@/lib/db/schema";
 
 export interface GradeOptions {
@@ -932,4 +935,72 @@ export async function markEssay(questionId: string, essay: string): Promise<Essa
 /** The band 1 model essay: only for the student's own finished result (see above). */
 export function essayModelEssay(questionId: string): string | null {
   return essayKeyOf(questionId)?.key.modelEssay ?? null;
+}
+
+
+// ---- English essays (spec 011) -------------------------------------------------------------------------
+//
+// The ONLY readers of an English essay question's key (constitution Principle I, 2.18.0). What each may release:
+//   englishEssayPublicView    the public question, directive meaning, source and practice ids: no key field.
+//   englishEssayKeyForMarker  the marking notes and key concept tags, for the server-side marker prompt ONLY. Its
+//                             result must never be placed in any response.
+//   englishEssayModelEssay    the band 1 model essay, for the student's OWN FINISHED result only. The caller must
+//                             check the phase row is finished and belongs to the session user; this function never
+//                             decides that.
+
+function englishEssayQuestion(questionId: string): EnglishEssayQuestion | null {
+  const found = getQuestion(questionId);
+  return found && found.question.type === "englishEssay" ? found.question : null;
+}
+
+/** The public question (any English essay, live or not) with its directive's meaning. No key. */
+export function englishEssayPublicView(questionId: string): PublicEnglishEssay | null {
+  const q = englishEssayQuestion(questionId);
+  if (!q) return null;
+  const info = directiveInfo(q.directive);
+  return {
+    type: "englishEssay",
+    group: "englishEssay",
+    maxMarks: 20,
+    live: q.live,
+    id: q.id,
+    prompt: q.prompt,
+    directive: q.directive,
+    directiveDefinition: info.definition,
+    directiveGuidance: info.guidance,
+    offer: q.offer,
+    source: q.source,
+    conceptIds: [...q.conceptIds],
+  };
+}
+
+/** Whether an English essay exists and is live (only a live essay may be started). */
+export function englishEssayIsLive(questionId: string): boolean {
+  return englishEssayQuestion(questionId)?.live === true;
+}
+
+/** The marker's view of the key: the question text, its marking notes and key tags. Server-side marking only. */
+export function englishEssayKeyForMarker(
+  questionId: string,
+): { question: string; markingNotes: string; conceptTags: string[] } | null {
+  const q = englishEssayQuestion(questionId);
+  const key: EnglishEssayKey | undefined = getAnswer(questionId)?.englishEssay;
+  if (!q || !key) return null;
+  return { question: q.prompt, markingNotes: key.markingNotes, conceptTags: [...key.conceptTags] };
+}
+
+/** The band 1 model essay: only for the student's own finished result (see above). */
+export function englishEssayModelEssay(questionId: string): string | null {
+  return getAnswer(questionId)?.englishEssay?.modelEssay ?? null;
+}
+
+/**
+ * Marks an English essay: sends the question, its marking notes and the essay (never the model essay) to the model provider
+ * and returns the validated reply. Nothing from the key is in the return value. Null when the marker is unavailable (no
+ * key, errors, or a bad reply twice).
+ */
+export async function markEnglishEssay(questionId: string, essay: string): Promise<EnglishMarkerOutput | null> {
+  const key = englishEssayKeyForMarker(questionId);
+  if (!key) return null;
+  return markEnglishEssayWithModel({ question: key.question, markingNotes: key.markingNotes, essay });
 }

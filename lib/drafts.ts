@@ -94,6 +94,32 @@ export function loadEssayScaffoldDraft(
   return v && typeof v === "object" && "intro" in v ? v : null;
 }
 
+// ---- the English essay plan (spec 011), one key per attempt ----------------
+
+export const englishEssayScaffoldDraftKey = (attemptId: string) => `draft:english-essay-scaffold:${attemptId}`;
+
+/** Mirrors the English plan to this tab's sessionStorage for an instant restore; the server row is the source of truth. */
+export function saveEnglishEssayScaffoldDraft(
+  attemptId: string,
+  scaffold: import("@/lib/english-essay/types").EnglishEssayScaffold,
+  store: StorageLike | null = tabStorage(),
+) {
+  write(store, englishEssayScaffoldDraftKey(attemptId), scaffold);
+}
+
+export function loadEnglishEssayScaffoldDraft(
+  attemptId: string,
+  store: StorageLike | null = tabStorage(),
+): import("@/lib/english-essay/types").EnglishEssayScaffold | null {
+  const v = read<import("@/lib/english-essay/types").EnglishEssayScaffold>(store, englishEssayScaffoldDraftKey(attemptId));
+  return v && typeof v === "object" && typeof v.thesis === "string" && Array.isArray(v.body) ? v : null;
+}
+
+/** Clears the English plan mirror once the server has saved or locked it. */
+export function clearEnglishEssayScaffoldDraft(attemptId: string, store: StorageLike | null = tabStorage()) {
+  remove(store, englishEssayScaffoldDraftKey(attemptId));
+}
+
 // ---- the rewrite draft beacon (spec 006 FR-053) ---------------------------
 
 const lastSentDraft = new Map<string, string>();
@@ -276,6 +302,8 @@ export interface AttemptPayload {
   comparativeState?: import("@/lib/comparative/types").ComparativeState;
   /** spec 010: the stage and state of an essay attempt: the plan, the review, the draft, the result (released per Principle I). */
   essayState?: import("@/lib/essay/types").EssayState;
+  /** spec 011: the stage and state of an English essay attempt (released per Principle I). */
+  englishEssayState?: import("@/lib/english-essay/types").EnglishEssayState;
   /**
    * spec 005: per-question rewrite phase state for resume, built server-side from the phase
    * row. Exactly what the stage allows: nothing from the key before a phase 1 grade, the hint

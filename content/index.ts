@@ -50,6 +50,9 @@ import { concepts as y12EnglishUnseenConcepts, retired as y12EnglishUnseenRetire
 import { meta as y12EconEssayMeta } from "./units/y12-economics-essay-writing/meta";
 import { questions as y12EconEssayQuestions } from "./units/y12-economics-essay-writing/questions";
 import { concepts as y12EconEssayConcepts, retired as y12EconEssayRetired } from "./units/y12-economics-essay-writing/concepts";
+import { meta as y12EnglishEssayMeta } from "./units/y12-english-essay-writing/meta";
+import { questions as y12EnglishEssayQuestions } from "./units/y12-english-essay-writing/questions";
+import { concepts as y12EnglishEssayConcepts, retired as y12EnglishEssayRetired } from "./units/y12-english-essay-writing/concepts";
 import { meta as y12EnglishComparativeMeta } from "./units/y12-english-advanced-comparative-texts/meta";
 import { questions as y12EnglishComparativeQuestions } from "./units/y12-english-advanced-comparative-texts/questions";
 import { texts as y12EnglishComparativeTexts } from "./units/y12-english-advanced-comparative-texts/texts";
@@ -139,6 +142,18 @@ export const UNITS: Unit[] = [
           questions: y12EconEssayQuestions,
           concepts: y12EconEssayConcepts,
           retired: y12EconEssayRetired,
+        } as Unit,
+      ]
+    : []),
+  // The English essay unit (spec 011) is registered only once an essay is live: until the marker gate has passed and an
+  // essay has been reviewed it does not exist for the home page, the unit route or any API (research R2, plan).
+  ...(y12EnglishEssayQuestions.some((q) => q.type === "englishEssay" && q.live)
+    ? [
+        {
+          ...y12EnglishEssayMeta,
+          questions: y12EnglishEssayQuestions,
+          concepts: y12EnglishEssayConcepts,
+          retired: y12EnglishEssayRetired,
         } as Unit,
       ]
     : []),

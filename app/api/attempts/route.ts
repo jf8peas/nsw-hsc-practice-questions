@@ -13,6 +13,7 @@ import { startSequential } from "@/lib/paragraph/start.server";
 import { startComparative } from "@/lib/comparative/start.server";
 import { startUnseen } from "@/lib/unseen/start.server";
 import { startEssay } from "@/lib/essay/start.server";
+import { startEnglishEssay } from "@/lib/english-essay/start.server";
 import { getQuestion } from "@/content";
 import { signAttemptToken } from "@/lib/tokens.server";
 
@@ -92,6 +93,49 @@ export async function POST(req: Request) {
         questions: [getQuestion(started.essay.id)!.question],
         answered: {},
         essayState: started.essayState,
+        ...(started.created ? {} : { resumed: true }),
+      },
+      { status: started.created ? 201 : 200 },
+    );
+  }
+
+  // The English essay-writing unit (spec 011): the same shape as the Economics essay flow with its own start, state and
+  // unique index. The student picks an essay (`questionId`, re-checked against the live essays) or resumes the one open
+  // attempt; it never starts degraded and never guesses (constitution Principle VI).
+  if (unit.flow === "englishEssay") {
+    if (session.kind !== "user") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    const wanted = typeof body.questionId === "string" ? body.questionId : undefined;
+    if (body.questionId !== undefined && wanted === undefined) {
+      return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+    }
+    const started = await startEnglishEssay(user.id, wanted);
+    if (started.kind === "unavailable") {
+      return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
+    }
+    if (started.kind === "not_found") return NextResponse.json({ error: "not_found" }, { status: 404 });
+    if (started.kind === "no_open_attempt") return NextResponse.json({ error: "no_open_attempt" }, { status: 404 });
+    if (started.kind === "attempt_open") {
+      return NextResponse.json({ error: "attempt_open", questionId: started.questionId }, { status: 409 });
+    }
+    const attemptToken = signAttemptToken({
+      uid: user.id,
+      attemptId: started.attempt.id,
+      unitId: unit.id,
+      questionIds: [started.essay.id],
+      mcOptionOrder: {},
+    });
+    return NextResponse.json(
+      {
+        attemptId: started.attempt.id,
+        attemptToken,
+        persisted: true,
+        unitId: unit.id,
+        passMark: unit.quiz?.passMark ?? DEFAULT_PASS_MARK,
+        questions: [started.essay],
+        answered: {},
+        englishEssayState: started.englishEssayState,
         ...(started.created ? {} : { resumed: true }),
       },
       { status: started.created ? 201 : 200 },

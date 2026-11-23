@@ -25,7 +25,11 @@
     "unseen-report": "tsx --conditions=react-server scripts/unseen-report.ts",
     "unseen-remark": "tsx --conditions=react-server scripts/unseen-remark.ts",
     "unseen-build-bank": "tsx --conditions=react-server scripts/unseen-build-bank.ts",
-    "essay-build-answers": "tsx scripts/essay-build-answers.ts"
+    "essay-build-answers": "tsx scripts/essay-build-answers.ts",
+    "reference-text:load": "tsx scripts/load-reference-text.ts",
+    "english-essay-build-answers": "tsx scripts/english-essay-build-answers.ts",
+    "english-essay-check-models": "tsx scripts/check-english-essay-models.ts",
+    "english-essay-quote-parity": "tsx --conditions=react-server scripts/check-english-essay-quote-parity.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

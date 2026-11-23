@@ -2912,3 +2912,13 @@ mark.un-hl-on:focus-visible { outline: 2px solid var(--rd-blue-500); outline-off
 .es-check-status.fix { color: var(--rd-ink-900); border-color: var(--rd-warn-500); background: var(--rd-warn-50); }
 .es-check-line { margin: 4px 0 0; color: var(--rd-ink-700); }
 .es-figure-flags h4 { margin: 12px 0 4px; }
+
+/* ---- the English essay-writing unit (spec 011): shares the es-* styles above; tokens only, 44 px targets ---- */
+.es-guidance-label { font-size: var(--rd-fs-sm); color: var(--rd-mute-600); }
+.es-grow { field-sizing: content; min-height: 44px; max-height: 40vh; }
+.es-sticky { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.es-warning { margin: 0; padding: 10px 12px; border: 1px solid var(--rd-warn-500); background: var(--rd-warn-50); border-radius: var(--rd-r-md); }
+.es-warning h3 { margin: 0 0 4px; font-size: var(--rd-fs-md); }
+.es-warning p { margin: 0; }
+.es-adjust { margin: 4px 0 0; padding: 8px 10px 8px 26px; border: 1px solid var(--rd-warn-500); background: var(--rd-warn-50); border-radius: var(--rd-r-md); display: flex; flex-direction: column; gap: 4px; }
+@media (prefers-reduced-motion: reduce) { .es-grow { transition: none; } }

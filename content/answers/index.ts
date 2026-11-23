@@ -14,6 +14,7 @@ import { answers as y12EconSentenceAnswers } from "../units/y12-economics-senten
 import { answers as y12EconParagraphAnswers } from "../units/y12-economics-paragraph-writing/answers";
 import { answers as y12EnglishUnseenAnswers } from "../units/y12-english-advanced-unseen-texts/answers";
 import { answers as y12EconEssayAnswers } from "../units/y12-economics-essay-writing/answers";
+import { answers as y12EnglishEssayAnswers } from "../units/y12-english-essay-writing/answers";
 import { answers as y12EnglishComparativeAnswers } from "../units/y12-english-advanced-comparative-texts/answers";
 
 /**
@@ -36,6 +37,7 @@ const ALL_ANSWERS: AnswerSet = {
   ...y12EnglishUnseenAnswers,
   ...y12EconEssayAnswers,
   ...y12EnglishComparativeAnswers,
+  ...y12EnglishEssayAnswers,
 };
 
 export function getAnswer(questionId: string): Answer | undefined {

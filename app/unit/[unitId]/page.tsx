@@ -20,6 +20,8 @@ import { load, loadUnitHistory } from "@/lib/db/queries/history.server";
 import { loadEssayProgressFor } from "@/lib/db/queries/sequence.server";
 import { UnitEssays } from "@/components/essay/UnitEssays";
 import { loadEssayUnitData } from "@/lib/essay/progress.server";
+import { UnitEssays as EnglishUnitEssays } from "@/components/english-essay/UnitEssays";
+import { loadEnglishEssayUnitData } from "@/lib/english-essay/progress.server";
 import { loadComparativeProgress, loadUnseenProgress } from "@/lib/db/queries/unseen-progress.server";
 
 export default async function UnitPage({
@@ -69,6 +71,12 @@ export default async function UnitPage({
       ? ({ status: "unavailable" } as const)
       : await load((db) => loadEssayUnitData(db, user.id, unit))
     : null;
+  // the English essay unit (spec 011): the same shape, with the live essays in offer order and the latest final mark and band
+  const englishEssays = unit.flow === "englishEssay"
+    ? degraded
+      ? ({ status: "unavailable" } as const)
+      : await load((db) => loadEnglishEssayUnitData(db, user.id, unit))
+    : null;
   const progress = unseen ?? comparative;
   const resume = !unit.sequence && !unit.draw && !unit.flow && history.status === "ok" ? history.data.resume : null;
 
@@ -100,7 +108,13 @@ export default async function UnitPage({
         })}
 
         <div className="start-actions">
-          {essays ? (
+          {englishEssays ? (
+            englishEssays.status === "unavailable" ? (
+              <p className="pg-notice" role="status">
+                We can&apos;t load your essays right now. Try again in a moment.
+              </p>
+            ) : null
+          ) : essays ? (
             essays.status === "unavailable" ? (
               <p className="pg-notice" role="status">
                 We can&apos;t load your essays right now. Try again in a moment.
@@ -158,6 +172,13 @@ export default async function UnitPage({
         </div>
       </header>
 
+      {englishEssays?.status === "ok" && (
+        <section className="unit-section" aria-labelledby="essays-title">
+          <SectionHead id="essays-title" title="Pick an essay" />
+          <EnglishUnitEssays unitId={unit.id} data={englishEssays.data} />
+        </section>
+      )}
+
       {essays?.status === "ok" && (
         <section className="unit-section" aria-labelledby="essays-title">
           <SectionHead id="essays-title" title="Pick an essay" />
@@ -166,7 +187,7 @@ export default async function UnitPage({
       )}
 
       {/* 2. The student's concepts to review, below Start/Continue and above the history. */}
-      <ConceptPanel unit={unit} progress={conceptProgress} view={conceptView} details={essays?.status === "ok" ? essays.data.gapDetails : undefined} />
+      <ConceptPanel unit={unit} progress={conceptProgress} view={conceptView} details={essays?.status === "ok" ? essays.data.gapDetails : englishEssays?.status === "ok" ? englishEssays.data.gapDetails : undefined} />
 
       {unseen?.status === "ok" && <UnitProgress byForm={unseen.data.byForm} />}
       {comparative?.status === "ok" && <ComparativeResults byKind={comparative.data.byKind} />}

@@ -9,6 +9,8 @@ import { getParagraphPhase } from "@/lib/db/queries/paragraph-phases.server";
 import { getRewritePhase } from "@/lib/db/queries/rewrite-phases.server";
 import { getUnseenPhase } from "@/lib/db/queries/unseen-phases.server";
 import { getEssayPhase } from "@/lib/db/queries/essay-phases.server";
+import { getEnglishEssayPhase } from "@/lib/db/queries/english-essay-phases.server";
+import { ESSAY_MAX_CHARS } from "@/lib/english-essay/counter";
 import { checkDraftRateLimit } from "@/lib/ratelimit.server";
 import { verifyAttemptToken } from "@/lib/tokens.server";
 
@@ -61,11 +63,13 @@ export async function POST(req: Request) {
   if (!token.questionIds.includes(questionId)) return bad("not_found", 404);
   const found = getQuestion(questionId);
   // serves the sentence unit (spec 006), the paragraph unit (spec 007), the unseen-text unit (spec 008) and the comparative unit (spec 009)
-  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph" && found.question.type !== "unseen" && found.question.type !== "comparative" && found.question.type !== "essay")) return bad("not_found", 404);
+  if (!found || (found.question.type !== "rewrite" && found.question.type !== "paragraph" && found.question.type !== "unseen" && found.question.type !== "comparative" && found.question.type !== "essay" && found.question.type !== "englishEssay")) return bad("not_found", 404);
   const kind = found.question.type;
   // the essay unit (spec 010) has one try: its draft is phase 1 only
   if (kind === "essay" && phase !== 1) return bad("invalid_request");
-  const draft = rawDraft.slice(0, kind === "essay" ? MAX_ESSAY_DRAFT_LEN : MAX_DRAFT_LEN);
+  // the English essay unit (spec 011) also has one try (phase 1 only) and room for 1,200 words
+  if (kind === "englishEssay" && phase !== 1) return bad("invalid_request");
+  const draft = rawDraft.slice(0, kind === "englishEssay" ? ESSAY_MAX_CHARS : kind === "essay" ? MAX_ESSAY_DRAFT_LEN : MAX_DRAFT_LEN);
 
   // A dedicated per-user limiter, separate from the grading limits (research R5.2).
   const perUser = await checkDraftRateLimit(user.id);
@@ -92,6 +96,12 @@ export async function POST(req: Request) {
     if (kind === "essay") {
       const essayRow = await dbCall((db) => getEssayPhase(db, user.id, attemptId, questionId));
       if (!essayRow || essayRow.status !== "writing") return json({ saved: false });
+      await dbCall((db) => upsertRewriteDraft(db, user.id, attemptId, token.unitId, questionId, 1, draft));
+      return json({ saved: true });
+    }
+    if (kind === "englishEssay") {
+      const englishRow = await dbCall((db) => getEnglishEssayPhase(db, user.id, attemptId, questionId));
+      if (!englishRow || englishRow.status !== "writing") return json({ saved: false });
       await dbCall((db) => upsertRewriteDraft(db, user.id, attemptId, token.unitId, questionId, 1, draft));
       return json({ saved: true });
     }

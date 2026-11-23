@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { configProblems } from "@/lib/config";
-import { getConceptModels, getConfig, getEnglishAdvModel, getEssayGradingModel, getEssayReviewModel } from "@/lib/config.server";
+import { getConceptModels, getConfig, getEnglishAdvModel, getEnglishEssayGradingModel, getEnglishEssayReviewModel, getEssayGradingModel, getEssayReviewModel } from "@/lib/config.server";
 
 const FULL = {
   AUTH_SECRET: "s",
@@ -121,5 +121,33 @@ describe("essay models (spec 010)", () => {
     const env = { GRADING_MODEL: "vendor/a", ENGLISH_ADV_GRADING_MODEL: "vendor/b" };
     expect(getEssayGradingModel(env)).toBe("deepseek/deepseek-v4.1-flash");
     expect(getEssayReviewModel(env)).toBe("deepseek/deepseek-v4.1-flash");
+  });
+});
+
+describe("English essay models (spec 011)", () => {
+  it("default to openai/gpt-6.2-sol when unset or blank", () => {
+    expect(getEnglishEssayGradingModel({})).toBe("openai/gpt-6.2-sol");
+    expect(getEnglishEssayGradingModel({ ENGLISH_ESSAY_GRADING_MODEL: "  " })).toBe("openai/gpt-6.2-sol");
+    expect(getEnglishEssayReviewModel({})).toBe("openai/gpt-6.2-sol");
+    expect(getEnglishEssayReviewModel({ ENGLISH_ESSAY_REVIEW_MODEL: "" })).toBe("openai/gpt-6.2-sol");
+  });
+
+  it("use the configured model, trimmed, and are independent of each other", () => {
+    const env = { ENGLISH_ESSAY_GRADING_MODEL: " vendor/mark ", ENGLISH_ESSAY_REVIEW_MODEL: " vendor/review " };
+    expect(getEnglishEssayGradingModel(env)).toBe("vendor/mark");
+    expect(getEnglishEssayReviewModel(env)).toBe("vendor/review");
+    expect(getEnglishEssayGradingModel({ ENGLISH_ESSAY_REVIEW_MODEL: "vendor/review" })).toBe("openai/gpt-6.2-sol");
+    expect(getEnglishEssayReviewModel({ ENGLISH_ESSAY_GRADING_MODEL: "vendor/mark" })).toBe("openai/gpt-6.2-sol");
+  });
+
+  it("never fall back to another unit's model setting", () => {
+    const env = {
+      ESSAY_GRADING_MODEL: "vendor/a",
+      ESSAY_REVIEW_MODEL: "vendor/b",
+      ENGLISH_ADV_GRADING_MODEL: "vendor/c",
+      GRADING_MODEL: "vendor/d",
+    };
+    expect(getEnglishEssayGradingModel(env)).toBe("openai/gpt-6.2-sol");
+    expect(getEnglishEssayReviewModel(env)).toBe("openai/gpt-6.2-sol");
   });
 });

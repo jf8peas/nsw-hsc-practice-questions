@@ -75,7 +75,7 @@ export function ConceptPanel({
   // after 2 correct first tries, an all-parts tip after 3 (`clearAfter`)
   // spec 008: the unseen-text unit lists its seven skills the same way (clear after 2 first tries)
   const skills = Boolean(unit.draw);
-  const essayUnit = unit.flow === "essay";
+  const essayUnit = unit.flow === "essay" || unit.flow === "englishEssay";
   const tips = Boolean(unit.sequence) || skills || essayUnit;
   const clearOf = (conceptId: string) => concepts.get(conceptId)?.clearAfter ?? TO_CLEAR;
   const needsContent = states.some((s) => !content.get(s.conceptId)?.summary);
