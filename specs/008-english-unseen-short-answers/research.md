@@ -474,8 +474,8 @@ empty; the model stopped because of length (`finish_reason: "length"`); it does 
 integer from 0 to `maxMarks`; any of the seven `met` values is missing or not a boolean (or the strings
 `"true"`/`"false"`); `feedback` or `biggestGap` is missing or blank after trimming; or the echo guard (R4)
 fires, or the mark equals `maxMarks` and `goFurther` is missing, null, blank or not a string. A `goFurther` on a below-full reply is dropped (stored as null), and it is part of the echo guard's strings. A missing `reason` is **not** a failure (stored as ""); the spec lists only the mark, the verdicts,
-the feedback and the biggest gap. Strings are trimmed and capped (reason 300, feedback 600, biggest gap 300,
-go further 300 characters).
+the feedback and the biggest gap. Strings are trimmed and capped (reason 1200, feedback 1500, biggest gap 800,
+go further 800 characters), cut at a sentence or word end (`lib/trim.ts`).
 
 **"Make it even stronger" (the `goFurther` field, prompt `unseen-pilot-5`; `unseen-pilot-6` makes `biggestGap` null at full marks).** A full-mark answer has no biggest gap, so the student would learn
 nothing about how to lift it. The reply gains `goFurther`: when the mark equals the question's full marks, one

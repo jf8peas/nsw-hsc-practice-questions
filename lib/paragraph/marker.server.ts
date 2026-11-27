@@ -4,6 +4,7 @@ import { chatCompletion, DEFAULT_MODEL, type ChatMessage } from "@/lib/openroute
 import type { RawMarkerVerdicts } from "@/lib/paragraph/scoring";
 import type { PartKey } from "@/lib/paragraph/parts";
 import { PART_ORDER } from "@/lib/paragraph/parts";
+import { trimToLimit } from "@/lib/trim";
 import type { EssayKey } from "@/lib/types";
 
 import rubricJson from "./rubric.json";
@@ -28,8 +29,9 @@ export const PROMPT_VERSION = rubric.promptVersion;
 
 const MAX_TOKENS = 1200;
 const TIMEOUT_MS = 30_000;
-const MAX_REASON = 300;
-const MAX_FEEDBACK = 400;
+// Ceilings against a runaway reply, not target lengths (the prompt asks for those). Keep them well above a normal reply.
+const MAX_REASON = 1200;
+const MAX_FEEDBACK = 1500;
 
 export interface MarkerInput {
   part: PartKey;
@@ -94,7 +96,7 @@ function flag(v: unknown): boolean | null {
   return null;
 }
 
-const text = (v: unknown, max: number): string => (typeof v === "string" ? v.trim().slice(0, max) : "");
+const text = (v: unknown, max: number): string => (typeof v === "string" ? trimToLimit(v, max) : "");
 
 /**
  * The first {...} block of the reply, as the pilot and the sentence unit do. A missing or unclear

@@ -3,6 +3,7 @@ import "server-only";
 import { getEssayReviewModel } from "@/lib/config.server";
 import type { StoredPlanReview } from "@/lib/db/schema";
 import { chatCompletion, type ChatMessage } from "@/lib/openrouter.server";
+import { trimToLimit } from "@/lib/trim";
 
 import { economyRule } from "./marker.server";
 import reviewJson from "./review.json";
@@ -34,6 +35,7 @@ export const REVIEW_BUDGET_MS = 45_000; // inside the review route's maxDuration
 export const REVIEW_MIN_RETRY_MS = 10_000;
 const RETRY_MARGIN_MS = 2_000;
 const MAX_LINE = 240;
+const MAX_WHY = 600;
 const MAX_FLAGS = 4;
 
 /** The plan as the reviewer reads it: each section, each field's label and text, an empty field shown as (empty). */
@@ -112,7 +114,8 @@ export function parseReviewReply(content: string, planText: string): StoredPlanR
     if (!f || typeof f !== "object") continue;
     const quote = text((f as { quote?: unknown }).quote, 300);
     if (!quote || !quoteInText(quote, planText)) continue;
-    figureFlags.push({ quote, why: scrubFlagWhy(quote, text((f as { why?: unknown }).why, 300)) });
+    const why = (f as { why?: unknown }).why;
+    figureFlags.push({ quote, why: scrubFlagWhy(quote, typeof why === "string" ? trimToLimit(why, MAX_WHY) : "") });
     if (figureFlags.length >= MAX_FLAGS) break;
   }
   return { checks, figureFlags };

@@ -3,6 +3,7 @@ import "server-only";
 import { getEnglishAdvModel } from "@/lib/config.server";
 import type { AnySkillVerdicts, SkillVerdict } from "@/lib/db/schema";
 import { chatCompletion, type ChatMessage } from "@/lib/openrouter.server";
+import { trimToLimit } from "@/lib/trim";
 import type { UnseenText } from "@/lib/types";
 import { SKILL_IDS } from "@/lib/unseen/skills";
 import { countWords } from "@/lib/wordcount";
@@ -30,10 +31,11 @@ export const FIRST_CALL_TIMEOUT_MS = 40_000;
 export const BUDGET_MS = 55_000; // inside the grade route's maxDuration of 60 s
 export const MIN_RETRY_MS = 12_000;
 const RETRY_MARGIN_MS = 2_000;
-const MAX_REASON = 300;
-const MAX_FEEDBACK = 600;
-const MAX_GAP = 300;
-const MAX_GO_FURTHER = 300;
+// Ceilings against a runaway reply, not target lengths (the prompt asks for those). Keep them well above a normal reply.
+const MAX_REASON = 1200;
+const MAX_FEEDBACK = 1500;
+const MAX_GAP = 800;
+const MAX_GO_FURTHER = 800;
 /** A run of the model answer this long in the reply is an echo (shorter runs are quotations). */
 export const ECHO_RUN = 60;
 
@@ -151,7 +153,7 @@ function flag(v: unknown): boolean | null {
   return null;
 }
 
-const text = (v: unknown, max: number): string => (typeof v === "string" ? v.trim().slice(0, max) : "");
+const text = (v: unknown, max: number): string => (typeof v === "string" ? trimToLimit(v, max) : "");
 
 /**
  * The first {...} block of the reply, as the pilot does. A missing mark, verdict or feedback makes
@@ -189,11 +191,8 @@ export function parseUnseenReply(content: string, maxMarks: number, skillIds: re
   const filled: Array<"feedback" | "biggestGap"> = [];
   let feedback = text(obj.feedback, MAX_FEEDBACK);
   if (!feedback) {
-    feedback = skillIds.filter((id) => skills[id].met && skills[id].reason)
-      .map((id) => skills[id].reason)
-      .join(" ")
-      .slice(0, MAX_FEEDBACK)
-      .trim();
+    const met = skillIds.filter((id) => skills[id].met && skills[id].reason).map((id) => skills[id].reason);
+    feedback = trimToLimit(met.join(" "), MAX_FEEDBACK);
     if (!feedback) return null;
     filled.push("feedback");
   }
@@ -206,7 +205,7 @@ export function parseUnseenReply(content: string, maxMarks: number, skillIds: re
   if (!full && !biggestGap) {
     const firstMissed = skillIds.find((id) => !skills[id].met && skills[id].reason);
     if (!firstMissed) return null;
-    biggestGap = skills[firstMissed].reason.slice(0, MAX_GAP);
+    biggestGap = trimToLimit(skills[firstMissed].reason, MAX_GAP);
     filled.push("biggestGap");
   }
   const goFurther = full ? text(obj.goFurther, MAX_GO_FURTHER) : "";

@@ -31,16 +31,18 @@ Changes from the draft prompt: `conceptsUsedWell` (added, R9), `{schoolCriteria}
 | Field | Rule | If it fails |
 |---|---|---|
 | `criteria.<five ids>.verdict` | in `strong, sound, developing, weak`; all five present | whole reply fails (never a default) |
-| `criteria.<id>.reason` | string; missing stored as ""; trimmed to 300 chars | — |
+| `criteria.<id>.reason` | string; missing stored as ""; limited to 1200 chars (see below) | — |
 | `band` | integer 1–5 | fails |
 | `mark` | integer | fails |
 | `coversRequiredEconomies` | boolean | fails |
-| `bandReason` | string, trimmed to 600 chars; missing → fails | fails |
-| `liftYourMark` | array of ≥ 1 strings; the first two kept, each ≤ 300 chars | fails if none |
-| `dataFlags` | array; ≤ 5 kept; `quote` must occur in the essay (whitespace-normalised, case-insensitive) else the flag is dropped; `why` with a digit not in its quote is replaced by a fixed sentence | invalid items dropped |
-| `gaps` | array; `concept` on the list, deduped, ≤ 5 kept in order; `detail` ≤ 200 chars | off-list items dropped |
+| `bandReason` | string, limited to 1500 chars; missing → fails | fails |
+| `liftYourMark` | array of ≥ 1 strings; the first two kept, each ≤ 800 chars | fails if none |
+| `dataFlags` | array; ≤ 5 kept; `quote` must occur in the essay (whitespace-normalised, case-insensitive) else the flag is dropped; `why` ≤ 600 chars, and one with a digit not in its quote is replaced by a fixed sentence | invalid items dropped |
+| `gaps` | array; `concept` on the list, deduped, ≤ 5 kept in order; `detail` ≤ 600 chars | off-list items dropped |
 | `conceptsUsedWell` | ids on the list, ≤ 8, minus any id also in `gaps` | off-list dropped; missing treated as `[]` (reported as a metric: the gate requires it present) |
 | echo | a run of ≥ 60 characters of the marking notes or school criteria (not in the question or essay) in any reply string | whole reply fails, retried |
+
+**Length limits** (`trimToLimit`, `lib/trim.ts`): they guard against a runaway reply and sit well above a normal one. Text over its limit is cut back to the last whole sentence, or, where that would drop more than half the allowance, to the last whole word followed by "…". A student is never shown a part word. The reviewer's `figureFlags.why` follows the same rule at 600 chars.
 
 **Post-processing** (`lib/essay/scoring.ts`): `final = clamp(mark, band.min, band.max)`; if the essay is tagged `both` and `coversRequiredEconomies` is false, `final = min(final, 12)`; `capped = final < clampedMark`. Stored: raw mark, band, final mark, `covers_both`.
 

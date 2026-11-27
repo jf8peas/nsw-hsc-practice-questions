@@ -35,19 +35,19 @@ Use `[]` for no knowledge errors, gaps or used-well concepts. The model is instr
 | Field | Rule | Failure handling |
 |---|---|---|
 | `criteria.<four ids>.verdict` | all four present and in `strong, sound, developing, weak` | whole reply fails; never a default |
-| `criteria.<id>.reason` | string, trimmed to 300 chars; missing becomes `""` | — |
+| `criteria.<id>.reason` | string, limited to 1200 chars; missing becomes `""` | — |
 | `band` | integer 1–5 | whole reply fails |
 | `mark` | integer 0–20; clamped into the selected band later | whole reply fails |
 | `questionFocus` | `fully`, `partly` or `barely` | whole reply fails |
-| `questionFocusReason` | non-empty string, trimmed to 400 chars | whole reply fails |
-| `bandReason` | non-empty string, trimmed to 600 chars | whole reply fails |
-| `liftYourMark` | string or array; at least one non-empty item after sanitising; first two kept, each ≤300 chars | whole reply fails if none |
-| `knowledgeErrors` | required array; `why` non-empty ≤300 chars; `quote` must occur in the essay after normalisation | invalid items dropped; deduplicated per data-model §7.1 |
-| `gaps` | required array; concept on the unit list, deduped, ≤5 in marker order; detail ≤200 chars | off-list items dropped |
+| `questionFocusReason` | non-empty string, limited to 1200 chars | whole reply fails |
+| `bandReason` | non-empty string, limited to 1500 chars | whole reply fails |
+| `liftYourMark` | string or array; at least one non-empty item after sanitising; first two kept, each ≤800 chars | whole reply fails if none |
+| `knowledgeErrors` | required array; `why` non-empty ≤600 chars; `quote` must occur in the essay after normalisation | invalid items dropped; deduplicated per data-model §7.1 |
+| `gaps` | required array; concept on the unit list, deduped, ≤5 in marker order; detail ≤600 chars | off-list items dropped |
 | `conceptsUsedWell` | required array of on-list ids, ≤8, minus any id also in gaps | off-list items dropped |
 | key echo | a 60+ character run of marking notes or Away text notes in student-facing strings, not also in question/essay | whole reply fails and is retried |
 
-Student-facing strings are trimmed and scrubbed of references to hidden notes. Unknown keys are ignored and never stored.
+Student-facing strings are trimmed and scrubbed of references to hidden notes. The length limits guard against a runaway reply: text over its limit is cut back to the last whole sentence, or, where that would drop more than half the allowance, to the last whole word followed by "…" (`trimToLimit`, `lib/trim.ts`). Unknown keys are ignored and never stored.
 
 ### Deterministic post-processing
 

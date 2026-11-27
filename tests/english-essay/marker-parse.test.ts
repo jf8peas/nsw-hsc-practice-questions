@@ -44,7 +44,7 @@ describe("parseEnglishEssayReply", () => {
     expect(parse({ ...base, knowledgeErrors: {} })).toBeNull();
   });
 
-  it("requires all four criteria with a valid verdict, and trims reasons to 300 characters", () => {
+  it("requires all four criteria with a valid verdict, and limits the length of a reason", () => {
     const base = valid();
     for (const id of ["argument", "analysis", "knowledge", "expression"]) {
       const c = structuredClone(base);
@@ -55,19 +55,28 @@ describe("parseEnglishEssayReply", () => {
       expect(parse(d), id).toBeNull();
     }
     const long = structuredClone(base);
-    long.criteria.argument.reason = "x".repeat(500);
+    long.criteria.argument.reason = "x".repeat(2000);
     delete long.criteria.analysis.reason;
     const r = parse(long)!;
-    expect(r.criteria.argument.reason).toHaveLength(300);
+    expect(r.criteria.argument.reason).toHaveLength(1200);
     expect(r.criteria.analysis.reason).toBe("");
   });
 
   it("keeps the first two lift points, accepts a single string and trims each", () => {
     expect(parse({ ...valid(), liftYourMark: ["a", "b", "c"] })!.lift).toEqual(["a", "b"]);
     expect(parse({ ...valid(), liftYourMark: "only one" })!.lift).toEqual(["only one"]);
-    expect(parse({ ...valid(), liftYourMark: ["x".repeat(400), "y"] })!.lift[0]).toHaveLength(300);
-    expect(parse({ ...valid(), bandReason: "z".repeat(900) })!.bandReason).toHaveLength(600);
-    expect(parse({ ...valid(), questionFocusReason: "q".repeat(900) })!.questionFocusReason).toHaveLength(400);
+    expect(parse({ ...valid(), liftYourMark: ["x".repeat(900), "y"] })!.lift[0]).toHaveLength(800);
+    expect(parse({ ...valid(), bandReason: "z".repeat(2000) })!.bandReason).toHaveLength(1500);
+    expect(parse({ ...valid(), questionFocusReason: "q".repeat(2000) })!.questionFocusReason).toHaveLength(1200);
+  });
+
+  it("keeps long feedback whole, and cuts a runaway one at a sentence end", () => {
+    const sentence = "The paragraph returns to the question and explains what the staging does for an audience. ";
+    const whole = sentence.repeat(6).trim();
+    expect(parse({ ...valid(), questionFocusReason: whole })!.questionFocusReason).toBe(whole);
+    const cut = parse({ ...valid(), bandReason: sentence.repeat(40) })!.bandReason;
+    expect(cut.length).toBeLessThanOrEqual(1500);
+    expect(cut.endsWith("for an audience.")).toBe(true);
   });
 
   it("drops invalid knowledge errors and off-list gaps and used-well ids, dedupes gaps and removes gaps from used-well", () => {
@@ -78,13 +87,13 @@ describe("parseEnglishEssayReply", () => {
         { concept: "skill-thesis", detail: "first" },
         { concept: "skill-thesis", detail: "dup" },
         { concept: "not-a-concept", detail: "x" },
-        { concept: "away-symbols", detail: "y".repeat(500) },
+        { concept: "away-symbols", detail: "y".repeat(900) },
       ],
       conceptsUsedWell: ["skill-thesis", "skill-expression", "skill-expression", "bogus", 5],
     })!;
     expect(r.knowledgeErrors).toEqual([{ quote: "a b c", why: "w" }]);
     expect(r.gaps.map((g) => g.conceptId)).toEqual([`${U}.c-skill-thesis`, `${U}.c-away-symbols`]);
-    expect(r.gaps[1]!.detail).toHaveLength(200);
+    expect(r.gaps[1]!.detail).toHaveLength(600);
     expect(r.usedWell).toEqual([`${U}.c-skill-expression`]);
   });
 

@@ -4,6 +4,7 @@ import { englishConceptLines } from "@/content/units/y12-english-essay-writing/c
 import { getEnglishEssayGradingModel } from "@/lib/config.server";
 import { scrubKeyMentions } from "@/lib/essay/marker.server";
 import { chatCompletion, type ChatMessage } from "@/lib/openrouter.server";
+import { trimToLimit } from "@/lib/trim";
 import { countWords } from "@/lib/wordcount";
 
 import rubricJson from "./rubric.json";
@@ -40,12 +41,13 @@ export const FIRST_CALL_TIMEOUT_MS = 60_000;
 export const BUDGET_MS = 115_000; // inside the grade route's maxDuration of 120 s
 export const MIN_RETRY_MS = 12_000;
 const RETRY_MARGIN_MS = 2_000;
-const MAX_REASON = 300;
-const MAX_FOCUS_REASON = 400;
-const MAX_BAND_REASON = 600;
-const MAX_LIFT = 300;
-const MAX_WHY = 300;
-const MAX_DETAIL = 200;
+// Ceilings against a runaway reply, not target lengths (the prompt asks for those). Keep them well above a normal reply.
+const MAX_REASON = 1200;
+const MAX_FOCUS_REASON = 1200;
+const MAX_BAND_REASON = 1500;
+const MAX_LIFT = 800;
+const MAX_WHY = 600;
+const MAX_DETAIL = 600;
 const MAX_USED_WELL = 8;
 /** A run of the notes this long in the reply is an echo (shorter runs are quotation). */
 export const ECHO_RUN = 60;
@@ -108,7 +110,8 @@ export interface ParsedEnglishEssayReply {
 }
 
 const text = (v: unknown, max: number): string => (typeof v === "string" ? v.trim().slice(0, max) : "");
-const safeText = (v: unknown, max: number): string => scrubKeyMentions(text(v, max));
+/** Student-facing prose: held to `max` at a sentence end, then the key-mention rewrite (an empty result stays empty). */
+const safeText = (v: unknown, max: number): string => scrubKeyMentions(typeof v === "string" ? trimToLimit(v, max) : "");
 
 /**
  * The first {...} block of the reply. A missing verdict, band, mark, question focus (or its reason), band reason or lift

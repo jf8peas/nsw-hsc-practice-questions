@@ -2,6 +2,7 @@ import "server-only";
 
 import { getEssayGradingModel } from "@/lib/config.server";
 import { chatCompletion, type ChatMessage } from "@/lib/openrouter.server";
+import { trimToLimit } from "@/lib/trim";
 import { countWords } from "@/lib/wordcount";
 
 import conceptList from "./concepts.json";
@@ -47,10 +48,12 @@ export const FIRST_CALL_TIMEOUT_MS = 60_000; // one holdout call took 46.5 s
 export const BUDGET_MS = 115_000; // inside the grade route's maxDuration of 120 s; a retry still fits SC-003's 2 minutes
 export const MIN_RETRY_MS = 12_000;
 const RETRY_MARGIN_MS = 2_000;
-const MAX_REASON = 300;
-const MAX_BAND_REASON = 600;
-const MAX_LIFT = 300;
-const MAX_DETAIL = 200;
+// Ceilings against a runaway reply, not target lengths (the prompt asks for those). Keep them well above a normal reply.
+const MAX_REASON = 1200;
+const MAX_BAND_REASON = 1500;
+const MAX_LIFT = 800;
+const MAX_WHY = 600;
+const MAX_DETAIL = 600;
 const MAX_FLAGS = 5;
 const MAX_USED_WELL = 8;
 /** A run of the notes or school criteria this long in the reply is an echo (shorter runs are quotation). */
@@ -143,8 +146,8 @@ export function scrubKeyMentions(value: string): string {
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
-/** `text`, then the key-mention rewrite (an empty result stays empty). */
-const safeText = (v: unknown, max: number): string => scrubKeyMentions(text(v, max));
+/** Student-facing prose: held to `max` at a sentence end, then the key-mention rewrite (an empty result stays empty). */
+const safeText = (v: unknown, max: number): string => scrubKeyMentions(typeof v === "string" ? trimToLimit(v, max) : "");
 
 /**
  * The first {...} block of the reply, as the pilot does. A missing verdict, band, mark,
@@ -192,7 +195,7 @@ export function parseEssayReply(content: string, essay: string, list: Record<str
     if (!f || typeof f !== "object") continue;
     const quote = text((f as { quote?: unknown }).quote, 300);
     if (!quote || !quoteInText(quote, essay)) continue;
-    flags.push({ quote, why: scrubFlagWhy(quote, safeText((f as { why?: unknown }).why, 300)) });
+    flags.push({ quote, why: scrubFlagWhy(quote, safeText((f as { why?: unknown }).why, MAX_WHY)) });
     if (flags.length >= MAX_FLAGS) break;
   }
 

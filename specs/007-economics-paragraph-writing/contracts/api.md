@@ -241,7 +241,7 @@ Reply (the first `{…}` block is parsed; one retry on failure; unparseable twic
 
 Validation: `met`, `preciseLanguage`, `noPadding` must each be a boolean (or the strings
 `"true"`/`"false"`); a missing or other value fails the parse. Strings are trimmed and capped
-(reason 300, feedback 400 characters). The server computes: `d.met = preciseLanguage && noPadding &&
+(reason 1200, feedback 1500 characters), cut at a sentence or word end (`lib/trim.ts`). The server computes: `d.met = preciseLanguage && noPadding &&
 wordCount <= limit`; `d.reason` is the conventions reason, replaced by "Over the {limit}-word limit
 ({n} words)." when over; the mark; the phase 2 cap (3); the recorded mark; the lost criteria; the
 tip ids. The model is not asked for tips.

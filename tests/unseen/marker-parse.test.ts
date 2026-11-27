@@ -70,7 +70,7 @@ describe("parseUnseenReply", () => {
     const r = parseUnseenReply(good({ mark: 4, goFurther: "  End on the mirror image.  " }), 4)!;
     expect(r.mark).toBe(4);
     expect(r.goFurther).toBe("End on the mirror image.");
-    expect(parseUnseenReply(good({ mark: 4, goFurther: "z".repeat(500) }), 4)!.goFurther).toHaveLength(300);
+    expect(parseUnseenReply(good({ mark: 4, goFurther: "z".repeat(900) }), 4)!.goFurther).toHaveLength(800);
   });
 
   it.each([
@@ -179,9 +179,19 @@ describe("parseUnseenReply", () => {
 
   it("caps long strings", async () => {
     const { parseUnseenReply } = await marker();
-    const r = parseUnseenReply(good({ feedback: "x".repeat(900), biggestGap: "y".repeat(500) }), 4)!;
-    expect(r.feedback).toHaveLength(600);
-    expect(r.biggestGap).toHaveLength(300);
+    const r = parseUnseenReply(good({ feedback: "x".repeat(2000), biggestGap: "y".repeat(900) }), 4)!;
+    expect(r.feedback).toHaveLength(1500);
+    expect(r.biggestGap).toHaveLength(800);
+  });
+
+  it("keeps feedback of several sentences whole, and cuts a runaway one at a sentence end", async () => {
+    const { parseUnseenReply } = await marker();
+    const sentence = "Say what the tide image makes a reader feel about the speaker. ";
+    const whole = sentence.repeat(12).trim();
+    expect(parseUnseenReply(good({ feedback: whole }), 4)!.feedback).toBe(whole);
+    const cut = parseUnseenReply(good({ feedback: sentence.repeat(40) }), 4)!.feedback;
+    expect(cut.length).toBeLessThanOrEqual(1500);
+    expect(cut.endsWith("about the speaker.")).toBe(true);
   });
 
   it("reads descriptionAdequate for a visual text", async () => {

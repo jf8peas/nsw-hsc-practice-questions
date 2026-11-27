@@ -259,8 +259,8 @@ agree. `parts.ts` (public: names, limits, short names) is checked against the JS
 - **Reply** (unchanged from round 5): `{ restated, criteria: { a|b|c: { reason, met } },
   conventions: { reason, preciseLanguage, noPadding }, feedback }`. `restated` is discarded, not
   stored (it can contain a rewrite of the student's text). A missing or non-boolean verdict is a
-  failed parse. Reasons are trimmed and capped at 300 characters, feedback at 400 (truncate, never
-  fail). The marker is not asked for "tips missed": they are computed in code from the verdicts
+  failed parse. Reasons are trimmed and capped at 1200 characters, feedback at 1500 (truncate at a
+  sentence or word end, `lib/trim.ts`; never fail). The marker is not asked for "tips missed": they are computed in code from the verdicts
   (FR-018's "tips missed" is satisfied by `lostCriteria`), so a model cannot invent a tip.
 - **Parsing with one retry.** First `{…}` block, as the pilot and `parseRewriteJson` do; on failure
   one second call with the same messages; on failure again the marker is *unavailable*.

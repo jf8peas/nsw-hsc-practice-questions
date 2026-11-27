@@ -64,13 +64,21 @@ describe("parseMarkerReply", () => {
     expect(parseMarkerReply("I think it is fine")).toBeNull();
     expect(parseMarkerReply("{not json}")).toBeNull();
   });
-  it("trims and caps reasons (300) and feedback (400) instead of failing", () => {
-    const long = "x".repeat(900);
+  it("trims and caps reasons (1200) and feedback (1500) instead of failing", () => {
+    const long = "x".repeat(2000);
     const r = parseMarkerReply(
       JSON.stringify({ ...good, criteria: { ...good.criteria, a: { reason: "  " + long, met: true } }, feedback: long }),
     );
-    expect(r!.a.reason.length).toBe(300);
-    expect(r!.feedback.length).toBe(400);
+    expect(r!.a.reason.length).toBe(1200);
+    expect(r!.feedback.length).toBe(1500);
+  });
+  it("keeps feedback of several sentences whole, and cuts a runaway one at a sentence end", () => {
+    const sentence = "Name the policy and say how it changes the incentive that firms face. ";
+    const whole = sentence.repeat(8).trim();
+    expect(parseMarkerReply(JSON.stringify({ ...good, feedback: whole }))!.feedback).toBe(whole);
+    const cut = parseMarkerReply(JSON.stringify({ ...good, feedback: sentence.repeat(40) }))!.feedback;
+    expect(cut.length).toBeLessThanOrEqual(1500);
+    expect(cut.endsWith("that firms face.")).toBe(true);
   });
 });
 

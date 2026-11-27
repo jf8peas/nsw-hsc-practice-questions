@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { containsKeyEcho, parseEssayReply, scrubKeyMentions, type ParsedEssayReply } from "@/lib/essay/marker.server";
+import { trimToLimit } from "@/lib/trim";
 
 import { markerEssayContent } from "../helpers/essay";
 
@@ -109,7 +110,45 @@ describe("gaps and concepts used well", () => {
 
   it("caps the detail length", () => {
     const r = parse(markerEssayContent({ gaps: [{ concept: "china-wto", detail: "x".repeat(900) }] }))!;
-    expect(r.gaps[0].detail).toHaveLength(200);
+    expect(r.gaps[0].detail).toHaveLength(600);
+  });
+});
+
+describe("long feedback is never cut mid-sentence", () => {
+  const sentence = "The essay names dated policies and ties each one to a claim about growth in the economy. ";
+
+  it("keeps a reason of several long sentences whole", () => {
+    const reason = sentence.repeat(6).trim();
+    const o = obj();
+    (o.criteria as Record<string, { reason: string }>).understanding.reason = reason;
+    expect(parse(text(o))!.criteria.understanding.reason).toBe(reason);
+  });
+
+  it("cuts a runaway reason back to its last whole sentence", () => {
+    const o = obj();
+    (o.criteria as Record<string, { reason: string }>).understanding.reason = sentence.repeat(40);
+    const out = parse(text(o))!.criteria.understanding.reason;
+    expect(out.length).toBeLessThanOrEqual(1200);
+    expect(out.endsWith("in the economy.")).toBe(true);
+  });
+});
+
+describe("trimToLimit", () => {
+  it("leaves text within the limit alone, apart from outer spaces", () => {
+    expect(trimToLimit("  One. Two.  ", 9)).toBe("One. Two.");
+  });
+
+  it("keeps a sentence that ends exactly on the limit", () => {
+    expect(trimToLimit("One two. Three four. Five.", 20)).toBe("One two. Three four.");
+  });
+
+  it("does not take a decimal point for the end of a sentence", () => {
+    expect(trimToLimit("HDI rose from 0.29 to 0.56 over four decades of reform", 30)).toBe("HDI rose from 0.29 to 0.56…");
+  });
+
+  it("falls back to a whole word with an ellipsis, within the limit", () => {
+    expect(trimToLimit("alpha beta gamma delta", 14)).toBe("alpha beta…");
+    expect(trimToLimit("x".repeat(50), 10)).toBe(`${"x".repeat(9)}…`);
   });
 });
 
