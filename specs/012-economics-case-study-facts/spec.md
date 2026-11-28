@@ -22,7 +22,7 @@ The student's weakest criterion in the first handwritten practice essay was data
 - Q: What earns the marks when a figure shows a change? → A: A question asking how something changed needs both values for the figure mark and both years for the period mark; a question about one year needs only that value and year.
 - Q: Who checks the questions before the unit goes live? → A: The AI agent building the unit checks every figure and year against the fact file and reports the results; the maintainer then reads all questions and keys before release.
 - Q: What ships if the work isn't all ready before Tue 1 Dec? → A: Two releases. The quiz, no-repeat draw and checks go first; "Things I need to know" follows as a second release, and until then the unit shows no revision list.
-- Q: How many questions in each pool? → A: 8 per pool (40 questions), giving 8 attempts with no repeats.
+- Q: How many questions in each pool? → A: 8 per pool (40 questions), giving 8 attempts with no repeats. *(Amended after the 28 Nov review: a 41st question, s25, makes 9 in the "both" pool.)*
 - Q: What counts as the significance of a fact? → A: The fact's impact line is the expected significance; any other significance supported by the fact file earns the mark too.
 
 ## Terms
@@ -110,7 +110,7 @@ The maintainer can trace every answer, figure and explanation to a fact ID, read
 
 ### Edge Cases
 
-- **Date-only facts** (a WTO entry date, a pledge): the date and year cannot be two separate marks. These are 2-mark questions: 1 mark for the event with its correct year, 1 for the significance. The year alone earns the date part; a missing or wrong day or month costs nothing.
+- **Date-only facts** (a WTO entry date): the date and year cannot be two separate marks. These are 2-mark questions: 1 mark for the event with its correct year, 1 for the significance. The year alone earns the date part; a missing or wrong day or month costs nothing. The UN climate pledge carries its own target years, so it is a 3-mark question: both targets; the year the pledge was made; the significance.
 - **Comparison questions**: the figure mark needs the figures for both economies and the year mark needs both periods; one economy's data alone earns neither. Where the comparison is about change, each economy needs both values and both years.
 - **Change over time**: one end of a change earns neither the figure mark nor the period mark. Where a fact has more than two points (tourist arrivals 2019, 2020, 2025), the values and years required are those the question asks about.
 - **Different periods**: China and Nepal figures often cover different years (for example Gini 1990–2022 and 1995–2022). A question states or asks for each economy's own period.
@@ -136,7 +136,7 @@ The maintainer can trace every answer, figure and explanation to a fact ID, read
 **Attempt shape and draw**
 
 - **FR-005**: Each attempt MUST draw exactly one question from each of five quiz groups, presented in this order: multiple choice China; multiple choice Nepal; short answer China; short answer Nepal; short answer both.
-- **FR-006**: Each pool MUST hold at least 8 questions; the unit is written with exactly 8 per pool (40 questions). The "both" pool's questions compare the two economies, or ask for the sentence a fact would support in an essay argument.
+- **FR-006**: Each pool MUST hold at least 8 questions; the unit is written with 41 questions: 9 in the "both" pool and 8 in each of the other four. The "both" pool's questions compare the two economies, or ask for the sentence a fact would support in an essay argument.
 - **FR-007**: For this unit, each quiz group MUST draw an unseen question while its pool has one. *(Needs new code: the existing draw is random and can repeat questions after one attempt.)*
 - **FR-008**: From the second release, favouring missed concepts MUST happen only within a quiz group and after the unseen rule; it MUST NOT change the one-per-group shape. When a pool has no unseen question, the draw prefers a missed concept, then the question answered longest ago. *(Needs new code: the existing weighting can move a place from one group to another, which could drop an economy from a quiz.)*
 - **FR-009**: FR-007 and FR-008 MUST NOT change how any other unit draws.
@@ -193,7 +193,7 @@ Essays and paragraph writing (specs 007 and 010); new question types; diagrams; 
 
 ### Measurable Outcomes
 
-- **SC-001**: A student can complete 8 attempts (40 questions) without seeing any question twice.
+- **SC-001**: A student can complete 8 attempts (40 of the unit's 41 questions, 9 of which are in the "both" pool) without seeing any question twice.
 - **SC-002**: 100% of attempts contain 2 multiple-choice and 3 short-answer questions, with at least one question dedicated to China and one to Nepal in each question type.
 - **SC-003**: All 36 ★ facts and all 11 fact groups are tested; no fact is tested by more than 3 questions.
 - **SC-004**: 100% of answer keys, figures, dates, names and explanations trace to a fact ID, and a full read-through finds no figure in any question that is not in the fact file.

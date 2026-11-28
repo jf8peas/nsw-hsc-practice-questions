@@ -14,7 +14,7 @@ export const conceptOfQuestionId = defineTags(U, concepts, {
   "china-environment": ["m07", "s03", "s08", "s23"],
   "nepal-strategies": ["m09", "m13", "m14", "m15", "s11", "s24"],
   "nepal-growth-trade": ["s10", "s15", "s21"],
-  "nepal-flows": ["m16", "s09", "s13", "s20"],
+  "nepal-flows": ["m16", "s09", "s13", "s20", "s25"],
   "nepal-development": ["m11", "m12", "s12", "s17"],
   "nepal-tourism-electricity": ["m10", "s14", "s16"],
 });

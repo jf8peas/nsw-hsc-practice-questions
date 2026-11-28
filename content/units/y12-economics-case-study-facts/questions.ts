@@ -3,7 +3,7 @@ import type { Question } from "@/lib/types";
 import { mc, sa } from "./build";
 import { conceptOfQuestionId } from "./concept-tags";
 
-// PUBLIC — no answer keys here. Forty original questions on the HSC Economics Topic 1 case study (China and Nepal),
+// PUBLIC — no answer keys here. Forty-one original questions on the HSC Economics Topic 1 case study (China and Nepal),
 // written from docs/y12-economics-case-study-facts-research.md only. A short-answer prompt never states a figure or
 // year that the question gives a mark for.
 export const questions: Question[] = [
@@ -114,13 +114,13 @@ export const questions: Question[] = [
     "They play little part in growth, because households cannot spend them",
   ]),
 
-  sa(1, "sa-china", 3, "State how China's World Bank Gini coefficient has changed since China's integration into the global economy, giving both values and both years, and explain what this shows about how the gains have been shared."),
+  sa(1, "sa-china", 3, "State how China's World Bank Gini coefficient has changed over the period the case study covers, giving both values and both years, and explain what this shows about how the gains have been shared."),
 
-  sa(2, "sa-china", 3, "State how China's GDP per person has changed since China's integration into the global economy, giving both values and both years, and explain what this shows about living standards."),
+  sa(2, "sa-china", 3, "State how China's GDP per person has changed over the period the case study covers, giving both values and both years, and explain what this shows about living standards."),
 
   sa(3, "sa-china", 3, "State China's share of the world's carbon dioxide (CO2) emissions in the latest year in the case study, giving the year, and explain what this shows about China's growth and the environment."),
 
-  sa(4, "sa-china", 3, "State how China's Human Development Index (HDI) has changed since China's integration into the global economy, giving both values and both years, and explain what this shows about development."),
+  sa(4, "sa-china", 3, "State how China's Human Development Index (HDI) has changed over the period the case study covers, giving both values and both years, and explain what this shows about development."),
 
   sa(5, "sa-china", 2, "State when China joined the World Trade Organization (WTO), and explain what membership meant for China's place in the global economy."),
 
@@ -128,11 +128,11 @@ export const questions: Question[] = [
 
   sa(7, "sa-china", 3, "State China's urban–rural income ratio in the latest year in the case study, giving the year, and explain what this shows about how income is shared."),
 
-  sa(8, "sa-china", 2, "Describe the pledge China made at the UN General Assembly about its carbon dioxide (CO2) emissions, giving the year it was made, and explain what it shows about China and the environment."),
+  sa(8, "sa-china", 3, "Describe the pledge China made at the UN General Assembly about its carbon dioxide (CO2) emissions, giving both target years and the year the pledge was made, and explain what it shows about China and the environment."),
 
-  sa(9, "sa-nepal", 3, "State how Nepal's remittances, as a share of GDP, have changed as Nepal has integrated into the global economy, giving both values and both years, and explain what this shows."),
+  sa(9, "sa-nepal", 3, "State how Nepal's remittances, as a share of GDP, have changed over the period the case study covers, giving both values and both years, and explain what this shows."),
 
-  sa(10, "sa-nepal", 3, "State how Nepal's GDP per person has changed as Nepal has integrated into the global economy, giving both values and both years, and explain what this shows about its level of development."),
+  sa(10, "sa-nepal", 3, "State how Nepal's GDP per person has changed over the period the case study covers, giving both values and both years, and explain what this shows about its level of development."),
 
   sa(11, "sa-nepal", 3, "Give one figure for the cost of Nepal's major earthquake, saying what it measures, and the year the earthquake happened. Explain what this shows about the challenges to Nepal's development."),
 
@@ -161,4 +161,6 @@ export const questions: Question[] = [
   sa(23, "sa-both", 3, "Write the sentence you would use in an essay on globalisation and the environment, using the change in China's carbon dioxide (CO2) emissions per person. Include both values and both years, and say what the change shows."),
 
   sa(24, "sa-both", 2, "State when China and when Nepal joined the World Trade Organization (WTO), and compare what membership meant for the two economies."),
+
+  sa(25, "sa-both", 3, "Write the sentence you would use in an essay about how Nepal is linked to the global economy, using Nepal's remittance inflows in the latest financial year in the case study. Include the figure and the financial year, and say what it shows."),
 ].map((q) => ({ ...q, concept: conceptOfQuestionId[q.id] }));

@@ -1,5 +1,6 @@
 # Fact check: Case Study Facts (Release 1)
 Checked by: Claude Code (Sonnet 5.5), 28 Nov 2026. Fact file: docs/y12-economics-case-study-facts-research.md as modified on 28 Nov 2026 at 15:18 (not yet committed when checked).
+Updated after the question review, 28 Nov 2026, against the fact file with the impact lines of N08 and N26 corrected from "hydropower" to "electricity" (that correction is not yet committed).
 
 The value tables were assembled by script from the unit and the fact rows. Names, significance and the notes below were checked by hand. Whether each direction, country and claim is right is the maintainer's read.
 
@@ -17,7 +18,16 @@ The value tables were assembled by script from the unit and the fact rows. Names
 - Comparisons such as "far more in China" and "the higher level" come from the two fact rows, not from an impact line.
 - Causes credited to remittances (s12, s17, s18) rest on impact lines N19, N20 and N23 only. N20's earlier figure is secondary.
 - The fact file calls 2025 and FY2025/26 figures preliminary; questions state them without saying so, except Nepal's growth, called an estimate.
-- Model answers s22 and s23 are one sentence each, because the question asks for one essay sentence.
+- Model answers s22, s23 and s25 are one sentence each, because the question asks for one essay sentence.
+
+### Changed after the question review (28 Nov 2026)
+- Electricity, not hydropower: m15 rubric; s16 model answer, rubric and notes.
+- Prompts s01, s02, s04, s09 and s10: "since integration" wording replaced with "over the period the case study covers".
+- Notes of all 24 earlier short answers: the "Only ... count, even if you have seen others from a real source" sentence replaced with "The mark is for the case study's ...; a different ... from another source does not earn it."
+- s08: now 3 marks (both targets; year of the pledge; what it shows), with a new prompt.
+- s25: new question on N16 (remittance inflows). Its expected significance is borrowed from the impact line of N15, which s09 also marks; N16's own line (spending, stable external accounts) can earn the mark as another supported point, and so can the World Bank caveat in row N17.
+- s25 prompt: "how Nepal is linked to the global economy" points towards the significance it marks.
+- s25 and m16 or s09: m16 is answered with the caveat s25 accepts, and s09 shares its significance. A quiz draws one short answer from SA both, so s25 can share a quiz with either.
 
 ## Coverage
 | Fact | ★ | Questions |
@@ -68,7 +78,7 @@ The value tables were assembled by script from the unit and the fact rows. Names
 | N13 | ★ | s15 |
 | N14 |  | - |
 | N15 | ★ | s09 |
-| N16 |  | - |
+| N16 |  | s25 |
 | N17 | ★ | m16 |
 | N18 | ★ | s13, s20 |
 | N19 | ★ | s17 |
@@ -343,7 +353,7 @@ Significance: impact line C26 (without the multiple or the latest-year trend).
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
 
-### s08 · sa-china · 2 marks · C29 · china-environment
+### s08 · sa-china · 3 marks · C29 · china-environment
 | As written | Where | Fact | Fact file says |
 |---|---|---|---|
 | 22 Sep 2020 | model answer | C29 | Pledge: CO2 to peak before 2030, carbon neutral before 2060 (UN General Assembly) (22 Sep 2020) |
@@ -460,7 +470,7 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 | 4000 | notes | N26 | rounds 3965: Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn (FY2025/26) |
 | 29 | notes | N26 | rounds 29.31: Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn (FY2025/26) |
 Names: India (N26). Sources cited: none.
-Significance: impact line N26 (without the ranking and the trend). It also calls the exports hydropower, as the line and the Definitions do; row N26 says electricity.
+Significance: impact line N26 (without the ranking and the trend). The exports are described as electricity, as row N26 says.
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
 
@@ -585,10 +595,23 @@ Significance: impact lines C03, N03.
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
 
+### s25 · sa-both · 3 marks · N16 · nepal-flows
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 2025-26 | model answer, rubric, notes | N16 | Remittance inflows US$16.19 bn (up 28.1%) (FY2025/26) |
+| 16.19 | model answer, rubric, notes | N16 | Remittance inflows US$16.19 bn (up 28.1%) (FY2025/26) |
+| 28.1 | rubric, notes | N16 | Remittance inflows US$16.19 bn (up 28.1%) (FY2025/26) |
+| 16.2 | notes | N16 | rounds 16.19: Remittance inflows US$16.19 bn (up 28.1%) (FY2025/26) |
+| 16 | notes | N16 | rounds 16.19: Remittance inflows US$16.19 bn (up 28.1%) (FY2025/26) |
+Names: World Bank (N17, notes only). Sources cited: none.
+Significance: borrows impact line N15 (exporting labour is the main link; remittances support household spending and cut poverty), because N16's line is mostly a trend that cannot be quoted; support: rows N15 and N16. Accepted further point: row N17 and its impact line.
+Changed or rounded: only the roundings named in the notes. Not traced: none.
+- [ ] Read by maintainer
+
 <!-- script:start -->
 (written by npm run case-facts:check; do not edit)
 
-40 questions; 460 numbers, periods and dates traced: 421 OK, 38 rounded, 1 from another row, 0 untraced.
+41 questions; 472 numbers, periods and dates traced: 431 OK, 40 rounded, 1 from another row, 0 untraced.
 
 ### Rule errors
 - none
@@ -633,6 +656,8 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 - ROUNDED `1500` in s21, notes (C08, N10)
 - ROUNDED `2.1` in s23, notes (C28)
 - ROUNDED `9.3` in s23, notes (C28)
+- ROUNDED `16.2` in s25, notes (N16)
+- ROUNDED `16` in s25, notes (N16)
 
 ### Warnings
 - y12-economics-case-study-facts.s13: notes says 43.5 bn; the fact row has 43.5 million
@@ -640,5 +665,5 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 - N23: shared by multiple choice m11 and short answer s18
 - name "Index" is not in the fact file (s04, s17)
 - name "Using" is not in the fact file (s06)
-- name "Accept" is not in the fact file (s13, s15)
+- name "Accept" is not in the fact file (s13, s15, s25)
 <!-- script:end -->

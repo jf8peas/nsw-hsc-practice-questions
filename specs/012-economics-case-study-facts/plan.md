@@ -4,12 +4,12 @@
 **Spec**: [spec.md](spec.md)
 
 **Beside this plan**: [research.md](research.md) (decisions), [data-model.md](data-model.md) (exact content shapes),
-[quickstart.md](quickstart.md) (validation), [content-prompt.md](content-prompt.md) (the 40 questions). No
+[quickstart.md](quickstart.md) (validation), [content-prompt.md](content-prompt.md) (the question-writing session). No
 `contracts/`: no request, response or table changes.
 
 ## Summary
 
-A new topic-quiz unit, `y12-economics-case-study-facts`: 40 original questions from one fact file, 8 in each of five
+A new topic-quiz unit, `y12-economics-case-study-facts`: 41 original questions from one fact file (9 in the SA both pool, 8 in each of the others), in five
 pools, one drawn from each pool per attempt. **Release 1 (live Mon 30 Nov)** is content plus four small code changes:
 
 1. an opt-in unseen-first draw for this unit;
@@ -39,7 +39,7 @@ draw, a switch that keeps AI concept content off, and the constitution amendment
 **Constraints**: Release 1 live by the evening of Mon 30 Nov 2026; content and fact check done Sun 29 Nov; Mon daytime
 for the maintainer's read; minimum Release 1 code; the sandbox cannot reach OpenRouter, so marker runs are local
 
-**Scale/Scope**: 40 questions, 11 concepts, 57 facts; one unit
+**Scale/Scope**: 41 questions, 11 concepts, 57 facts; one unit
 
 ## Constitution Check
 
@@ -159,4 +159,4 @@ wait for the content.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| Principle III, last bullet, if read literally: Claude Code drafts the 40 questions | The spec requires original questions in two days | Hand-writing 40 questions with keys and explanations does not fit the timetable. The app generates nothing; validation, tracing and the maintainer's read gate the text. The wording is clarified in the Release 2 amendment (or now, as 2.18.1, if you prefer) |
+| Principle III, last bullet, if read literally: Claude Code drafts the 41 questions | The spec requires original questions in two days | Hand-writing 41 questions with keys and explanations does not fit the timetable. The app generates nothing; validation, tracing and the maintainer's read gate the text. The wording is clarified in the Release 2 amendment (or now, as 2.18.1, if you prefer) |

@@ -1,7 +1,7 @@
 import type { McQuestion, ShortQuestion } from "@/lib/types";
 import { shuffleBySeed } from "@/lib/shuffle";
 
-// Shared builders for this unit's question file. Ids are m01–m16 and s01–s24 and are never renumbered; new
+// Shared builders for this unit's question file. Ids are m01–m16 and s01–s25 and are never renumbered; new
 // questions are appended. Every question carries the same source line (spec 012 FR-014).
 
 export const U = "y12-economics-case-study-facts";

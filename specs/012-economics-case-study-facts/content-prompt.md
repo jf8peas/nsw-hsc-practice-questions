@@ -1,4 +1,4 @@
-# Content task prompt for spec 012 (the 40 questions, Release 1)
+# Content task prompt for spec 012 (the 41 questions, Release 1)
 
 Paste everything inside the block below into Claude Code once. It can start straight away and run beside the code
 tasks: it writes only the unit folder and two files in this spec folder, and the code tasks write everything else.
@@ -6,7 +6,7 @@ If `npm run case-facts:check` does not exist yet when it reaches step 6, it fini
 step 6 again once it does.
 
 ```text
-Spec 012 content task, RELEASE 1. Write the 40 questions of the unit y12-economics-case-study-facts ("Case Study Facts: China and Nepal", HSC Economics Topic 1) with their keys, wrong-option explanations and concept tags, from one fact file. A student sits an exam on Tuesday 1 December 2026 and will learn whatever these questions say, so a wrong figure is worse than a missing question. It must be written and fact-checked by Sunday night, 29 November.
+Spec 012 content task, RELEASE 1. Write the 41 questions of the unit y12-economics-case-study-facts ("Case Study Facts: China and Nepal", HSC Economics Topic 1) with their keys, wrong-option explanations and concept tags, from one fact file. A student sits an exam on Tuesday 1 December 2026 and will learn whatever these questions say, so a wrong figure is worse than a missing question. It must be written and fact-checked by Sunday night, 29 November.
 
 Read first, in this order: docs/y12-economics-case-study-facts-research.md (the fact file: the ONLY source of facts, including its "Context and impact" section, one impact line per fact ID), specs/012-economics-case-study-facts/spec.md (FR-001 to FR-022, FR-032 and the edge cases), data-model.md (all of it), research.md (§0 findings B to D, §6, §8, §11), and the pattern unit content/units/y12-economics-global-economy/ (meta.ts, build.ts, concepts.ts, concept-tags.ts, questions.ts, answers.ts, explanations.ts) with content/explanation-helpers.ts and content/concept-helpers.ts.
 
@@ -17,13 +17,13 @@ Another session is changing lib/, scripts/, tests/, content/index.ts, content/an
 
 Steps:
 1. Skeleton: meta.ts exactly as data-model.md §2; concepts.ts from §3; build.ts copied from the global economy unit with this unit's id, two-digit ids (m01, s01), a group parameter, no diagrams, and the source constant "Original question — case study facts (checked Nov 2026)" (the dash is an em dash).
-2. Questions (questions.ts): the 40 slots in data-model.md §4, in order, m01–m16 then s01–s24. Keep each slot's facts and subject unless the question cannot be written well; if you move a fact, keep every ★ fact tested, every fact group covered, no fact in more than 3 questions, and the slots marked † unchanged.
+2. Questions (questions.ts): the 41 slots in data-model.md §4, in order, m01–m16 then s01–s25. Keep each slot's facts and subject unless the question cannot be written well; if you move a fact, keep every ★ fact tested, every fact group covered, no fact in more than 3 questions, and the slots marked † unchanged.
 3. Keys (answers.ts) in the shapes of data-model.md §5, each with factIds.
 4. Wrong-option explanations (explanations.ts): one for every wrong option of every multiple-choice question.
 5. Concept tags (concept-tags.ts): exactly one per question, as in §4.
 6. Write marker-cases.json from data-model.md §7, adjusting an answer only if a question's final wording needs it.
 7. Write fact-check.md in the format of data-model.md §6, by checking each question against the fact file row by row. For each short answer record the impact line(s) its significance point uses, or "own significance" with the fact-file support for it. Then run npm run case-facts:check and fix everything it reports as an error or UNTRACED; explain each warning you leave.
-8. Second pass, as a hostile checker: reread all 40 against the fact file as if someone else wrote them. For each: can two options be defended? does the prompt hand over a figure or year that it or another question marks? is the country and direction right? would a student with the right facts be marked down by these notes, or a student with wrong ones marked up? does each significance point match its fact's impact line, or is it supported by the file? did any answer, option, explanation or note take a number, name, quantity or trend from an impact line? Fix, and rerun step 7.
+8. Second pass, as a hostile checker: reread all 41 against the fact file as if someone else wrote them. For each: can two options be defended? does the prompt hand over a figure or year that it or another question marks? is the country and direction right? would a student with the right facts be marked down by these notes, or a student with wrong ones marked up? does each significance point match its fact's impact line, or is it supported by the file? did any answer, option, explanation or note take a number, name, quantity or trend from an impact line? Fix, and rerun step 7.
 9. Stop and report: the count by pool; any slot you changed and why; every rounding you allowed; every figure, date or name you changed or could not trace (or "none"); the multiple-choice questions that test significance; every short answer with its own significance instead of the impact line; the shared-fact and prompt warnings; your three least confident questions; and the path to fact-check.md. Leave everything uncommitted.
 
 Facts (these override anything you know):
@@ -51,7 +51,7 @@ Multiple choice:
 - rubric is one sentence: the correct fact and its source.
 
 Short-answer keys:
-- 3 marks: rubric points "Figure: …", "Period: …", "What it shows: …". 2 marks (date-only facts s05, s08, s24): the event with its correct year, then "What it shows: …".
+- 3 marks: rubric points "Figure: …", "Period: …", "What it shows: …". 2 marks (date-only facts s05, s24; s08 is 3 marks: both pledge targets, the year of the pledge, what it shows): the event with its correct year, then "What it shows: …".
 - Base the "What it shows" point and the model answer's significance sentence on the impact line(s) of the question's fact(s), in words a student would write, not necessarily verbatim. Only where a line does not fit what the question asks, use another significance the fact file supports, and record it as "own significance" in step 7. In the sa-both pool you may combine the two economies' lines into a comparison (for example, inequality rose in China, where coastal, urban and skilled workers gained most, but fell in Nepal, where remittances reach ordinary households).
 - The figure point of a change question needs both values; the period point both years. A comparison needs both economies for the figure point and both periods for the period point.
 - Model answer: 2 to 4 sentences a strong Year 12 student could write, with the full date where the file has one.

@@ -25,7 +25,7 @@ const keys: AnswerSet = {
   [`${U}.m12`]: { correctText: "2.4% lived on under $3.00 a day, and 52.7% on under $8.30 a day", rubric: ["In 2022, 2.4% of people in Nepal lived on under $3.00 a day and 52.7% on under $8.30 a day, on 2021 PPP lines (Source S8)."], factIds: ["N21", "N22"] },
   [`${U}.m13`]: { correctText: "The IMF Board approved about US$395.9 million in January 2022", rubric: ["The IMF Board approved an Extended Credit Facility of about US$395.9 million for Nepal on 12 Jan 2022 (Source S24)."], factIds: ["N07"] },
   [`${U}.m14`]: { correctText: "A liberal Industrial Policy and a Foreign Investment and Technology Transfer Act", rubric: ["In 1992 Nepal introduced a new liberal Industrial Policy and the Foreign Investment and Technology Transfer Act (Source S19)."], factIds: ["N02"] },
-  [`${U}.m15`]: { correctText: "It could build up an export and narrow the trade deficit, but relies on one buyer", rubric: ["The agreement of 4 Jan 2024 with India could build up hydropower exports and narrow the trade deficit, but ties Nepal to a single buyer (Source S25)."], factIds: ["N08"] },
+  [`${U}.m15`]: { correctText: "It could build up an export and narrow the trade deficit, but relies on one buyer", rubric: ["The agreement of 4 Jan 2024 with India could build up electricity exports and narrow the trade deficit, but ties Nepal to a single buyer (Source S25)."], factIds: ["N08"] },
   [`${U}.m16`]: { correctText: "They are central to growth but have not created quality jobs at home", rubric: ["The World Bank says remittances are central to growth but have not created quality jobs at home (Source S28)."], factIds: ["N17"] },
 
   [`${U}.s01`]: {
@@ -35,7 +35,7 @@ const keys: AnswerSet = {
       "Period: from 1990 to 2022 (both years).",
       "What it shows: growth was uneven (coastal, urban and skilled workers gained most), so income inequality increased.",
     ],
-    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Rounding to about 32 and 36 is fine, and a day or month is never needed. A fall instead of a rise, Nepal's figures, or China's official NBS Gini (a different measure) earn no figure mark. Only these World Bank values count, even if you have seen others from a real source. For the last mark, say what the rise shows: growth was uneven, with coastal, urban and skilled workers gaining most, so inequality increased. Another point the case study supports, such as the Lorenz curve moving away from the line of equality, also earns it. Only saying the numbers again, or saying inequality fell, does not.",
+    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Rounding to about 32 and 36 is fine, and a day or month is never needed. A fall instead of a rise, Nepal's figures, or China's official NBS Gini (a different measure) earn no figure mark. The mark is for the case study's World Bank values (or accepted roundings above); different values from another source do not earn it. For the last mark, say what the rise shows: growth was uneven, with coastal, urban and skilled workers gaining most, so inequality increased. Another point the case study supports, such as the Lorenz curve moving away from the line of equality, also earns it. Only saying the numbers again, or saying inequality fell, does not.",
     factIds: ["C24"],
   },
   [`${U}.s02`]: {
@@ -45,7 +45,7 @@ const keys: AnswerSet = {
       "Period: from 1990 to 2025 (both years).",
       "What it shows: average incomes rose greatly, so living standards improved as the economy grew.",
     ],
-    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about US$320 for the first value and about US$14,000 or about US$13,900 for the second. A day or month is never needed. Only these figures count, even if you have seen others from a real source. Nepal's figures, or a fall instead of a rise, earn no figure mark. For the last mark, say what the rise shows: average incomes rose greatly, so living standards improved. Another point the case study supports, such as strong economic growth over a long period, also earns it. Only saying the numbers again, or saying incomes fell, does not.",
+    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about US$320 for the first value and about US$14,000 or about US$13,900 for the second. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Nepal's figures, or a fall instead of a rise, earn no figure mark. For the last mark, say what the rise shows: average incomes rose greatly, so living standards improved. Another point the case study supports, such as strong economic growth over a long period, also earns it. Only saying the numbers again, or saying incomes fell, does not.",
     factIds: ["C08"],
   },
   [`${U}.s03`]: {
@@ -55,7 +55,7 @@ const keys: AnswerSet = {
       "Period: in 2025.",
       "What it shows: energy-hungry, export-led industry has caused heavy pollution, a negative externality of globalisation (an environmental cost of growth).",
     ],
-    notes: "Accept \"about 32%\" or \"about a third\" for the share. The total in tonnes is extra detail and is not needed. You need the year 2025 for the second mark; a day or month is never needed. Only this share counts, even if you have seen another figure from a real source, and another country's figure earns no figure mark. For the last mark, say what it shows: energy-hungry, export-led industry has caused pollution whose cost falls on others (a negative externality). Another point the case study supports, such as an environmental cost of rapid growth, also earns it. Only saying the share again, or saying China's growth has had no environmental cost, does not.",
+    notes: "Accept \"about 32%\" or \"about a third\" for the share. The total in tonnes is extra detail and is not needed. You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's share (or an accepted rounding above); a different share from another source does not earn it. Another country's figure earns no figure mark. For the last mark, say what it shows: energy-hungry, export-led industry has caused pollution whose cost falls on others (a negative externality). Another point the case study supports, such as an environmental cost of rapid growth, also earns it. Only saying the share again, or saying China's growth has had no environmental cost, does not.",
     factIds: ["C27"],
   },
   [`${U}.s04`]: {
@@ -65,7 +65,7 @@ const keys: AnswerSet = {
       "Period: from 1990 to 2023 (both years).",
       "What it shows: health, education and income improved, not just GDP, so growth turned into development.",
     ],
-    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about 0.49 and about 0.80. The rank is not needed, and a day or month is never needed. Only these China values count, even if you have seen others from a real source. Nepal's HDI, or a fall instead of a rise, earns no figure mark. For the last mark, say what the rise shows: health, education and income improved, so growth turned into development. Another point the case study supports, such as better living standards, also earns it. Only saying the numbers again, or saying development went backwards, does not.",
+    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about 0.49 and about 0.80. The rank is not needed, and a day or month is never needed. The mark is for the case study's China values (or accepted roundings above); different values from another source do not earn it. Nepal's HDI, or a fall instead of a rise, earns no figure mark. For the last mark, say what the rise shows: health, education and income improved, so growth turned into development. Another point the case study supports, such as better living standards, also earns it. Only saying the numbers again, or saying development went backwards, does not.",
     factIds: ["C13"],
   },
   [`${U}.s05`]: {
@@ -74,7 +74,7 @@ const keys: AnswerSet = {
       "Event and year: China joined the World Trade Organization in 2001.",
       "What it shows: lower tariffs and secure access to world markets turned China into a manufacturing base for the world.",
     ],
-    notes: "The year 2001 earns the first mark; the day and month are never needed. Only this year counts, even if you have seen another from a real source, and the year Nepal joined earns nothing for this part. For the second mark, say what membership did: lower tariffs and secure access to world markets turned China into a manufacturing base for the world. Another point the case study supports, such as higher exports and foreign investment helping growth, or competition for domestic firms, also earns it. Only saying again that China joined, or saying membership cut China off from world markets, does not.",
+    notes: "The year 2001 earns the first mark; the day and month are never needed. The mark is for the case study's year; a different year from another source does not earn it. The year Nepal joined earns nothing for this part. For the second mark, say what membership did: lower tariffs and secure access to world markets turned China into a manufacturing base for the world. Another point the case study supports, such as higher exports and foreign investment helping growth, or competition for domestic firms, also earns it. Only saying again that China joined, or saying membership cut China off from world markets, does not.",
     factIds: ["C03"],
   },
   [`${U}.s06`]: {
@@ -84,7 +84,7 @@ const keys: AnswerSet = {
       "Period: by the end of 2020.",
       "What it shows: the government had to act to spread globalisation's gains to rural areas that growth had left behind.",
     ],
-    notes: "One correct figure earns the first mark: 98.99 million rural poor (about 99 million, or nearly 100 million), all 832 poor counties, or 128,000 poor villages. These are Chinese government figures measured against China's national poverty line. The year 2020 earns the second mark; a day or month is never needed. Only these figures count, even if you have seen others from a real source, another country's figure earns nothing, and the World Bank's total for poverty reduction is a different fact. For the last mark, say what it shows: the government had to act to spread globalisation's gains to rural areas left behind. Another point the case study supports, such as support aimed at lasting income for each poor household instead of one-off handouts, also earns it. Only saying the figure again, or saying the program left rural people poorer, does not.",
+    notes: "One correct figure earns the first mark: 98.99 million rural poor (about 99 million, or nearly 100 million), all 832 poor counties, or 128,000 poor villages. These are Chinese government figures measured against China's national poverty line. The year 2020 earns the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns nothing, and the World Bank's total for poverty reduction is a different fact. For the last mark, say what it shows: the government had to act to spread globalisation's gains to rural areas left behind. Another point the case study supports, such as support aimed at lasting income for each poor household instead of one-off handouts, also earns it. Only saying the figure again, or saying the program left rural people poorer, does not.",
     factIds: ["C20"],
   },
   [`${U}.s07`]: {
@@ -94,16 +94,17 @@ const keys: AnswerSet = {
       "Period: in 2025.",
       "What it shows: urban households earn far more than rural ones, so income is still very unequally shared between city and countryside.",
     ],
-    notes: "Accept the ratio 2.31 (or about 2.3), or both incomes (about 56,500 yuan urban and about 24,500 yuan rural). You need the year 2025 for the second mark; a day or month is never needed. Only these figures count, even if you have seen a different ratio from a real source, and another country's figure earns no figure mark. For the last mark, say what it shows: a large income gap remains between urban and rural households. Another point the case study supports, such as growth having been concentrated in the coastal cities, also earns it. Only saying the ratio or the two incomes again, or saying rural households earn more, does not.",
+    notes: "Accept the ratio 2.31 (or about 2.3), or both incomes (about 56,500 yuan urban and about 24,500 yuan rural). You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns no figure mark. For the last mark, say what it shows: a large income gap remains between urban and rural households. Another point the case study supports, such as growth having been concentrated in the coastal cities, also earns it. Only saying the ratio or the two incomes again, or saying rural households earn more, does not.",
     factIds: ["C26"],
   },
   [`${U}.s08`]: {
     modelAnswer: "On 22 Sep 2020, at the UN General Assembly, China pledged that its CO2 emissions would peak before 2030 and that it would be carbon neutral before 2060. This commits China to cutting emissions while still growing, a test of whether growth and sustainability can be balanced.",
     rubric: [
-      "Event and year: in 2020 China pledged that CO2 emissions would peak before 2030 and that it would be carbon neutral before 2060.",
+      "Pledge: CO2 emissions to peak before 2030 and carbon neutrality before 2060 (both targets).",
+      "Year: the pledge was made in 2020.",
       "What it shows: China has committed to cutting emissions while still growing, a test of balancing growth and sustainability.",
     ],
-    notes: "For the first mark give the year of the pledge, 2020, and both parts of it: CO2 emissions to peak before 2030 and carbon neutrality before 2060 (\"by\" is accepted for \"before\"). The day and month are never needed. Only these years count, even if you have seen others from a real source, either target year on its own is not the year of the pledge, and another country's pledge earns nothing. For the second mark, say what it shows: China is committed to cutting emissions while still growing, which tests whether growth and sustainability can be balanced. Another point the case study supports, such as a response to the environmental cost of China's growth, also earns it. Only saying the pledge again, or saying China pledged to raise emissions without limit, does not.",
+    notes: "For the first mark give both parts of the pledge: CO2 emissions to peak before 2030 and carbon neutrality before 2060 (\"by\" is accepted for \"before\"). The second mark needs the year the pledge was made, 2020; the day and month are never needed. The marks are for the case study's years; different years from another source do not earn them. Either target year on its own is not the year of the pledge, and another country's pledge earns nothing. For the last mark, say what it shows: China is committed to cutting emissions while still growing, which tests whether growth and sustainability can be balanced. Another point the case study supports, such as a response to the environmental cost of China's growth, also earns it. Only saying the pledge again, or saying China pledged to raise emissions without limit, does not.",
     factIds: ["C29"],
   },
   [`${U}.s09`]: {
@@ -113,7 +114,7 @@ const keys: AnswerSet = {
       "Period: from 1993 to 2025 (both years).",
       "What it shows: exporting labour is Nepal's main link to the global economy, and remittances support household spending and cut poverty.",
     ],
-    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about 1.5% and about 32% or about a third. A day or month is never needed. Only these figures count, even if you have seen others from a real source, and a fall instead of a rise, or another country's figure, earns no figure mark. For the last mark, say what the rise shows: remittances support household spending and cut poverty, or exporting labour is now Nepal's main link to the global economy. Another point the case study supports, such as remittances helping to pay for the trade deficit, also earns it. Only saying the numbers again, or saying remittances became less important, does not.",
+    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about 1.5% and about 32% or about a third. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. A fall instead of a rise, or another country's figure, earns no figure mark. For the last mark, say what the rise shows: remittances support household spending and cut poverty, or exporting labour is now Nepal's main link to the global economy. Another point the case study supports, such as remittances helping to pay for the trade deficit, also earns it. Only saying the numbers again, or saying remittances became less important, does not.",
     factIds: ["N15"],
   },
   [`${U}.s10`]: {
@@ -123,7 +124,7 @@ const keys: AnswerSet = {
       "Period: from 1990 to 2025 (both years).",
       "What it shows: average income rose but remains low, so Nepal is still a developing economy.",
     ],
-    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about US$190 and about US$1,500. A day or month is never needed. Only these figures count, even if you have seen others from a real source. China's figures, or a fall instead of a rise, earn no figure mark. For the last mark, say what it shows: income rose but is still low, so Nepal remains a developing economy. Another point the case study supports, such as economic growth raising material living standards, also earns it. Only saying the numbers again, or saying incomes fell, does not.",
+    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about US$190 and about US$1,500. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. China's figures, or a fall instead of a rise, earn no figure mark. For the last mark, say what it shows: income rose but is still low, so Nepal remains a developing economy. Another point the case study supports, such as economic growth raising material living standards, also earns it. Only saying the numbers again, or saying incomes fell, does not.",
     factIds: ["N10"],
   },
   [`${U}.s11`]: {
@@ -133,7 +134,7 @@ const keys: AnswerSet = {
       "Period: 2015.",
       "What it shows: a huge shock for a small economy that destroyed homes and infrastructure and left Nepal reliant on foreign aid to rebuild.",
     ],
-    notes: "One figure, correctly labelled, earns the first mark: damage US$5.15 bn (about US$5 bn), losses US$1.9 bn (about US$2 bn), or recovery needs US$6.6 bn or about a third of the economy. The year 2015 earns the second mark; a day or month is never needed. Only these figures count, even if you have seen others from a real source, and a figure with the wrong label, or for another country, earns no figure mark. The donors' pledge is a different fact. For the last mark, say what it shows: a huge shock to a small economy that destroyed homes and infrastructure and made Nepal rely on foreign aid. Another point the case study supports, such as dependence on international organisations in a crisis, also earns it. Only saying the figure again, or saying the earthquake helped development, does not.",
+    notes: "One figure, correctly labelled, earns the first mark: damage US$5.15 bn (about US$5 bn), losses US$1.9 bn (about US$2 bn), or recovery needs US$6.6 bn or about a third of the economy. The year 2015 earns the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. A figure with the wrong label, or for another country, earns no figure mark. The donors' pledge is a different fact. For the last mark, say what it shows: a huge shock to a small economy that destroyed homes and infrastructure and made Nepal rely on foreign aid. Another point the case study supports, such as dependence on international organisations in a crisis, also earns it. Only saying the figure again, or saying the earthquake helped development, does not.",
     factIds: ["N04"],
   },
   [`${U}.s12`]: {
@@ -143,7 +144,7 @@ const keys: AnswerSet = {
       "Period: from 1995-96 to 2022-23 (both survey years).",
       "What it shows: Nepal's integration, especially through remittances, improved living standards.",
     ],
-    notes: "Give both values for the first mark and both survey years for the second: one end on its own earns neither. Accept about 42% or about 40% for the earlier rate, and about 20% or about a fifth for the later one. Write the survey years as 1995-96 and 2022-23 (or 1995/96 and 2022/23); a single calendar year is not enough, and a day or month is never needed. Only these national figures count, even if you have seen others from a real source: the World Bank's poverty lines are a different measure. A rise instead of a fall, or another country's figure, earns no figure mark. For the last mark, say what the fall shows: living standards improved, helped especially by remittances. Another point the case study supports, such as progress in development, also earns it. Only saying the numbers again, or saying poverty rose, does not.",
+    notes: "Give both values for the first mark and both survey years for the second: one end on its own earns neither. Accept about 42% or about 40% for the earlier rate, and about 20% or about a fifth for the later one. Write the survey years as 1995-96 and 2022-23 (or 1995/96 and 2022/23); a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's national figures (or accepted roundings above); different figures from another source do not earn it. The World Bank's poverty lines are a different measure. A rise instead of a fall, or another country's figure, earns no figure mark. For the last mark, say what the fall shows: living standards improved, helped especially by remittances. Another point the case study supports, such as progress in development, also earns it. Only saying the numbers again, or saying poverty rose, does not.",
     factIds: ["N20"],
   },
   [`${U}.s13`]: {
@@ -153,7 +154,7 @@ const keys: AnswerSet = {
       "Period: in 2025.",
       "What it shows: low foreign investment means little capital, technology and job creation from abroad.",
     ],
-    notes: "Accept US$43.5 million (about US$44 million) or 0.10% of GDP (about 0.1%). You need the year 2025 for the second mark; a day or month is never needed. Only these figures count, even if you have seen others from a real source. China's figure, or US$43.5 bn instead of million, earns no figure mark. For the last mark, say what it shows: Nepal gets little capital, technology and job creation from abroad. Another point the case study supports, such as low investment limiting economic growth, also earns it. Only saying the figure again, or saying Nepal attracts a great deal of foreign investment, does not.",
+    notes: "Accept US$43.5 million (about US$44 million) or 0.10% of GDP (about 0.1%). You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. China's figure, or US$43.5 bn instead of million, earns no figure mark. For the last mark, say what it shows: Nepal gets little capital, technology and job creation from abroad. Another point the case study supports, such as low investment limiting economic growth, also earns it. Only saying the figure again, or saying Nepal attracts a great deal of foreign investment, does not.",
     factIds: ["N18"],
   },
   [`${U}.s14`]: {
@@ -163,7 +164,7 @@ const keys: AnswerSet = {
       "Period: 2019, 2020 and 2025 (all three years).",
       "What it shows: tourism is a key source of foreign exchange and jobs but is highly vulnerable to global shocks such as the pandemic.",
     ],
-    notes: "All three figures earn the first mark and all three years the second; leaving one out earns neither mark for that part. Accept about 1,200,000, about 230,000 and about 1,160,000. A day or month is never needed. Only these figures count, even if you have seen others from a real source, another country's figure earns nothing, and the changes must run the right way: a sharp fall and then a recovery. For the last mark, say what it shows: tourism brings foreign exchange and jobs but is very exposed to global shocks. Another point the case study supports, such as the risk of relying on a sector that depends on the rest of the world, also earns it. Only saying the numbers again, or saying tourism was unaffected by the pandemic, does not.",
+    notes: "All three figures earn the first mark and all three years the second; leaving one out earns neither mark for that part. Accept about 1,200,000, about 230,000 and about 1,160,000. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns nothing, and the changes must run the right way: a sharp fall and then a recovery. For the last mark, say what it shows: tourism brings foreign exchange and jobs but is very exposed to global shocks. Another point the case study supports, such as the risk of relying on a sector that depends on the rest of the world, also earns it. Only saying the numbers again, or saying tourism was unaffected by the pandemic, does not.",
     factIds: ["N24"],
   },
   [`${U}.s15`]: {
@@ -173,17 +174,17 @@ const keys: AnswerSet = {
       "Period: FY2025/26 (also written 2025/26).",
       "What it shows: imports far exceed exports, a sign of a narrow export base, with remittances helping to finance the gap.",
     ],
-    notes: "Accept Rs 1,781.09 bn, about Rs 1,780 bn or about Rs 1,800 bn. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. Only this figure (or those roundings) counts, even if you have seen another from a real source, and calling it a surplus, or giving China's trade figures, earns no figure mark. For the last mark, say what it shows: imports far exceed exports because the export base is narrow, or remittances help to finance the gap. Another point the case study supports, such as a lack of competitive export industries, also earns it. Only saying the figure again, or saying Nepal exports more than it imports, does not.",
+    notes: "Accept Rs 1,781.09 bn, about Rs 1,780 bn or about Rs 1,800 bn. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Calling it a surplus, or giving China's trade figures, earns no figure mark. For the last mark, say what it shows: imports far exceed exports because the export base is narrow, or remittances help to finance the gap. Another point the case study supports, such as a lack of competitive export industries, also earns it. Only saying the figure again, or saying Nepal exports more than it imports, does not.",
     factIds: ["N13"],
   },
   [`${U}.s16`]: {
-    modelAnswer: "In FY2025/26 Nepal exported about 3,965 GWh of electricity to India, earning NRs 29.31 bn. These hydropower exports are promising for Nepal: they earn foreign exchange and supply clean energy to the region.",
+    modelAnswer: "In FY2025/26 Nepal exported about 3,965 GWh of electricity to India, earning NRs 29.31 bn. These electricity exports are promising for Nepal: they earn foreign exchange and supply clean energy to the region.",
     rubric: [
       "Figure: about 3,965 GWh exported to India, or NRs 29.31 bn earned.",
       "Period: FY2025/26 (also written 2025/26).",
-      "What it shows: electricity from hydropower is a promising export that earns foreign exchange and supplies clean energy to the region.",
+      "What it shows: electricity is a promising export that earns foreign exchange and supplies clean energy to the region.",
     ],
-    notes: "One figure earns the first mark: about 3,965 GWh (about 4,000 GWh) or NRs 29.31 bn (about NRs 29 bn), with its unit. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. Only these figures count, even if you have seen others from a real source. Another country's figure earns nothing, and the generation capacity in MW and the agreement with India are different facts. For the last mark, say what it shows: a promising export that earns foreign exchange and supplies clean energy to the region. Another point the case study supports, such as helping to narrow the trade deficit, also earns it. Only saying the figure again, or saying Nepal only imports electricity, does not.",
+    notes: "One figure earns the first mark: about 3,965 GWh (about 4,000 GWh) or NRs 29.31 bn (about NRs 29 bn), with its unit. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns nothing, and the generation capacity in MW and the agreement with India are different facts. For the last mark, say what it shows: electricity is a promising export that earns foreign exchange and supplies clean energy to the region. Another point the case study supports, such as helping to narrow the trade deficit, also earns it. Only saying the figure again, or saying Nepal only imports electricity, does not.",
     factIds: ["N26"],
   },
   [`${U}.s17`]: {
@@ -193,7 +194,7 @@ const keys: AnswerSet = {
       "Period: 1990 to 2023 for each economy.",
       "What it shows: both economies became more developed and China reached the higher level (China's growth turned into development; Nepal was helped by remittances).",
     ],
-    notes: "The first mark needs both values for both economies, and the second needs both years for each: one economy alone, or one end of a change, earns neither. Accept about 0.49 and 0.80 for China, and about 0.40 and 0.62 for Nepal. A day or month is never needed. Only these figures count, even if you have seen others from a real source; swapping the two economies, or showing a fall, earns no figure mark. For the last mark, say what the comparison shows: both developed, with China at the higher level. Another point the case study supports, such as remittances helping Nepal's development, also earns it. Only saying the numbers again, or saying either economy's development went backwards, does not.",
+    notes: "The first mark needs both values for both economies, and the second needs both years for each: one economy alone, or one end of a change, earns neither. Accept about 0.49 and 0.80 for China, and about 0.40 and 0.62 for Nepal. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Swapping the two economies, or showing a fall, earns no figure mark. For the last mark, say what the comparison shows: both developed, with China at the higher level. Another point the case study supports, such as remittances helping Nepal's development, also earns it. Only saying the numbers again, or saying either economy's development went backwards, does not.",
     factIds: ["C13", "N19"],
   },
   [`${U}.s18`]: {
@@ -203,7 +204,7 @@ const keys: AnswerSet = {
       "Period: China 1990 to 2022 and Nepal 1995 to 2022.",
       "What it shows: inequality rose in China (coastal, urban and skilled workers gained most) but fell in Nepal (remittances reach ordinary households).",
     ],
-    notes: "The first mark needs both values for both economies, and the second needs each economy's own two years: one economy alone, or one end of a change, earns neither. Accept about 32 and 36 for China, and about 35 and 30 for Nepal. A day or month is never needed. Only these World Bank values count, even if you have seen others from a real source; China's official NBS Gini is a different measure. A wrong direction, or swapped economies, earns no figure mark. For the last mark, say why the changes differ: in China growth favoured coastal, urban and skilled workers, while in Nepal remittances reach ordinary households. Another point the case study supports, such as China's Lorenz curve moving away from the line of equality while Nepal's moves closer, also earns it. Only saying the numbers again, or saying inequality fell in China or rose in Nepal, does not.",
+    notes: "The first mark needs both values for both economies, and the second needs each economy's own two years: one economy alone, or one end of a change, earns neither. Accept about 32 and 36 for China, and about 35 and 30 for Nepal. A day or month is never needed. The mark is for the case study's World Bank values (or accepted roundings above); different values from another source do not earn it. China's official NBS Gini is a different measure. A wrong direction, or swapped economies, earns no figure mark. For the last mark, say why the changes differ: in China growth favoured coastal, urban and skilled workers, while in Nepal remittances reach ordinary households. Another point the case study supports, such as China's Lorenz curve moving away from the line of equality while Nepal's moves closer, also earns it. Only saying the numbers again, or saying inequality fell in China or rose in Nepal, does not.",
     factIds: ["C24", "N23"],
   },
   [`${U}.s19`]: {
@@ -213,7 +214,7 @@ const keys: AnswerSet = {
       "Period: China 2025, and Nepal FY2024/25 for about 4.4% (FY2025/26 for the estimated 3.85%).",
       "What it shows: China's growth is still strong for its size, while Nepal's is moderate and relies on remittance-funded spending more than investment or exports.",
     ],
-    notes: "The first mark needs a figure for both economies and the second needs both periods: one economy alone earns neither. For China give 5.0% (5% is fine) in 2025. For Nepal give about 4.4% in FY2024/25, or the estimated 3.85% in FY2025/26; the figure and the financial year must match, and a single calendar year is not enough. A day or month is never needed. Only these figures count, even if you have seen others from a real source, and swapping the economies earns no figure mark. For the last mark, say what the comparison shows: China's growth is still strong for its size, while Nepal's is moderate and leans on remittance-funded spending. Another point the case study supports, such as low investment limiting Nepal's growth, also earns it. Only saying the numbers again, or saying China's economy shrank, does not.",
+    notes: "The first mark needs a figure for both economies and the second needs both periods: one economy alone earns neither. For China give 5.0% (5% is fine) in 2025. For Nepal give about 4.4% in FY2024/25, or the estimated 3.85% in FY2025/26; the figure and the financial year must match, and a single calendar year is not enough. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Swapping the economies earns no figure mark. For the last mark, say what the comparison shows: China's growth is still strong for its size, while Nepal's is moderate and leans on remittance-funded spending. Another point the case study supports, such as low investment limiting Nepal's growth, also earns it. Only saying the numbers again, or saying China's economy shrank, does not.",
     factIds: ["C07", "N11"],
   },
   [`${U}.s20`]: {
@@ -223,7 +224,7 @@ const keys: AnswerSet = {
       "Period: 2025 for both economies.",
       "What it shows: foreign investment has brought China capital, technology and skills, while Nepal's low inflows bring little capital, technology or jobs.",
     ],
-    notes: "The first mark needs a figure for both economies and the second the year for both (saying \"both in 2025\" is enough): one economy alone earns neither. Accept about US$80 bn for China, and about US$44 million or about 0.1% of GDP for Nepal. A day or month is never needed. Only these figures count, even if you have seen others from a real source; mixing up bn and million, or swapping the economies, earns no figure mark. For the last mark, say what the comparison shows: China has gained far more capital, technology and skills from foreign firms than Nepal. Another point the case study supports, such as foreign investment shifting China's production possibility frontier outward, also earns it. Only saying the numbers again, or saying Nepal receives more than China, does not.",
+    notes: "The first mark needs a figure for both economies and the second the year for both (saying \"both in 2025\" is enough): one economy alone earns neither. Accept about US$80 bn for China, and about US$44 million or about 0.1% of GDP for Nepal. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Mixing up bn and million, or swapping the economies, earns no figure mark. For the last mark, say what the comparison shows: China has gained far more capital, technology and skills from foreign firms than Nepal. Another point the case study supports, such as foreign investment shifting China's production possibility frontier outward, also earns it. Only saying the numbers again, or saying Nepal receives more than China, does not.",
     factIds: ["C11", "N18"],
   },
   [`${U}.s21`]: {
@@ -233,7 +234,7 @@ const keys: AnswerSet = {
       "Period: 1990 to 2025 for each economy.",
       "What it shows: living standards, measured by average income, rose far more in China, while Nepal's income remains low.",
     ],
-    notes: "The first mark needs both values for both economies, and the second needs both years for each: one economy alone, or one end of a change, earns neither. Accept about US$320 and US$14,000 for China, and about US$190 and US$1,500 for Nepal. A day or month is never needed. Only these figures count, even if you have seen others from a real source; swapping the economies, or showing a fall, earns no figure mark. For the last mark, say what the comparison shows: average income rose far more in China, and Nepal is still a developing economy with low income. Another point the case study supports, such as both economies growing and raising material living standards, also earns it. Only saying the numbers again, or saying Nepal's income is now higher than China's, does not.",
+    notes: "The first mark needs both values for both economies, and the second needs both years for each: one economy alone, or one end of a change, earns neither. Accept about US$320 and US$14,000 for China, and about US$190 and US$1,500 for Nepal. A day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Swapping the economies, or showing a fall, earns no figure mark. For the last mark, say what the comparison shows: average income rose far more in China, and Nepal is still a developing economy with low income. Another point the case study supports, such as both economies growing and raising material living standards, also earns it. Only saying the numbers again, or saying Nepal's income is now higher than China's, does not.",
     factIds: ["C08", "N10"],
   },
   [`${U}.s22`]: {
@@ -243,7 +244,7 @@ const keys: AnswerSet = {
       "Period: over 40 years.",
       "What it shows: a major development gain linked to globalisation, which counters the argument that globalisation only harmed China.",
     ],
-    notes: "Accept close to, nearly or about 800 million people for the first mark. The second mark needs the length of time, over 40 years (or four decades); a single year, such as the year reform began, does not earn it, and a day or month is never needed. Only this World Bank figure counts, even if you have seen others from a real source; the Chinese government's figure for targeted poverty alleviation is a different fact. A rise in poverty, or another country's figure, earns no figure mark. For the last mark, say what it shows: a major development gain linked to globalisation. Another point the case study supports, such as reform ending a closed, centrally planned economy and opening China to world markets, also earns it. Only saying the figure again, or saying globalisation raised poverty, does not.",
+    notes: "Accept close to, nearly or about 800 million people for the first mark. The second mark needs the length of time, over 40 years (or four decades); a single year, such as the year reform began, does not earn it, and a day or month is never needed. The mark is for the case study's World Bank figure (or an accepted rounding above); a different figure from another source does not earn it. The Chinese government's figure for targeted poverty alleviation is a different fact. A rise in poverty, or another country's figure, earns no figure mark. For the last mark, say what it shows: a major development gain linked to globalisation. Another point the case study supports, such as reform ending a closed, centrally planned economy and opening China to world markets, also earns it. Only saying the figure again, or saying globalisation raised poverty, does not.",
     factIds: ["C01", "C14"],
   },
   [`${U}.s23`]: {
@@ -253,7 +254,7 @@ const keys: AnswerSet = {
       "Period: from 1990 to 2024 (both years).",
       "What it shows: emissions rose with living standards, not just population, an environmental cost of rising incomes.",
     ],
-    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about 2.1 t and about 9.3 t. A day or month is never needed. Only these per person values count, even if you have seen others from a real source; China's total emissions are a different fact. A fall instead of a rise earns no figure mark. For the last mark, say what the rise shows: emissions rose with living standards, an environmental cost of rising incomes. Another point the case study supports, such as pollution being a negative externality of growth, also earns it. Only saying the numbers again, or saying emissions per person fell, does not.",
+    notes: "Give both values for the first mark and both years for the second: one end on its own earns neither. Accept about 2.1 t and about 9.3 t. A day or month is never needed. The mark is for the case study's per person values (or accepted roundings above); different values from another source do not earn it. China's total emissions are a different fact. A fall instead of a rise earns no figure mark. For the last mark, say what the rise shows: emissions rose with living standards, an environmental cost of rising incomes. Another point the case study supports, such as pollution being a negative externality of growth, also earns it. Only saying the numbers again, or saying emissions per person fell, does not.",
     factIds: ["C28"],
   },
   [`${U}.s24`]: {
@@ -262,8 +263,18 @@ const keys: AnswerSet = {
       "Events and years: China joined in 2001 and Nepal in 2004 (both).",
       "What it shows: access to world markets turned China into a manufacturing base, while Nepal had few competitive exports to sell.",
     ],
-    notes: "The first mark needs both years, 2001 for China and 2004 for Nepal; one economy alone, or the years swapped, earns nothing for this part. A day or month is never needed. Only these years count, even if you have seen others from a real source. For the second mark, compare what membership meant: China became a manufacturing base for the world, while Nepal had few competitive exports to sell. Another point the case study supports, such as lower tariffs bringing more competition for domestic firms, also earns it. Only saying again that both joined, or saying membership cut either economy off from world markets, does not.",
+    notes: "The first mark needs both years, 2001 for China and 2004 for Nepal; one economy alone, or the years swapped, earns nothing for this part. A day or month is never needed. The mark is for the case study's years; different years from another source do not earn it. For the second mark, compare what membership meant: China became a manufacturing base for the world, while Nepal had few competitive exports to sell. Another point the case study supports, such as lower tariffs bringing more competition for domestic firms, also earns it. Only saying again that both joined, or saying membership cut either economy off from world markets, does not.",
     factIds: ["C03", "N03"],
+  },
+  [`${U}.s25`]: {
+    modelAnswer: "In FY2025/26 Nepal received remittance inflows of US$16.19 bn, which shows that exporting labour is Nepal's main link to the global economy, with the money sent home supporting household spending and cutting poverty.",
+    rubric: [
+      "Figure: remittance inflows of US$16.19 bn (the 28.1% rise is not needed).",
+      "Period: FY2025/26 (also written 2025/26).",
+      "What it shows: exporting labour is Nepal's main link to the global economy, and remittances support household spending and cut poverty.",
+    ],
+    notes: "Accept US$16.19 bn, about US$16.2 bn or about US$16 bn. The 28.1% rise is not needed. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Remittances as a share of GDP are a different fact, and another country's figure, or millions instead of billions, earns no figure mark. For the last mark, say what it shows: exporting labour is Nepal's main link to the global economy, or remittances support household spending and cut poverty. Another point the case study supports, such as the World Bank's caveat that remittances have not created quality jobs at home, also earns it. Only saying the figure again, or saying remittances matter little to Nepal, does not.",
+    factIds: ["N16"],
   },
 };
 

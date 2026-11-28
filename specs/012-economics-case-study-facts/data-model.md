@@ -80,7 +80,7 @@ Release 2 adds `conceptsReady: true` and `conceptContent: "key-notes"`.
 
 ## 4. Questions, groups and default allocation
 
-Ids `…​.m01`–`m16`, `…​.s01`–`s24`. Source on every question:
+Ids `…​.m01`–`m16`, `…​.s01`–`s25`. Source on every question:
 `Original question — case study facts (checked Nov 2026)` (the dash is U+2014).
 
 This allocation meets FR-010 and FR-011 by construction (36 of 36 ★ facts, 11 of 11 groups, no fact more than 3
@@ -112,7 +112,7 @@ slots marked † keep their subject (the marker cases depend on them).
 | s05 † | sa-china | 2 | C03 | china-opening-up | WTO entry (date-only fact) |
 | s06 | sa-china | 3 | C20 | china-targeted-poverty-alleviation | What it had achieved by the end |
 | s07 † | sa-china | 3 | C26 | china-inequality | Urban–rural income ratio |
-| s08 | sa-china | 2 | C29 | china-environment | The climate pledge (date-only fact) |
+| s08 | sa-china | 3 | C29 | china-environment | The climate pledge: both targets, and the year it was made |
 | s09 † | sa-nepal | 3 | N15 | nepal-flows | Change in remittances, share of GDP |
 | s10 | sa-nepal | 3 | N10 | nepal-growth-trade | Change in GDP per person |
 | s11 | sa-nepal | 3 | N04 | nepal-strategies | Earthquake cost |
@@ -129,6 +129,7 @@ slots marked † keep their subject (the marker cases depend on them).
 | s22 | sa-both | 3 | C01, C14 | china-development | Essay sentence: reform and poverty |
 | s23 | sa-both | 3 | C28 | china-environment | Essay sentence: emissions per person |
 | s24 | sa-both | 2 | C03, N03 | nepal-strategies | Compare WTO entry (date-only facts) |
+| s25 | sa-both | 3 | N16 | nepal-flows | Essay sentence: remittance inflows |
 
 ## 5. Answer key shapes (`answers.ts`, `explanations.ts`, server-only)
 

@@ -222,7 +222,7 @@ One line per fact, keyed by fact ID: the context and impact of the fact (its 'so
 - **N05** Shows how much a developing economy depends on aid and international organisations in a crisis.
 - **N06** Foreign (Indian) investment in hydropower, the main area where FDI and exports could grow together.
 - **N07** Balance-of-payments support tied to reform conditions. It helps stability but limits Nepal's policy independence.
-- **N08** Could turn hydropower into a major export and narrow the trade deficit, but it ties Nepal to a single buyer.
+- **N08** Could turn electricity into a major export and narrow the trade deficit, but it ties Nepal to a single buyer.
 - **N09** Keeps duty-free market access and concessional support for longer, but shows Nepal is not yet ready to compete without them.
 - **N10** Average income rose about eightfold in current US dollars but remains low, so Nepal is still a developing economy.
 - **N11** Moderate growth, much of it driven by remittance-funded spending rather than investment or exports.
@@ -240,7 +240,7 @@ One line per fact, keyed by fact ID: the context and impact of the fact (its 'so
 - **N23** Unlike in China, inequality fell, because remittances flow straight to ordinary households, including poor rural ones.
 - **N24** Tourism is a key source of foreign exchange and jobs, but it is highly vulnerable to global shocks such as the pandemic.
 - **N25** Fast growth in power generation is creating a surplus to export.
-- **N26** Hydropower is becoming Nepal's most promising export: it earns foreign exchange and supplies clean energy to the region.
+- **N26** Electricity is becoming Nepal's most promising export: it earns foreign exchange and supplies clean energy to the region.
 
 ## Sources
 

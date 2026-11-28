@@ -45,7 +45,7 @@ year may be worked out for it.
 | Principle | Release 1 |
 |---|---|
 | I | ✅ `factIds` is a field of the server-only key (`answers.ts`), never copied into a response. Explanations are released after an answer, model answer, rubric and notes with the short-answer grade: all existing behaviour. No fact ID appears in any student-visible text (validated). |
-| III | ⚠ New ids, content as code, tags allowed on a unit not yet concept-ready; finding A restores "no revision list". The reading: the last bullet says "No quiz question is written by an LLM", and Claude Code drafts these 40. Its source is spec 002 FR-040, "**the system** MUST NOT use an LLM to write any quiz question": the app generating questions. Here the text is drafted at authoring time, committed, validated and read by you before release. |
+| III | ⚠ New ids, content as code, tags allowed on a unit not yet concept-ready; finding A restores "no revision list". The reading: the last bullet says "No quiz question is written by an LLM", and Claude Code drafts these 41. Its source is spec 002 FR-040, "**the system** MUST NOT use an LLM to write any quiz question": the app generating questions. Here the text is drafted at authoring time, committed, validated and read by you before release. |
 | IV | ✅ The new content rules go in the validator in the same change. |
 | V | ✅ Original questions, Topic 1, sources documented in `docs/y12-economics-case-study-facts-research.md` and the README. No HSC question, no diagram. |
 | VI | ✅ The marker, self-mark fallback and cap are unchanged. The unseen-first draw is a preference: if results cannot be read, the quiz starts at random. It is **not** a "depends on stored progress" unit (specs 007 and 008), which refuses to start. |
@@ -190,7 +190,7 @@ page); reusing the AI pipeline with a fixed summary (FR-026).
 
 ## 6. Content format
 
-- **Ids**: `y12-economics-case-study-facts.m01`–`m16` and `.s01`–`s24`; new ones are appended.
+- **Ids**: `y12-economics-case-study-facts.m01`–`m16` and `.s01`–`s25`; new ones are appended.
 - **Builders**: `build.ts` copied from the global economy unit: two digits, the group as a parameter, the source
   constant inside, no diagrams.
 - **Groups**, in quiz order: `mc-china`, `mc-nepal`, `sa-china`, `sa-nepal`, `sa-both`, one each; `short: 3`,
