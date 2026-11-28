@@ -108,11 +108,25 @@ Phases 1 to 6 are **Release 1**. Phases 7 and 8 are **Release 2**: do not start 
 - [X] T029 [P] In `README.md` add the `y12-economics-case-study-facts` row to the Units table (Topic 1, 41 original questions, five pools (9 in SA both, 8 in the others), unseen-first draw, source: `docs/y12-economics-case-study-facts-research.md`; commands `case-facts:check` and `case-facts:marker-check`) and one sentence on `quiz.drawUnseenFirst` under "Content structure".
 - [X] T030 Run `npm run case-facts:check`, then `npm run validate && npx tsc --noEmit && npm run lint && npm test && npm run build`; fix failures.
 - [ ] T031 **(MAINTAINER)** Monday early: run the marker sample (quickstart §2) with the production `GRADING_MODEL`. 9 of 9 on three runs.
-- [ ] T032 **(MAINTAINER)** Read all 41 questions, keys, explanations and notes against the checklist (quickstart §3); tick each in `fact-check.md`; list findings.
+- [ ] T032 **(MAINTAINER)** Read all 48 questions, keys, explanations and notes against the checklist (quickstart §3); tick each in `fact-check.md`; list findings.
 - [ ] T033 Fix every marker and read-through finding in `content/units/y12-economics-case-study-facts/` (and `marker-cases.json` if a question's wording changed); record changes in `fact-check.md`; rerun `case-facts:check`, and ask the maintainer to rerun the marker sample if a short answer or note changed.
-- [ ] T034 After the maintainer confirms the findings are closed: `npm run validate:shipped` (adds 41 question ids and 11 concept ids to `content/shipped-ids.json`), rerun the full chain of T030, delete any scratch file this feature's tasks left in `.cline/`, naming each file (never by a `tmp-*` wildcard: the folder holds files from other work), leave everything uncommitted and report.
+- [ ] T034 After the maintainer confirms the findings are closed: `npm run validate:shipped` (adds 48 question ids and 13 concept ids to `content/shipped-ids.json`), rerun the full chain of T030, delete any scratch file this feature's tasks left in `.cline/`, naming each file (never by a `tmp-*` wildcard: the folder holds files from other work), leave everything uncommitted and report.
 - [ ] T035 **(MAINTAINER)** Commit, including the fact file (the Vercel build fails without it), and deploy; Preview first if set up (quickstart §4). Live by Monday evening.
 - [ ] T036 **(MAINTAINER)** Phone check at 390 px as a fresh student (quickstart §5; steps 1–6 at minimum).
+
+---
+
+## Phase 6b: Fact-file revision (Release 1)
+
+The fact file was revised on 28 Nov (67 facts, 44 ★, 13 groups, 40 sources). These tasks run after T030 and before
+T031; T031 to T036 then cover all 48 questions. Counts in the completed tasks above are as they were at the time.
+
+- [X] T052 [US4] Add `china-g` and `nepal-f` to `FACT_GROUP_CONCEPT` in `lib/content-rules-case-facts.ts`; update the pins in `tests/case-facts/fact-file.test.ts` (including the multi-source cells of C20, N28 and N31), the fixture in `tests/helpers/case-facts-fixtures.ts` and the affected rules and leak tests.
+- [X] T053 [US1] Add the `china-hindrances` and `nepal-hindrances` concepts and their tags.
+- [X] T054 [US1] Write m17, m18 and s26 to s30 (C32, C33, C34, C36, N27, N28, N31) with keys and explanations.
+- [X] T055 [US1] Update s06, s07, s15, s16, s22 and the m05 explanation to the changed facts.
+- [X] T056 Update `spec.md`, `data-model.md`, `research.md`, `plan.md`, `quickstart.md`, the meta description and the README row.
+- [X] T057 [US4] Run `npm run case-facts:check`, update `fact-check.md`, then the full chain of T030.
 
 ---
 
@@ -131,7 +145,7 @@ Phases 1 to 6 are **Release 1**. Phases 7 and 8 are **Release 2**: do not start 
 - [ ] T043 [US3] Add `latestMissByConcept(unit, results)` (uncleared concepts only) to `lib/concepts/progress.ts`, `getConceptNotes(unitId, questionIdByConcept)` to `lib/grading.server.ts` (returns nothing unless the unit is `key-notes`), and `loadUnitConceptNotes(userId, unit)` to `lib/db/queries/concepts.server.ts`, scoped to the session user.
 - [ ] T044 [US3] Pass the notes to `ConceptPanel`'s `details` prop in `app/unit/[unitId]/page.tsx`; in `components/ConceptPanel.tsx`, for `key-notes` units title the list "Things I need to know", with sub text "Facts you missed. A topic clears after 3 later full-mark answers on it, and your quizzes favour it until then." and empty text "All clear — nothing to review right now. Any fact you miss in a quiz will show up here." T042 passes.
 - [ ] T045 [US3] In `lib/content-rules-case-facts.ts` require, when `conceptContent === "key-notes"`, a one-line `conceptNote` of at most 450 characters on every key, with no fact ID; trace notes as a strict field in `lib/case-facts/trace.ts`; add cases to `tests/case-facts/`.
-- [ ] T046 [US3] (needs T045) Write 41 `conceptNote`s in the unit's `answers.ts` (each names the fact with the correct figure and year or period, from the fact file only, and may end with that fact's impact line, without any quantity or trend it states); add a Release 2 section to `fact-check.md`; `npm run case-facts:check` clean.
+- [ ] T046 [US3] (needs T045) Write 48 `conceptNote`s in the unit's `answers.ts` (each names the fact with the correct figure and year or period, from the fact file only, and may end with that fact's impact line, without any quantity or trend it states); add a Release 2 section to `fact-check.md`; `npm run case-facts:check` clean.
 - [ ] T047 [P] [US3] Amend `.specify/memory/constitution.md` to 2.19.0 with the text drafted in research §1 (Principles I, III, VI, Quality Gates, Sync Impact Report, Last Amended).
 - [ ] T048 [P] [US3] Extend `marker-cases.json` to every short answer, with each tolerance case that applies to it (rounded, year without day or month, one end only, wrong country, wrong direction, bare restatement) and expected marks.
 
@@ -139,7 +153,7 @@ Phases 1 to 6 are **Release 1**. Phases 7 and 8 are **Release 2**: do not start 
 
 ## Phase 8: Release 2 gate
 
-- [ ] T049 **(MAINTAINER)** Read the 41 notes; run `npm run case-facts:marker-check` on `marker-cases.json`; findings are fixed and rerun.
+- [ ] T049 **(MAINTAINER)** Read the 48 notes; run `npm run case-facts:marker-check` on `marker-cases.json`; findings are fixed and rerun.
 - [ ] T050 Set `conceptsReady: true` and `conceptContent: "key-notes"` in the unit's `meta.ts` (only with T039–T047 done: same deploy), update the README row, add `factIds`/`conceptNote` leak checks for the unit page to `tests/no-key-leak.test.ts`, run `validate:shipped` and the full chain; leave uncommitted.
 - [ ] T051 **(MAINTAINER)** Commit, deploy, and run quickstart §6 on a phone.
 

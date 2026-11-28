@@ -21,11 +21,13 @@ export const FACT_GROUP_CONCEPT: Record<string, string> = {
   "china-d": "china-targeted-poverty-alleviation",
   "china-e": "china-inequality",
   "china-f": "china-environment",
+  "china-g": "china-hindrances",
   "nepal-a": "nepal-strategies",
   "nepal-b": "nepal-growth-trade",
   "nepal-c": "nepal-flows",
   "nepal-d": "nepal-development",
   "nepal-e": "nepal-tourism-electricity",
+  "nepal-f": "nepal-hindrances",
 };
 
 const QUIZ_GROUPS = ["mc-china", "mc-nepal", "sa-china", "sa-nepal", "sa-both"];
@@ -53,7 +55,7 @@ export function validateCaseFactRules(unit: Unit, answers: AnswerSet, factFile: 
     if (!concepts.some((c) => c.id === id)) errors.push(`${unit.id}: concept ${id} is missing`);
   }
   for (const c of concepts) {
-    if (!expected.has(c.id)) errors.push(`${unit.id}: concept ${c.id} is not one of the 11 fact-group concepts`);
+    if (!expected.has(c.id)) errors.push(`${unit.id}: concept ${c.id} is not one of the ${expected.size} fact-group concepts`);
     if (/\d/.test(c.description)) errors.push(`${c.id}: concept description must hold no digit (it is public)`);
   }
 

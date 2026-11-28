@@ -25,7 +25,7 @@ On a failure: fix the question's notes (and similar ones), rerun, and read the c
 ## 3. Your read-through (FR-032; allow about 3 hours)
 
 Open `fact-check.md` (changes and untraced items first), the fact file, and the unit's `questions.ts`, `answers.ts`
-and `explanations.ts`. For each of the 41, then tick its box:
+and `explanations.ts`. For each of the 48, then tick its box:
 
 1. **Prompt**: clear which country, which measure, one year or a change? Does it give away a figure or year that it,
    or another question, marks?
@@ -90,14 +90,14 @@ where u.email = '<test account email>' and r.unit_id = 'y12-economics-case-study
 
 Expected: `40 | 40`.
 
-9. **A ninth attempt** starts: its both-economies short answer is the one question of the 41 not yet seen, and the
-   other four repeat attempt 1's (answered longest ago).
+9. **A ninth attempt** starts with five questions not yet seen (45 of the 48 in all). A tenth repeats the two multiple
+   choice from attempt 1 (answered longest ago); the three short-answer pools each still have a question not yet seen.
 
 Short of time: steps 1 to 6 on the phone are the release check; the automated route tests cover steps 8 and 9.
 
 ## 6. Release 2 (after Tue 1 Dec)
 
-1. `npm run case-facts:check` with the 41 concept notes written; your read of the notes.
+1. `npm run case-facts:check` with the 48 concept notes written; your read of the notes.
 2. `npm run case-facts:marker-check` on the full case file (every short answer).
 3. Full chain.
 4. On the phone: a student with Release 1 results sees "Things I need to know" with the concepts missed then, each

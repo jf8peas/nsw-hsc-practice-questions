@@ -7,6 +7,8 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 - **Columns:** `ID` (stable, never renumber), `★` (priority: learn first), `Fact`, `When`, `Exams` (which of the six practice exams the fact serves), `Source`.
 - **Secondary figures:** China's NBS Gini of about 0.47, and Nepal's 1995-96 national poverty rate of about 42%, were approved for use without the primary page loading. Targeted poverty alleviation figures are Chinese government figures measured against China's national poverty line.
 - **Preliminary figures:** figures for 2025 and FY2025/26 are the first published (preliminary) figures and may be revised; Nepal's FY2025/26 growth is an estimate. **Poverty lines** are the World Bank's current lines ($3.00 and $8.30 a day, 2021 PPP, adopted June 2025), which replaced the older $2.15 and $6.85 lines (2017 PPP).
+- **Currency:** dollar figures are converted from the source's yuan or rupees (shown in brackets, and the source figure) at the average rate for that year: 7.1429 yuan per US$ in 2025 (NBS communique), 6.196 in 2013 and 6.901 in 2020 (World Bank, PA.NUS.FCRF); Rs 145.96 per US$ in FY2025/26, the rate implied by Nepal Rastra Bank's own figures (remittances of Rs 2,363.13 bn = US$16.19 bn). Converted figures are rounded and marked 'about'.
+- **Updated 28 Nov 2026 (Peyton's feedback):** C01 and C02 name the Open Door Policy; C10, C23, C26, N13 and N26 show US$ first with local currency in brackets; C14, C15 and C20 lead with the share of the population; new hindrance sections China G (C32–C36) and Nepal F (N27–N31). No existing fact ID changed meaning, except that C20 now also gives the rural poverty rate. Accuracy fixes the same evening: N28 uses the World Bank's 0.4% (official estimates of 2015-16 growth were revised several times, all below 1%); N31 gives the first-day toll of 19 and the total of 77 deaths.
 - **Checked against a reviewer's queries (28 Nov 2026):** the IMF ECF was approved by the Board on 12 Jan 2022 (press release dated 13 Jan); the LDC postponement to 24 Nov 2029 was adopted by the UN General Assembly (Resolution 81/L.8) in late October 2026.
 
 ## The six practice exams
@@ -14,11 +16,11 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 | Exam | Economy | Question asks the student to | Fact sections |
 |---|---|---|---|
 | 1 | China | Analyse: globalisation → income inequality and environment | China A, B (trade, FDI), C, D, E, F |
-| 2 | Nepal | Assess: effectiveness of strategies for growth and development | Nepal A, B, C, D, E |
-| 3 | Both | Compare: globalisation → growth, environment, income distribution | Comparison table; China B, C, E, F; Nepal B, C, D, E |
-| 4 | China | To what extent: integration strategies → growth and development | China A, B, C, D, E (limits), F (limits) |
-| 5 | Nepal | Evaluate: remittances, aid and FDI → growth and development | Nepal A (aid events), C, D, B (trade deficit) |
-| 6 | Both | Discuss: international organisations and other governments | China A (WTO, BRI), F (UN pledge); Nepal A (WTO, IMF, donors, India, LDC), C (FDI) |
+| 2 | Nepal | Assess: effectiveness of strategies for growth and development | Nepal A, B, C, D, E, F (limits) |
+| 3 | Both | Compare: globalisation → growth, environment, income distribution | Comparison table; China B, C, E, F, G (COVID); Nepal B, C, D, E, F (blockade) |
+| 4 | China | To what extent: integration strategies → growth and development | China A, B, C, D, E (limits), F (limits), G |
+| 5 | Nepal | Evaluate: remittances, aid and FDI → growth and development | Nepal A (aid events), C, D, B (trade deficit), F (civil war, COVID) |
+| 6 | Both | Discuss: international organisations and other governments | China A (WTO, BRI), F (UN pledge), G (US tariffs); Nepal A (WTO, IMF, donors, India, LDC), C (FDI), F (blockade) |
 
 ## China (emerging economy)
 
@@ -26,8 +28,8 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 
 | ID | ★ | Fact | When | Exams | Source |
 |---|---|---|---|---|---|
-| C01 | ★ | Reform and opening-up under Deng Xiaoping | 1978 | 1, 4 | [S1] |
-| C02 | ★ | Four Special Economic Zones approved: Shenzhen, Zhuhai, Shantou, Xiamen | 26 Aug 1980 | 1, 3, 4 | [S2] |
+| C01 | ★ | Open Door Policy (reform and opening-up) begins under Deng Xiaoping; Special Economic Zones were its first major step | 1978 | 1, 4 | [S1] |
+| C02 | ★ | Open Door Policy: four Special Economic Zones approved: Shenzhen, Zhuhai, Shantou, Xiamen | 26 Aug 1980 | 1, 3, 4 | [S2] |
 | C03 | ★ | Joins the World Trade Organization | 11 Dec 2001 | 1, 3, 4, 6 | [S3] |
 | C04 | ★ | Belt and Road Initiative proposed (in Kazakhstan and Indonesia). INTERNATIONAL trade and infrastructure links, NOT a rural program | autumn 2013 | 4, 6 | [S4] |
 | C05 |  | Made in China 2025 issued: upgrade to high-tech manufacturing. '2025' is the target year, not the start | 8 May 2015 | 4 | [S5] |
@@ -40,7 +42,7 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 | C07 | ★ | Real GDP growth 5.0% | 2025 | 3, 4 | [S7] |
 | C08 | ★ | GDP per person: US$318 → US$13,862 | 1990 → 2025 | 3, 4 | [S8] |
 | C09 |  | Trade as a share of GDP: 24.2% → 38.0% | 1990 → 2025 | 1, 4, 6 | [S8] |
-| C10 |  | Goods exports 26,989.0 bn yuan (up 6.1%); trade surplus 8,509.4 bn yuan | 2025 | 4 | [S7] |
+| C10 |  | Goods exports about US$3.78 trillion (26,989.0 bn yuan, up 6.1%); trade surplus about US$1.19 trillion (8,509.4 bn yuan) | 2025 | 4 | [S7] |
 | C11 | ★ | FDI net inflows: US$3.49 bn → US$79.98 bn | 1990 → 2025 | 3, 4 | [S8] |
 | C12 |  | Foreign investment actually used fell 9.5% (a sign of slowing returns) | 2025 | 4 | [S7] |
 
@@ -49,8 +51,8 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 | ID | ★ | Fact | When | Exams | Source |
 |---|---|---|---|---|---|
 | C13 | ★ | HDI: 0.491 → 0.797 (rank 78 of 193) | 1990 → 2023 | 4 | [S9] |
-| C14 | ★ | Poverty fell by close to 800 million people (World Bank) | over 40 years | 1, 3, 4, 6 | [S10] |
-| C15 |  | $3.00-a-day poverty (World Bank line, 2021 PPP): 83.1% → 0.0% | 1990 → 2022 | 1, 3 | [S8] |
+| C14 | ★ | Close to 800 million people lifted out of poverty: close to three-quarters of the world's poverty reduction (World Bank). As a share of the population, see the next row | over 40 years | 1, 3, 4, 6 | [S10] |
+| C15 | ★ | Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% | 1990 → 2022 | 1, 3, 4 | [S8] |
 | C16 | ★ | Extreme poverty eradicated | by 2020 | 4 | [S6] |
 | C17 |  | Still living on under $8.30 a day (2021 PPP): 15.2% | 2024 | 1, 4 | [S6] |
 | C18 |  | Urbanisation 67.89% | 2025 | 4 | [S7] |
@@ -60,10 +62,10 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 | ID | ★ | Fact | When | Exams | Source |
 |---|---|---|---|---|---|
 | C19 | ★ | Proposed by Xi Jinping at Shibadong village, Hunan | 3 Nov 2013 | 1, 3, 4 | [S11] |
-| C20 | ★ | Last 98.99 million rural poor lifted above the national poverty line; all 832 poor counties and 128,000 poor villages removed from the list | by end 2020 | 1, 3, 4 | [S12] |
+| C20 | ★ | Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list | end 2012 → end 2020 | 1, 3, 4 | [S32], [S12] |
 | C21 |  | Method: register each poor household; tailored plans (local industry, education, housing) instead of handouts | 2013–2020 | 1, 4 | [S12] |
 | C22 |  | 9.6 million people relocated from impoverished areas | late 2012–2020 | 1, 4 | [S13] |
-| C23 |  | Income per person of the rural poor: 6,079 yuan → 12,588 yuan | 2013 → 2020 | 1, 4 | [S14] |
+| C23 |  | Income per person of the rural poor: about US$981 (6,079 yuan) → about US$1,824 (12,588 yuan) | 2013 → 2020 | 1, 4 | [S14] |
 
 ### E. Income inequality
 
@@ -71,7 +73,7 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 |---|---|---|---|---|---|
 | C24 | ★ | Gini (World Bank): 32.2 → 36.0 — inequality ROSE | 1990 → 2022 | 1, 3, 4 | [S8] |
 | C25 |  | Official NBS Gini about 0.47 (0.465 in 2019, 0.468 in 2020). Different basis: never compare it with the World Bank figure (secondary source) | 2019–2020 | 1 | secondary (see notes) |
-| C26 | ★ | Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) | 2025 | 1, 3, 4 | [S7] |
+| C26 | ★ | Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) | 2025 | 1, 3, 4 | [S7] |
 
 ### F. Environmental sustainability
 
@@ -82,6 +84,16 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 | C29 | ★ | Pledge: CO2 to peak before 2030, carbon neutral before 2060 (UN General Assembly) | 22 Sep 2020 | 1, 3, 6 | [S16] |
 | C30 | ★ | National emissions trading scheme starts (power sector) | 16 Jul 2021 | 1, 3 | [S17] |
 | C31 |  | Clean energy 30.4% of energy use; carbon intensity of GDP down 5.0% | 2025 | 1 | [S7] |
+
+### G. Hindrances: what has held China back
+
+| ID | ★ | Fact | When | Exams | Source |
+|---|---|---|---|---|---|
+| C32 | ★ | US–China trade war begins: first US tariffs (25%) on about US$34 bn of Chinese goods | 6 Jul 2018 | 3, 4, 6 | [S33] |
+| C33 | ★ | Average US tariff on Chinese goods: 2.7% → 19% → about 36.5% (it peaked in April 2025; both sides paused some tariffs for a year from late 2025) | 2017 → 2019 → Jul 2026 | 3, 4, 6 | [S34] |
+| C34 | ★ | COVID-19 lockdowns: real GDP growth fell to 2.3% and 3.1% | 2020; 2022 | 3, 4 | [S8] |
+| C35 |  | Property downturn: investment in real estate development fell 17.2% | 2025 | 4 | [S7] |
+| C36 | ★ | Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over | 2025 | 4 | [S7] |
 
 ## Nepal (developing economy)
 
@@ -106,7 +118,7 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 | N10 | ★ | GDP per person: US$186 → US$1,536 | 1990 → 2025 | 2, 3 | [S8] |
 | N11 | ★ | Real GDP growth about 4.4%; 3.85% estimated the next year | FY2024/25; FY2025/26 | 2, 3 | [S27] |
 | N12 |  | Trade as a share of GDP 42.6% | 2025 | 3 | [S8] |
-| N13 | ★ | Trade deficit Rs 1,781.09 bn | FY2025/26 | 2, 5 | [S27] |
+| N13 | ★ | Trade deficit about US$12.2 bn (Rs 1,781.09 bn) | FY2025/26 | 2, 5 | [S27] |
 | N14 |  | Exports were only 15.4% of imports | FY2024/25 | 2 | [S27] |
 
 ### C. Remittances, aid and foreign investment
@@ -134,7 +146,17 @@ Source material for the app unit `y12-economics-case-study-facts` (spec 012). Th
 |---|---|---|---|---|---|
 | N24 | ★ | Tourist arrivals: 1,197,191 → 230,085 (COVID) → 1,162,365 | 2019 → 2020 → 2025 | 2, 3 | [S30] |
 | N25 |  | Total generation capacity 4,120 MW (all sources — don't call it all hydro) | FY2025/26 | 2 | [S31] |
-| N26 | ★ | Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn | FY2025/26 | 2, 3, 5 | [S31] |
+| N26 | ★ | Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) | FY2025/26 | 2, 3, 5 | [S31] |
+
+### F. Hindrances: what has held Nepal back
+
+| ID | ★ | Fact | When | Exams | Source |
+|---|---|---|---|---|---|
+| N27 | ★ | Maoist civil war: more than 13,000 killed; ended by the Comprehensive Peace Accord on 21 Nov 2006 | 1996–2006 | 2, 5 | [S35] |
+| N28 | ★ | Indian border blockade after Nepal's new constitution (20 Sep 2015) cut supplies of fuel and goods until Feb 2016; growth fell below 1%, to about 0.4% (World Bank) | 2015-16 | 2, 3, 6 | [S36], [S37], [S8] |
+| N29 |  | Landlocked and reliant on India: over 60% of imports came from India | 2015 | 2, 6 | [S38] |
+| N30 |  | COVID-19: real GDP fell 2.4% | 2020 | 2, 5 | [S8] |
+| N31 | ★ | Political instability: Gen Z anti-corruption protests; 19 protesters killed on the first day and Prime Minister Oli resigned the next; 77 deaths in total (government committee) | 8–9 Sep 2025 | 2 | [S39], [S40] |
 
 ## China vs Nepal (for the combined exams 3 and 6)
 
@@ -210,11 +232,16 @@ One line per fact, keyed by fact ID: the context and impact of the fact (its 'so
 - **C24** Growth was uneven: coastal, urban and skilled workers gained most. Pair it with the Lorenz curve moving away from the line of equality.
 - **C25** China's own measure also shows high inequality. Quote it on its own, never next to the World Bank figure.
 - **C26** Urban households earn more than twice as much as rural ones. The gap narrowed slightly in the latest year but remains large.
-- **C27** Energy-hungry, export-led industry made China the world's largest emitter: a negative externality of globalisation.
+- **C27** Rapid, energy-hungry industrial growth, boosted by exports, made China the world's largest emitter: a negative externality of globalisation.
 - **C28** Emissions rose with living standards, not just population: the environmental cost of rising incomes.
 - **C29** Commits China to cutting emissions while still growing, a test of whether growth and sustainability can be balanced.
 - **C30** Puts a price on carbon so polluters pay for the externality. It started with the power sector.
 - **C31** Evidence the shift has begun, but most energy use still comes from other sources.
+- **C32** Tariffs raise the price of Chinese goods in the US, cutting demand for China's exports and adding uncertainty for the firms that rely on them.
+- **C33** Shows how far protectionism against China has risen, a key risk to export-led growth. The truce shows the two economies still depend on each other.
+- **C34** Strict lockdowns cut output and incomes, showing growth can be hit by domestic policy shocks as well as global ones.
+- **C35** Falling property investment weakens a major source of growth and household wealth, slowing the economy.
+- **C36** Fewer workers and more retirees will slow growth and raise pressure on pensions and health spending: a long-term limit on development.
 - **N01** Began opening a heavily regulated economy to markets and trade.
 - **N02** Opened industries to private and foreign investors, but FDI stayed low, so the impact was limited.
 - **N03** Locked in lower tariffs and gave access to world markets, but Nepal had few competitive exports to sell.
@@ -241,6 +268,11 @@ One line per fact, keyed by fact ID: the context and impact of the fact (its 'so
 - **N24** Tourism is a key source of foreign exchange and jobs, but it is highly vulnerable to global shocks such as the pandemic.
 - **N25** Fast growth in power generation is creating a surplus to export.
 - **N26** Electricity is becoming Nepal's most promising export: it earns foreign exchange and supplies clean energy to the region.
+- **N27** A decade of conflict destroyed infrastructure, deterred investment and disrupted development.
+- **N28** Shows the danger of relying on one neighbour for trade: the blockade came on top of the earthquake and almost stopped growth.
+- **N29** Being landlocked makes trade costly and leaves Nepal exposed to decisions made in India.
+- **N30** The pandemic hit tourism and economic activity, showing how exposed Nepal is to global shocks.
+- **N31** Political crises and weak governance deter investment and slow reform, one reason Nepal's strategies have delivered less than hoped.
 
 ## Sources
 
@@ -275,4 +307,13 @@ One line per fact, keyed by fact ID: the context and impact of the fact (its 'so
 - **S29** National Statistics Office (Nepal), Nepal Living Standards Surveys, as reported in the Kathmandu Post, 'Nepal sees less than expected decline in poverty' (13 Feb 2024); 1995-96 figure from the NLSS series (secondary). <https://kathmandupost.com/money/2024/02/13/nepal-sees-less-than-expected-decline-in-poverty>
 - **S30** Ministry of Culture, Tourism and Civil Aviation (Nepal), Nepal Tourism Statistics 2025. <https://tourism.gov.np/content/711/nepal-tourism-statistics-2025/>
 - **S31** Nepal Electricity Authority, A Year in Review: Fiscal Year 2025/26. <https://nea.org.np/detail/annual-report-20252026>
+- **S32** National Bureau of Statistics of China, 'Poverty alleviation and development…' (70th anniversary report no. 15, in Chinese): rural poverty incidence 10.2% at the end of 2012 (98.99 million people), China's current national line. <https://www.stats.gov.cn/sj/zxfb/202302/t20230203_1900412.html>
+- **S33** EY Tax News, 'US imposes first set of tariffs on China origin products; publishes list of $34 billion in goods subject to additional 25% duty effective July 6' (18 Jun 2018). <https://taxnews.ey.com/news/2018-1237-us-imposes-first-set-of-tariffs-on-china-origin-products-publishes-list-of-34-billion-in-goods-subject-to-additional-25-percent-duty-effective-july-6>
+- **S34** Congressional Research Service, 'U.S.-China Tariff Actions Since 2018: An Overview' (IF12990, 14 Aug 2026), Table 1. <https://www.everycrsreport.com/files/2026-08-14_IF12990_c2ab2608402fefbb8a984a9b12cbdbe7c6948dcc.html>
+- **S35** Human Rights Watch, 'Nepal: Decade After Peace, Scant Progress on Justice' (18 Nov 2016). <https://www.hrw.org/news/2016/11/18/nepal-decade-after-peace-scant-progress-justice>
+- **S36** Kathmandu Post, 'How Nepal's bid to diversify trade after the blockade fell flat' (29 Dec 2021): India's blockade after the 20 Sep 2015 constitution. <https://kathmandupost.com/national/2021/12/29/how-nepal-s-bid-to-diversify-trade-after-the-blockade-fell-flat>
+- **S37** Reuters via VOA, 'Quake-hit Nepal cuts growth outlook to lowest in 14 years' (2016): the blockade ended in February. <https://www.voanews.com/a/reu-quake-hit-nepal-cuts-growth-outlook-to-lowest-in-14-years/3314668.html>
+- **S38** Republica, 'How trade spats increase poverty: the India–Nepal episode of 2015': over 60% of imports from India in 2015. <https://myrepublica.nagariknetwork.com/news/how-trade-spats-increase-poverty-the-india-nepal-episode-of-2015>
+- **S39** Al Jazeera, ''Topple this government': Nepal's Gen Z protesters demand mass resignations' (9 Sep 2025). <https://www.aljazeera.com/features/2025/9/9/we-want-mass-resignations-nepals-gen-z-anger-explodes-after-19-killed>
+- **S40** Deccan Herald (PTI), 'Gen Z movement in Nepal caused damage worth over Rs 85 billion, led to 77 deaths: report' (12 Dec 2025): government committee on the 8–9 Sep 2025 movement. <https://www.deccanherald.com/world/gen-z-movement-in-nepal-caused-damage-worth-over-rs-85-billion-led-to-77-deaths-report-3829299>
 

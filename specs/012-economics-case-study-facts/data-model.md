@@ -26,7 +26,7 @@ export const meta: UnitMeta = {
   type: "Topic Quiz",
   title: "Case Study Facts: China and Nepal",
   description:
-    "HSC Economics Topic 1: The Global Economy case study (2009 syllabus, examined in the 2027 HSC). Drills the China and Nepal facts and data to memorise: each figure or date with its year, and what it shows for growth, development, inequality or the environment. Each attempt draws 2 multiple-choice and 3 short-answer questions covering both economies, and 8 attempts go by without a repeated question. All questions are original and built from facts checked in November 2026; revise the figures before the 2027 HSC.",
+    "HSC Economics Topic 1: The Global Economy case study (2009 syllabus, examined in the 2027 HSC). Drills the China and Nepal facts and data to memorise: each figure or date with its year, and what it shows for growth, development, inequality or the environment, including what has held each economy back. Each attempt draws 2 multiple-choice and 3 short-answer questions covering both economies, and 9 attempts go by without a repeated question. All questions are original and built from facts checked in November 2026; revise the figures before the 2027 HSC.",
   created: "2026-11-30",
   order: 7,
   explanationsComplete: true,
@@ -69,23 +69,27 @@ Release 2 adds `conceptsReady: true` and `conceptContent: "key-notes"`.
 | `china-targeted-poverty-alleviation` | China D | China's targeted poverty alleviation: its start, method and results |
 | `china-inequality` | China E | How income is shared in China, and how to read the measures of it |
 | `china-environment` | China F | China's emissions, climate commitments and environmental policy |
+| `china-hindrances` | China G | What has held China's growth and development back |
 | `nepal-strategies` | Nepal A | Nepal's policies, agreements and major events that shape growth and development |
 | `nepal-growth-trade` | Nepal B | Nepal's economic growth and its trade position |
 | `nepal-flows` | Nepal C | Remittances, aid and foreign investment, and what they do for Nepal's economy |
 | `nepal-development` | Nepal D | Nepal's development, poverty and inequality measures |
 | `nepal-tourism-electricity` | Nepal E | Nepal's tourism and electricity sectors |
+| `nepal-hindrances` | Nepal F | What has held Nepal's growth and development back |
 
 `concept-tags.ts`: `defineTags(U, concepts, { "<slug>": ["m01", "s05", ...] })`, exactly one per question.
 `questions.ts` ends `].map((q) => ({ ...q, concept: conceptOfQuestionId[q.id] }))`.
 
 ## 4. Questions, groups and default allocation
 
-Ids `…​.m01`–`m16`, `…​.s01`–`s25`. Source on every question:
+Ids `…​.m01`–`m18`, `…​.s01`–`s30`. Source on every question:
 `Original question — case study facts (checked Nov 2026)` (the dash is U+2014).
 
-This allocation meets FR-010 and FR-011 by construction (36 of 36 ★ facts, 11 of 11 groups, no fact more than 3
+This allocation meets FR-010 and FR-011 by construction (44 of 44 ★ facts, 13 of 13 groups, no fact more than 3
 times). The content agent may move facts if a question does not work, as long as the rules still pass and the six
 slots marked † keep their subject (the marker cases depend on them).
+
+Pool sizes: mc-china 9, mc-nepal 9, sa-china 10, sa-nepal 10, sa-both 10 (48 questions).
 
 | Id | Group | Marks | Facts | Concept slug | Subject |
 |---|---|---|---|---|---|
@@ -105,12 +109,14 @@ slots marked † keep their subject (the marker cases depend on them).
 | m14 | mc-nepal | 1 | N02 | nepal-strategies | The 1992 policy and Act |
 | m15 | mc-nepal | 1 | N08 | nepal-strategies | Electricity export agreement with India |
 | m16 | mc-nepal | 1 | N17 | nepal-flows | World Bank on remittances and jobs |
+| m17 | mc-china | 1 | C32 | china-hindrances | The first US tariffs of the trade war |
+| m18 | mc-nepal | 1 | N27 | nepal-hindrances | The Maoist civil war |
 | s01 † | sa-china | 3 | C24 | china-inequality | Change in the World Bank Gini |
 | s02 | sa-china | 3 | C08 | china-growth | Change in GDP per person |
 | s03 † | sa-china | 3 | C27 | china-environment | China's share of world CO2 in the latest year |
 | s04 † | sa-china | 3 | C13 | china-development | Change in HDI (rank optional) |
 | s05 † | sa-china | 2 | C03 | china-opening-up | WTO entry (date-only fact) |
-| s06 | sa-china | 3 | C20 | china-targeted-poverty-alleviation | What it had achieved by the end |
+| s06 | sa-china | 3 | C20 | china-targeted-poverty-alleviation | Change in the rural poverty rate (China's national line) |
 | s07 † | sa-china | 3 | C26 | china-inequality | Urban–rural income ratio |
 | s08 | sa-china | 3 | C29 | china-environment | The climate pledge: both targets, and the year it was made |
 | s09 † | sa-nepal | 3 | N15 | nepal-flows | Change in remittances, share of GDP |
@@ -126,10 +132,15 @@ slots marked † keep their subject (the marker cases depend on them).
 | s19 | sa-both | 3 | C07, N11 | china-growth | Compare recent growth (own periods) |
 | s20 | sa-both | 3 | C11, N18 | nepal-flows | Compare FDI inflows |
 | s21 | sa-both | 3 | C08, N10 | nepal-growth-trade | Compare growth in GDP per person |
-| s22 | sa-both | 3 | C01, C14 | china-development | Essay sentence: reform and poverty |
+| s22 | sa-both | 3 | C01, C14, C15 | china-development | Essay sentence: share of the population in extreme poverty |
 | s23 | sa-both | 3 | C28 | china-environment | Essay sentence: emissions per person |
 | s24 | sa-both | 2 | C03, N03 | nepal-strategies | Compare WTO entry (date-only facts) |
 | s25 | sa-both | 3 | N16 | nepal-flows | Essay sentence: remittance inflows |
+| s26 | sa-china | 3 | C34 | china-hindrances | Growth in the COVID-19 lockdown years |
+| s27 | sa-china | 3 | C36 | china-hindrances | The shrinking, ageing population |
+| s28 | sa-nepal | 3 | N28 | nepal-hindrances | The Indian border blockade |
+| s29 | sa-nepal | 3 | N31 | nepal-hindrances | The Gen Z protests |
+| s30 | sa-both | 3 | C33, N28 | china-hindrances | Compare trade hindrances: US tariffs and the blockade |
 
 ## 5. Answer key shapes (`answers.ts`, `explanations.ts`, server-only)
 
@@ -152,6 +163,7 @@ argument). `explanations.ts`: `{ 2: [["start of wrong option", "The correct fact
 | One year | that value and that year only |
 | Comparison | both economies for each of the first two points; each with its own period |
 | Model answer | shows the full date where the fact file gives one |
+| Two currencies | US dollars first, local currency in brackets, as the fact row; either accepted; a US dollar figure of the wrong size earns nothing |
 | Financial years | the financial year as written (`FY2024/25`, also `2024/25`) |
 
 ## 6. Fact-check report (`specs/012-economics-case-study-facts/fact-check.md`)
@@ -222,7 +234,7 @@ Question: **unseen → seen** when a result is saved; it never returns to unseen
 | Field | From |
 |---|---|
 | `id`, `star`, `statement`, `when`, `source`, `sourceNumbers` | the fact's table row |
-| `group` | its lettered section (`china-a` … `nepal-e`) |
+| `group` | its lettered section (`china-a` … `nepal-f`) |
 | impact line | its `- **<ID>** …` bullet under `## Context and impact`, held in the parser's `impact` map keyed by ID |
 
 Rules (the parser throws, naming the ID): exactly one impact line per fact, none for an ID without a fact row, no digit

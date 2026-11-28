@@ -1,13 +1,32 @@
 # Fact check: Case Study Facts (Release 1)
-Checked by: Claude Code (Sonnet 5.5), 28 Nov 2026. Fact file: docs/y12-economics-case-study-facts-research.md as modified on 28 Nov 2026 at 15:18 (not yet committed when checked).
-Updated after the question review, 28 Nov 2026, against the fact file with the impact lines of N08 and N26 corrected from "hydropower" to "electricity" (that correction is not yet committed).
+Checked by: Claude Code (Sonnet 5.5), 28 Nov 2026. Fact file: docs/y12-economics-case-study-facts-research.md as modified on 28 Nov 2026 at 15:18 (first check).
+Updated after the question review, 28 Nov 2026: the impact lines of N08 and N26 corrected from "hydropower" to "electricity" (committed with that review).
+Updated again 28 Nov 2026 for the revised fact file (67 facts; not yet committed when checked).
 
 The value tables were assembled by script from the unit and the fact rows. Names, significance and the notes below were checked by hand. Whether each direction, country and claim is right is the maintainer's read.
 
 ## Changed, rounded or not traced
+
+### Changed for the revised fact file (28 Nov 2026)
+- New questions: m17 (C32), m18 (N27), s26 (C34), s27 (C36), s28 (N28), s29 (N31), s30 (C33, N28). Two new concepts: china-hindrances and nepal-hindrances. C35, N29 and N30 have no question (not starred).
+- s06: now marks the rural poverty rate on China's national line (10.2% to zero, end 2012 to end 2020); the old figures are alternatives for the first mark. New prompt.
+- s22: now marks the share of the population in extreme poverty (C15 added); close to 800 million over 40 years is accepted instead. New prompt.
+- s07, s15, s16: US dollars first with the local currency in brackets; either currency accepted.
+- m05 explanation: "the Open Door Policy (reform and opening-up)".
+- m03, m08 and m12 and their explanations were checked against the changed facts and left as they were.
+- s30's significance is the unit's own comparison (see its section).
+- The fact file was edited again at 19:53 (40 sources): N28 now gives growth below 1%, about 0.4% (World Bank), replacing the official 0.2% (s28, s30); N31 now gives 19 killed on the first day and 77 in total (s29); the C27 impact line was reworded (s03 significance follows it).
+- Accuracy review: s03 uses the reworded C27 line; s26 also accepts a rate up to a tenth of a percentage point below 2.3% and 3.1% (China's official figures; the fact file does not state them, so no figure is written); s28 and s29 reworded; s29 accepts "19 killed" without "first day". s30 needed no change.
+
+### Hints between questions
+- m06's explanation for "By 1990" gives the 1990 share (83.1%) that s22 marks; m12 shows China's 0.0%, which s22 also marks.
+- s28 and s30 share N28: s28's feedback gives s30's Nepal figure and year, and s28 comes first when a quiz draws both.
+- s14 and s26 both involve the COVID year 2020; s26 marks it.
+
+### Earlier notes
 - Not traced: none.
 - Slot m06 keeps fact C16 and its subject; the options are 2020, 1990, 2013 and 2015 (no later year, which would also be true).
-- Prompts s14 and s22 were reworded in the second pass so they do not hand over the years or the significance they mark.
+- Prompts s14 and s22 were reworded in the second pass so they do not hand over the years or the significance they mark (s22 has since been rewritten).
 - Names: "Human Development Index" writes out HDI, which the file does not spell out (s04, s17). "Using" and "Accept" on the script's name list are ordinary words.
 - Roundings accepted are named in each short answer's notes; the script block below lists them all.
 - s11: "about US$2 bn" (losses of US$1.9 bn) is the one value the script reports from another row.
@@ -46,7 +65,7 @@ The value tables were assembled by script from the unit and the fact rows. Names
 | C12 |  | - |
 | C13 | ★ | s04, s17 |
 | C14 | ★ | s22 |
-| C15 |  | - |
+| C15 | ★ | s22 |
 | C16 | ★ | m06 |
 | C17 |  | - |
 | C18 |  | - |
@@ -63,6 +82,11 @@ The value tables were assembled by script from the unit and the fact rows. Names
 | C29 | ★ | s08 |
 | C30 | ★ | m07 |
 | C31 |  | - |
+| C32 | ★ | m17 |
+| C33 | ★ | s30 |
+| C34 | ★ | s26 |
+| C35 |  | - |
+| C36 | ★ | s27 |
 | N01 |  | - |
 | N02 | ★ | m14 |
 | N03 | ★ | s24 |
@@ -89,6 +113,11 @@ The value tables were assembled by script from the unit and the fact rows. Names
 | N24 | ★ | s14 |
 | N25 |  | m10 |
 | N26 | ★ | s16 |
+| N27 | ★ | m18 |
+| N28 | ★ | s28, s30 |
+| N29 |  | - |
+| N30 |  | - |
+| N31 | ★ | s29 |
 
 ## Questions
 ### m01 · mc-china · 1 mark · C04, C19 · china-opening-up
@@ -135,9 +164,9 @@ Changed or rounded: none. Not traced: none.
 | 2025 | wrong option, explanation | C05 | Made in China 2025 issued: upgrade to high-tech manufacturing. '2025' is the target year, not the start (8 May 2015) |
 | 2015 | wrong option | C05 | Made in China 2025 issued: upgrade to high-tech manufacturing. '2025' is the target year, not the start (8 May 2015) |
 | 2013 | correct option, wrong option | C19 | Proposed by Xi Jinping at Shibadong village, Hunan (3 Nov 2013) |
-| 1978 | wrong option, explanation | C01 | Reform and opening-up under Deng Xiaoping (1978) |
+| 1978 | wrong option, explanation | C01 | Open Door Policy (reform and opening-up) begins under Deng Xiaoping; Special Economic Zones were its first major step (1978) |
 | 3 Nov 2013 | rubric, explanation | C19 | Proposed by Xi Jinping at Shibadong village, Hunan (3 Nov 2013) |
-Names: Xi Jinping, Shibadong, Hunan (C19); Deng Xiaoping (C01); Kazakhstan, Indonesia (C04); Made in China 2025 (C05). Sources cited: S11.
+Names: Xi Jinping, Shibadong village, Hunan (C19); Deng Xiaoping, Open Door Policy (C01); Kazakhstan, Indonesia, Belt and Road Initiative (C04); Made in China 2025 (C05). Sources cited: S11.
 Changed or rounded: none. Not traced: none.
 - [ ] Read by maintainer
 
@@ -258,6 +287,33 @@ Names: World Bank (N17). Sources cited: S28.
 Changed or rounded: none. Not traced: none.
 - [ ] Read by maintainer
 
+### m17 · mc-china · 1 mark · C32 · china-hindrances
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 2025 | wrong option | C05 | Made in China 2025 issued: upgrade to high-tech manufacturing. '2025' is the target year, not the start (8 May 2015) |
+| 25 | wrong option, correct option, rubric, explanation | C32 | US–China trade war begins: first US tariffs (25%) on about US$34 bn of Chinese goods (6 Jul 2018) |
+| 34 | wrong option, correct option, rubric, explanation | C32 | US–China trade war begins: first US tariffs (25%) on about US$34 bn of Chinese goods (6 Jul 2018) |
+| 2018 | wrong option, correct option | C32 | US–China trade war begins: first US tariffs (25%) on about US$34 bn of Chinese goods (6 Jul 2018) |
+| 2013 | wrong option, explanation | C04 | Belt and Road Initiative proposed (in Kazakhstan and Indonesia). INTERNATIONAL trade and infrastructure links, NOT a rural program (autumn 2013) |
+| 6 Jul 2018 | rubric, explanation | C32 | US–China trade war begins: first US tariffs (25%) on about US$34 bn of Chinese goods (6 Jul 2018) |
+Names: US, China (C32); Belt and Road Initiative (C04). Sources cited: S33.
+Changed or rounded: none. Not traced: none.
+- [ ] Read by maintainer
+
+### m18 · mc-nepal · 1 mark · N27 · nepal-hindrances
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 13000 | prompt, rubric | N27 | Maoist civil war: more than 13,000 killed; ended by the Comprehensive Peace Accord on 21 Nov 2006 (1996–2006) |
+| 1996 | wrong option, correct option, rubric, explanation | N27 | Maoist civil war: more than 13,000 killed; ended by the Comprehensive Peace Accord on 21 Nov 2006 (1996–2006) |
+| 2006 | wrong option, correct option, rubric, explanation | N27 | Maoist civil war: more than 13,000 killed; ended by the Comprehensive Peace Accord on 21 Nov 2006 (1996–2006) |
+| 1985 | wrong option, explanation | N01 | Liberalisation begins (1985) |
+| 1992 | wrong option | N02 | New liberal Industrial Policy; Foreign Investment and Technology Transfer Act (1992) |
+| 2022 | wrong option | C15 | Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+| 21 Nov 2006 | rubric, explanation | N27 | Maoist civil war: more than 13,000 killed; ended by the Comprehensive Peace Accord on 21 Nov 2006 (1996–2006) |
+Names: Nepal, Maoist civil war, Comprehensive Peace Accord (N27). Sources cited: S35.
+Changed or rounded: none. Not traced: none.
+- [ ] Read by maintainer
+
 ### s01 · sa-china · 3 marks · C24 · china-inequality
 | As written | Where | Fact | Fact file says |
 |---|---|---|---|
@@ -294,7 +350,7 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 | 32 | model answer, rubric, notes | C27 | CO2 emissions 12.4 billion tonnes, about 32% of the world total (2025) |
 | 12.4 | model answer | C27 | CO2 emissions 12.4 billion tonnes, about 32% of the world total (2025) |
 Names: CO2 (C27). Sources cited: none.
-Significance: impact line C27 (without the emitter ranking).
+Significance: impact line C27, including its ranking ("the world's largest emitter") at the maintainer's instruction; FR-015 otherwise leaves a line's rankings out, and no fact row states this one.
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
 
@@ -327,13 +383,16 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 ### s06 · sa-china · 3 marks · C20 · china-targeted-poverty-alleviation
 | As written | Where | Fact | Fact file says |
 |---|---|---|---|
-| 2020 | model answer, rubric, notes | C20 | Last 98.99 million rural poor lifted above the national poverty line; all 832 poor counties and 128,000 poor villages removed from the list (by end 2020) |
-| 98.99 | model answer, rubric, notes | C20 | Last 98.99 million rural poor lifted above the national poverty line; all 832 poor counties and 128,000 poor villages removed from the list (by end 2020) |
-| 832 | rubric, notes | C20 | Last 98.99 million rural poor lifted above the national poverty line; all 832 poor counties and 128,000 poor villages removed from the list (by end 2020) |
-| 128000 | rubric, notes | C20 | Last 98.99 million rural poor lifted above the national poverty line; all 832 poor counties and 128,000 poor villages removed from the list (by end 2020) |
-| 99 | notes | C20 | rounds 98.99: Last 98.99 million rural poor lifted above the national poverty line; all 832 poor counties and 128,000 poor villages removed from the list (by end 2020) |
-| 100 | notes | C20 | rounds 98.99: Last 98.99 million rural poor lifted above the national poverty line; all 832 poor counties and 128,000 poor villages removed from the list (by end 2020) |
-Names: Chinese government, national poverty line (fact file notes); World Bank (C14). Sources cited: none.
+| 10.2 | model answer, rubric, notes | C20 | Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 2012 | model answer, rubric, notes | C20 | Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 2020 | model answer, rubric, notes | C20 | Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 98.99 | model answer, rubric, notes | C20 | Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 832 | rubric, notes | C20 | Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 128000 | rubric, notes | C20 | Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 10 | notes | C20 | rounds 10.2: Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 99 | notes | C20 | rounds 98.99: Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+| 100 | notes | C20 | rounds 98.99: Rural poverty rate (China's national line): 10.2% → zero, as the last 98.99 million rural poor were lifted out; all 832 poor counties and 128,000 poor villages removed from the list (end 2012 → end 2020) |
+Names: Chinese government figures, China's national poverty line (fact file notes); World Bank (C14, C15). Sources cited: none.
 Significance: impact line C20.
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
@@ -341,13 +400,17 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 ### s07 · sa-china · 3 marks · C26 · china-inequality
 | As written | Where | Fact | Fact file says |
 |---|---|---|---|
-| 2025 | model answer, rubric, notes | C26 | Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) (2025) |
-| 2.31 | model answer, rubric, notes | C26 | Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) (2025) |
-| 56502 | model answer, rubric | C26 | Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) (2025) |
-| 24456 | model answer, rubric | C26 | Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) (2025) |
-| 2.3 | notes | C26 | rounds 2.31: Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) (2025) |
-| 56500 | notes | C26 | rounds 56502: Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) (2025) |
-| 24500 | notes | C26 | rounds 24456: Urban–rural income ratio 2.31 (urban 56,502 yuan vs rural 24,456 yuan per person) (2025) |
+| 2025 | model answer, rubric, notes | C26 | Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 2.31 | model answer, rubric, notes | C26 | Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 7910 | model answer, rubric, notes | C26 | Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 56502 | model answer, rubric | C26 | Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 3424 | model answer, rubric, notes | C26 | Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 24456 | model answer, rubric | C26 | Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 2.3 | notes | C26 | rounds 2.31: Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 7900 | notes | C26 | rounds 7910: Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 3400 | notes | C26 | rounds 3424: Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 56500 | notes | C26 | rounds 56502: Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
+| 24500 | notes | C26 | rounds 24456: Urban–rural income ratio 2.31 (urban about US$7,910 vs rural about US$3,424 per person; 56,502 vs 24,456 yuan) (2025) |
 Names: none. Sources cited: none.
 Significance: impact line C26 (without the multiple or the latest-year trend).
 Changed or rounded: only the roundings named in the notes. Not traced: none.
@@ -452,10 +515,12 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 ### s15 · sa-nepal · 3 marks · N13 · nepal-growth-trade
 | As written | Where | Fact | Fact file says |
 |---|---|---|---|
-| 2025-26 | model answer, rubric, notes | N13 | Trade deficit Rs 1,781.09 bn (FY2025/26) |
-| 1781.09 | model answer, rubric, notes | N13 | Trade deficit Rs 1,781.09 bn (FY2025/26) |
-| 1780 | notes | N13 | rounds 1781.09: Trade deficit Rs 1,781.09 bn (FY2025/26) |
-| 1800 | notes | N13 | rounds 1781.09: Trade deficit Rs 1,781.09 bn (FY2025/26) |
+| 2025-26 | model answer, rubric, notes | N13 | Trade deficit about US$12.2 bn (Rs 1,781.09 bn) (FY2025/26) |
+| 12.2 | model answer, rubric, notes | N13 | Trade deficit about US$12.2 bn (Rs 1,781.09 bn) (FY2025/26) |
+| 1781.09 | model answer, rubric, notes | N13 | Trade deficit about US$12.2 bn (Rs 1,781.09 bn) (FY2025/26) |
+| 12 | notes | N13 | rounds 12.2: Trade deficit about US$12.2 bn (Rs 1,781.09 bn) (FY2025/26) |
+| 1780 | notes | N13 | rounds 1781.09: Trade deficit about US$12.2 bn (Rs 1,781.09 bn) (FY2025/26) |
+| 1800 | notes | N13 | rounds 1781.09: Trade deficit about US$12.2 bn (Rs 1,781.09 bn) (FY2025/26) |
 Names: none. Sources cited: none.
 Significance: impact line N13.
 Changed or rounded: only the roundings named in the notes. Not traced: none.
@@ -464,11 +529,13 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 ### s16 · sa-nepal · 3 marks · N26 · nepal-tourism-electricity
 | As written | Where | Fact | Fact file says |
 |---|---|---|---|
-| 2025-26 | model answer, rubric, notes | N26 | Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn (FY2025/26) |
-| 3965 | model answer, rubric, notes | N26 | Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn (FY2025/26) |
-| 29.31 | model answer, rubric, notes | N26 | Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn (FY2025/26) |
-| 4000 | notes | N26 | rounds 3965: Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn (FY2025/26) |
-| 29 | notes | N26 | rounds 29.31: Electricity exported to India about 3,965 GWh, earning NRs 29.31 bn (FY2025/26) |
+| 2025-26 | model answer, rubric, notes | N26 | Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) (FY2025/26) |
+| 3965 | model answer, rubric, notes | N26 | Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) (FY2025/26) |
+| 201 | model answer, rubric, notes | N26 | Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) (FY2025/26) |
+| 29.31 | model answer, rubric, notes | N26 | Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) (FY2025/26) |
+| 4000 | notes | N26 | rounds 3965: Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) (FY2025/26) |
+| 200 | notes | N26 | rounds 201: Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) (FY2025/26) |
+| 29 | notes | N26 | rounds 29.31: Electricity exported to India about 3,965 GWh, earning about US$201 million (NRs 29.31 bn) (FY2025/26) |
 Names: India (N26). Sources cited: none.
 Significance: impact line N26 (without the ranking and the trend). The exports are described as electricity, as row N26 says.
 Changed or rounded: only the roundings named in the notes. Not traced: none.
@@ -559,13 +626,20 @@ Significance: impact line N10; own significance: average income rose far more in
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
 
-### s22 · sa-both · 3 marks · C01, C14 · china-development
+### s22 · sa-both · 3 marks · C01, C14, C15 · china-development
 | As written | Where | Fact | Fact file says |
 |---|---|---|---|
-| 800 | model answer, rubric, notes | C14 | Poverty fell by close to 800 million people (World Bank) (over 40 years) |
-| 40 | model answer, rubric, notes | C14 | Poverty fell by close to 800 million people (World Bank) (over 40 years) |
-Names: Deng Xiaoping (C01); World Bank (C14). Sources cited: none.
-Significance: impact lines C14 (without the ranking), C01 (second accepted point).
+| 3.00 | model answer, rubric | C15 | Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+| 83.1 | model answer, rubric, notes | C15 | Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+| 1990 | model answer, rubric, notes | C15 | Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+| 0.0 | model answer, rubric, notes | C15 | Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+| 2022 | model answer, rubric, notes | C15 | Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+| 800 | rubric, notes | C14 | Close to 800 million people lifted out of poverty: close to three-quarters of the world's poverty reduction (World Bank). As a share of the population, see the next row (over 40 years) |
+| 40 | rubric, notes | C14 | Close to 800 million people lifted out of poverty: close to three-quarters of the world's poverty reduction (World Bank). As a share of the population, see the next row (over 40 years) |
+| 83 | notes | C15 | rounds 83.1: Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+| 80 | notes | C15 | rounds 83.1: Share of the population in extreme poverty ($3.00 a day, World Bank line, 2021 PPP): 83.1% → 0.0% (1990 → 2022) |
+Names: Open Door Policy (C01); World Bank (C14, C15). Sources cited: none.
+Significance: impact line C14 (without the ranking), C01 (a second accepted point); row C14 for the three-quarters point.
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
 
@@ -608,10 +682,78 @@ Significance: borrows impact line N15 (exporting labour is the main link; remitt
 Changed or rounded: only the roundings named in the notes. Not traced: none.
 - [ ] Read by maintainer
 
+### s26 · sa-china · 3 marks · C34 · china-hindrances
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 19 | prompt, model answer | C34 | COVID-19 lockdowns: real GDP growth fell to 2.3% and 3.1% (2020; 2022) |
+| 2.3 | model answer, rubric | C34 | COVID-19 lockdowns: real GDP growth fell to 2.3% and 3.1% (2020; 2022) |
+| 2020 | model answer, rubric | C34 | COVID-19 lockdowns: real GDP growth fell to 2.3% and 3.1% (2020; 2022) |
+| 3.1 | model answer, rubric | C34 | COVID-19 lockdowns: real GDP growth fell to 2.3% and 3.1% (2020; 2022) |
+| 2022 | model answer, rubric | C34 | COVID-19 lockdowns: real GDP growth fell to 2.3% and 3.1% (2020; 2022) |
+Names: COVID-19 (C34). Sources cited: none.
+Significance: impact line C34.
+Changed or rounded: the notes also accept a rate up to a tenth of a percentage point below 2.3% and 3.1% (accuracy review); the fact row does not state those lower rates. Not traced: none.
+- [ ] Read by maintainer
+
+### s27 · sa-china · 3 marks · C36 · china-hindrances
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 2025 | model answer, rubric, notes | C36 | Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over (2025) |
+| 3.39 | model answer, rubric, notes | C36 | Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over (2025) |
+| 1404.89 | model answer, rubric | C36 | Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over (2025) |
+| 23.0 | model answer, rubric, notes | C36 | Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over (2025) |
+| 60 | model answer, rubric, notes | C36 | Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over (2025) |
+| 3.4 | notes | C36 | rounds 3.39: Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over (2025) |
+| 23 | notes | C36 | Ageing, shrinking population: down 3.39 million to 1,404.89 million; 23.0% aged 60 and over (2025) |
+Names: none. Sources cited: none.
+Significance: impact line C36.
+Changed or rounded: only the roundings named in the notes. Not traced: none.
+- [ ] Read by maintainer
+
+### s28 · sa-nepal · 3 marks · N28 · nepal-hindrances
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 0.4 | model answer, rubric, notes | N28 | Indian border blockade after Nepal's new constitution (20 Sep 2015) cut supplies of fuel and goods until Feb 2016; growth fell below 1%, to about 0.4% (World Bank) (2015-16) |
+| 2015-16 | model answer, rubric, notes | N28 | Indian border blockade after Nepal's new constitution (20 Sep 2015) cut supplies of fuel and goods until Feb 2016; growth fell below 1%, to about 0.4% (World Bank) (2015-16) |
+| 1 | rubric, notes | N28 | Indian border blockade after Nepal's new constitution (20 Sep 2015) cut supplies of fuel and goods until Feb 2016; growth fell below 1%, to about 0.4% (World Bank) (2015-16) |
+Names: India (N28). Sources cited: none.
+Significance: impact line N28 (without "almost stopped growth"); the earthquake is in the line and in row N04; the landlocked point is row and line N29.
+Changed or rounded: none. Not traced: none.
+- [ ] Read by maintainer
+
+### s29 · sa-nepal · 3 marks · N31 · nepal-hindrances
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 2025 | model answer, rubric, notes | N31 | Political instability: Gen Z anti-corruption protests; 19 protesters killed on the first day and Prime Minister Oli resigned the next; 77 deaths in total (government committee) (8–9 Sep 2025) |
+| 19 | model answer, rubric, notes | N31 | Political instability: Gen Z anti-corruption protests; 19 protesters killed on the first day and Prime Minister Oli resigned the next; 77 deaths in total (government committee) (8–9 Sep 2025) |
+| 77 | model answer, rubric, notes | N31 | Political instability: Gen Z anti-corruption protests; 19 protesters killed on the first day and Prime Minister Oli resigned the next; 77 deaths in total (government committee) (8–9 Sep 2025) |
+| 8 | rubric, notes | N31 | Political instability: Gen Z anti-corruption protests; 19 protesters killed on the first day and Prime Minister Oli resigned the next; 77 deaths in total (government committee) (8–9 Sep 2025) |
+Names: Gen Z, Prime Minister Oli, government committee (N31). Sources cited: none.
+Significance: impact line N31.
+Changed or rounded: none. Not traced: none.
+- [ ] Read by maintainer
+
+### s30 · sa-both · 3 marks · C33, N28 · china-hindrances
+| As written | Where | Fact | Fact file says |
+|---|---|---|---|
+| 2.7 | model answer, rubric, notes | C33 | Average US tariff on Chinese goods: 2.7% → 19% → about 36.5% (it peaked in April 2025; both sides paused some tariffs for a year from late 2025) (2017 → 2019 → Jul 2026) |
+| 2017 | model answer, rubric, notes | C33 | Average US tariff on Chinese goods: 2.7% → 19% → about 36.5% (it peaked in April 2025; both sides paused some tariffs for a year from late 2025) (2017 → 2019 → Jul 2026) |
+| 36.5 | model answer, rubric, notes | C33 | Average US tariff on Chinese goods: 2.7% → 19% → about 36.5% (it peaked in April 2025; both sides paused some tariffs for a year from late 2025) (2017 → 2019 → Jul 2026) |
+| 2026 | model answer, rubric, notes | C33 | Average US tariff on Chinese goods: 2.7% → 19% → about 36.5% (it peaked in April 2025; both sides paused some tariffs for a year from late 2025) (2017 → 2019 → Jul 2026) |
+| 1 | model answer, rubric, notes | N28 | Indian border blockade after Nepal's new constitution (20 Sep 2015) cut supplies of fuel and goods until Feb 2016; growth fell below 1%, to about 0.4% (World Bank) (2015-16) |
+| 0.4 | model answer, rubric, notes | N28 | Indian border blockade after Nepal's new constitution (20 Sep 2015) cut supplies of fuel and goods until Feb 2016; growth fell below 1%, to about 0.4% (World Bank) (2015-16) |
+| 2015-16 | model answer, rubric, notes | N28 | Indian border blockade after Nepal's new constitution (20 Sep 2015) cut supplies of fuel and goods until Feb 2016; growth fell below 1%, to about 0.4% (World Bank) (2015-16) |
+| 36 | notes | C33 | rounds 36.5: Average US tariff on Chinese goods: 2.7% → 19% → about 36.5% (it peaked in April 2025; both sides paused some tariffs for a year from late 2025) (2017 → 2019 → Jul 2026) |
+| 37 | notes | C33 | rounds 36.5: Average US tariff on Chinese goods: 2.7% → 19% → about 36.5% (it peaked in April 2025; both sides paused some tariffs for a year from late 2025) (2017 → 2019 → Jul 2026) |
+Names: US, China (C33); India, Nepal (N28). Sources cited: none.
+Significance: own significance: each economy can be hurt by another country's decisions; support: rows C33 and N28 and impact lines C33 and N28 (without the trend).
+Changed or rounded: only the roundings named in the notes. Not traced: none.
+- [ ] Read by maintainer
+
 <!-- script:start -->
 (written by npm run case-facts:check; do not edit)
 
-41 questions; 472 numbers, periods and dates traced: 431 OK, 40 rounded, 1 from another row, 0 untraced.
+48 questions; 635 numbers, periods and dates traced: 584 OK, 50 rounded, 1 from another row, 0 untraced.
 
 ### Rule errors
 - none
@@ -623,9 +765,12 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 - ROUNDED `13900` in s02, notes (C08)
 - ROUNDED `0.49` in s04, notes (C13)
 - ROUNDED `0.80` in s04, notes (C13)
+- ROUNDED `10` in s06, notes (C20)
 - ROUNDED `99` in s06, notes (C20)
 - ROUNDED `100` in s06, notes (C20)
 - ROUNDED `2.3` in s07, notes (C26)
+- ROUNDED `7900` in s07, notes (C26)
+- ROUNDED `3400` in s07, notes (C26)
 - ROUNDED `56500` in s07, notes (C26)
 - ROUNDED `24500` in s07, notes (C26)
 - ROUNDED `32` in s09, notes (N15)
@@ -638,9 +783,11 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 - ROUNDED `1200000` in s14, notes (N24)
 - ROUNDED `230000` in s14, notes (N24)
 - ROUNDED `1160000` in s14, notes (N24)
+- ROUNDED `12` in s15, notes (N13)
 - ROUNDED `1780` in s15, notes (N13)
 - ROUNDED `1800` in s15, notes (N13)
 - ROUNDED `4000` in s16, notes (N26)
+- ROUNDED `200` in s16, notes (N26)
 - ROUNDED `29` in s16, notes (N26)
 - ROUNDED `0.49` in s17, notes (C13, N19)
 - ROUNDED `0.80` in s17, notes (C13, N19)
@@ -654,10 +801,15 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 - ROUNDED `14000` in s21, notes (C08, N10)
 - ROUNDED `190` in s21, notes (C08, N10)
 - ROUNDED `1500` in s21, notes (C08, N10)
+- ROUNDED `83` in s22, notes (C01, C14, C15)
+- ROUNDED `80` in s22, notes (C01, C14, C15)
 - ROUNDED `2.1` in s23, notes (C28)
 - ROUNDED `9.3` in s23, notes (C28)
 - ROUNDED `16.2` in s25, notes (N16)
 - ROUNDED `16` in s25, notes (N16)
+- ROUNDED `3.4` in s27, notes (C36)
+- ROUNDED `36` in s30, notes (C33, N28)
+- ROUNDED `37` in s30, notes (C33, N28)
 
 ### Warnings
 - y12-economics-case-study-facts.s13: notes says 43.5 bn; the fact row has 43.5 million
@@ -665,5 +817,5 @@ Changed or rounded: only the roundings named in the notes. Not traced: none.
 - N23: shared by multiple choice m11 and short answer s18
 - name "Index" is not in the fact file (s04, s17)
 - name "Using" is not in the fact file (s06)
-- name "Accept" is not in the fact file (s13, s15, s25)
+- name "Accept" is not in the fact file (s13, s25)
 <!-- script:end -->

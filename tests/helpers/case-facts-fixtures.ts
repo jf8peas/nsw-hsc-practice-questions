@@ -1,7 +1,7 @@
 // A synthetic case-facts unit (spec 012) for the rules and draw tests, so they never depend on the real unit. Every
 // fact and line here is invented.
 //
-// 8 questions in each of mc-china, mc-nepal, sa-china, sa-nepal and sa-both, over 11 invented fact groups with three
+// 8 questions in each of mc-china, mc-nepal, sa-china, sa-nepal and sa-both, over 13 invented fact groups with three
 // facts each (the first of each is ★).
 
 import type { AnswerSet, McQuestion, Question, ShortQuestion, Unit } from "@/lib/types";
@@ -15,11 +15,13 @@ export const FIXTURE_SECTIONS: Array<[economy: "china" | "nepal", letter: string
   ["china", "D", "china-targeted-poverty-alleviation"],
   ["china", "E", "china-inequality"],
   ["china", "F", "china-environment"],
+  ["china", "G", "china-hindrances"],
   ["nepal", "A", "nepal-strategies"],
   ["nepal", "B", "nepal-growth-trade"],
   ["nepal", "C", "nepal-flows"],
   ["nepal", "D", "nepal-development"],
   ["nepal", "E", "nepal-tourism-electricity"],
+  ["nepal", "F", "nepal-hindrances"],
 ];
 
 interface FixtureFact {
@@ -115,7 +117,9 @@ export function buildCaseFactsFixture(id = "fx-facts"): { unit: Unit; answers: A
   // China facts are used in file order across both China pools, Nepal facts likewise; "both" takes one of each.
   for (let i = 0; i < 8; i++) mc(i + 1, "mc-china", china[i]);
   for (let i = 0; i < 8; i++) mc(i + 9, "mc-nepal", nepal[i]);
-  for (let i = 0; i < 8; i++) sa(i + 1, "sa-china", [china[8 + i]], china[8 + i]);
+  // C17 and C18 are left untested (a rules test stars one of them); C19, the last group's ★ fact, is tested
+  const saChina = [8, 9, 10, 11, 12, 13, 15, 18];
+  for (let i = 0; i < 8; i++) sa(i + 1, "sa-china", [china[saChina[i]]], china[saChina[i]]);
   for (let i = 0; i < 8; i++) sa(i + 9, "sa-nepal", [nepal[(8 + i) % nepal.length]], nepal[(8 + i) % nepal.length]);
   for (let i = 0; i < 8; i++) sa(i + 17, "sa-both", [china[i], nepal[i]], i % 2 === 0 ? china[i] : nepal[i]);
 

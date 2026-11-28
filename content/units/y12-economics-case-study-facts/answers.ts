@@ -27,6 +27,8 @@ const keys: AnswerSet = {
   [`${U}.m14`]: { correctText: "A liberal Industrial Policy and a Foreign Investment and Technology Transfer Act", rubric: ["In 1992 Nepal introduced a new liberal Industrial Policy and the Foreign Investment and Technology Transfer Act (Source S19)."], factIds: ["N02"] },
   [`${U}.m15`]: { correctText: "It could build up an export and narrow the trade deficit, but relies on one buyer", rubric: ["The agreement of 4 Jan 2024 with India could build up electricity exports and narrow the trade deficit, but ties Nepal to a single buyer (Source S25)."], factIds: ["N08"] },
   [`${U}.m16`]: { correctText: "They are central to growth but have not created quality jobs at home", rubric: ["The World Bank says remittances are central to growth but have not created quality jobs at home (Source S28)."], factIds: ["N17"] },
+  [`${U}.m17`]: { correctText: "In 2018 the US added 25% tariffs on about US$34 bn of Chinese goods", rubric: ["The first US tariffs of the US–China trade war, 25% on about US$34 bn of Chinese goods, came on 6 Jul 2018 (Source S33)."], factIds: ["C32"] },
+  [`${U}.m18`]: { correctText: "It ran from 1996 to 2006 and was ended by the Comprehensive Peace Accord", rubric: ["Nepal's Maoist civil war ran from 1996 to 2006, killed more than 13,000 people and was ended by the Comprehensive Peace Accord on 21 Nov 2006 (Source S35)."], factIds: ["N27"] },
 
   [`${U}.s01`]: {
     modelAnswer: "China's World Bank Gini coefficient rose from 32.2 in 1990 to 36.0 in 2022. Growth was uneven, with coastal, urban and skilled workers gaining most, so income became more unequally shared.",
@@ -49,13 +51,13 @@ const keys: AnswerSet = {
     factIds: ["C08"],
   },
   [`${U}.s03`]: {
-    modelAnswer: "In 2025 China produced about 32% of the world's CO2 emissions, 12.4 billion tonnes. Energy-hungry, export-led industry caused this pollution, a negative externality of globalisation.",
+    modelAnswer: "In 2025 China produced about 32% of the world's CO2 emissions, 12.4 billion tonnes. Rapid, energy-hungry industrial growth, boosted by exports, made China the world's largest emitter, a negative externality of globalisation.",
     rubric: [
       "Figure: about 32% of the world total.",
       "Period: in 2025.",
-      "What it shows: energy-hungry, export-led industry has caused heavy pollution, a negative externality of globalisation (an environmental cost of growth).",
+      "What it shows: rapid, energy-hungry industrial growth, boosted by exports, made China the world's largest emitter, a negative externality of globalisation (an environmental cost of growth).",
     ],
-    notes: "Accept \"about 32%\" or \"about a third\" for the share. The total in tonnes is extra detail and is not needed. You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's share (or an accepted rounding above); a different share from another source does not earn it. Another country's figure earns no figure mark. For the last mark, say what it shows: energy-hungry, export-led industry has caused pollution whose cost falls on others (a negative externality). Another point the case study supports, such as an environmental cost of rapid growth, also earns it. Only saying the share again, or saying China's growth has had no environmental cost, does not.",
+    notes: "Accept \"about 32%\" or \"about a third\" for the share. The total in tonnes is extra detail and is not needed. You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's share (or an accepted rounding above); a different share from another source does not earn it. Another country's figure earns no figure mark. For the last mark, say what it shows: rapid, energy-hungry industrial growth, boosted by exports, made China the world's largest emitter, a negative externality of globalisation (a cost that falls on others). Another point the case study supports, such as an environmental cost of rapid growth, also earns it. Only saying the share again, or saying China's growth has had no environmental cost, does not.",
     factIds: ["C27"],
   },
   [`${U}.s04`]: {
@@ -78,23 +80,23 @@ const keys: AnswerSet = {
     factIds: ["C03"],
   },
   [`${U}.s06`]: {
-    modelAnswer: "According to Chinese government figures, by the end of 2020 the last 98.99 million rural poor had been lifted above China's national poverty line. This shows the government had to act to spread the gains from globalisation to rural areas that export-led growth had left behind.",
+    modelAnswer: "According to Chinese government figures, China's rural poverty rate, measured against the national poverty line, fell from 10.2% at the end of 2012 to zero by the end of 2020, as the last 98.99 million rural poor were lifted out. This shows the government had to act to spread the gains from globalisation to rural areas that export-led growth had left behind.",
     rubric: [
-      "Figure: the last 98.99 million rural poor lifted above the national poverty line (or all 832 poor counties, or 128,000 poor villages, removed from the list).",
-      "Period: by the end of 2020.",
+      "Figure: the rural poverty rate on China's national poverty line fell from 10.2% to zero (both values; or the last 98.99 million rural poor lifted out, all 832 poor counties, or 128,000 poor villages, removed from the list).",
+      "Period: from the end of 2012 to the end of 2020 (both years).",
       "What it shows: the government had to act to spread globalisation's gains to rural areas that growth had left behind.",
     ],
-    notes: "One correct figure earns the first mark: 98.99 million rural poor (about 99 million, or nearly 100 million), all 832 poor counties, or 128,000 poor villages. These are Chinese government figures measured against China's national poverty line. The year 2020 earns the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns nothing, and the World Bank's total for poverty reduction is a different fact. For the last mark, say what it shows: the government had to act to spread globalisation's gains to rural areas left behind. Another point the case study supports, such as support aimed at lasting income for each poor household instead of one-off handouts, also earns it. Only saying the figure again, or saying the program left rural people poorer, does not.",
+    notes: "For the first mark give both values of the rural poverty rate, 10.2% (about 10%) and zero: one value on its own does not earn it. One of these earns the first mark instead: the last 98.99 million rural poor (about 99 million, or nearly 100 million), all 832 poor counties, or 128,000 poor villages. These are Chinese government figures measured against China's national poverty line, not a World Bank line. The second mark needs both years, 2012 and 2020 (the end of each), whichever figure you give: one year on its own does not earn it, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns nothing, and the World Bank's figures on China's poverty are different facts. For the last mark, say what it shows: the government had to act to spread globalisation's gains to rural areas left behind. Another point the case study supports, such as support aimed at lasting income for each poor household instead of one-off handouts, also earns it. Only saying the figures again, or saying the program left rural people poorer, does not.",
     factIds: ["C20"],
   },
   [`${U}.s07`]: {
-    modelAnswer: "In 2025 China's urban–rural income ratio was 2.31: income per person was 56,502 yuan in urban areas and 24,456 yuan in rural areas. Urban households earn far more than rural ones, so a large gap in income remains.",
+    modelAnswer: "In 2025 China's urban–rural income ratio was 2.31: income per person was about US$7,910 (56,502 yuan) in urban areas and about US$3,424 (24,456 yuan) in rural areas. Urban households earn far more than rural ones, so a large gap in income remains.",
     rubric: [
-      "Figure: an urban–rural income ratio of 2.31 (or urban 56,502 yuan against rural 24,456 yuan per person).",
+      "Figure: an urban–rural income ratio of 2.31 (or urban about US$7,910 against rural about US$3,424 per person; 56,502 against 24,456 yuan).",
       "Period: in 2025.",
       "What it shows: urban households earn far more than rural ones, so income is still very unequally shared between city and countryside.",
     ],
-    notes: "Accept the ratio 2.31 (or about 2.3), or both incomes (about 56,500 yuan urban and about 24,500 yuan rural). You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns no figure mark. For the last mark, say what it shows: a large income gap remains between urban and rural households. Another point the case study supports, such as growth having been concentrated in the coastal cities, also earns it. Only saying the ratio or the two incomes again, or saying rural households earn more, does not.",
+    notes: "Accept the ratio 2.31 (or about 2.3), or both incomes per person in either currency: about US$7,910 urban and about US$3,424 rural (about US$7,900 and about US$3,400), or about 56,500 yuan urban and about 24,500 yuan rural. A US dollar figure of the wrong size, such as an income given in millions or billions, earns nothing. You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns no figure mark. For the last mark, say what it shows: a large income gap remains between urban and rural households. Another point the case study supports, such as growth having been concentrated in the coastal cities, also earns it. Only saying the ratio or the two incomes again, or saying rural households earn more, does not.",
     factIds: ["C26"],
   },
   [`${U}.s08`]: {
@@ -168,23 +170,23 @@ const keys: AnswerSet = {
     factIds: ["N24"],
   },
   [`${U}.s15`]: {
-    modelAnswer: "In FY2025/26 Nepal's trade deficit was Rs 1,781.09 bn. Imports far exceed exports, a sign of a narrow export base, and remittances help to finance the gap.",
+    modelAnswer: "In FY2025/26 Nepal's trade deficit was about US$12.2 bn (Rs 1,781.09 bn). Imports far exceed exports, a sign of a narrow export base, and remittances help to finance the gap.",
     rubric: [
-      "Figure: a trade deficit of Rs 1,781.09 bn.",
+      "Figure: a trade deficit of about US$12.2 bn (Rs 1,781.09 bn).",
       "Period: FY2025/26 (also written 2025/26).",
       "What it shows: imports far exceed exports, a sign of a narrow export base, with remittances helping to finance the gap.",
     ],
-    notes: "Accept Rs 1,781.09 bn, about Rs 1,780 bn or about Rs 1,800 bn. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Calling it a surplus, or giving China's trade figures, earns no figure mark. For the last mark, say what it shows: imports far exceed exports because the export base is narrow, or remittances help to finance the gap. Another point the case study supports, such as a lack of competitive export industries, also earns it. Only saying the figure again, or saying Nepal exports more than it imports, does not.",
+    notes: "Accept the deficit in either currency: about US$12.2 bn (or about US$12 bn), or Rs 1,781.09 bn, about Rs 1,780 bn or about Rs 1,800 bn. A US dollar figure of the wrong size (million instead of bn) earns nothing. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Calling it a surplus, or giving China's trade figures, earns no figure mark. For the last mark, say what it shows: imports far exceed exports because the export base is narrow, or remittances help to finance the gap. Another point the case study supports, such as a lack of competitive export industries, also earns it. Only saying the figure again, or saying Nepal exports more than it imports, does not.",
     factIds: ["N13"],
   },
   [`${U}.s16`]: {
-    modelAnswer: "In FY2025/26 Nepal exported about 3,965 GWh of electricity to India, earning NRs 29.31 bn. These electricity exports are promising for Nepal: they earn foreign exchange and supply clean energy to the region.",
+    modelAnswer: "In FY2025/26 Nepal exported about 3,965 GWh of electricity to India, earning about US$201 million (NRs 29.31 bn). These electricity exports are promising for Nepal: they earn foreign exchange and supply clean energy to the region.",
     rubric: [
-      "Figure: about 3,965 GWh exported to India, or NRs 29.31 bn earned.",
+      "Figure: about 3,965 GWh exported to India, or about US$201 million (NRs 29.31 bn) earned.",
       "Period: FY2025/26 (also written 2025/26).",
       "What it shows: electricity is a promising export that earns foreign exchange and supplies clean energy to the region.",
     ],
-    notes: "One figure earns the first mark: about 3,965 GWh (about 4,000 GWh) or NRs 29.31 bn (about NRs 29 bn), with its unit. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns nothing, and the generation capacity in MW and the agreement with India are different facts. For the last mark, say what it shows: electricity is a promising export that earns foreign exchange and supplies clean energy to the region. Another point the case study supports, such as helping to narrow the trade deficit, also earns it. Only saying the figure again, or saying Nepal only imports electricity, does not.",
+    notes: "One figure earns the first mark: about 3,965 GWh (about 4,000 GWh), or the earnings in either currency, about US$201 million (about US$200 million) or NRs 29.31 bn (about NRs 29 bn), with its unit. A US dollar figure of the wrong size (bn instead of million) earns nothing. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Another country's figure earns nothing, and the generation capacity in MW and the agreement with India are different facts. For the last mark, say what it shows: electricity is a promising export that earns foreign exchange and supplies clean energy to the region. Another point the case study supports, such as helping to narrow the trade deficit, also earns it. Only saying the figure again, or saying Nepal only imports electricity, does not.",
     factIds: ["N26"],
   },
   [`${U}.s17`]: {
@@ -238,14 +240,14 @@ const keys: AnswerSet = {
     factIds: ["C08", "N10"],
   },
   [`${U}.s22`]: {
-    modelAnswer: "China's reform and opening-up under Deng Xiaoping began its integration into world markets, and the World Bank reports that poverty fell by close to 800 million people over 40 years, a major development gain linked to globalisation that counters the argument that globalisation only harmed China.",
+    modelAnswer: "As China integrated into world markets under the Open Door Policy (reform and opening-up), the share of its population living in extreme poverty ($3.00 a day, World Bank measure) fell from 83.1% in 1990 to 0.0% in 2022, a major development gain linked to globalisation that counters the argument that globalisation only harmed China.",
     rubric: [
-      "Figure: poverty fell by close to 800 million people.",
-      "Period: over 40 years.",
+      "Figure: the share of the population in extreme poverty ($3.00 a day) fell from 83.1% to 0.0% (both shares; close to 800 million people lifted out of poverty is also accepted).",
+      "Period: from 1990 to 2022 (both years; over 40 years if the 800 million figure is used instead).",
       "What it shows: a major development gain linked to globalisation, which counters the argument that globalisation only harmed China.",
     ],
-    notes: "Accept close to, nearly or about 800 million people for the first mark. The second mark needs the length of time, over 40 years (or four decades); a single year, such as the year reform began, does not earn it, and a day or month is never needed. The mark is for the case study's World Bank figure (or an accepted rounding above); a different figure from another source does not earn it. The Chinese government's figure for targeted poverty alleviation is a different fact. A rise in poverty, or another country's figure, earns no figure mark. For the last mark, say what it shows: a major development gain linked to globalisation. Another point the case study supports, such as reform ending a closed, centrally planned economy and opening China to world markets, also earns it. Only saying the figure again, or saying globalisation raised poverty, does not.",
-    factIds: ["C01", "C14"],
+    notes: "For the first mark give both shares of the population in extreme poverty, 83.1% (about 83% or about 80%) and 0.0% (zero, or almost zero): one share on its own does not earn it. The second mark needs both years, 1990 and 2022: one year on its own does not earn it, and a day or month is never needed. You may also give close to, nearly or about 800 million people lifted out of poverty. Used instead of the shares, it earns the first mark, and its length of time, over 40 years (or four decades), earns the second. The mark is for the case study's World Bank figures (or accepted roundings above); different figures from another source do not earn it. The Chinese government's rural poverty figures are a different measure. A rise in poverty, or another country's figure, earns no figure mark. For the last mark, say what it shows: a major development gain linked to globalisation. Another point the case study supports, such as the Open Door Policy (reform and opening-up, either name is accepted) ending a closed, centrally planned economy, or China making close to three-quarters of the world's poverty reduction, also earns it. Only saying the figures again, or saying globalisation raised poverty, does not.",
+    factIds: ["C01", "C14", "C15"],
   },
   [`${U}.s23`]: {
     modelAnswer: "China's CO2 emissions per person rose from 2.13 t in 1990 to 9.32 t in 2024, showing that emissions rose with living standards, not just with population: an environmental cost of rising incomes.",
@@ -275,6 +277,56 @@ const keys: AnswerSet = {
     ],
     notes: "Accept US$16.19 bn, about US$16.2 bn or about US$16 bn. The 28.1% rise is not needed. You need the financial year, FY2025/26 or 2025/26, for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Remittances as a share of GDP are a different fact, and another country's figure, or millions instead of billions, earns no figure mark. For the last mark, say what it shows: exporting labour is Nepal's main link to the global economy, or remittances support household spending and cut poverty. Another point the case study supports, such as the World Bank's caveat that remittances have not created quality jobs at home, also earns it. Only saying the figure again, or saying remittances matter little to Nepal, does not.",
     factIds: ["N16"],
+  },
+  [`${U}.s26`]: {
+    modelAnswer: "China's real GDP growth fell to 2.3% in 2020 and 3.1% in 2022 during COVID-19 lockdowns. This shows that growth can be hit by domestic policy shocks as well as global ones, because strict lockdowns cut output and incomes.",
+    rubric: [
+      "Figure: real GDP growth of 2.3% and 3.1% (both rates).",
+      "Period: 2020 for 2.3% and 2022 for 3.1% (both years, each with its own rate).",
+      "What it shows: strict lockdowns cut output and incomes, so growth can be hit by domestic policy shocks as well as global ones.",
+    ],
+    notes: "Give both growth rates for the first mark and both years for the second: one on its own earns neither. For either year, a rate up to a tenth of a percentage point below the case study's is also accepted, because China's own official figures differ by about that much. For the second mark each year must go with its own rate, so swapping them does not earn it. A day or month is never needed. The mark is for the case study's figures (or ones within that tenth); other figures from another source do not earn it. China's average growth and its latest growth are different facts, and another country's figure earns no figure mark. For the last mark, say what the fall shows: growth can be hit by domestic policy shocks as well as global ones. Another point the case study supports, such as strict lockdowns cutting output and incomes, also earns it. Only saying the figures again, or saying the lockdowns speeded up China's growth, does not.",
+    factIds: ["C34"],
+  },
+  [`${U}.s27`]: {
+    modelAnswer: "In 2025 China's population fell by 3.39 million to 1,404.89 million, and 23.0% of its people were aged 60 and over. With fewer workers and more retirees, growth will slow and pressure on pensions and health spending will rise, a long-term limit on development.",
+    rubric: [
+      "Figure: the population down 3.39 million (to 1,404.89 million), or 23.0% aged 60 and over.",
+      "Period: in 2025.",
+      "What it shows: fewer workers and more retirees will slow growth and raise pressure on pensions and health spending, a long-term limit on development.",
+    ],
+    notes: "One figure, correctly labelled, earns the first mark: a population fall of 3.39 million (about 3.4 million), or 23.0% aged 60 and over (about 23%, or nearly a quarter). The total population on its own does not show either change. You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Saying the population grew, giving the fall in billions instead of millions, or giving another country's figure earns no figure mark. For the last mark, say what it means: fewer workers and more retirees will slow growth, or raise pressure on pensions and health spending. Another point the case study supports, such as a long-term limit on development, also earns it. Only saying the figure again, or saying an ageing population will speed up growth, does not.",
+    factIds: ["C36"],
+  },
+  [`${U}.s28`]: {
+    modelAnswer: "India's border blockade cut Nepal's supplies of fuel and goods, and Nepal's economy grew by only about 0.4% in 2015-16 (World Bank). Coming on top of the earthquake, the blockade shows the danger of relying on one neighbour for trade.",
+    rubric: [
+      "Figure: growth fell below 1%, to about 0.4%.",
+      "Period: 2015-16 (also written 2015/16).",
+      "What it shows: the danger of relying on one neighbour for trade, as the blockade cut supplies and hit growth on top of the earthquake.",
+    ],
+    notes: "For the first mark, accept about 0.4%, or \"below 1%\" or \"less than 1%\" if you give it with the year. You need the year 2015-16 (or 2015/16) for the second mark; a single calendar year is not enough, and a day or month is never needed. The mark is for the case study's figure (or an accepted rounding above); a different figure from another source does not earn it. Saying the economy shrank, giving the figure for Nepal's COVID year, or another country's figure earns no figure mark. For the last mark, say what the blockade shows: the danger of relying on one neighbour for trade. Another point the case study supports, such as being landlocked leaving Nepal exposed to decisions made in India, also earns it. Only saying the figure again, or saying the blockade helped Nepal grow, does not.",
+    factIds: ["N28"],
+  },
+  [`${U}.s29`]: {
+    modelAnswer: "In September 2025, 19 protesters were killed on the first day of Nepal's Gen Z anti-corruption protests and Prime Minister Oli resigned the next day; a government committee later counted 77 deaths in total. Political crises and weak governance like this deter investment and slow reform, one reason Nepal's strategies have delivered less than hoped.",
+    rubric: [
+      "Figure or result: 19 protesters killed on the first day (8 Sep), 77 deaths in total (government committee), or Prime Minister Oli resigning.",
+      "Period: in 2025.",
+      "What it shows: political crises and weak governance deter investment and slow reform, so Nepal's strategies have delivered less than hoped.",
+    ],
+    notes: "Any one of these earns the first mark: 19 protesters killed on the first day (8 Sep), 77 deaths in total (a government committee's count), or Prime Minister Oli resigning. Writing \"19 killed\" without saying it was the first day still earns the mark, because it is the case study's figure, but remember that 19 was only the first day's toll: the total was 77. You need the year 2025 for the second mark; a day or month is never needed. The mark is for the case study's figure; a different figure from another source does not earn it. The death toll of Nepal's civil war is a different fact. For the last mark, say what it shows: political crises and weak governance deter investment, or slow reform. Another point the case study supports, such as Nepal's strategies delivering less than hoped, also earns it. Only saying what happened again, or saying the crisis attracted investment, does not.",
+    factIds: ["N31"],
+  },
+  [`${U}.s30`]: {
+    modelAnswer: "The average US tariff on Chinese goods rose from 2.7% in 2017 to about 36.5% in Jul 2026, while in Nepal, hit by India's border blockade, growth fell below 1%, to about 0.4%, in 2015-16. Both economies can be hurt by other countries' decisions: rising protectionism is a key risk to China's export-led growth, and the blockade showed the danger of Nepal relying on one neighbour for trade.",
+    rubric: [
+      "Figure: the average US tariff on Chinese goods rose from 2.7% to about 36.5%, and Nepal's growth fell below 1%, to about 0.4%.",
+      "Period: China 2017 and 2026, and Nepal 2015-16.",
+      "What it shows: both are exposed to other countries: rising US protectionism is a key risk to China's export-led growth, while the blockade showed the danger of Nepal relying on one neighbour for trade.",
+    ],
+    notes: "The first mark needs both China tariff figures, 2.7% and about 36.5% (about 36% or about 37% is fine), and Nepal's growth, about 0.4% (or below 1%). The second needs China's two years, 2017 and 2026, and Nepal's year, 2015-16 (or 2015/16). One economy alone, or one end of China's change, earns neither mark. China's tariff for the year in between is not needed, and a day or month is never needed. The mark is for the case study's figures (or accepted roundings above); different figures from another source do not earn it. A fall in the tariff instead of a rise, or swapping the economies, earns no figure mark. For the last mark, say what the comparison shows: each economy can be hurt by another country's decisions, China by rising US tariffs on its exports and Nepal by a blockade from the neighbour it relies on. Another point the case study supports, such as protectionism being a risk to China's export-led growth while Nepal's risk comes from relying on one neighbour, also earns it. Only saying the figures again, or saying either hindrance helped growth, does not.",
+    factIds: ["C33", "N28"],
   },
 };
 

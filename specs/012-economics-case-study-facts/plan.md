@@ -9,7 +9,7 @@
 
 ## Summary
 
-A new topic-quiz unit, `y12-economics-case-study-facts`: 41 original questions from one fact file (9 in the SA both pool, 8 in each of the others), in five
+A new topic-quiz unit, `y12-economics-case-study-facts`: 48 original questions from one fact file (9 in each multiple-choice pool, 10 in each short-answer pool), in five
 pools, one drawn from each pool per attempt. **Release 1 (live Mon 30 Nov)** is content plus four small code changes:
 
 1. an opt-in unseen-first draw for this unit;
@@ -39,7 +39,7 @@ draw, a switch that keeps AI concept content off, and the constitution amendment
 **Constraints**: Release 1 live by the evening of Mon 30 Nov 2026; content and fact check done Sun 29 Nov; Mon daytime
 for the maintainer's read; minimum Release 1 code; the sandbox cannot reach OpenRouter, so marker runs are local
 
-**Scale/Scope**: 41 questions, 11 concepts, 57 facts; one unit
+**Scale/Scope**: 48 questions, 13 concepts, 67 facts; one unit
 
 ## Constitution Check
 
@@ -159,4 +159,4 @@ wait for the content.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| Principle III, last bullet, if read literally: Claude Code drafts the 41 questions | The spec requires original questions in two days | Hand-writing 41 questions with keys and explanations does not fit the timetable. The app generates nothing; validation, tracing and the maintainer's read gate the text. The wording is clarified in the Release 2 amendment (or now, as 2.18.1, if you prefer) |
+| Principle III, last bullet, if read literally: Claude Code drafts the 48 questions | The spec requires original questions in two days | Hand-writing 48 questions with keys and explanations does not fit the timetable. The app generates nothing; validation, tracing and the maintainer's read gate the text. The wording is clarified in the Release 2 amendment (or now, as 2.18.1, if you prefer) |

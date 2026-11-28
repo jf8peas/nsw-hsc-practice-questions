@@ -3,7 +3,7 @@ import type { Question } from "@/lib/types";
 import { mc, sa } from "./build";
 import { conceptOfQuestionId } from "./concept-tags";
 
-// PUBLIC — no answer keys here. Forty-one original questions on the HSC Economics Topic 1 case study (China and Nepal),
+// PUBLIC — no answer keys here. Forty-eight original questions on the HSC Economics Topic 1 case study (China and Nepal),
 // written from docs/y12-economics-case-study-facts-research.md only. A short-answer prompt never states a figure or
 // year that the question gives a mark for.
 export const questions: Question[] = [
@@ -114,6 +114,20 @@ export const questions: Question[] = [
     "They play little part in growth, because households cannot spend them",
   ]),
 
+  mc(17, "mc-china", "Which statement about the first US tariffs of the US–China trade war is correct?", [
+    "In 2018 the US added 25% tariffs on about US$34 bn of Chinese goods",
+    "In 2025 the US added 25% tariffs on about US$34 bn of Chinese goods",
+    "In 2013 the US added 25% tariffs on about US$34 bn of Chinese goods",
+    "In 2018 the US removed 25% tariffs on about US$34 bn of Chinese goods",
+  ]),
+
+  mc(18, "mc-nepal", "Nepal's Maoist civil war killed more than 13,000 people. Which statement about it is correct?", [
+    "It ran from 1996 to 2006 and was ended by the Comprehensive Peace Accord",
+    "It ran from 1996 to 2006 and was started by the Comprehensive Peace Accord",
+    "It ran from 1985 to 1992 and was ended by the Comprehensive Peace Accord",
+    "It ran from 2006 to 2022 and was ended by the Comprehensive Peace Accord",
+  ]),
+
   sa(1, "sa-china", 3, "State how China's World Bank Gini coefficient has changed over the period the case study covers, giving both values and both years, and explain what this shows about how the gains have been shared."),
 
   sa(2, "sa-china", 3, "State how China's GDP per person has changed over the period the case study covers, giving both values and both years, and explain what this shows about living standards."),
@@ -124,7 +138,7 @@ export const questions: Question[] = [
 
   sa(5, "sa-china", 2, "State when China joined the World Trade Organization (WTO), and explain what membership meant for China's place in the global economy."),
 
-  sa(6, "sa-china", 3, "Using Chinese government figures, state what targeted poverty alleviation had achieved for China's rural poor by the time it finished. Give one figure and the year, and explain what this shows about development or inequality."),
+  sa(6, "sa-china", 3, "Targeted poverty alleviation set out to end rural poverty. Using Chinese government figures measured against China's national poverty line, state how the rural poverty rate changed over the period the case study gives, giving both values and both years, and explain what this shows about development or inequality."),
 
   sa(7, "sa-china", 3, "State China's urban–rural income ratio in the latest year in the case study, giving the year, and explain what this shows about how income is shared."),
 
@@ -156,11 +170,21 @@ export const questions: Question[] = [
 
   sa(21, "sa-both", 3, "Compare the change in GDP per person in China and Nepal, giving both values and both years for each economy, and explain what the comparison shows about living standards."),
 
-  sa(22, "sa-both", 3, "Write the sentence you would use in an essay about what China's integration into the global economy has meant for poverty. Include a World Bank figure and the length of time it covers, and say what it shows."),
+  sa(22, "sa-both", 3, "Write the sentence you would use in an essay about what China's integration into the global economy has meant for poverty. Include how the share of China's population living in extreme poverty (World Bank measure) changed, giving both shares and both years, and say what it shows."),
 
   sa(23, "sa-both", 3, "Write the sentence you would use in an essay on globalisation and the environment, using the change in China's carbon dioxide (CO2) emissions per person. Include both values and both years, and say what the change shows."),
 
   sa(24, "sa-both", 2, "State when China and when Nepal joined the World Trade Organization (WTO), and compare what membership meant for the two economies."),
 
   sa(25, "sa-both", 3, "Write the sentence you would use in an essay about how Nepal is linked to the global economy, using Nepal's remittance inflows in the latest financial year in the case study. Include the figure and the financial year, and say what it shows."),
+  sa(26, "sa-china", 3, "State China's real GDP growth in each of the years the case study links to COVID-19 lockdowns, giving both growth rates and their years, and explain what this shows about China's growth."),
+
+  sa(27, "sa-china", 3, "Give one figure from the case study showing that China's population is shrinking or ageing, saying what it measures, and the year. Explain what this means for China's growth and development."),
+
+  sa(28, "sa-nepal", 3, "State what Nepal's economic growth was in the year hit by the Indian border blockade, giving the case study's figure and that year, and explain what the blockade shows about the risks to Nepal's development."),
+
+  sa(29, "sa-nepal", 3, "State what happened in Nepal's Gen Z anti-corruption protests, giving either a death toll (saying what it counts) or the political result, and the year. Explain what this shows about the challenges to Nepal's development."),
+
+  sa(30, "sa-both", 3, "Compare a trade hindrance in each economy. For China, give the average US tariff on Chinese goods at the earliest and latest points in the case study, with their years. For Nepal, give the case study's growth figure for the year of India's border blockade, with that year. Explain what the comparison shows."),
+
 ].map((q) => ({ ...q, concept: conceptOfQuestionId[q.id] }));

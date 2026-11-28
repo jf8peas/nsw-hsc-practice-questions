@@ -12,9 +12,11 @@ export const conceptOfQuestionId = defineTags(U, concepts, {
   "china-targeted-poverty-alleviation": ["m05", "s06"],
   "china-inequality": ["m04", "s01", "s07", "s18"],
   "china-environment": ["m07", "s03", "s08", "s23"],
+  "china-hindrances": ["m17", "s26", "s27", "s30"],
   "nepal-strategies": ["m09", "m13", "m14", "m15", "s11", "s24"],
   "nepal-growth-trade": ["s10", "s15", "s21"],
   "nepal-flows": ["m16", "s09", "s13", "s20", "s25"],
   "nepal-development": ["m11", "m12", "s12", "s17"],
   "nepal-tourism-electricity": ["m10", "s14", "s16"],
+  "nepal-hindrances": ["m18", "s28", "s29"],
 });

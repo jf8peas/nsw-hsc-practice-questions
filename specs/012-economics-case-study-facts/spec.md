@@ -22,14 +22,14 @@ The student's weakest criterion in the first handwritten practice essay was data
 - Q: What earns the marks when a figure shows a change? → A: A question asking how something changed needs both values for the figure mark and both years for the period mark; a question about one year needs only that value and year.
 - Q: Who checks the questions before the unit goes live? → A: The AI agent building the unit checks every figure and year against the fact file and reports the results; the maintainer then reads all questions and keys before release.
 - Q: What ships if the work isn't all ready before Tue 1 Dec? → A: Two releases. The quiz, no-repeat draw and checks go first; "Things I need to know" follows as a second release, and until then the unit shows no revision list.
-- Q: How many questions in each pool? → A: 8 per pool (40 questions), giving 8 attempts with no repeats. *(Amended after the 28 Nov review: a 41st question, s25, makes 9 in the "both" pool.)*
+- Q: How many questions in each pool? → A: 8 per pool (40 questions), giving 8 attempts with no repeats. *(Amended after the 28 Nov review: a 41st question, s25, makes 9 in the "both" pool. Amended again on 28 Nov for the revised fact file: 48 questions, in pools of 9, 9, 10, 10 and 10.)*
 - Q: What counts as the significance of a fact? → A: The fact's impact line is the expected significance; any other significance supported by the fact file earns the mark too.
 
 ## Terms
 
-- **Fact file**: `docs/y12-economics-case-study-facts-research.md`. It holds 57 facts (China C01–C31, Nepal N01–N26), 36 of them marked ★ (priority), plus a comparison table, definitions, theory, common errors, an impact line for each fact and numbered sources.
+- **Fact file**: `docs/y12-economics-case-study-facts-research.md`. It holds 67 facts (China C01–C36, Nepal N01–N31), 44 of them marked ★ (priority), plus a comparison table, definitions, theory, common errors, an impact line for each fact and 40 numbered sources.
 - **Fact**: one row of the fact file, identified by its ID.
-- **Fact group**: one lettered section of the file (China A–F, Nepal A–E).
+- **Fact group**: one lettered section of the file (China A–G, Nepal A–F; 13 in all).
 - **Impact line**: the fact file's context-and-impact line for a fact, keyed by its ID.
 - **Quiz group**: one of the five slots in an attempt. A **question pool** is the set of questions a quiz group draws from.
 - **Seen question**: a question the student has already answered in this unit.
@@ -118,6 +118,7 @@ The maintainer can trace every answer, figure and explanation to a fact ID, read
 - **Accurate figures outside the fact file**: the marking notes tell the marker that the mark is for the fact file's figure (or an accepted rounding of it).
 - **Two Gini measures**: China's NBS figure (about 0.47) and the World Bank figure (36.0) are never compared as if on one scale; confusing them is a distractor, not a correct answer.
 - **Secondary and government figures** (NBS Gini, Nepal's 1995-96 poverty rate, targeted poverty alleviation figures): wording does not claim more certainty than the fact file's notes allow.
+- **Two currencies**: where the fact file gives a US dollar figure with the local currency in brackets, the model answer leads with US dollars, either currency is accepted, and a US dollar figure of the wrong size (bn for million) earns nothing.
 - **A fact the file lacks**: the question is dropped, not completed from elsewhere.
 - **Distractor years and figures**: wrong options are built only from values that appear in the fact file.
 - **Photo answers, daily limit, database outage, abandoned quiz**: behave as in other quiz units. A question that was drawn but never answered counts as unseen.
@@ -136,15 +137,15 @@ The maintainer can trace every answer, figure and explanation to a fact ID, read
 **Attempt shape and draw**
 
 - **FR-005**: Each attempt MUST draw exactly one question from each of five quiz groups, presented in this order: multiple choice China; multiple choice Nepal; short answer China; short answer Nepal; short answer both.
-- **FR-006**: Each pool MUST hold at least 8 questions; the unit is written with 41 questions: 9 in the "both" pool and 8 in each of the other four. The "both" pool's questions compare the two economies, or ask for the sentence a fact would support in an essay argument.
+- **FR-006**: Each pool MUST hold at least 8 questions; the unit is written with 48 questions: 9 multiple choice on China, 9 on Nepal, 10 short answers on China, 10 on Nepal and 10 on both. The "both" pool's questions compare the two economies, or ask for the sentence a fact would support in an essay argument.
 - **FR-007**: For this unit, each quiz group MUST draw an unseen question while its pool has one. *(Needs new code: the existing draw is random and can repeat questions after one attempt.)*
 - **FR-008**: From the second release, favouring missed concepts MUST happen only within a quiz group and after the unseen rule; it MUST NOT change the one-per-group shape. When a pool has no unseen question, the draw prefers a missed concept, then the question answered longest ago. *(Needs new code: the existing weighting can move a place from one group to another, which could drop an economy from a quiz.)*
 - **FR-009**: FR-007 and FR-008 MUST NOT change how any other unit draws.
 
 **Coverage**
 
-- **FR-010**: Every ★ fact (36) MUST be tested by at least one question.
-- **FR-011**: Every fact group (11) MUST have at least one question, and no fact may be tested by more than 3 questions.
+- **FR-010**: Every ★ fact (44) MUST be tested by at least one question.
+- **FR-011**: Every fact group (13) MUST have at least one question, and no fact may be tested by more than 3 questions.
 
 **Question rules**
 
@@ -152,7 +153,7 @@ The maintainer can trace every answer, figure and explanation to a fact ID, read
 - **FR-013**: Every question MUST record, in its server-only answer key, the IDs of the facts it tests (at least one).
 - **FR-014**: Every question's public source line MUST read exactly "Original question — case study facts (checked Nov 2026)". *(Needs a validation change: only "Original question" or a school-paper credit is accepted today.)*
 - **FR-015**: Every figure, date and name in a question, option, model answer, marking note, explanation or concept note MUST come from the fact file and be quoted as written there (rounding allowed). A statement of significance may draw on the impact lines of the question's facts and on the fact file's definitions and theory, but MUST NOT introduce a new figure, date, name or source. Nothing is taken from an impact line as data, including a quantity, ranking or trend it states in words; an explanation or note that adds a line leaves those words out.
-- **FR-016**: Each multiple-choice question MUST have four options with exactly one correct. Distractors MUST come from real confusions: the fact file's common errors (Belt and Road as a rural program; Made in China 2025 dated 2025; NBS Gini compared with World Bank Gini; Nepal's graduation from least developed country status given as 2026; 4,120 MW called all hydro), China's and Nepal's figures swapped, the right figure with the wrong year, or the right event with the wrong direction (inequality rose in China and fell in Nepal). At least 4 of the 16 multiple-choice questions MUST test a fact's significance rather than recall: the correct option paraphrases the impact line, and the distractors are a wrong direction, the other economy's impact or a common error.
+- **FR-016**: Each multiple-choice question MUST have four options with exactly one correct. Distractors MUST come from real confusions: the fact file's common errors (Belt and Road as a rural program; Made in China 2025 dated 2025; NBS Gini compared with World Bank Gini; Nepal's graduation from least developed country status given as 2026; 4,120 MW called all hydro), China's and Nepal's figures swapped, the right figure with the wrong year, or the right event with the wrong direction (inequality rose in China and fell in Nepal). At least 4 of the 18 multiple-choice questions MUST test a fact's significance rather than recall: the correct option paraphrases the impact line, and the distractors are a wrong direction, the other economy's impact or a common error.
 - **FR-017**: Every wrong multiple-choice option MUST have an explanation, shown only after the student answers, that names the fact and its source number. It MAY add the fact's impact line.
 - **FR-018**: Each short-answer question MUST be worth 2 or 3 marks and ask the student to recall a fact with its figure or date and year, and to say what it shows for growth, development, inequality or the environment (or, in the "both" pool, to compare or to write the essay sentence it supports). The expected significance is that of the impact line(s) of the question's fact(s).
 - **FR-019**: Each short-answer key MUST have a model answer and one mark point per mark: for 3 marks, the figure or date; the year or period; the significance. For 2 marks, the first two combined; then the significance. The significance point MUST state the expected significance from the impact line(s) of the question's fact(s), in words a student would write, not necessarily verbatim. Where the line does not fit what the question asks, the point MAY state another significance the fact file supports, recorded with that support in the fact-check report (FR-032). When the question asks how something changed, the figure point requires both values and the period point both years; when it asks about one year, only that value and year. The question's wording MUST make clear which it asks.
@@ -161,7 +162,7 @@ The maintainer can trace every answer, figure and explanation to a fact ID, read
 
 **Things I need to know**
 
-- **FR-022**: The unit MUST have 11 concepts, one per fact group: `china-opening-up`, `china-growth`, `china-development`, `china-targeted-poverty-alleviation`, `china-inequality`, `china-environment`, `nepal-strategies`, `nepal-growth-trade`, `nepal-flows`, `nepal-development`, `nepal-tourism-electricity`. Every question MUST carry exactly one of them. Concept descriptions are public and MUST NOT give away answers.
+- **FR-022**: The unit MUST have 13 concepts, one per fact group: `china-opening-up`, `china-growth`, `china-development`, `china-targeted-poverty-alleviation`, `china-inequality`, `china-environment`, `china-hindrances`, `nepal-strategies`, `nepal-growth-trade`, `nepal-flows`, `nepal-development`, `nepal-tourism-electricity`, `nepal-hindrances`. Every question MUST carry exactly one of them. Concept descriptions are public and MUST NOT give away answers.
 - **FR-023**: A question scored below full marks MUST add its concept to the student's list, and the concept MUST clear by the app's existing rule (three later full-mark answers).
 - **FR-024**: The unit page MUST head this list "Things I need to know" and show, under each listed concept, the one-line note of the most recently missed question on it, naming the fact and the correct figure and year. The note MAY end with that fact's impact line. *(Needs new code: this heading and per-concept notes exist only for the writing units.)*
 - **FR-025**: Concept notes are answer-key material. They MUST stay on the server until the student has missed that question, MUST NOT be stored with results, and the project constitution MUST be amended in the same change to allow this release.
@@ -193,9 +194,9 @@ Essays and paragraph writing (specs 007 and 010); new question types; diagrams; 
 
 ### Measurable Outcomes
 
-- **SC-001**: A student can complete 8 attempts (40 of the unit's 41 questions, 9 of which are in the "both" pool) without seeing any question twice.
+- **SC-001**: A student can complete 9 attempts (45 of the unit's 48 questions) without seeing any question twice; the two multiple-choice pools of 9 set the limit.
 - **SC-002**: 100% of attempts contain 2 multiple-choice and 3 short-answer questions, with at least one question dedicated to China and one to Nepal in each question type.
-- **SC-003**: All 36 ★ facts and all 11 fact groups are tested; no fact is tested by more than 3 questions.
+- **SC-003**: All 44 ★ facts and all 13 fact groups are tested; no fact is tested by more than 3 questions.
 - **SC-004**: 100% of answer keys, figures, dates, names and explanations trace to a fact ID, and a full read-through finds no figure in any question that is not in the fact file.
 - **SC-005**: In a check of sample answers for every short-answer question's tolerance cases that apply to it (rounded figure, year without day or month, only one end of a change, wrong country, wrong direction, bare restatement), the marks awarded match the marking notes.
 - **SC-006**: Release 1 is live and usable on a phone before Tue 1 Dec 2026.
@@ -214,4 +215,4 @@ Essays and paragraph writing (specs 007 and 010); new question types; diagrams; 
 |---|---|
 | Per-attempt split by economy | MC China 1, MC Nepal 1, SA China 1, SA Nepal 1, SA both 1 |
 | Short-answer marks | 2 or 3 |
-| Later facts beyond the 57 | No: the fact file is the scope |
+| Facts beyond the fact file's 67 | No: the fact file is the scope |

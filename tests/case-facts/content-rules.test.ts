@@ -152,7 +152,7 @@ describe("validateCaseFactRules", () => {
   });
 
   it("fails a missing or extra concept and a digit in a description", () => {
-    expectError(broken((f) => void f.unit.concepts!.pop()), ID, /nepal-tourism-electricity/);
+    expectError(broken((f) => void f.unit.concepts!.pop()), ID, /nepal-hindrances/);
     expectError(
       broken((f) => void f.unit.concepts!.push({ id: `${ID}.c-extra`, description: "Extra" })),
       ID,

@@ -7,7 +7,7 @@ export const meta: UnitMeta = {
   type: "Topic Quiz",
   title: "Case Study Facts: China and Nepal",
   description:
-    "HSC Economics Topic 1: The Global Economy case study (2009 syllabus, examined in the 2027 HSC). Drills the China and Nepal facts and data to memorise: each figure or date with its year, and what it shows for growth, development, inequality or the environment. Each attempt draws 2 multiple-choice and 3 short-answer questions covering both economies, and 8 attempts go by without a repeated question. All questions are original and built from facts checked in November 2026; revise the figures before the 2027 HSC.",
+    "HSC Economics Topic 1: The Global Economy case study (2009 syllabus, examined in the 2027 HSC). Drills the China and Nepal facts and data to memorise: each figure or date with its year, and what it shows for growth, development, inequality or the environment, including what has held each economy back. Each attempt draws 2 multiple-choice and 3 short-answer questions covering both economies, and 9 attempts go by without a repeated question. All questions are original and built from facts checked in November 2026; revise the figures before the 2027 HSC.",
   created: "2026-11-30",
   order: 7,
   explanationsComplete: true,

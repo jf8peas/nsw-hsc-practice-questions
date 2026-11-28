@@ -13,7 +13,7 @@ export interface Fact {
   source: string;
   /** "S8" and so on; empty for a secondary source with no number. */
   sourceNumbers: string[];
-  /** "china-a" to "nepal-e". */
+  /** "china-a" to "nepal-f". */
   group: string;
 }
 

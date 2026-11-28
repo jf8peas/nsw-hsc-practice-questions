@@ -45,7 +45,7 @@ year may be worked out for it.
 | Principle | Release 1 |
 |---|---|
 | I | ✅ `factIds` is a field of the server-only key (`answers.ts`), never copied into a response. Explanations are released after an answer, model answer, rubric and notes with the short-answer grade: all existing behaviour. No fact ID appears in any student-visible text (validated). |
-| III | ⚠ New ids, content as code, tags allowed on a unit not yet concept-ready; finding A restores "no revision list". The reading: the last bullet says "No quiz question is written by an LLM", and Claude Code drafts these 41. Its source is spec 002 FR-040, "**the system** MUST NOT use an LLM to write any quiz question": the app generating questions. Here the text is drafted at authoring time, committed, validated and read by you before release. |
+| III | ⚠ New ids, content as code, tags allowed on a unit not yet concept-ready; finding A restores "no revision list". The reading: the last bullet says "No quiz question is written by an LLM", and Claude Code drafts these 48. Its source is spec 002 FR-040, "**the system** MUST NOT use an LLM to write any quiz question": the app generating questions. Here the text is drafted at authoring time, committed, validated and read by you before release. |
 | IV | ✅ The new content rules go in the validator in the same change. |
 | V | ✅ Original questions, Topic 1, sources documented in `docs/y12-economics-case-study-facts-research.md` and the README. No HSC question, no diagram. |
 | VI | ✅ The marker, self-mark fallback and cap are unchanged. The unseen-first draw is a preference: if results cannot be read, the quiz starts at random. It is **not** a "depends on stored progress" unit (specs 007 and 008), which refuses to start. |
@@ -143,7 +143,7 @@ unit's draws (breaks whenever any unit gains a question).
 
 ## 4. Release 1 concept handling
 
-**Decision**: every question is tagged (`concept-tags.ts`), `concepts.ts` holds the 11 concepts, and `conceptsReady`
+**Decision**: every question is tagged (`concept-tags.ts`), `concepts.ts` holds the 13 concepts, and `conceptsReady`
 is **not** set.
 
 **Confirmed**: `validateConceptRules` checks tags and concept lists on every unit and requires them only on ready
@@ -190,7 +190,7 @@ page); reusing the AI pipeline with a fixed summary (FR-026).
 
 ## 6. Content format
 
-- **Ids**: `y12-economics-case-study-facts.m01`–`m16` and `.s01`–`s25`; new ones are appended.
+- **Ids**: `y12-economics-case-study-facts.m01`–`m18` and `.s01`–`s30`; new ones are appended.
 - **Builders**: `build.ts` copied from the global economy unit: two digits, the group as a parameter, the source
   constant inside, no diagrams.
 - **Groups**, in quiz order: `mc-china`, `mc-nepal`, `sa-china`, `sa-nepal`, `sa-both`, one each; `short: 3`,
@@ -221,13 +221,13 @@ exercised by vitest with fixtures.
 **Reason**: User Story 4 says the build stops, and constitution IV puts content rules in the validator. `prebuild`
 runs the validator; Vercel's build does not run vitest, so a test-only coverage check would not stop a bad deploy.
 
-**Fact file**: **parse the markdown** at check time (`lib/case-facts/fact-file.ts`). Checked today: 57 rows match
-`| C01 |` / `| N01 |`, all with six cells, 36 with ★, in 11 `###` sections; sources are `- **S1**` lines. The parser
+**Fact file**: **parse the markdown** at check time (`lib/case-facts/fact-file.ts`). Checked on 28 Nov after the fact-file revision: 67 rows match
+`| C01 |` / `| N01 |`, all with six cells, 44 with ★, in 13 `###` sections; sources are `- **S1**` lines. The parser
 throws on a fact-id row without six cells, a duplicate id, a row outside a lettered section, or no facts at all; a
-test pins 57 / 36 / 11 so a format change is noticed. Line endings may be LF or CRLF.
+test pins 67 facts / 44 ★ / 13 groups / 40 sources so a format change is noticed. Line endings may be LF or CRLF.
 It also parses the `## Context and impact` bullets (`- **C01** …`) into a map from fact ID to impact line, and throws,
 naming the ID, on a fact with no line or two, a line for an ID that has no fact row, or a digit outside the ID. A test
-pins 57 impact lines. The validator and the check script report the thrown message.
+pins 67 impact lines. The validator and the check script report the thrown message.
 *Rejected*: a generated JSON (a second list that can drift, and a step to forget); IDs typed into code (the spec
 makes the file the only list).
 
@@ -243,7 +243,7 @@ The fact file is untracked today: **it must be in the Release 1 commit**, or the
 | Every key names at least one fact, no repeats, all in the fact file; China pools only `C`, Nepal pools only `N` | FR-013, 028 |
 | Every ★ fact tested; every fact group has a question; no fact in more than 3 questions | FR-010, 011, 028 |
 | Exactly one impact line per fact, none for an unknown ID, no digit outside the ID (the parser throws) | FR-028 |
-| Exactly the 11 concepts; every question tagged, with a group matching one of its facts; no digit in a description | FR-022 |
+| Exactly the 13 concepts; every question tagged, with a group matching one of its facts; no digit in a description | FR-022 |
 | No fact ID in any prompt, option, model answer, rubric, note or explanation | FR-029 |
 
 ## 8. Fact-check report (FR-032)

@@ -11,11 +11,13 @@ export const concepts = defineConcepts("y12-economics-case-study-facts", [
   ["china-targeted-poverty-alleviation", "China's targeted poverty alleviation: its start, method and results"],
   ["china-inequality", "How income is shared in China, and how to read the measures of it"],
   ["china-environment", "China's emissions, climate commitments and environmental policy"],
+  ["china-hindrances", "What has held China's growth and development back"],
   ["nepal-strategies", "Nepal's policies, agreements and major events that shape growth and development"],
   ["nepal-growth-trade", "Nepal's economic growth and its trade position"],
   ["nepal-flows", "Remittances, aid and foreign investment, and what they do for Nepal's economy"],
   ["nepal-development", "Nepal's development, poverty and inequality measures"],
   ["nepal-tourism-electricity", "Nepal's tourism and electricity sectors"],
+  ["nepal-hindrances", "What has held Nepal's growth and development back"],
 ]);
 
 export const retired: Record<string, string | null> = {};

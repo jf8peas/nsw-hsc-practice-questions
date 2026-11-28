@@ -316,14 +316,14 @@ describe("case-study facts unit: no fact ID and no key text before an answer", (
   const caseUnit = UNITS.find((u) => u.id === CASE)!;
   const FACT_ID = /[CN]\d{2}/;
 
-  it("the public unit and a start response hold no fact ID and none of the 41 keys' text", async () => {
+  it("the public unit and a start response hold no fact ID and none of the 48 keys' text", async () => {
     env = await setupRouteEnv();
     await signedInStudent(env);
     // the attempt token and id are random strings, not content
     const { attemptToken: _token, attemptId: _id, ...started } = await startRoute(CASE);
     expect(started.questions).toHaveLength(5);
     const texts = [JSON.stringify(caseUnit), JSON.stringify(started)];
-    expect(caseUnit.questions).toHaveLength(41);
+    expect(caseUnit.questions).toHaveLength(48);
     for (const text of texts) {
       expect(text).not.toMatch(FACT_ID);
       for (const q of caseUnit.questions) {

@@ -25,7 +25,7 @@ export const explanations: ExplanationTable = {
     ["The two should be averaged", "An average of two measures with a different basis means nothing. Quote the World Bank figure and the NBS figure (a secondary source) separately and never compare them (Source S8)."],
   ],
   5: [
-    ["Deng Xiaoping", "Deng Xiaoping led reform and opening-up from 1978. Xi Jinping proposed targeted poverty alleviation at Shibadong village, Hunan, on 3 Nov 2013 (Source S11)."],
+    ["Deng Xiaoping", "Deng Xiaoping led the Open Door Policy (reform and opening-up) from 1978. Xi Jinping proposed targeted poverty alleviation at Shibadong village, Hunan, on 3 Nov 2013 (Source S11)."],
     ["Xi Jinping proposed it in Kazakhstan", "Kazakhstan and Indonesia are where the Belt and Road Initiative was proposed. Targeted poverty alleviation was proposed at Shibadong village, Hunan, on 3 Nov 2013 (Source S11)."],
     ["It was issued as part", "Made in China 2025 is about high-tech manufacturing. Targeted poverty alleviation was proposed by Xi Jinping at Shibadong village, Hunan, on 3 Nov 2013 (Source S11)."],
   ],
@@ -83,5 +83,15 @@ export const explanations: ExplanationTable = {
     ["They have created so many", "The opposite is true: in 2026 the World Bank reported that remittances have not created quality jobs at home, and 82% of workers are informal (Source S28)."],
     ["They have built up export manufacturing", "Remittances are money sent home by workers abroad, and the World Bank reported in 2026 that they have not created quality jobs at home, although they are central to growth (Source S28)."],
     ["They play little part", "Remittances are central to Nepal's growth, as the World Bank reported in 2026; the limit is that they have not created quality jobs at home (Source S28)."],
+  ],
+  17: [
+    ["In 2025", "That is too late: the first US tariffs, 25% on about US$34 bn of Chinese goods, came on 6 Jul 2018 (Source S33)."],
+    ["In 2013", "That is too early: 2013 is when the Belt and Road Initiative was proposed. The first US tariffs, 25% on about US$34 bn of Chinese goods, came on 6 Jul 2018 (Source S33)."],
+    ["In 2018 the US removed", "The direction is reversed: on 6 Jul 2018 the US added 25% tariffs on about US$34 bn of Chinese goods (Source S33)."],
+  ],
+  18: [
+    ["It ran from 1996 to 2006 and was started", "The accord ended the war and did not start it: the war ran from 1996 until the Comprehensive Peace Accord of 21 Nov 2006 (Source S35)."],
+    ["It ran from 1985", "1985 is when liberalisation began. The war ran from 1996 to 2006, ending with the Comprehensive Peace Accord of 21 Nov 2006 (Source S35)."],
+    ["It ran from 2006", "2006 is when the war ended, not when it began: it ran from 1996 to 2006, ending with the Comprehensive Peace Accord of 21 Nov 2006 (Source S35)."],
   ],
 };

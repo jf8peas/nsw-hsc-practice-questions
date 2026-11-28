@@ -107,14 +107,17 @@ describe("parseFactFile", () => {
     expect(broken("gadgets matter.", "gadgets matter in 2001.")).toThrow(/N01/);
   });
 
-  it("reads the shipped fact file: 57 facts, 36 starred, 11 groups, 31 sources and 57 impact lines", () => {
+  it("reads the shipped fact file: 67 facts, 44 starred, 13 groups, 40 sources and 67 impact lines", () => {
     const file = fs.readFileSync(path.resolve(__dirname, "../../docs/y12-economics-case-study-facts-research.md"), "utf8");
     const real = parseFactFile(file);
-    expect(real.facts.size).toBe(57);
-    expect([...real.facts.values()].filter((f) => f.star)).toHaveLength(36);
-    expect(real.groups).toHaveLength(11);
-    expect(real.sources.size).toBe(31);
-    expect(real.impact.size).toBe(57);
+    expect(real.facts.size).toBe(67);
+    expect([...real.facts.values()].filter((f) => f.star)).toHaveLength(44);
+    expect(real.groups).toHaveLength(13);
+    expect(real.sources.size).toBe(40);
+    expect(real.impact.size).toBe(67);
     expect(real.facts.get("C25")!.sourceNumbers).toEqual([]);
+    expect(real.facts.get("C20")!.sourceNumbers).toEqual(["S32", "S12"]);
+    expect(real.facts.get("N28")!.sourceNumbers).toEqual(["S36", "S37", "S8"]);
+    expect(real.facts.get("N31")!.sourceNumbers).toEqual(["S39", "S40"]);
   });
 });
