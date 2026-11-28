@@ -58,13 +58,16 @@ const BANNED_KEYS = [
   "phase2CreditedSpans",
   "phase2TermOutcomes",
   "languageNote",
+  // spec 012: the fact IDs a question tests are never sent; a concept note is released by the unit page only (Release 2)
+  "factIds",
+  "conceptNote",
 ];
 
 /**
  * Offline teacher tasks (spec 007 R8) that read the paragraph essay key to build test cases and to
  * re-mark. They run on a teacher's machine, never at request time and never in a bundle.
  */
-const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts", "scripts/check-unseen-descriptions.ts", "scripts/unseen-report.ts", "scripts/unseen-field-cases.ts", "scripts/unseen-remark.ts", "scripts/comparative-field-cases.ts", "scripts/check-english-essay-models.ts"]);
+const OFFLINE_KEY_READERS = new Set(["scripts/paragraph-field-cases.ts", "scripts/paragraph-remark.ts", "scripts/check-unseen-descriptions.ts", "scripts/unseen-report.ts", "scripts/unseen-field-cases.ts", "scripts/unseen-remark.ts", "scripts/comparative-field-cases.ts", "scripts/check-english-essay-models.ts", "scripts/check-case-facts.ts"]);
 
 describe("POST /api/attempts exposes no answer key, for every unit", () => {
   for (const unit of UNITS) {
@@ -302,5 +305,56 @@ describe("the unseen text's own page (spec 008 FR-006) reads no key module", () 
     }
     const code = src.replace(/\/\/.*$/gm, ""); // comments may name the key; code may not
     expect(code).not.toMatch(/keys|descriptions|criteria|modelAnswer/);
+  });
+});
+
+
+// ---- the case-study facts unit (spec 012 FR-029) ----------------------------------------------
+
+describe("case-study facts unit: no fact ID and no key text before an answer", () => {
+  const CASE = "y12-economics-case-study-facts";
+  const caseUnit = UNITS.find((u) => u.id === CASE)!;
+  const FACT_ID = /[CN]\d{2}/;
+
+  it("the public unit and a start response hold no fact ID and none of the 40 keys' text", async () => {
+    env = await setupRouteEnv();
+    await signedInStudent(env);
+    // the attempt token and id are random strings, not content
+    const { attemptToken: _token, attemptId: _id, ...started } = await startRoute(CASE);
+    expect(started.questions).toHaveLength(5);
+    const texts = [JSON.stringify(caseUnit), JSON.stringify(started)];
+    expect(caseUnit.questions).toHaveLength(40);
+    for (const text of texts) {
+      expect(text).not.toMatch(FACT_ID);
+      for (const q of caseUnit.questions) {
+        const key = getAnswer(q.id)!;
+        const secrets = [key.modelAnswer ?? "", ...key.rubric, key.notes ?? "", ...Object.values(key.wrongExplanations ?? {})];
+        for (const secret of secrets) if (secret.length > 20) expect(text, q.id).not.toContain(run(secret));
+      }
+    }
+  });
+
+  it("grading a multiple-choice and a short answer returns no fact IDs and no concept note", async () => {
+    env = await setupRouteEnv();
+    await signedInStudent(env);
+    const started = await startRoute(CASE);
+    const { POST } = await import("@/app/api/grade/route");
+    for (const type of ["mc", "short"] as const) {
+      const question = started.questions.find((x) => x.type === type)!;
+      const res = await POST(
+        post("/api/grade", {
+          attemptId: started.attemptId,
+          attemptToken: started.attemptToken,
+          questionId: question.id,
+          answer: type === "mc" ? "0" : "An answer.",
+        }),
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      const keys = allKeys(body);
+      expect(keys.has("factIds")).toBe(false);
+      expect(keys.has("conceptNote")).toBe(false);
+      expect(JSON.stringify(body)).not.toMatch(FACT_ID);
+    }
   });
 });

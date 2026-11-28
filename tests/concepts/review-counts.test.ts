@@ -61,3 +61,10 @@ describe("conceptReviewCounts (home page 'to review' pill)", () => {
     expect([...conceptReviewCounts(units, r).entries()]).toEqual([[READY, 2]]);
   });
 });
+
+describe("a unit that is tagged but not yet concept-ready (spec 012)", () => {
+  it("gets no count after a wrong answer: its unit page has no list to review", () => {
+    const tagged: Unit = { ...readyUnit, conceptsReady: undefined };
+    expect(conceptReviewCounts([tagged], [wrong(READY, `${READY}.m01`, 1)])).toEqual(new Map());
+  });
+});

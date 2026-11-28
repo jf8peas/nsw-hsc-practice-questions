@@ -4,10 +4,11 @@ import { NextResponse } from "next/server";
 
 import { getUnit } from "@/content";
 import { resolveSession } from "@/lib/auth.server";
-import { DEFAULT_PASS_MARK, drawAttempt, toPublicQuestions } from "@/lib/attempts/draw.server";
+import { DEFAULT_PASS_MARK, drawAttempt, toPublicQuestions, type DrawHistory } from "@/lib/attempts/draw.server";
 import { loadWeighting, type Weighting } from "@/lib/concepts/weighting.server";
 import { DbUnavailableError, dbCall } from "@/lib/db/index.server";
 import { createAttempt } from "@/lib/db/queries/attempts.server";
+import { listUnitResultsForProgress } from "@/lib/db/queries/results.server";
 import { checkAttemptRateLimit } from "@/lib/ratelimit.server";
 import { startSequential } from "@/lib/paragraph/start.server";
 import { startComparative } from "@/lib/comparative/start.server";
@@ -265,7 +266,19 @@ export async function POST(req: Request) {
       weighting = null;
     }
   }
-  const drawn = drawAttempt(unit, undefined, weighting ?? undefined);
+  // Spec 012: a unit that draws unseen questions first needs to know what this student has answered. It is a
+  // preference of the same kind: if the results cannot be read, the quiz starts, drawn at random.
+  let history: DrawHistory | undefined;
+  if (session.kind === "user" && unit.quiz?.drawUnseenFirst) {
+    try {
+      const rows = await dbCall((db) => listUnitResultsForProgress(db, user.id, unit.id));
+      // rows come in answer order, so a question's last answer wins
+      history = { lastAnswered: new Map(rows.map((r) => [r.questionId, r.answeredAt])) };
+    } catch {
+      history = undefined;
+    }
+  }
+  const drawn = drawAttempt(unit, undefined, weighting ?? undefined, history);
   const attemptId = randomUUID();
 
   let persisted = session.kind === "user";

@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "id": "r1-rounded",
+      "tolerance": "rounded",
+      "questionId": "y12-economics-case-study-facts.s03",
+      "answer": "China produced about a third of the world's carbon dioxide emissions in 2025, which shows its industrial growth has come at a large environmental cost.",
+      "expected": 3
+    },
+    {
+      "id": "r1-year-only",
+      "tolerance": "year without day or month",
+      "questionId": "y12-economics-case-study-facts.s05",
+      "answer": "China joined the World Trade Organization in 2001, which opened export markets to its manufacturers and supported economic growth.",
+      "expected": 2
+    },
+    {
+      "id": "r1-one-end",
+      "tolerance": "one end of a change",
+      "questionId": "y12-economics-case-study-facts.s01",
+      "answer": "China's World Bank Gini coefficient was 36.0 in 2022.",
+      "expected": 0
+    },
+    {
+      "id": "r1-wrong-country",
+      "tolerance": "wrong country",
+      "questionId": "y12-economics-case-study-facts.s04",
+      "answer": "China's HDI rose from 0.404 in 1990 to 0.622 in 2023.",
+      "expected": 1
+    },
+    {
+      "id": "r1-wrong-direction",
+      "tolerance": "wrong direction",
+      "questionId": "y12-economics-case-study-facts.s01",
+      "answer": "China's World Bank Gini coefficient fell from 36.0 in 1990 to 32.2 in 2022, so income inequality fell.",
+      "expected": 1
+    },
+    {
+      "id": "r1-restatement",
+      "tolerance": "bare restatement",
+      "questionId": "y12-economics-case-study-facts.s09",
+      "answer": "Nepal's remittances rose from 1.5% of GDP in 1993 to 32.3% of GDP in 2025. That is an increase from 1.5% to 32.3%.",
+      "expected": 2
+    },
+    {
+      "id": "r1-outside-figure",
+      "tolerance": "figure from outside the fact file",
+      "questionId": "y12-economics-case-study-facts.s07",
+      "answer": "China's urban to rural income ratio was 2.8 in 2025.",
+      "expected": 1
+    },
+    {
+      "id": "r1-other-significance",
+      "tolerance": "another supported significance",
+      "questionId": "y12-economics-case-study-facts.s09",
+      "answer": "Nepal's remittances rose from 1.5% of GDP in 1993 to 32.3% of GDP in 2025. Although they are central to growth, they have not created quality jobs at home.",
+      "expected": 3
+    },
+    {
+      "id": "r1-wrong-significance",
+      "tolerance": "wrong direction of significance",
+      "questionId": "y12-economics-case-study-facts.s01",
+      "answer": "China's World Bank Gini coefficient rose from 32.2 in 1990 to 36.0 in 2022, which shows income inequality in China fell.",
+      "expected": 2
+    }
+  ]
+}

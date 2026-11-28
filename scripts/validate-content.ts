@@ -21,6 +21,8 @@ import {
   validateShippedIds,
   type ShippedIds,
 } from "../lib/content-rules";
+import { parseFactFile } from "../lib/case-facts/fact-file";
+import { CASE_FACTS_FILE, CASE_FACTS_SOURCE, CASE_FACTS_UNIT_ID, validateCaseFactRules } from "../lib/content-rules-case-facts";
 import { validateComparativeRules } from "../lib/content-rules-comparative";
 import { validateEssayRules } from "../lib/content-rules-essay";
 import { validateEnglishEssayRules } from "../lib/content-rules-english-essay";
@@ -88,6 +90,21 @@ function validateEnglishModels(unit: Unit, answers: AnswerSet): string[] {
   return out;
 }
 
+/**
+ * Spec 012: the case-study facts unit is checked against its fact file, the only list of facts, ★ flags and impact lines.
+ * A missing or unreadable file stops the build, because nothing could then be traced.
+ */
+function validateCaseFacts(unit: Unit, answers: AnswerSet): string[] {
+  if (unit.id !== CASE_FACTS_UNIT_ID) return [];
+  const file = join(process.cwd(), CASE_FACTS_FILE);
+  if (!existsSync(file)) return [`${unit.id}: the fact file ${CASE_FACTS_FILE} is missing`];
+  try {
+    return validateCaseFactRules(unit, answers, parseFactFile(readFileSync(file, "utf8")));
+  } catch (error) {
+    return [`${unit.id}: ${CASE_FACTS_FILE} does not parse: ${(error as Error).message}`];
+  }
+}
+
 async function main() {
   const seenQuestionIds = new Set<string>();
   const seenUnitIds = new Set<string>();
@@ -130,6 +147,7 @@ async function main() {
     for (const m of validateEssayRules(unit, answers, UNITS)) err(m);
     for (const m of validateEnglishEssayRules(unit, answers)) err(m);
     for (const m of validateEnglishModels(unit, answers)) err(m);
+    for (const m of validateCaseFacts(unit, answers)) err(m);
     for (const m of validateUnseenRules(unit, answers, new Date(), (name) => imageSize(unit.id, name))) err(m);
     // the comparative unit's images live in the shared text store, which is spec 008's unit folder
     for (const m of validateComparativeRules(unit, answers, comparativeVerbs, UNITS, new Date(), (name) => imageSize("y12-english-advanced-unseen-texts", name))) err(m);
@@ -145,7 +163,9 @@ async function main() {
 
       // Principle V: a verbatim school-paper question names its source, and never an HSC paper
       if (q.source !== undefined) {
-        if (q.source !== ORIGINAL_SOURCE && !SOURCE_RE.test(q.source)) {
+        // spec 012 FR-014: one longer original-question line, allowed for that unit only
+        const caseFactsLine = unit.id === CASE_FACTS_UNIT_ID && q.source === CASE_FACTS_SOURCE;
+        if (q.source !== ORIGINAL_SOURCE && !caseFactsLine && !SOURCE_RE.test(q.source)) {
           err(`${q.id}: source "${q.source}" must look like "<School> <Year> <Trial|Half-yearly|Common Test 1>, Q<n>", optionally with a part such as Q<n>(a) or Q<n>(a)(i)`);
         }
         if (/\b(HSC|NESA)\b/i.test(q.source)) err(`${q.id}: source "${q.source}" names an HSC/NESA paper; HSC questions are not allowed`);

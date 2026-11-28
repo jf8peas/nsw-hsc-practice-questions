@@ -120,9 +120,9 @@ export interface ConceptResultWithUnit extends ConceptResult {
  * How many concepts are not yet cleared, per unit, for the units listed — the home page's
  * "to review" numbers ("Things you need to know" on the unit page, in one pass for every
  * card). Only units in `units` are counted, so a result for a unit id that is no longer in
- * content is ignored; a unit with nothing to review is absent from the map. A unit that has
- * not adopted concepts naturally never appears, because its untagged questions count toward
- * nothing.
+ * content is ignored; a unit with nothing to review is absent from the map. A unit that is not
+ * `conceptsReady` never appears, even if its questions are already tagged (spec 012): its unit
+ * page has no list to review.
  */
 export function conceptReviewCounts(
   units: readonly Unit[],
@@ -136,6 +136,7 @@ export function conceptReviewCounts(
   }
   const out = new Map<string, number>();
   for (const unit of units) {
+    if (!unit.conceptsReady) continue;
     const shared = unit.sharesProgressWith ?? [];
     const list = shared.length ? [unit.id, ...shared].flatMap((id) => perUnit.get(id) ?? []) : perUnit.get(unit.id);
     if (!list || list.length === 0) continue;

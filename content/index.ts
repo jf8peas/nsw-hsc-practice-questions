@@ -37,6 +37,9 @@ import { meta as y12EconGlobalMeta } from "./units/y12-economics-global-economy/
 import { questions as y12EconGlobalQuestions } from "./units/y12-economics-global-economy/questions";
 import { concepts as y12EconGlobalConcepts, retired as y12EconGlobalRetired } from "./units/y12-economics-global-economy/concepts";
 import { conceptOfQuestionId as y12EconGlobalTags } from "./units/y12-economics-global-economy/concept-tags";
+import { meta as y12EconCaseFactsMeta } from "./units/y12-economics-case-study-facts/meta";
+import { questions as y12EconCaseFactsQuestions } from "./units/y12-economics-case-study-facts/questions";
+import { concepts as y12EconCaseFactsConcepts, retired as y12EconCaseFactsRetired } from "./units/y12-economics-case-study-facts/concepts";
 import { meta as y12EconSentenceMeta } from "./units/y12-economics-sentence-writing/meta";
 import { questions as y12EconSentenceQuestions } from "./units/y12-economics-sentence-writing/questions";
 import { concepts as y12EconSentenceConcepts, retired as y12EconSentenceRetired } from "./units/y12-economics-sentence-writing/concepts";
@@ -113,6 +116,12 @@ export const UNITS: Unit[] = [
     questions: y12EconGlobalQuestions,
     concepts: y12EconGlobalConcepts,
     retired: y12EconGlobalRetired,
+  },
+  {
+    ...y12EconCaseFactsMeta,
+    questions: y12EconCaseFactsQuestions,
+    concepts: y12EconCaseFactsConcepts,
+    retired: y12EconCaseFactsRetired,
   },
   {
     ...y12EconSentenceMeta,

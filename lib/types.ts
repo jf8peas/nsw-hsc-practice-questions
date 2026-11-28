@@ -40,6 +40,11 @@ export interface QuizConfig {
    * Groups are drawn in listed order, so quiz order follows this list.
    */
   groups?: QuizDraw[];
+  /**
+   * Spec 012: each group takes a never-answered question while one exists, then the least recently
+   * answered. Needs `groups`.
+   */
+  drawUnseenFirst?: boolean;
 }
 
 /** A formula shown on the unit page (after the Start quiz button). */
@@ -413,6 +418,8 @@ export interface Answer {
   essay?: EssayQuestionKey;
   /** `englishEssay` only (spec 011): the essay's key. SERVER ONLY. */
   englishEssay?: EnglishEssayKey;
+  /** Spec 012: the fact-file IDs the question tests. SERVER ONLY. */
+  factIds?: string[];
 }
 
 /** The answer key of one English essay question (spec 011, data-model §1.2). SERVER ONLY. */

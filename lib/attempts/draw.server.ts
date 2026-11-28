@@ -163,18 +163,49 @@ function drawWeighted(unit: Unit, weighting: Weighting, rand: RandomInt): Questi
   );
 }
 
+/** When this student last answered each question of the unit (spec 012). A question not listed is unseen. */
+export interface DrawHistory {
+  lastAnswered: ReadonlyMap<string, Date>;
+}
+
+/**
+ * Spec 012 FR-007: from each group, questions the student has never answered first, then the ones answered longest ago;
+ * ties are random. It only ever takes from the group's own pool, so the quiz keeps its shape.
+ */
+function drawUnseenFirst(unit: Unit, history: DrawHistory, rand: RandomInt): Question[] {
+  const at = (q: Question) => history.lastAnswered.get(q.id)?.getTime() ?? 0; // 0 = never answered
+  return unit.quiz!.groups!.flatMap(({ group, n }) =>
+    shuffle(
+      unit.questions.filter((q) => q.group === group),
+      rand,
+    )
+      .sort((a, b) => at(a) - at(b)) // the sort is stable, so the shuffle decides ties
+      .slice(0, n),
+  );
+}
+
 /**
  * Draw the questions for a new attempt. This is `prepare()` from the old
  * components/Quiz.tsx, moved server-side, with the same behaviour:
  *  - `meta.quiz.groups`: draw n from each named group, in listed order;
  *  - otherwise short answers first, then MC, random within each (`quiz.short` /
  *    `quiz.mc` counts, or everything when the unit has no `quiz` config).
+ * A unit with `quiz.drawUnseenFirst` (spec 012) takes unseen questions first when its history is
+ * given, and is never drawn weighted, because weighting can move a place between groups.
  * Each MC question gets a random option order, stored on the attempt.
  */
-export function drawAttempt(unit: Unit, rand: RandomInt = randomInt, weighting?: Weighting): Drawn {
+export function drawAttempt(
+  unit: Unit,
+  rand: RandomInt = randomInt,
+  weighting?: Weighting,
+  history?: DrawHistory,
+): Drawn {
   let chosen: Question[];
-  const weighted = weighting && unit.conceptsReady ? drawWeighted(unit, weighting, rand) : null;
-  if (weighted) {
+  const unseenFirst = Boolean(unit.quiz?.drawUnseenFirst && unit.quiz.groups);
+  const weighted = weighting && unit.conceptsReady && !unseenFirst ? drawWeighted(unit, weighting, rand) : null;
+  if (unseenFirst && history) {
+    chosen = drawUnseenFirst(unit, history, rand);
+  } else if (weighted) {
     chosen = weighted;
   } else if (unit.quiz?.groups) {
     chosen = unit.quiz.groups.flatMap(({ group, n }) =>

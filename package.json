@@ -10,6 +10,8 @@
     "gen:formulas": "tsx scripts/gen-formula-html.ts",
     "validate": "tsx scripts/validate-content.ts",
     "validate:shipped": "tsx scripts/validate-content.ts --update-shipped",
+    "case-facts:check": "tsx scripts/check-case-facts.ts",
+    "case-facts:marker-check": "tsx --conditions=react-server scripts/case-facts-marker-check.ts",
     "prebuild": "tsx scripts/gen-formula-html.ts && tsx scripts/validate-content.ts",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",

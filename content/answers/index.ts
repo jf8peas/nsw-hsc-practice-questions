@@ -10,6 +10,7 @@ import { answers as y12PhysCircPracAnswers } from "../units/y12-physics-circular
 import { answers as y12PhysTask1Answers } from "../units/y12-physics-task1-exam-practice/answers";
 import { answers as y11EconEssayAnswers } from "../units/y11-economics-essay-scaffold/answers";
 import { answers as y12EconGlobalAnswers } from "../units/y12-economics-global-economy/answers";
+import { answers as y12EconCaseFactsAnswers } from "../units/y12-economics-case-study-facts/answers";
 import { answers as y12EconSentenceAnswers } from "../units/y12-economics-sentence-writing/answers";
 import { answers as y12EconParagraphAnswers } from "../units/y12-economics-paragraph-writing/answers";
 import { answers as y12EnglishUnseenAnswers } from "../units/y12-english-advanced-unseen-texts/answers";
@@ -32,6 +33,7 @@ const ALL_ANSWERS: AnswerSet = {
   ...y12PhysCircPracAnswers,
   ...y12PhysTask1Answers,
   ...y12EconGlobalAnswers,
+  ...y12EconCaseFactsAnswers,
   ...y12EconSentenceAnswers,
   ...y12EconParagraphAnswers,
   ...y12EnglishUnseenAnswers,

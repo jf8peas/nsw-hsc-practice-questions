@@ -5,10 +5,10 @@ the project is put together and `.specify/memory/constitution.md` for the rules 
 respect (it overrides other docs).
 
 <!-- SPECKIT START -->
-Current feature plan: [specs/011-english-essay-writing/plan.md](specs/011-english-essay-writing/plan.md)
-(spec, research, data model and quickstart live beside it). The previous plan, the Economics essay unit, is
-[specs/010-economics-essay-writing/plan.md](specs/010-economics-essay-writing/plan.md); spec 010 stays normative for
-behaviour spec 011 does not override.
+Current feature plan: [specs/012-economics-case-study-facts/plan.md](specs/012-economics-case-study-facts/plan.md)
+(spec, research, data model, quickstart and content prompt live beside it). The previous plan, the English essay unit, is
+[specs/011-english-essay-writing/plan.md](specs/011-english-essay-writing/plan.md); spec 010
+([plan](specs/010-economics-essay-writing/plan.md)) stays normative for behaviour spec 011 does not override.
 
 **Protected material (spec 011):** the full text of *Away*, the pilot essays, the marking notes and the quote-parity fixture
 live only in gitignored `resources/`. Never commit them, paste them into a test or fixture, print them, or serve them to a
